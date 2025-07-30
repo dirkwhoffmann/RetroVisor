@@ -6,25 +6,70 @@
 //
 
 import Cocoa
+import ScreenCaptureKit
+
+class ClickThroughView: NSView {
+
+}
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    
+    var window: TransparentWindow!
+    var preview: Preview!
 
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
 
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Insert code here to initialize your application
-    }
-
-    func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
-    }
-
-    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+        window.unfreeze()
         return true
     }
 
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
 
+        let screenSize = NSScreen.main?.frame.size ?? CGSize(width: 800, height: 600)
+        let windowSize = CGSize(width: 400, height: 300)
+        let windowOrigin = CGPoint(
+            x: (screenSize.width - windowSize.width) / 2,
+            y: (screenSize.height - windowSize.height) / 2
+        )
+
+        let window = TransparentWindow(
+            contentRect: NSRect(origin: windowOrigin, size: windowSize),
+            styleMask: [],
+            backing: .buffered,
+            defer: false
+        )
+
+        window.isOpaque = false
+        window.backgroundColor = NSColor.systemBlue.withAlphaComponent(0.2)
+        window.hasShadow = true
+        window.level = .floating
+        window.makeKeyAndOrderFront(nil)
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
+
+        preview = Preview(frame: window.contentView!.bounds)
+        preview.wantsLayer = true
+        preview.autoresizingMask = [.width, .height]
+        window.myview = preview
+        window.contentView = preview
+        self.window = window
+        window.delegate = self
+        window.unfreeze()
+
+        Task {
+            await window.setup()
+        }
+    }
 }
 
+extension AppDelegate: NSWindowDelegate {
+
+    func windowDidMove(_ notification: Notification) {
+        print("windowDidMove")
+        window.updateRect()
+    }
+    func windowDidResize(_ notification: Notification) {
+        window.updateRect()
+    }
+}
