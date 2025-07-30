@@ -72,12 +72,12 @@ extension MyWindowController: SCStreamOutput {
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
         print("🎥 Frame received at: \(Date())")
-        // myview!.updateImage(from: sampleBuffer, cropRectPixels: rect)
-        DispatchQueue.main.async {
-            if let view = self.window?.contentView as? GlassView {
-                view.displaySampleBuffer(sampleBuffer)
-            } else {
-                print("View not found")
+
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        // Pass pixel buffer to view controller
+        DispatchQueue.main.async { [weak self] in
+            if let vc = self?.contentViewController as? MyViewController {
+                vc.update(with: pixelBuffer)
             }
         }
     }
