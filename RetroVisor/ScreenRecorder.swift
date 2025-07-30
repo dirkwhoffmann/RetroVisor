@@ -28,6 +28,8 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         // Configure video capture
         streamConfig.width = display!.width
         streamConfig.height = display!.height
+        streamConfig.pixelFormat = kCVPixelFormatType_32BGRA
+        streamConfig.colorSpaceName = CGColorSpace.sRGB
 
         // Set the capture interval at 60 fps
         streamConfig.minimumFrameInterval = CMTime(value: 1, timescale: 60)

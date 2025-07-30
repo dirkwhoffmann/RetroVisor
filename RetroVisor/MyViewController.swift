@@ -79,6 +79,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let width = CVPixelBufferGetWidth(pixelBuffer)
         let height = CVPixelBufferGetHeight(pixelBuffer)
 
+        let format = CVPixelBufferGetPixelFormatType(pixelBuffer)
+
         var cvTextureOut: CVMetalTexture?
         let result = CVMetalTextureCacheCreateTextureFromImage(nil,
                                                                textureCache,

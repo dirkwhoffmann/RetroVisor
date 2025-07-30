@@ -71,7 +71,7 @@ extension MyWindowController: SCStreamOutput {
 
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
-        print("🎥 Frame received at: \(Date())")
+        // print("🎥 Frame received at: \(Date())")
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         // Pass pixel buffer to view controller
