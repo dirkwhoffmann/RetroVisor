@@ -1,9 +1,11 @@
+// -----------------------------------------------------------------------------
+// This file is part of RetroVision
 //
-//  AppDelegate.swift
-//  RetroVisor
+// Copyright (C) Dirk W. Hoffmann. www.dirkwhoffmann.de
+// Licensed under the GNU General Public License v3
 //
-//  Created by Dirk Hoffmann on 29.07.25.
-//
+// See https://www.gnu.org for license information
+// -----------------------------------------------------------------------------
 
 import Cocoa
 import ScreenCaptureKit

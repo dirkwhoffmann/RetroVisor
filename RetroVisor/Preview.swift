@@ -1,9 +1,12 @@
+// -----------------------------------------------------------------------------
+// This file is part of RetroVision
 //
-//  Preview.swift
-//  RetroVisor
+// Copyright (C) Dirk W. Hoffmann. www.dirkwhoffmann.de
+// Licensed under the GNU General Public License v3
 //
-//  Created by Dirk Hoffmann on 30.07.25.
-//
+// See https://www.gnu.org for license information
+// -----------------------------------------------------------------------------
+
 import Cocoa
 import ScreenCaptureKit
 
@@ -39,11 +42,21 @@ class Preview: NSView {
                                                                                                    y: -adjustedCropRect.origin.y))
 
         // Apply Core Image filter
+        /*
         let filter = CIFilter(name: "CISepiaTone")
         filter?.setValue(croppedImage, forKey: kCIInputImageKey)
         filter?.setValue(0.9, forKey: kCIInputIntensityKey)
+         */
+        let sepia = CIFilter(name: "CISepiaTone")!
+        sepia.setValue(croppedImage, forKey: kCIInputImageKey)
+        sepia.setValue(0.9, forKey: kCIInputIntensityKey)
 
-        let outputImage = filter!.outputImage!
+        let vignette = CIFilter(name: "CIVignette")!
+        vignette.setValue(sepia.outputImage, forKey: kCIInputImageKey)
+        vignette.setValue(2.0, forKey: kCIInputIntensityKey)
+        vignette.setValue(30.0, forKey: kCIInputRadiusKey)
+
+        let outputImage = vignette.outputImage!
         let rep = NSCIImageRep(ciImage: outputImage)
         let nsImage = NSImage(size: outputImage.extent.size)
         nsImage.addRepresentation(rep)
