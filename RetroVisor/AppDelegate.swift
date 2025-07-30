@@ -28,6 +28,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
 
+        if let window = NSApplication.shared.windows.first {
+                let frame = NSRect(x: 300, y: 300, width: 800, height: 600)
+                window.setFrame(frame, display: true)
+                window.makeKeyAndOrderFront(nil)
+            }
+        
         let screenSize = NSScreen.main?.frame.size ?? CGSize(width: 800, height: 600)
         let windowSize = CGSize(width: 400, height: 300)
         let windowOrigin = CGPoint(
