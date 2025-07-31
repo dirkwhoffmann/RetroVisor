@@ -13,6 +13,7 @@ import ScreenCaptureKit
 class MyWindowController: NSWindowController {
 
     var recorder = ScreenRecorder()
+    var viewController : MyViewController? { return self.contentViewController as? MyViewController }
 
     override func windowDidLoad() {
 
@@ -30,7 +31,7 @@ class MyWindowController: NSWindowController {
             window.makeKeyAndOrderFront(nil)
             window.titleVisibility = .hidden
             window.titlebarAppearsTransparent = true
-
+            window.delegate = self
             unfreeze()
 
             Task {
@@ -64,6 +65,29 @@ class MyWindowController: NSWindowController {
             window.contentView?.layer?.borderWidth = 2
             window.contentView?.layer?.cornerRadius = 10
         }
+    }
+}
+
+extension MyWindowController: NSWindowDelegate {
+
+    func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
+
+        // print("windowWillResize \(frameSize)")
+        let rect = recorder.viewRectInScreenPixels(view: window!.contentView!)!
+        print("x: \(rect.minX) y: \(rect.minY) x2: \(rect.maxX) y2: \(rect.maxY)")
+        viewController?.updateTextureRect(rect)
+        return frameSize
+    }
+
+    func windowWillMove(_ notification: Notification) {
+
+        // print("windowWillMove")
+    }
+
+    func windowDidMove(_ notification: Notification) {
+
+        let rect = recorder.viewRectInScreenPixels(view: window!.contentView!)!
+        viewController?.updateTextureRect(rect)
     }
 }
 

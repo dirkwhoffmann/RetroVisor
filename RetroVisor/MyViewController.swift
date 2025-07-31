@@ -57,6 +57,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
             Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1]),
         ]
         */
+        /*
         let vertices: [Vertex] = [
 
             // Triangle 1 (top-left -> bottom-left -> top-right)
@@ -68,14 +69,13 @@ class MyViewController: NSViewController, MTKViewDelegate {
             Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
             Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
             Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1]),
-
-            /*
-            Vertex(pos: [-1,  1, 0, 1], tex: [0, 0]),
-            Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
-            Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
-            */
         ]
+         */
+
+        /*
         vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Vertex>.size, options: [])
+         */
+        updateTextureRect(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
 
         // Load shaders from default library
         let defaultLibrary = device.makeDefaultLibrary()!
@@ -118,6 +118,20 @@ class MyViewController: NSViewController, MTKViewDelegate {
         } catch {
             fatalError("Failed to create pipeline state: \(error)")
         }
+    }
+
+    func updateTextureRect(_ rect: CGRect) {
+
+        let vertices: [Vertex] = [
+            Vertex(pos: [-1,  1, 0, 1], tex: [Float(rect.minX), Float(1.0 - rect.maxY)]),
+            Vertex(pos: [-1, -1, 0, 1], tex: [Float(rect.minX), Float(1.0 - rect.minY)]),
+            Vertex(pos: [ 1,  1, 0, 1], tex: [Float(rect.maxX), Float(1.0 - rect.maxY)]),
+            Vertex(pos: [ 1, -1, 0, 1], tex: [Float(rect.maxX), Float(1.0 - rect.minY)]),
+        ]
+
+        vertexBuffer = device.makeBuffer(bytes: vertices,
+                                         length: vertices.count * MemoryLayout<Vertex>.stride,
+                                         options: [])
     }
 
     func texture(from pixelBuffer: CVPixelBuffer) -> MTLTexture? {
@@ -167,7 +181,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
-        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 6)
+        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
         encoder.endEncoding()
 
         commandBuffer.present(drawable)

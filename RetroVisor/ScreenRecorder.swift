@@ -93,13 +93,17 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             height: viewFrame.height)
 
         // Convert screen points to pixels (multiply by display.scale)
-        let scale = CGFloat(1.0) // display.scale
+        let scalex = CGFloat(1.0) / CGFloat(display?.width ?? 1)
+        let scaley = CGFloat(1.0) / CGFloat(display?.height ?? 1)
+
         let screenRectPixels = CGRect(
-            x: screenRectPoints.origin.x * scale,
-            y: screenRectPoints.origin.y * scale,
-            width: screenRectPoints.width * scale,
-            height: screenRectPoints.height * scale)
+            x: screenRectPoints.origin.x * scalex,
+            y: screenRectPoints.origin.y * scaley,
+            width: screenRectPoints.width * scalex,
+            height: screenRectPoints.height * scaley)
 
         return screenRectPixels
     }
+
+
 }
