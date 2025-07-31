@@ -86,10 +86,10 @@ class MyWindowController: NSWindowController {
         if let window = self.window {
 
             window.ignoresMouseEvents = true
-            window.styleMask = [.nonactivatingPanel, .fullSizeContentView]
+            window.styleMask = [.titled, .nonactivatingPanel, .fullSizeContentView]
             window.backgroundColor = NSColor.gray.withAlphaComponent(0.2)
             window.contentView?.layer?.borderColor = NSColor.systemGray.cgColor
-            window.contentView?.layer?.borderWidth = 1
+            window.contentView?.layer?.borderWidth = 0
             window.contentView?.layer?.cornerRadius = 10
         }
     }
@@ -104,8 +104,41 @@ class MyWindowController: NSWindowController {
             window.contentView?.layer?.borderColor = NSColor.systemBlue.cgColor
             window.contentView?.layer?.borderWidth = 2
             window.contentView?.layer?.cornerRadius = 10
+            // startTrackingWindowLive()
         }
     }
+
+    /*
+    var eventMonitor: Any?
+    var lastWindowFrame: NSRect = .zero
+
+    func startTrackingWindowLive() {
+        lastWindowFrame = window?.frame ?? .zero
+
+        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDragged]) { [weak self] _ in
+            print("monitor")
+            guard let self = self, let window = self.window else { return }
+            let newFrame = window.frame
+            print("newFrame  \(newFrame)")
+            if newFrame != self.lastWindowFrame {
+                self.lastWindowFrame = newFrame
+                self.windowDidActuallyMove(to: newFrame)
+            }
+        }
+        print("eventMonitor = \(eventMonitor)")
+    }
+
+    func stopTrackingWindowLive() {
+        if let monitor = eventMonitor {
+            NSEvent.removeMonitor(monitor)
+            eventMonitor = nil
+        }
+    }
+
+    func windowDidActuallyMove(to frame: NSRect) {
+        print("Window moved to \(frame)")
+    }
+     */
 }
 
 extension MyWindowController: NSWindowDelegate {
@@ -121,21 +154,21 @@ extension MyWindowController: NSWindowDelegate {
     }
 
     func windowDidMove(_ notification: Notification) {
-        scheduleDebouncedUpdate()
+        // scheduleDebouncedUpdate()
+        // print("windowDidMove \(window!.frame)")
     }
 
     func windowDidResize(_ notification: Notification) {
         scheduleDebouncedUpdate()
     }
 
-    private func scheduleDebouncedUpdate() {
+    func scheduleDebouncedUpdate(frame: NSRect? = nil) {
 
         if (recorder.responsive) {
-            Task {
-                await self.recorder.capture(receiver: self, view: self.window!.contentView!)
-                if let textureRect = self.recorder.textureRect {
-                    self.viewController?.updateTextureRect(textureRect)
-                }
+
+            recorder.capture(receiver: self, view: self.window!.contentView!, frame: frame)
+            if let textureRect = recorder.textureRect {
+                viewController?.updateTextureRect(textureRect)
             }
             return
         }
@@ -145,7 +178,7 @@ extension MyWindowController: NSWindowDelegate {
         // Schedule new timer
         debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
             Task {
-                await self!.recorder.capture(receiver: self!, view: self!.window!.contentView!)
+                await self!.recorder.capture(receiver: self!, view: self!.window!.contentView!, frame: nil)
                 await self!.viewController?.updateTextureRect(self!.recorder.textureRect!)
             }
         }

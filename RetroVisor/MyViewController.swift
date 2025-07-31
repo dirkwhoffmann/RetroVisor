@@ -175,12 +175,16 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     func draw(in view: MTKView) {
 
+        /*
+        if let w = view.window as? GlassWindow {
+            print("size: \(w.frame)")
+            w.myWindowController!.scheduleDebouncedUpdate()
+        }
+        */
         guard let drawable = view.currentDrawable,
               let commandBuffer = commandQueue.makeCommandBuffer(),
               let passDescriptor = view.currentRenderPassDescriptor else { return }
 
-        // time = animate ? time + 0.016 : 0.0
-//        memcpy(timeBuffer.contents(), &time, MemoryLayout<Float>.stride)
         time += 0.01
 
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!

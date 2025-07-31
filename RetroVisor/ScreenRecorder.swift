@@ -53,6 +53,20 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         )
     }
 
+    func inScreenCoords(view: NSView, frame: NSRect) -> CGRect {
+
+        let window = view.window!
+        let windowFrame = frame
+        let screenFrame = window.screen?.frame ?? .zero
+
+        return CGRect(
+            x: windowFrame.origin.x,
+            y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
+            width: windowFrame.width,
+            height: windowFrame.height
+        )
+    }
+
     /*
     func normalizedInScreenCoords(view: NSView) -> CGRect {
 
@@ -76,49 +90,13 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         )
     }
 
-    /*
-    private var streamConfiguration: SCStreamConfiguration {
-
-        let config = SCStreamConfiguration()
-
-        // Configure audio capture
-        config.capturesAudio = false
-
-        // Configure video capture
-        let rect = windowInScreenCoords()
-        config.sourceRect = rect
-        config.width = Int(rect.width)
-        config.height = Int(rect.height)
-        // config.width = display!.width
-        // config.height = display!.height
-        config.pixelFormat = kCVPixelFormatType_32BGRA
-        config.colorSpaceName = CGColorSpace.sRGB
-        // config.sourceRect = windowInScreenCoords()
-
-        // Set the capture interval at 60 fps
-        config.minimumFrameInterval = CMTime(value: 1, timescale: 60)
-
-        // Increase the depth of the frame queue to ensure high fps
-        config.queueDepth = 5
-
-        return config
-    }
-    */
-    /*
-     func getDisplay() async -> SCDisplay?
-     {
-     do {
-     let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
-     return content.displays.first
-     } catch {
-     return nil
-     }
-     }
-     */
-
-    func capture(receiver: SCStreamOutput, view: NSView)
+    func capture(receiver: SCStreamOutput, view: NSView, frame: NSRect?)
     {
-        capture(receiver: receiver, sourceRect: inScreenCoords(view: view))
+        if let frame = frame {
+            capture(receiver: receiver, sourceRect: inScreenCoords(view: view, frame: frame))
+        } else {
+            capture(receiver: receiver, sourceRect: inScreenCoords(view: view))
+        }
     }
 
     func capture(receiver: SCStreamOutput, sourceRect: CGRect)

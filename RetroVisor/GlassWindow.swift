@@ -22,8 +22,6 @@ class GlassWindow: NSWindow {
 
     override func mouseDown(with event: NSEvent) {
 
-        myWindowController?.viewController?.animate = true
-
         if event.clickCount == 2 {
 
             // Double click
@@ -34,14 +32,41 @@ class GlassWindow: NSWindow {
             // Single click
             self.performDrag(with: event)
         }
+
+        //  if let screen = self.screen {
+            let mouseLocation = NSEvent.mouseLocation
+            initialMouseLocation = mouseLocation
+            initialWindowOrigin = self.frame.origin
+        // }
     }
 
-    override func mouseUp(with event: NSEvent) {
 
-        // super.mouseUp(with: event)
-        // myWindowController?.viewController?.animate = false
-        // myWindowController?.viewController?.mouseUp(with: event)
+    private var initialMouseLocation: NSPoint = .zero
+    private var initialWindowOrigin: NSPoint = .zero
 
+    override func mouseDragged(with event: NSEvent) {
+        super.mouseDragged(with: event)
+
+        let currentMouseLocation = NSEvent.mouseLocation
+
+        let dx = currentMouseLocation.x - initialMouseLocation.x
+        let dy = currentMouseLocation.y - initialMouseLocation.y
+
+        let newOrigin = NSPoint(x: initialWindowOrigin.x + dx,
+                                y: initialWindowOrigin.y + dy)
+
+        if newOrigin != self.frame.origin {
+            self.setFrameOrigin(newOrigin)
+            windowDidMoveContinuously(to: newOrigin)
+        }
+    }
+
+    private func windowDidMoveContinuously(to origin: NSPoint) {
+        // print("Live moved to: \(origin)")
+        // let roundedOrigin = NSPoint(x: round(origin.x), y: round(origin.y))
+
+        myWindowController?.scheduleDebouncedUpdate(frame: NSRect(origin: origin, size: frame.size))
+        // Hier kannst du z. B. SCStream-Konfiguration aktualisieren
     }
 }
 
