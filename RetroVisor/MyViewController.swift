@@ -30,7 +30,10 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     var textureCache: CVMetalTextureCache!
     var currentTexture: MTLTexture?
-    
+    // var timeBuffer: MTLBuffer!
+
+    var animate: Bool = false
+
     override func loadView() {
         // Create MTKView programmatically as the main view
         device = MTLCreateSystemDefaultDevice()
@@ -49,32 +52,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         commandQueue = device.makeCommandQueue()
 
-        /*
-        let vertices: [Vertex] = [
-            Vertex(pos: [-1,  1, 0, 1], tex: [0, 0]),
-            Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
-            Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
-            Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1]),
-        ]
-        */
-        /*
-        let vertices: [Vertex] = [
-
-            // Triangle 1 (top-left -> bottom-left -> top-right)
-            Vertex(pos: [ -1,  1, 0, 1], tex: [0, 0]),
-            Vertex(pos: [ -1, -1, 0, 1], tex: [0, 1]),
-            Vertex(pos: [  1,  1, 0, 1], tex: [1, 0]),
-
-            // Triangle 2 (top-right -> bottom-left -> bottom-right)
-            Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
-            Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
-            Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1]),
-        ]
-         */
-
-        /*
-        vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Vertex>.size, options: [])
-         */
         updateTextureRect(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
 
         // Load shaders from default library
@@ -83,8 +60,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_main")!
 
         let samplerDescriptor = MTLSamplerDescriptor()
-        samplerDescriptor.minFilter = .linear
-        samplerDescriptor.magFilter = .linear
+        samplerDescriptor.minFilter = .nearest
+        samplerDescriptor.magFilter = .nearest
         samplerDescriptor.mipFilter = .notMipmapped
         samplerState = device.makeSamplerState(descriptor: samplerDescriptor)
 
@@ -112,6 +89,9 @@ class MyViewController: NSViewController, MTKViewDelegate {
         pipelineDescriptor.fragmentFunction = fragmentFunc
         pipelineDescriptor.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
+
+        // Create uniforms
+        // timeBuffer = device.makeBuffer(length: MemoryLayout<Float>.stride, options: [])
 
         do {
             pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
@@ -165,21 +145,34 @@ class MyViewController: NSViewController, MTKViewDelegate {
         // Trigger view redraw
         mtkView.setNeedsDisplay(mtkView.bounds)
     }
-    
+
+    var time: Float = 0.0
+    var center: SIMD2<Float> = SIMD2(0.5, 0.5)
+
     func draw(in view: MTKView) {
+
         guard let drawable = view.currentDrawable,
               let commandBuffer = commandQueue.makeCommandBuffer(),
               let passDescriptor = view.currentRenderPassDescriptor else { return }
 
+        // time = animate ? time + 0.016 : 0.0
+//        memcpy(timeBuffer.contents(), &time, MemoryLayout<Float>.stride)
+        time += 0.01
+
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState)
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        // encoder.setFragmentTexture(currentTexture, index: 0)
         encoder.setFragmentSamplerState(samplerState, index: 0)
+        // encoder.setFragmentBuffer(timeBuffer, offset: 0, index: 0)
 
         if let texture = currentTexture {
             encoder.setFragmentTexture(texture, index: 0)
         }
+
+        // Pass uniforms: time and center
+        encoder.setFragmentBytes(&time, length: MemoryLayout<Float>.size, index: 0)
+        // encoder.setFragmentBytes(&center, length: MemoryLayout<SIMD2<Float>>.size, index: 1)
+
 
         encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
         encoder.endEncoding()

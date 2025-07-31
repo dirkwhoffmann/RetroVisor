@@ -22,6 +22,8 @@ class GlassWindow: NSWindow {
 
     override func mouseDown(with event: NSEvent) {
 
+        myWindowController?.viewController?.animate = true
+
         if event.clickCount == 2 {
 
             // Double click
@@ -32,6 +34,12 @@ class GlassWindow: NSWindow {
             // Single click
             self.performDrag(with: event)
         }
+    }
+
+    override func mouseUp(with event: NSEvent) {
+
+        super.mouseUp(with: event)
+        myWindowController?.viewController?.animate = false
     }
 }
 
