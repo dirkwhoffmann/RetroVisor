@@ -15,10 +15,40 @@ class MyWindowController: NSWindowController {
     var recorder = ScreenRecorder()
     var viewController : MyViewController? { return self.contentViewController as? MyViewController }
 
-    var isMoving: Bool = false
-    var isResizing: Bool = false
-
+    var liveMode: Bool = false
     var debounceTimer: Timer?
+
+    // Source rectangle of the screen capturer
+    var captureRect: CGRect?
+
+    // Displayed texture cutout
+    var textureRect: CGRect?
+
+    func updateRects() {
+
+        updateRects(area: .zero)
+    }
+
+    func updateRects(area: CGRect) {
+
+        print("updateRects(\(area))")
+
+        guard let display = recorder.display else { return }
+
+        if liveMode == false {
+
+            let newCaptureRect = display.frame
+            let newTextureRect = recorder.viewRectInScreenPixels(view: window!.contentView!)!
+            print("newCaptureRect = \(newCaptureRect)")
+            print("newTextureRect = \(newTextureRect)")
+
+            if captureRect != newCaptureRect {
+                print("Need to restart server")
+            }
+            captureRect = newCaptureRect
+            textureRect = newTextureRect
+        }
+    }
 
     override func windowDidLoad() {
 
@@ -39,10 +69,12 @@ class MyWindowController: NSWindowController {
             window.delegate = self
             unfreeze()
 
+            // updateRects()
+
             Task {
                 // Setup the recorder
                 recorder.window = self.window
-                await recorder.setup(receiver: self)
+                await recorder.launch(receiver: self)
                 let rect = recorder.viewRectInScreenPixels(view: window.contentView!)!
                 viewController?.updateTextureRect(rect)
             }

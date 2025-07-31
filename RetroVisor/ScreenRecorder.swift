@@ -16,7 +16,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     var display: SCDisplay?
     var filter: SCContentFilter?
     var window: NSWindow?
-    
+
     private let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
 
     func windowInScreenCoords() -> CGRect {
@@ -24,7 +24,6 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         let windowFrame = window!.frame
         let screenFrame = window!.screen?.frame ?? .zero
 
-        // macOS hat Ursprung links unten in globalen Koordinaten (Y = 0 unten)
         return CGRect(
             x: windowFrame.origin.x,
             y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
@@ -60,36 +59,65 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         return config
     }
 
-    func setup(receiver: SCStreamOutput) async
+    /*
+     func getDisplay() async -> SCDisplay?
+     {
+     do {
+     let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+     return content.displays.first
+     } catch {
+     return nil
+     }
+     }
+     */
+
+    func launch(receiver: SCStreamOutput, sourceRect: CGRect? = nil) async
     {
         print("setup")
 
         do {
 
             // Get the display to capture
-            let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+            let content = try await SCShareableContent.excludingDesktopWindows(
+                false, onScreenWindowsOnly: true
+            )
             display = content.displays.first
 
-            if (display == nil) {
-                fatalError("Failed to select display")
-            }
-
             // Create a content filter with the current app excluded
-            let excludedApps = content.applications.filter {
+            let exclude = content.applications.filter {
                 app in Bundle.main.bundleIdentifier == app.bundleIdentifier
             }
             filter = SCContentFilter(display: display!,
-                                     excludingApplications: excludedApps,
+                                     excludingApplications: exclude,
                                      exceptingWindows: [])
 
-            // Setup the stream
+            // Configure the stream
+            let config = SCStreamConfiguration()
+
+            // Configure audio capture
+            config.capturesAudio = false
+
+            // Configure video capture
+            let rect = sourceRect ?? display!.frame // windowInScreenCoords()
+            config.sourceRect = rect
+            config.width = Int(rect.width)
+            config.height = Int(rect.height)
+            // config.width = display!.width
+            // config.height = display!.height
+            config.pixelFormat = kCVPixelFormatType_32BGRA
+            config.colorSpaceName = CGColorSpace.sRGB
+            // config.sourceRect = windowInScreenCoords()
+            config.minimumFrameInterval = CMTime(value: 1, timescale: 60)
+            config.queueDepth = 5
+
+            // Create the stream
             stream = SCStream(filter: filter!, configuration: streamConfiguration, delegate: self)
 
-            // Prepare to receive streamed data
+            // Register the stream receiver
             try stream!.addStreamOutput(receiver, type: .screen, sampleHandlerQueue: videoQueue)
 
-            print("Starting stream capture...")
             try await stream!.startCapture()
+            print("Stream capturer launched.")
 
         } catch {
             print("Error: \(error)")
