@@ -102,11 +102,22 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     func updateTextureRect(_ rect: CGRect) {
 
+        let tx1 = Float(0.0)
+        let tx2 = Float(1.0)
+        let ty1 = Float(0.0)
+        let ty2 = Float(1.0)
+        /*
+        let tx1 = Float(rect.minX)
+        let tx2 = Float(rect.maxX)
+        let ty1 = Float(1.0 - rect.maxY)
+        let ty2 = Float(1.0 - rect.minY)
+        */
+
         let vertices: [Vertex] = [
-            Vertex(pos: [-1,  1, 0, 1], tex: [Float(rect.minX), Float(1.0 - rect.maxY)]),
-            Vertex(pos: [-1, -1, 0, 1], tex: [Float(rect.minX), Float(1.0 - rect.minY)]),
-            Vertex(pos: [ 1,  1, 0, 1], tex: [Float(rect.maxX), Float(1.0 - rect.maxY)]),
-            Vertex(pos: [ 1, -1, 0, 1], tex: [Float(rect.maxX), Float(1.0 - rect.minY)]),
+            Vertex(pos: [-1,  1, 0, 1], tex: [tx1, ty1]),
+            Vertex(pos: [-1, -1, 0, 1], tex: [tx1, ty2]),
+            Vertex(pos: [ 1,  1, 0, 1], tex: [tx2, ty1]),
+            Vertex(pos: [ 1, -1, 0, 1], tex: [tx2, ty2]),
         ]
 
         vertexBuffer = device.makeBuffer(bytes: vertices,
@@ -136,7 +147,18 @@ class MyViewController: NSViewController, MTKViewDelegate {
         return nil
     }
 
-    // MARK: - MTKViewDelegate methods
+    /*
+    override func mouseUp(with event: NSEvent) {
+        super.mouseUp(with: event)
+        print("MyViewController.mouseUp \(Date())")
+        if let controller = view.window?.windowController as? MyWindowController {
+            Task {
+                print("Heureka \(Date())")
+                await controller.recorder.restart(receiver: controller)
+            }
+        }
+    }
+    */
 
     func update(with pixelBuffer: CVPixelBuffer) {
         // Convert pixelBuffer to Metal texture (or store it)

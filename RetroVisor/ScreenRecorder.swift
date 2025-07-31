@@ -15,29 +15,49 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     var stream: SCStream?
     var display: SCDisplay?
     var filter: SCContentFilter?
-
+    var window: NSWindow?
+    
     private let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
+
+    func windowInScreenCoords() -> CGRect {
+
+        let windowFrame = window!.frame
+        let screenFrame = window!.screen?.frame ?? .zero
+
+        // macOS hat Ursprung links unten in globalen Koordinaten (Y = 0 unten)
+        return CGRect(
+            x: windowFrame.origin.x,
+            y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
+            width: windowFrame.width,
+            height: windowFrame.height
+        )
+    }
 
     private var streamConfiguration: SCStreamConfiguration {
 
-        let streamConfig = SCStreamConfiguration()
+        let config = SCStreamConfiguration()
 
         // Configure audio capture
-        streamConfig.capturesAudio = false
+        config.capturesAudio = false
 
         // Configure video capture
-        streamConfig.width = display!.width
-        streamConfig.height = display!.height
-        streamConfig.pixelFormat = kCVPixelFormatType_32BGRA
-        streamConfig.colorSpaceName = CGColorSpace.sRGB
+        let rect = windowInScreenCoords()
+        config.sourceRect = rect
+        config.width = Int(rect.width)
+        config.height = Int(rect.height)
+        // config.width = display!.width
+        // config.height = display!.height
+        config.pixelFormat = kCVPixelFormatType_32BGRA
+        config.colorSpaceName = CGColorSpace.sRGB
+        // config.sourceRect = windowInScreenCoords()
 
         // Set the capture interval at 60 fps
-        streamConfig.minimumFrameInterval = CMTime(value: 1, timescale: 60)
+        config.minimumFrameInterval = CMTime(value: 1, timescale: 60)
 
         // Increase the depth of the frame queue to ensure high fps
-        streamConfig.queueDepth = 5
+        config.queueDepth = 5
 
-        return streamConfig
+        return config
     }
 
     func setup(receiver: SCStreamOutput) async
@@ -69,6 +89,46 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             try stream!.addStreamOutput(receiver, type: .screen, sampleHandlerQueue: videoQueue)
 
             print("Starting stream capture...")
+            try await stream!.startCapture()
+
+        } catch {
+            print("Error: \(error)")
+            return
+        }
+    }
+
+    func restart(receiver: SCStreamOutput) async
+    {
+        print("restart")
+
+        do {
+
+            // Stop current stream
+            try await stream?.stopCapture()
+
+            // Get the display to capture
+            let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+            display = content.displays.first
+
+            if (display == nil) {
+                fatalError("Failed to select display")
+            }
+
+            // Create a content filter with the current app excluded
+            let excludedApps = content.applications.filter {
+                app in Bundle.main.bundleIdentifier == app.bundleIdentifier
+            }
+            filter = SCContentFilter(display: display!,
+                                     excludingApplications: excludedApps,
+                                     exceptingWindows: [])
+
+            // Setup the stream with new config
+            stream = SCStream(filter: filter!, configuration: streamConfiguration, delegate: self)
+
+            // Prepare to receive streamed data
+            try stream!.addStreamOutput(receiver, type: .screen, sampleHandlerQueue: videoQueue)
+
+            print("Restarting stream capture...")
             try await stream!.startCapture()
 
         } catch {

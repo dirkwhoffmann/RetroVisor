@@ -15,6 +15,11 @@ class MyWindowController: NSWindowController {
     var recorder = ScreenRecorder()
     var viewController : MyViewController? { return self.contentViewController as? MyViewController }
 
+    var isMoving: Bool = false
+    var isResizing: Bool = false
+
+    var debounceTimer: Timer?
+
     override func windowDidLoad() {
 
         super.windowDidLoad()
@@ -36,6 +41,7 @@ class MyWindowController: NSWindowController {
 
             Task {
                 // Setup the recorder
+                recorder.window = self.window
                 await recorder.setup(receiver: self)
                 let rect = recorder.viewRectInScreenPixels(view: window.contentView!)!
                 viewController?.updateTextureRect(rect)
@@ -78,18 +84,29 @@ extension MyWindowController: NSWindowDelegate {
         let rect = recorder.viewRectInScreenPixels(view: window!.contentView!)!
         // print("x: \(rect.minX) y: \(rect.minY) x2: \(rect.maxX) y2: \(rect.maxY)")
         viewController?.updateTextureRect(rect)
+        // isResizing = true
         return frameSize
     }
 
-    func windowWillMove(_ notification: Notification) {
-
-        // print("windowWillMove")
+    func windowDidMove(_ notification: Notification) {
+        scheduleDebouncedUpdate()
     }
 
-    func windowDidMove(_ notification: Notification) {
+    func windowDidResize(_ notification: Notification) {
+        scheduleDebouncedUpdate()
+    }
 
-        let rect = recorder.viewRectInScreenPixels(view: window!.contentView!)!
-        viewController?.updateTextureRect(rect)
+    private func scheduleDebouncedUpdate() {
+
+        // Cancel existing timer
+        debounceTimer?.invalidate()
+
+        // Schedule new timer
+        debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
+            Task {
+                await self!.recorder.restart(receiver: self!)
+            }
+        }
     }
 }
 

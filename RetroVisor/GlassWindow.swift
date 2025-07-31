@@ -38,8 +38,10 @@ class GlassWindow: NSWindow {
 
     override func mouseUp(with event: NSEvent) {
 
-        super.mouseUp(with: event)
-        myWindowController?.viewController?.animate = false
+        // super.mouseUp(with: event)
+        // myWindowController?.viewController?.animate = false
+        // myWindowController?.viewController?.mouseUp(with: event)
+
     }
 }
 
