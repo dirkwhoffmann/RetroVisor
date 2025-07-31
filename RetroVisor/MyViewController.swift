@@ -110,8 +110,10 @@ class MyViewController: NSViewController, MTKViewDelegate {
         */
         let tx1 = Float(rect.minX)
         let tx2 = Float(rect.maxX)
-        let ty1 = Float(1.0 - rect.maxY)
-        let ty2 = Float(1.0 - rect.minY)
+//        let ty1 = Float(1.0 - rect.maxY)
+//        let ty2 = Float(1.0 - rect.minY)
+        let ty1 = Float(rect.minY)
+        let ty2 = Float(rect.maxY)
 
         let vertices: [Vertex] = [
             Vertex(pos: [-1,  1, 0, 1], tex: [tx1, ty1]),

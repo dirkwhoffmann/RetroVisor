@@ -53,6 +53,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         )
     }
 
+    /*
     func normalizedInScreenCoords(view: NSView) -> CGRect {
 
         let rect = inScreenCoords(view: view)
@@ -63,6 +64,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             height: rect.height / CGFloat(display!.height)
         )
     }
+    */
 
     func normalize(rect: CGRect) -> CGRect {
 
