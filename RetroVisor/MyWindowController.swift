@@ -136,7 +136,8 @@ extension MyWindowController: NSWindowDelegate {
         // Schedule new timer
         debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
             Task {
-                await self!.recorder.restart(receiver: self!)
+                // await self!.recorder.restart(receiver: self!)
+                await self!.recorder.capture(receiver: self!, view: self!.window!.contentView!)
             }
         }
     }

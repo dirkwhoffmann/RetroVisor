@@ -32,6 +32,20 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         )
     }
 
+    func inScreenCoords(view: NSView) -> CGRect {
+
+        let window = view.window!
+        let windowFrame = window.frame
+        let screenFrame = window.screen?.frame ?? .zero
+
+        return CGRect(
+            x: windowFrame.origin.x,
+            y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
+            width: windowFrame.width,
+            height: windowFrame.height
+        )
+    }
+
     private var streamConfiguration: SCStreamConfiguration {
 
         let config = SCStreamConfiguration()
@@ -70,6 +84,22 @@ class ScreenRecorder: NSObject, SCStreamDelegate
      }
      }
      */
+
+    func capture(receiver: SCStreamOutput, view: NSView) async
+    {
+        let sourceRect = inScreenCoords(view: view)
+
+        do {
+            // Stop current stream
+            try await stream?.stopCapture()
+
+            // Relaunch
+            await launch(receiver: receiver, sourceRect: sourceRect)
+
+        } catch {
+            print("Error: \(error)")
+        }
+    }
 
     func launch(receiver: SCStreamOutput, sourceRect: CGRect? = nil) async
     {
@@ -121,10 +151,10 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
         } catch {
             print("Error: \(error)")
-            return
         }
     }
 
+    /*
     func restart(receiver: SCStreamOutput) async
     {
         print("restart")
@@ -164,6 +194,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             return
         }
     }
+    */
 
     func viewRectInScreenPixels(view: NSView) -> CGRect? {
 
