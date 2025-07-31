@@ -12,8 +12,28 @@ import AVFoundation
 
 class GlassWindow: NSWindow {
 
+    var myWindowController: MyWindowController? {
+        return windowController as? MyWindowController
+    }
+
     func windowDidLoad() {
         print("Hallo. windowDidLoad")
+    }
+
+    override func mouseDown(with event: NSEvent) {
+
+        if event.clickCount == 2 {
+
+            // Double click
+            // freeze()
+            print("Double click")
+            myWindowController?.freeze()
+
+        } else {
+
+            // Single click
+            self.performDrag(with: event)
+        }
     }
 }
 

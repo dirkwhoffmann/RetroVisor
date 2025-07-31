@@ -20,9 +20,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var window: TransparentWindow!
     var preview: Preview!
 
+    var windowController: MyWindowController? {
+        return NSApplication.shared.windows.first?.windowController as? MyWindowController
+    }
+
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
 
         window.unfreeze()
+        windowController!.unfreeze()
         return true
     }
 

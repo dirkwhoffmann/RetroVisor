@@ -36,16 +36,20 @@ vertex VertexOut vertex_main(const device VertexIn *vertices [[buffer(0)]],
 // Fragment shader
 //
 
+/*
 fragment float4 fragment_main(VertexOut in [[stage_in]],
                               texture2d<float> tex [[texture(0)]],
-                              sampler s [[sampler(0)]]) {
-    return tex.sample(s, in.texCoord);
-}
-/*
-fragment float4 fragment_main(VertexOut in [[ stage_in ]],
-                              texture2d<float> inputTexture [[ texture(0) ]],
-                              sampler textureSampler [[ sampler(0) ]]) {
-    const float4 color = inputTexture.sample(textureSampler, in.texCoord);
+                              sampler sam [[sampler(0)]]) {
+
+    float4 color = tex.sample(sam, in.texCoord);
     return color;
 }
 */
+
+fragment float4 fragment_main(VertexOut in [[stage_in]],
+                              texture2d<float> tex [[texture(0)]],
+                              sampler sam [[sampler(0)]]) {
+    float4 color = tex.sample(sam, in.texCoord);
+    float4 color2 = color.gbra;
+    return color2;
+}
