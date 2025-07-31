@@ -50,6 +50,14 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
                               texture2d<float> tex [[texture(0)]],
                               sampler sam [[sampler(0)]]) {
     float4 color = tex.sample(sam, in.texCoord);
-    float4 color2 = color.gbra;
-    return color2;
+
+    float r = color.r;
+    float g = color.g;
+    float b = color.b;
+
+    float sepiaR = min(1.0, 0.44 * r + 0.77 * g + 0.20 * b);
+    float sepiaG = min(1.0, 0.39 * r + 0.70 * g + 0.17 * b);
+    float sepiaB = min(1.0, 0.23 * r + 0.52 * g + 0.10 * b);
+
+    return float4(sepiaR, sepiaG, sepiaB, color.a);
 }

@@ -25,8 +25,6 @@ class GlassWindow: NSWindow {
         if event.clickCount == 2 {
 
             // Double click
-            // freeze()
-            print("Double click")
             myWindowController?.freeze()
 
         } else {

@@ -37,6 +37,8 @@ class MyWindowController: NSWindowController {
             Task {
                 // Setup the recorder
                 await recorder.setup(receiver: self)
+                let rect = recorder.viewRectInScreenPixels(view: window.contentView!)!
+                viewController?.updateTextureRect(rect)
             }
         }
     }
@@ -74,7 +76,7 @@ extension MyWindowController: NSWindowDelegate {
 
         // print("windowWillResize \(frameSize)")
         let rect = recorder.viewRectInScreenPixels(view: window!.contentView!)!
-        print("x: \(rect.minX) y: \(rect.minY) x2: \(rect.maxX) y2: \(rect.maxY)")
+        // print("x: \(rect.minX) y: \(rect.minY) x2: \(rect.maxX) y2: \(rect.maxY)")
         viewController?.updateTextureRect(rect)
         return frameSize
     }
