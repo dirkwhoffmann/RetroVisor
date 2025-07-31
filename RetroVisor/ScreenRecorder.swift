@@ -16,8 +16,15 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     var display: SCDisplay?
     var filter: SCContentFilter?
     var window: NSWindow?
+    let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
 
-    private let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
+    // Source rectangle of the screen capturer
+    var captureRect: CGRect?
+
+    // Displayed texture cutout
+    var textureRect: CGRect?
+
+    var responsive: Bool = false
 
     func windowInScreenCoords() -> CGRect {
 
@@ -43,6 +50,27 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
             width: windowFrame.width,
             height: windowFrame.height
+        )
+    }
+
+    func normalizedInScreenCoords(view: NSView) -> CGRect {
+
+        let rect = inScreenCoords(view: view)
+        return CGRect(
+            x: rect.minX / CGFloat(display!.width),
+            y: rect.minY / CGFloat(display!.height),
+            width: rect.width / CGFloat(display!.width),
+            height: rect.height / CGFloat(display!.height)
+        )
+    }
+
+    func normalize(rect: CGRect) -> CGRect {
+
+        return CGRect(
+            x: rect.minX / CGFloat(display!.width),
+            y: rect.minY / CGFloat(display!.height),
+            width: rect.width / CGFloat(display!.width),
+            height: rect.height / CGFloat(display!.height)
         )
     }
 
@@ -87,17 +115,43 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
     func capture(receiver: SCStreamOutput, view: NSView) async
     {
-        let sourceRect = inScreenCoords(view: view)
+        await capture(receiver: receiver, sourceRect: inScreenCoords(view: view))
+    }
 
-        do {
-            // Stop current stream
-            try await stream?.stopCapture()
+    func capture(receiver: SCStreamOutput, sourceRect: CGRect) async
+    {
+        var newCaptureRect = CGRect.zero
+        var newTextureRect = CGRect.zero
 
-            // Relaunch
-            await launch(receiver: receiver, sourceRect: sourceRect)
+        if responsive {
 
-        } catch {
-            print("Error: \(error)")
+            // Grab the entire screen and draw a portion of the texture
+            newCaptureRect = display!.frame
+            newTextureRect = normalize(rect: sourceRect)
+
+        } else {
+
+            // Grab a portion of the screen and draw the entire texture
+            newCaptureRect = sourceRect
+            newTextureRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        }
+
+        textureRect = newTextureRect
+
+        if (captureRect != newCaptureRect) {
+
+            // Restart the recorder
+            
+            do {
+                // Stop current stream
+                try await stream?.stopCapture()
+
+                // Relaunch
+                await launch(receiver: receiver, sourceRect: sourceRect)
+
+            } catch {
+                print("Error: \(error)")
+            }
         }
     }
 
