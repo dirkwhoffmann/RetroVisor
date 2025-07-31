@@ -113,9 +113,9 @@ extension MyWindowController: NSWindowDelegate {
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
 
         // print("windowWillResize \(frameSize)")
-        let rect = recorder.viewRectInScreenPixels(view: window!.contentView!)!
+        // let rect = recorder.viewRectInScreenPixels(view: window!.contentView!)!
         // print("x: \(rect.minX) y: \(rect.minY) x2: \(rect.maxX) y2: \(rect.maxY)")
-        viewController?.updateTextureRect(rect)
+        // viewController?.updateTextureRect(rect)
         // isResizing = true
         return frameSize
     }
@@ -130,14 +130,23 @@ extension MyWindowController: NSWindowDelegate {
 
     private func scheduleDebouncedUpdate() {
 
+        if (recorder.responsive) {
+            Task {
+                await self.recorder.capture(receiver: self, view: self.window!.contentView!)
+                if let textureRect = self.recorder.textureRect {
+                    self.viewController?.updateTextureRect(textureRect)
+                }
+            }
+            return
+        }
         // Cancel existing timer
         debounceTimer?.invalidate()
 
         // Schedule new timer
         debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
             Task {
-                // await self!.recorder.restart(receiver: self!)
                 await self!.recorder.capture(receiver: self!, view: self!.window!.contentView!)
+                await self!.viewController?.updateTextureRect(self!.recorder.textureRect!)
             }
         }
     }

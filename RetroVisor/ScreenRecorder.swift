@@ -24,7 +24,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     // Displayed texture cutout
     var textureRect: CGRect?
 
-    var responsive: Bool = false
+    var responsive = true
 
     func windowInScreenCoords() -> CGRect {
 
@@ -74,6 +74,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         )
     }
 
+    /*
     private var streamConfiguration: SCStreamConfiguration {
 
         let config = SCStreamConfiguration()
@@ -100,7 +101,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
         return config
     }
-
+    */
     /*
      func getDisplay() async -> SCDisplay?
      {
@@ -123,10 +124,12 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         var newCaptureRect = CGRect.zero
         var newTextureRect = CGRect.zero
 
+        guard let display = display else { return }
+
         if responsive {
 
             // Grab the entire screen and draw a portion of the texture
-            newCaptureRect = display!.frame
+            newCaptureRect = display.frame
             newTextureRect = normalize(rect: sourceRect)
 
         } else {
@@ -140,14 +143,17 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
         if (captureRect != newCaptureRect) {
 
+            captureRect = newCaptureRect
+
             // Restart the recorder
-            
+            print("Restarting the recorder...")
+
             do {
                 // Stop current stream
                 try await stream?.stopCapture()
 
                 // Relaunch
-                await launch(receiver: receiver, sourceRect: sourceRect)
+                await launch(receiver: receiver, sourceRect: captureRect)
 
             } catch {
                 print("Error: \(error)")
@@ -195,7 +201,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             config.queueDepth = 5
 
             // Create the stream
-            stream = SCStream(filter: filter!, configuration: streamConfiguration, delegate: self)
+            stream = SCStream(filter: filter!, configuration: config, delegate: self)
 
             // Register the stream receiver
             try stream!.addStreamOutput(receiver, type: .screen, sampleHandlerQueue: videoQueue)

@@ -102,16 +102,16 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     func updateTextureRect(_ rect: CGRect) {
 
+        /*
         let tx1 = Float(0.0)
         let tx2 = Float(1.0)
         let ty1 = Float(0.0)
         let ty2 = Float(1.0)
-        /*
+        */
         let tx1 = Float(rect.minX)
         let tx2 = Float(rect.maxX)
         let ty1 = Float(1.0 - rect.maxY)
         let ty2 = Float(1.0 - rect.minY)
-        */
 
         let vertices: [Vertex] = [
             Vertex(pos: [-1,  1, 0, 1], tex: [tx1, ty1]),
