@@ -116,12 +116,12 @@ class ScreenRecorder: NSObject, SCStreamDelegate
      }
      */
 
-    func capture(receiver: SCStreamOutput, view: NSView) async
+    func capture(receiver: SCStreamOutput, view: NSView)
     {
-        await capture(receiver: receiver, sourceRect: inScreenCoords(view: view))
+        capture(receiver: receiver, sourceRect: inScreenCoords(view: view))
     }
 
-    func capture(receiver: SCStreamOutput, sourceRect: CGRect) async
+    func capture(receiver: SCStreamOutput, sourceRect: CGRect)
     {
         var newCaptureRect = CGRect.zero
         var newTextureRect = CGRect.zero
@@ -150,15 +150,17 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             // Restart the recorder
             print("Restarting the recorder...")
 
-            do {
-                // Stop current stream
-                try await stream?.stopCapture()
+            Task {
+                do {
+                    // Stop current stream
+                    try await stream?.stopCapture()
 
-                // Relaunch
-                await launch(receiver: receiver, sourceRect: captureRect)
+                    // Relaunch
+                    await launch(receiver: receiver, sourceRect: captureRect)
 
-            } catch {
-                print("Error: \(error)")
+                } catch {
+                    print("Error: \(error)")
+                }
             }
         }
     }
