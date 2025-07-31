@@ -12,6 +12,13 @@ import Cocoa
 import Cocoa
 import MetalKit
 
+struct Vertex {
+
+    var pos: SIMD4<Float>              // 16 bytes
+    var tex: SIMD2<Float>              // 8 bytes
+    var pad: SIMD2<Float> = [0, 0]
+}
+
 class MyViewController: NSViewController, MTKViewDelegate {
 
     var mtkView: MTKView!
@@ -42,14 +49,33 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         commandQueue = device.makeCommandQueue()
 
-        // Quad vertices for fullscreen rectangle (NDC coords)
-        let vertices: [Float] = [
-            -1,  1, 0, 1,  // top-left
-             -1, -1, 0, 1,  // bottom-left
-             1,  1, 0, 1,  // top-right
-             1, -1, 0, 1,  // bottom-right
+        /*
+        let vertices: [Vertex] = [
+            Vertex(pos: [-1,  1, 0, 1], tex: [0, 0]),
+            Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
+            Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
+            Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1]),
         ]
-        vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Float>.size, options: [])
+        */
+        let vertices: [Vertex] = [
+
+            // Triangle 1 (top-left -> bottom-left -> top-right)
+            Vertex(pos: [ -1,  1, 0, 1], tex: [0, 0]),
+            Vertex(pos: [ -1, -1, 0, 1], tex: [0, 1]),
+            Vertex(pos: [  1,  1, 0, 1], tex: [1, 0]),
+
+            // Triangle 2 (top-right -> bottom-left -> bottom-right)
+            Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
+            Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
+            Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1]),
+
+            /*
+            Vertex(pos: [-1,  1, 0, 1], tex: [0, 0]),
+            Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
+            Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
+            */
+        ]
+        vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Vertex>.size, options: [])
 
         // Load shaders from default library
         let defaultLibrary = device.makeDefaultLibrary()!
@@ -62,11 +88,30 @@ class MyViewController: NSViewController, MTKViewDelegate {
         samplerDescriptor.mipFilter = .notMipmapped
         samplerState = device.makeSamplerState(descriptor: samplerDescriptor)
 
+        // Setup vertex descriptor
+        let vertexDescriptor = MTLVertexDescriptor()
+
+        // Single interleaved buffer
+        vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex>.stride
+        vertexDescriptor.layouts[0].stepRate = 1
+        vertexDescriptor.layouts[0].stepFunction = MTLVertexStepFunction.perVertex
+
+        // Positions
+        vertexDescriptor.attributes[0].format = .float4
+        vertexDescriptor.attributes[0].offset = 0
+        vertexDescriptor.attributes[0].bufferIndex = 0
+
+        // Texture coordinates
+        vertexDescriptor.attributes[1].format = .float2
+        vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
+        vertexDescriptor.attributes[1].bufferIndex = 0
+
         // Create pipeline descriptor
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.vertexFunction = vertexFunc
         pipelineDescriptor.fragmentFunction = fragmentFunc
         pipelineDescriptor.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
+        pipelineDescriptor.vertexDescriptor = vertexDescriptor
 
         do {
             pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
@@ -76,10 +121,10 @@ class MyViewController: NSViewController, MTKViewDelegate {
     }
 
     func texture(from pixelBuffer: CVPixelBuffer) -> MTLTexture? {
+
         let width = CVPixelBufferGetWidth(pixelBuffer)
         let height = CVPixelBufferGetHeight(pixelBuffer)
-
-        let format = CVPixelBufferGetPixelFormatType(pixelBuffer)
+        // let format = CVPixelBufferGetPixelFormatType(pixelBuffer)
 
         var cvTextureOut: CVMetalTexture?
         let result = CVMetalTextureCacheCreateTextureFromImage(nil,
@@ -115,14 +160,14 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState)
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        encoder.setFragmentTexture(currentTexture, index: 0)
+        // encoder.setFragmentTexture(currentTexture, index: 0)
         encoder.setFragmentSamplerState(samplerState, index: 0)
 
         if let texture = currentTexture {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
-        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 6)
         encoder.endEncoding()
 
         commandBuffer.present(drawable)
