@@ -17,35 +17,45 @@ struct AnimatedValue<T: BinaryFloatingPoint> {
             delta = (target - current) / s
         }
     }
-    
     var target: T {
         didSet {
             let s = T(steps == 0 ? 1 : steps)
             delta = (target - current) / s
         }
     }
-    
-    var animates: Bool {
-        current != target
-    }
-    
-    var clamped: T {
-        min(max(current, 0), 1)
-    }
-    
+    var animates: Bool { current != target }
+    var clamped: T { min(max(current, 0), 1) }
+
     init(current: T = 0, target: T = 0) {
+
         self.current = current
         self.target = target
-        self.steps = 1
-        delta = target - current
     }
     
     init(_ value: T) {
+
         self.init(current: value, target: value)
     }
     
     mutating func set(_ value: T) {
-        current = value
-        target = value
+
+        self.current = value
+        self.target = value
+    }
+
+    mutating func set(from: T, to: T, steps: Int) {
+
+        self.current = from
+        self.target = to
+        self.steps = steps
+    }
+
+    mutating func move() {
+
+        if abs(current - target) < abs(delta) {
+            current = target
+        } else {
+            current += delta
+        }
     }
 }

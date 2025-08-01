@@ -13,6 +13,7 @@ struct VertexOut {
 
 struct Uniforms {
     float time;
+    float intensity;
     float2 center;
     float4 texRect;
 };
@@ -97,14 +98,14 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     // Apply a subtle offset opposite to drag direction
     float2 uv = in.texCoord;
 
-    if (uniforms.time > 0.0) {
+    if (uniforms.intensity > 0.0) {
         float2 uvMin = uniforms.texRect.xy;
             float2 uvMax = uniforms.texRect.zw;
             float2 localUV = (uv - uvMin) / (uvMax - uvMin);
 
             float2 dir = localUV - uniforms.center;
             float dist = length(dir);
-            float ripple = 0.015 * sin(30.0 * dist - uniforms.time * 10.0);
+            float ripple = uniforms.intensity * 0.015 * sin(30.0 * dist - uniforms.time * 10.0);
             localUV += normalize(dir) * ripple;
 
             uv = mix(uvMin, uvMax, localUV);

@@ -22,6 +22,7 @@ struct Vertex {
 struct Uniforms {
 
     var time: Float
+    var intensity: Float
     var center: SIMD2<Float>
     var texRect: SIMD4<Float>
 }
@@ -36,7 +37,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var nearestSampler: MTLSamplerState!
     var linearSampler: MTLSamplerState!
 
-    var uniforms = Uniforms.init(time: 0.0, center: [0,0], texRect: [0,0,0,0])
+    var uniforms = Uniforms.init(time: 0.0, intensity: 0.0, center: [0,0], texRect: [0,0,0,0])
 
     var textureCache: CVMetalTextureCache!
     var currentTexture: MTLTexture?
@@ -45,9 +46,10 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var time: Float = 0.0
     var center: SIMD2<Float> = SIMD2(0.5, 0.5)
 
-
     var frame = 0
     var animate: Bool = false
+
+    var intensity = AnimatedValue<Float>(0.0)
 
     override func loadView() {
         // Create MTKView programmatically as the main view
@@ -220,14 +222,18 @@ class MyViewController: NSViewController, MTKViewDelegate {
               let commandBuffer = commandQueue.makeCommandBuffer(),
               let passDescriptor = view.currentRenderPassDescriptor else { return }
 
+        intensity.move()
+        if intensity.animates { print("intensity = \(intensity.current)") }
+
         if (time > 0) { time += 0.01 }
         frame += 1
         uniforms.time = time
-
+        uniforms.intensity = intensity.current
+        
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState)
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        encoder.setFragmentSamplerState(time > 0 ? linearSampler : nearestSampler, index: 0)
+        encoder.setFragmentSamplerState(intensity.current > 0 ? linearSampler : nearestSampler, index: 0)
         // encoder.setFragmentBuffer(timeBuffer, offset: 0, index: 0)
 
         if let texture = currentTexture {

@@ -150,21 +150,30 @@ extension MyWindowController: TrackingWindowDelegate {
     func windowDidStartResize(_ window: TrackingWindow) {
         print("windowDidStartResize")
         viewController!.time = 1.0
+        viewController!.intensity.target = 1.0
+        viewController!.intensity.steps = 15
     }
 
     func windowDidStopResize(_ window: TrackingWindow) {
         print("windowDidStopResize")
         viewController!.time = 0.0
+        viewController!.intensity.target = 0.0
+        viewController!.intensity.steps = 15
     }
 
     func windowDidStartDrag(_ window: TrackingWindow) {
         print("Started dragging")
         viewController!.time = 1.0
+        viewController!.intensity.target = 1.0
+        viewController!.intensity.steps = 25
+
     }
 
     func windowDidStopDrag(_ window: TrackingWindow) {
         print("Stopped dragging")
         viewController!.time = 0.0
+        viewController!.intensity.target = 0.0
+        viewController!.intensity.steps = 25
     }
 
     func windowDidDrag(_ window: TrackingWindow, frame: NSRect) {
