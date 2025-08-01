@@ -33,7 +33,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var commandQueue: MTLCommandQueue!
     var pipelineState: MTLRenderPipelineState!
     var vertexBuffer: MTLBuffer!
-    var samplerState: MTLSamplerState!
+    var nearestSampler: MTLSamplerState!
+    var linearSampler: MTLSamplerState!
 
     var uniforms = Uniforms.init(time: 0.0, center: [0,0], texRect: [0,0,0,0])
 
@@ -73,11 +74,15 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
         let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_main")!
 
+        /*
         let samplerDescriptor = MTLSamplerDescriptor()
         samplerDescriptor.minFilter = .nearest
         samplerDescriptor.magFilter = .nearest
         samplerDescriptor.mipFilter = .notMipmapped
         samplerState = device.makeSamplerState(descriptor: samplerDescriptor)
+         */
+        nearestSampler = makeSamplerState(minFilter: .nearest, magFilter: .nearest)
+        linearSampler  = makeSamplerState(minFilter: .linear,  magFilter: .linear)
 
         // Setup vertex descriptor
         let vertexDescriptor = MTLVertexDescriptor()
@@ -112,6 +117,15 @@ class MyViewController: NSViewController, MTKViewDelegate {
         } catch {
             fatalError("Failed to create pipeline state: \(error)")
         }
+    }
+
+    func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
+
+        let descriptor = MTLSamplerDescriptor()
+        descriptor.minFilter = minFilter
+        descriptor.magFilter = magFilter
+        descriptor.mipFilter = .notMipmapped
+        return device.makeSamplerState(descriptor: descriptor)!
     }
 
     func updateTextureRect(_ rect: CGRect) {
@@ -225,7 +239,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState)
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        encoder.setFragmentSamplerState(samplerState, index: 0)
+        encoder.setFragmentSamplerState(time > 0 ? linearSampler : nearestSampler, index: 0)
         // encoder.setFragmentBuffer(timeBuffer, offset: 0, index: 0)
 
         if let texture = currentTexture {
