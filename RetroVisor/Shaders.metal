@@ -11,6 +11,12 @@ struct VertexOut {
     float2 texCoord;
 };
 
+struct Uniforms {
+    float time;
+    float2 center;
+    float4 texRect;
+};
+
 //
 // Vertex shader
 //
@@ -84,28 +90,24 @@ float3 lavaColorMap(float t) {
 
 fragment float4 fragment_main(VertexOut in [[stage_in]],
                               texture2d<float> tex [[texture(0)]],
-                              constant float &time [[buffer(0)]],
-                              constant float2 &center [[buffer(1)]],
+                              constant Uniforms& uniforms [[buffer(0)]],
                               sampler sam [[sampler(0)]]) {
 
 
     // Apply a subtle offset opposite to drag direction
     float2 uv = in.texCoord;
 
-    if (time > 0.0) {
-        // float2 uv = in.texCoord;
+    if (uniforms.time > 0.0) {
+        float2 uvMin = uniforms.texRect.xy;
+            float2 uvMax = uniforms.texRect.zw;
+            float2 localUV = (uv - uvMin) / (uvMax - uvMin);
 
-            // Calculate direction vector from ripple center
-            float2 dir = uv - center;
+            float2 dir = localUV - uniforms.center;
             float dist = length(dir);
+            float ripple = 0.015 * sin(30.0 * dist - uniforms.time * 5.0);
+            localUV += normalize(dir) * ripple;
 
-            // Create ripples with radial sine wave distortion
-            float ripple = 0.005 * sin(40.0 * dist - time * 8.0);
-
-            // Apply ripple effect along radial direction
-            uv += normalize(dir) * ripple;
-
-            // return tex.sample(sam, uv);
+            uv = mix(uvMin, uvMax, localUV);
     }
 
     // Sample texture color

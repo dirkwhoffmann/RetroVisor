@@ -19,6 +19,13 @@ struct Vertex {
     var pad: SIMD2<Float> = [0, 0]
 }
 
+struct Uniforms {
+
+    var time: Float
+    var center: SIMD2<Float>
+    var texRect: SIMD4<Float>
+}
+
 class MyViewController: NSViewController, MTKViewDelegate {
 
     var mtkView: MTKView!
@@ -28,9 +35,15 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var vertexBuffer: MTLBuffer!
     var samplerState: MTLSamplerState!
 
+    var uniforms = Uniforms.init(time: 0.0, center: [0,0], texRect: [0,0,0,0])
+
     var textureCache: CVMetalTextureCache!
     var currentTexture: MTLTexture?
     // var timeBuffer: MTLBuffer!
+
+    var time: Float = 0.0
+    var center: SIMD2<Float> = SIMD2(0.5, 0.5)
+
 
     var frame = 0
     var animate: Bool = false
@@ -116,6 +129,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let ty1 = Float(rect.minY)
         let ty2 = Float(rect.maxY)
 
+        uniforms.texRect = [tx1, ty1, tx2, ty2];
+
         let vertices: [Vertex] = [
             Vertex(pos: [-1,  1, 0, 1], tex: [tx1, ty1]),
             Vertex(pos: [-1, -1, 0, 1], tex: [tx1, ty2]),
@@ -126,6 +141,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         vertexBuffer = device.makeBuffer(bytes: vertices,
                                          length: vertices.count * MemoryLayout<Vertex>.stride,
                                          options: [])
+
     }
 
     func texture(from pixelBuffer: CVPixelBuffer) -> MTLTexture? {
@@ -171,9 +187,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
         mtkView.setNeedsDisplay(mtkView.bounds)
     }
 
-    var time: Float = 0.0
-    var center: SIMD2<Float> = SIMD2(0.5, 0.5)
-
     private var lastFrameTime: TimeInterval = CACurrentMediaTime()
     private let expectedFrameDuration: TimeInterval = 1.0 / 60.0  // for 60 FPS
     private let frameDropThresholdMultiplier = 1.5  // Consider frame dropped if duration > 1.5x expected
@@ -207,7 +220,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         if (time > 0) { time += 0.01 }
         frame += 1
-        
+        uniforms.time = time
+
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState)
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
@@ -219,8 +233,11 @@ class MyViewController: NSViewController, MTKViewDelegate {
         }
 
         // Pass uniforms: time and center
-        encoder.setFragmentBytes(&time, length: MemoryLayout<Float>.size, index: 0)
-        encoder.setFragmentBytes(&center, length: MemoryLayout<SIMD2<Float>>.size, index: 1)
+        // encoder.setFragmentBytes(&time, length: MemoryLayout<Float>.size, index: 0)
+        // encoder.setFragmentBytes(&center, length: MemoryLayout<SIMD2<Float>>.size, index: 1)
+        encoder.setFragmentBytes(&uniforms,
+                                 length: MemoryLayout<Uniforms>.stride,
+                                 index: 0)
 
 
         encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
