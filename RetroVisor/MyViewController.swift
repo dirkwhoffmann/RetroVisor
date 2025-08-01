@@ -210,22 +210,10 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     func draw(in view: MTKView) {
 
-        /*
-        let now = CACurrentMediaTime()
-        let delta = now - lastFrameTime
-
-        if delta > expectedFrameDuration * frameDropThresholdMultiplier {
-            let ms = Int(delta * 1000)
-            print("⚠️ Frame dropped! Duration: \(ms) ms")
-        }
-
-        lastFrameTime = now
-        */
-
-
         let w = view.window as! GlassWindow
-        // print("size: \(w.frame)")
-        // theFrame = w.liveFrame
+        theFrame2 = w.liveFrame
+        // print("liveFrame: \(w.liveFrame)")
+        // print("window.frame: \(w.frame)")
         w.myWindowController!.scheduleDebouncedUpdate(frame: theFrame2)
 
         guard let drawable = view.currentDrawable,

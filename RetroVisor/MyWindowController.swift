@@ -144,7 +144,17 @@ class MyWindowController: NSWindowController {
 extension MyWindowController: TrackingWindowDelegate {
 
     func windowDidMove(_ notification: Notification) {
-        print("\(viewController?.frame ?? 0) windowDidMove: \(window?.frame ?? NSRect.zero)")
+        // print("\(viewController?.frame ?? 0) windowDidMove: \(window?.frame ?? NSRect.zero)")
+    }
+
+    func windowDidStartResize(_ window: TrackingWindow) {
+        print("windowDidStartResize")
+        viewController!.time = 1.0
+    }
+
+    func windowDidStopResize(_ window: TrackingWindow) {
+        print("windowDidStopResize")
+        viewController!.time = 0.0
     }
 
     func windowDidStartDrag(_ window: TrackingWindow) {
@@ -160,20 +170,26 @@ extension MyWindowController: TrackingWindowDelegate {
     func windowDidDrag(_ window: TrackingWindow, frame: NSRect) {
         // print("\(viewController?.frame ?? 0) Dragging: \(frame)")
 
+        /*
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss.S" // S = tenths of a second
         let timestamp = formatter.string(from: Date())
         print("[\(timestamp)] \(viewController?.frame ?? 0) Dragging: \(frame)")
 
         // scheduleDebouncedUpdate(frame: frame)
+        */
     }
 
     func windowWasDoubleClicked(_ window: TrackingWindow) {
         print("Double clicked:")
+        freeze()
     }
 
     func windowDidResize(_ notification: Notification) {
-        scheduleDebouncedUpdate()
+        // print("resize")
+        if let win = window as? GlassWindow {
+            win.liveFrame = NSRect(origin: window!.frame.origin, size: window!.frame.size)
+        }
     }
 
     func scheduleDebouncedUpdate(frame: NSRect? = nil) {

@@ -104,7 +104,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
 
             float2 dir = localUV - uniforms.center;
             float dist = length(dir);
-            float ripple = 0.015 * sin(30.0 * dist - uniforms.time * 5.0);
+            float ripple = 0.015 * sin(30.0 * dist - uniforms.time * 10.0);
             localUV += normalize(dir) * ripple;
 
             uv = mix(uvMin, uvMax, localUV);

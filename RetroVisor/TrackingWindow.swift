@@ -13,6 +13,8 @@ protocol TrackingWindowDelegate: NSWindowDelegate {
 
     func windowDidStartDrag(_ window: TrackingWindow)
     func windowDidStopDrag(_ window: TrackingWindow)
+    func windowDidStartResize(_ window: TrackingWindow)
+    func windowDidStopResize(_ window: TrackingWindow)
     func windowDidDrag(_ window: TrackingWindow, frame: NSRect)
     func windowWasDoubleClicked(_ window: TrackingWindow)
 }
@@ -23,9 +25,11 @@ class TrackingWindow: NSWindow {
     var dragAnywhere = true
 
     private var isDragging = false
+    private var isResizing = false
     private var lastMouseLocation: NSPoint?
     private var initialWindowOrigin: NSPoint?
     private var prevOrigin: NSPoint?
+    private var resizeDebounceTimer: Timer?
 
     override func sendEvent(_ event: NSEvent) {
 
@@ -69,15 +73,14 @@ class TrackingWindow: NSWindow {
 
                 // Snap to pixel grid (optional, avoids subpixel fuzziness)
                 /*
-                newOrigin.x = round(newOrigin.x)
-                newOrigin.y = round(newOrigin.y)
-                */
+                 newOrigin.x = round(newOrigin.x)
+                 newOrigin.y = round(newOrigin.y)
+                 */
                 newOrigin.x = floor(newOrigin.x)
                 newOrigin.y = floor(newOrigin.y)
 
                 liveFrame = NSRect(origin: newOrigin, size: self.frame.size)
 
-                // if newOrigin != self.frame.origin {
                 if newOrigin != prevOrigin {
 
                     prevOrigin = newOrigin
@@ -86,7 +89,7 @@ class TrackingWindow: NSWindow {
             }
 
         case .leftMouseUp:
-            
+
             if isDragging {
                 isDragging = false
                 (delegate as? TrackingWindowDelegate)?.windowDidStopDrag(self)
@@ -97,6 +100,25 @@ class TrackingWindow: NSWindow {
 
         default:
             break;
+        }
+    }
+
+    override func setFrame(_ frameRect: NSRect, display flag: Bool) {
+
+        super.setFrame(frameRect, display: flag)
+
+        // Called frequently during live resizing
+        if !isResizing {
+            isResizing = true
+            (delegate as? TrackingWindowDelegate)?.windowDidStartResize(self)
+        }
+
+        // Reset timer to detect resize end
+        resizeDebounceTimer?.invalidate()
+        resizeDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
+            guard let self = self else { return }
+            self.isResizing = false
+            (delegate as? TrackingWindowDelegate)?.windowDidStopResize(self)
         }
     }
 }
