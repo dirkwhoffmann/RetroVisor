@@ -20,8 +20,11 @@ class GlassWindow: TrackingWindow {
         print("Hallo. windowDidLoad")
     }
 
+    /*
     override func mouseDown(with event: NSEvent) {
 
+        super.mouseDown(with: event)
+        
         if event.clickCount == 2 {
 
             // Double click
@@ -39,11 +42,12 @@ class GlassWindow: TrackingWindow {
             initialWindowOrigin = self.frame.origin
         // }
     }
-
+     */
 
     private var initialMouseLocation: NSPoint = .zero
     private var initialWindowOrigin: NSPoint = .zero
 
+    /*
     override func mouseDragged(with event: NSEvent) {
         super.mouseDragged(with: event)
 
@@ -60,7 +64,8 @@ class GlassWindow: TrackingWindow {
             windowDidMoveContinuously(to: newOrigin)
         }
     }
-
+     */
+    
     private func windowDidMoveContinuously(to origin: NSPoint) {
         // print("Live moved to: \(origin)")
         // let roundedOrigin = NSPoint(x: round(origin.x), y: round(origin.y))

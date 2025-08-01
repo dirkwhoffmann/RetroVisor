@@ -153,12 +153,20 @@ extension MyWindowController: TrackingWindowDelegate {
         return frameSize
     }
 
-    func windowDidStartDrag(_ window: NSWindow) {
+    func windowDidStartDrag(_ window: TrackingWindow) {
         print("Started dragging")
     }
-    
-    func windowDidStopDrag(_ window: NSWindow) {
+
+    func windowDidStopDrag(_ window: TrackingWindow) {
         print("Stopped dragging")
+    }
+
+    func windowDidDrag(_ window: TrackingWindow, frame: NSRect) {
+        print("Dragging: \(frame)")
+    }
+
+    func windowWasDoubleClicked(_ window: TrackingWindow) {
+        print("Double clicked:")
     }
 
     func windowDidMove(_ notification: Notification) {
