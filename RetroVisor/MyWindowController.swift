@@ -143,14 +143,8 @@ class MyWindowController: NSWindowController {
 
 extension MyWindowController: TrackingWindowDelegate {
 
-    func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
-
-        // print("windowWillResize \(frameSize)")
-        // let rect = recorder.viewRectInScreenPixels(view: window!.contentView!)!
-        // print("x: \(rect.minX) y: \(rect.minY) x2: \(rect.maxX) y2: \(rect.maxY)")
-        // viewController?.updateTextureRect(rect)
-        // isResizing = true
-        return frameSize
+    func windowDidMove(_ notification: Notification) {
+        print("windowDidMove: \(window?.frame ?? NSRect.zero)")
     }
 
     func windowDidStartDrag(_ window: TrackingWindow) {
@@ -163,15 +157,11 @@ extension MyWindowController: TrackingWindowDelegate {
 
     func windowDidDrag(_ window: TrackingWindow, frame: NSRect) {
         print("Dragging: \(frame)")
+        scheduleDebouncedUpdate(frame: frame)
     }
 
     func windowWasDoubleClicked(_ window: TrackingWindow) {
         print("Double clicked:")
-    }
-
-    func windowDidMove(_ notification: Notification) {
-        // scheduleDebouncedUpdate()
-        // print("windowDidMove \(window!.frame)")
     }
 
     func windowDidResize(_ notification: Notification) {

@@ -43,10 +43,10 @@ class GlassWindow: TrackingWindow {
         // }
     }
      */
-
+    /*
     private var initialMouseLocation: NSPoint = .zero
     private var initialWindowOrigin: NSPoint = .zero
-
+    */
     /*
     override func mouseDragged(with event: NSEvent) {
         super.mouseDragged(with: event)
@@ -65,7 +65,8 @@ class GlassWindow: TrackingWindow {
         }
     }
      */
-    
+
+    /*
     private func windowDidMoveContinuously(to origin: NSPoint) {
         // print("Live moved to: \(origin)")
         // let roundedOrigin = NSPoint(x: round(origin.x), y: round(origin.y))
@@ -73,6 +74,7 @@ class GlassWindow: TrackingWindow {
         myWindowController?.scheduleDebouncedUpdate(frame: NSRect(origin: origin, size: frame.size))
         // Hier kannst du z. B. SCStream-Konfiguration aktualisieren
     }
+    */
 }
 
 class GlassView: NSView {
