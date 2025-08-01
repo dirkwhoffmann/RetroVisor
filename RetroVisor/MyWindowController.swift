@@ -141,7 +141,7 @@ class MyWindowController: NSWindowController {
      */
 }
 
-extension MyWindowController: NSWindowDelegate {
+extension MyWindowController: TrackingWindowDelegate {
 
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
 
@@ -151,6 +151,14 @@ extension MyWindowController: NSWindowDelegate {
         // viewController?.updateTextureRect(rect)
         // isResizing = true
         return frameSize
+    }
+
+    func windowDidStartDrag(_ window: NSWindow) {
+        print("Started dragging")
+    }
+    
+    func windowDidStopDrag(_ window: NSWindow) {
+        print("Stopped dragging")
     }
 
     func windowDidMove(_ notification: Notification) {

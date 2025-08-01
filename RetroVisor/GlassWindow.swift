@@ -10,7 +10,7 @@
 import Cocoa
 import AVFoundation
 
-class GlassWindow: NSWindow {
+class GlassWindow: TrackingWindow {
 
     var myWindowController: MyWindowController? {
         return windowController as? MyWindowController
