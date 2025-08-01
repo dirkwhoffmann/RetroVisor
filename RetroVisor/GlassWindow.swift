@@ -20,29 +20,8 @@ class GlassWindow: TrackingWindow {
         print("Hallo. windowDidLoad")
     }
 
-    /*
-    override func mouseDown(with event: NSEvent) {
 
-        super.mouseDown(with: event)
-        
-        if event.clickCount == 2 {
 
-            // Double click
-            myWindowController?.freeze()
-
-        } else {
-
-            // Single click
-            self.performDrag(with: event)
-        }
-
-        //  if let screen = self.screen {
-            let mouseLocation = NSEvent.mouseLocation
-            initialMouseLocation = mouseLocation
-            initialWindowOrigin = self.frame.origin
-        // }
-    }
-     */
     /*
     private var initialMouseLocation: NSPoint = .zero
     private var initialWindowOrigin: NSPoint = .zero

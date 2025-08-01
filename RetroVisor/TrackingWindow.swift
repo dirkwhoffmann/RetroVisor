@@ -19,9 +19,13 @@ protocol TrackingWindowDelegate: NSWindowDelegate {
 
 class TrackingWindow: NSWindow {
 
+    var liveFrame = NSRect.zero
+    var dragAnywhere = true
+
     private var isDragging = false
     private var lastMouseLocation: NSPoint?
     private var initialWindowOrigin: NSPoint?
+    private var prevOrigin: NSPoint?
 
     override func sendEvent(_ event: NSEvent) {
 
@@ -32,10 +36,16 @@ class TrackingWindow: NSWindow {
         case .leftMouseDown:
 
             if event.clickCount == 2 {
+
                 (delegate as? TrackingWindowDelegate)?.windowWasDoubleClicked(self)
+
             } else {
-                lastMouseLocation = event.locationInWindow
+
+                lastMouseLocation = NSEvent.mouseLocation
                 initialWindowOrigin = self.frame.origin
+                if (dragAnywhere) {
+                    self.performDrag(with: event)
+                }
             }
 
         case .leftMouseDragged:
@@ -48,7 +58,7 @@ class TrackingWindow: NSWindow {
             if let lastLocation = lastMouseLocation,
                let startOrigin = initialWindowOrigin {
 
-                let currentLocation = event.locationInWindow
+                let currentLocation = NSEvent.mouseLocation // event.locationInWindow
                 let delta = NSPoint(x: currentLocation.x - lastLocation.x,
                                     y: currentLocation.y - lastLocation.y)
 
@@ -58,14 +68,21 @@ class TrackingWindow: NSWindow {
                 newOrigin.y += delta.y
 
                 // Snap to pixel grid (optional, avoids subpixel fuzziness)
+                /*
                 newOrigin.x = round(newOrigin.x)
                 newOrigin.y = round(newOrigin.y)
-                // self.setFrameOrigin(newOrigin)
+                */
+                newOrigin.x = floor(newOrigin.x)
+                newOrigin.y = floor(newOrigin.y)
 
-                // Compute new frame
-                let newFrame = NSRect(origin: newOrigin, size: self.frame.size)
+                liveFrame = NSRect(origin: newOrigin, size: self.frame.size)
 
-                (delegate as? TrackingWindowDelegate)?.windowDidDrag(self, frame: newFrame)
+                // if newOrigin != self.frame.origin {
+                if newOrigin != prevOrigin {
+
+                    prevOrigin = newOrigin
+                    (delegate as? TrackingWindowDelegate)?.windowDidDrag(self, frame: liveFrame)
+                }
             }
 
         case .leftMouseUp:

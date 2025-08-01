@@ -71,11 +71,45 @@ fragment float4 fragment_ripple(VertexOut in [[stage_in]],
 }
 */
 
+float3 lavaColorMap(float t) {
+    // Map a grayscale value to lava colors
+    return mix(
+        mix(float3(0.2, 0.0, 0.0), float3(1.0, 0.4, 0.0), smoothstep(0.2, 0.6, t)), // dark to orange
+        float3(1.0, 1.0, 0.0),                                                     // to yellow
+        smoothstep(0.6, 1.0, t)
+    );
+}
+
+
+
 fragment float4 fragment_main(VertexOut in [[stage_in]],
                               texture2d<float> tex [[texture(0)]],
+                              constant float &time [[buffer(0)]],
+                              constant float2 &center [[buffer(1)]],
                               sampler sam [[sampler(0)]]) {
+
+
+    // Apply a subtle offset opposite to drag direction
+    float2 uv = in.texCoord;
+
+    if (time > 0.0) {
+        // float2 uv = in.texCoord;
+
+            // Calculate direction vector from ripple center
+            float2 dir = uv - center;
+            float dist = length(dir);
+
+            // Create ripples with radial sine wave distortion
+            float ripple = 0.005 * sin(40.0 * dist - time * 8.0);
+
+            // Apply ripple effect along radial direction
+            uv += normalize(dir) * ripple;
+
+            // return tex.sample(sam, uv);
+    }
+
     // Sample texture color
-    float4 color = tex.sample(sam, in.texCoord);
+    float4 color = tex.sample(sam, uv);
 
     // Convert to grayscale (luminance)
     float luminance = dot(color.rgb, float3(0.299, 0.587, 0.114));

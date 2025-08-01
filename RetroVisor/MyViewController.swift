@@ -32,6 +32,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var currentTexture: MTLTexture?
     // var timeBuffer: MTLBuffer!
 
+    var frame = 0
     var animate: Bool = false
 
     override func loadView() {
@@ -173,20 +174,40 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var time: Float = 0.0
     var center: SIMD2<Float> = SIMD2(0.5, 0.5)
 
+    private var lastFrameTime: TimeInterval = CACurrentMediaTime()
+    private let expectedFrameDuration: TimeInterval = 1.0 / 60.0  // for 60 FPS
+    private let frameDropThresholdMultiplier = 1.5  // Consider frame dropped if duration > 1.5x expected
+
+    var theFrame = CGRect.zero
+    var theFrame2 = CGRect.zero
+
     func draw(in view: MTKView) {
 
         /*
-        if let w = view.window as? GlassWindow {
-            print("size: \(w.frame)")
-            w.myWindowController!.scheduleDebouncedUpdate()
+        let now = CACurrentMediaTime()
+        let delta = now - lastFrameTime
+
+        if delta > expectedFrameDuration * frameDropThresholdMultiplier {
+            let ms = Int(delta * 1000)
+            print("⚠️ Frame dropped! Duration: \(ms) ms")
         }
+
+        lastFrameTime = now
         */
+
+
+        let w = view.window as! GlassWindow
+        // print("size: \(w.frame)")
+        // theFrame = w.liveFrame
+        w.myWindowController!.scheduleDebouncedUpdate(frame: theFrame2)
+
         guard let drawable = view.currentDrawable,
               let commandBuffer = commandQueue.makeCommandBuffer(),
               let passDescriptor = view.currentRenderPassDescriptor else { return }
 
-        time += 0.01
-
+        if (time > 0) { time += 0.01 }
+        frame += 1
+        
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState)
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
@@ -199,7 +220,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         // Pass uniforms: time and center
         encoder.setFragmentBytes(&time, length: MemoryLayout<Float>.size, index: 0)
-        // encoder.setFragmentBytes(&center, length: MemoryLayout<SIMD2<Float>>.size, index: 1)
+        encoder.setFragmentBytes(&center, length: MemoryLayout<SIMD2<Float>>.size, index: 1)
 
 
         encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
@@ -207,6 +228,9 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         commandBuffer.present(drawable)
         commandBuffer.commit()
+
+        theFrame2 = theFrame
+        theFrame = w.liveFrame
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {

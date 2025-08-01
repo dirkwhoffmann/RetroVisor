@@ -144,20 +144,28 @@ class MyWindowController: NSWindowController {
 extension MyWindowController: TrackingWindowDelegate {
 
     func windowDidMove(_ notification: Notification) {
-        print("windowDidMove: \(window?.frame ?? NSRect.zero)")
+        print("\(viewController?.frame ?? 0) windowDidMove: \(window?.frame ?? NSRect.zero)")
     }
 
     func windowDidStartDrag(_ window: TrackingWindow) {
         print("Started dragging")
+        viewController!.time = 1.0
     }
 
     func windowDidStopDrag(_ window: TrackingWindow) {
         print("Stopped dragging")
+        viewController!.time = 0.0
     }
 
     func windowDidDrag(_ window: TrackingWindow, frame: NSRect) {
-        print("Dragging: \(frame)")
-        scheduleDebouncedUpdate(frame: frame)
+        // print("\(viewController?.frame ?? 0) Dragging: \(frame)")
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss.S" // S = tenths of a second
+        let timestamp = formatter.string(from: Date())
+        print("[\(timestamp)] \(viewController?.frame ?? 0) Dragging: \(frame)")
+
+        // scheduleDebouncedUpdate(frame: frame)
     }
 
     func windowWasDoubleClicked(_ window: TrackingWindow) {
