@@ -16,6 +16,7 @@
 		50BA96552E3C80D6006BA8DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 50BA96452E3C80D6006BA8DF /* Assets.xcassets */; };
 		50BA96562E3C80D6006BA8DF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50BA96482E3C80D6006BA8DF /* Main.storyboard */; };
 		50BA96592E3C80F5006BA8DF /* TrackingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */; };
+		50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA965A2E3D4861006BA8DF /* Animated.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		50BA964C2E3C80D6006BA8DF /* ScreenRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenRecorder.swift; sourceTree = "<group>"; };
 		50BA964D2E3C80D6006BA8DF /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingWindow.swift; sourceTree = "<group>"; };
+		50BA965A2E3D4861006BA8DF /* Animated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animated.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 		50BA964E2E3C80D6006BA8DF /* RetroVisor */ = {
 			isa = PBXGroup;
 			children = (
+				50BA965A2E3D4861006BA8DF /* Animated.swift */,
 				50BA96442E3C80D6006BA8DF /* AppDelegate.swift */,
 				50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */,
 				50BA96462E3C80D6006BA8DF /* GlassWindow.swift */,
@@ -153,6 +156,7 @@
 				50BA96502E3C80D6006BA8DF /* GlassWindow.swift in Sources */,
 				50BA96592E3C80F5006BA8DF /* TrackingWindow.swift in Sources */,
 				50BA96512E3C80D6006BA8DF /* MyViewController.swift in Sources */,
+				50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */,
 				50BA96522E3C80D6006BA8DF /* MyWindowController.swift in Sources */,
 				50BA96532E3C80D6006BA8DF /* ScreenRecorder.swift in Sources */,
 				50BA96542E3C80D6006BA8DF /* Shaders.metal in Sources */,

@@ -17,61 +17,6 @@ class GlassWindow: TrackingWindow {
     }
 
     func windowDidLoad() {
-        print("Hallo. windowDidLoad")
-    }
 
-
-
-    /*
-    private var initialMouseLocation: NSPoint = .zero
-    private var initialWindowOrigin: NSPoint = .zero
-    */
-    /*
-    override func mouseDragged(with event: NSEvent) {
-        super.mouseDragged(with: event)
-
-        let currentMouseLocation = NSEvent.mouseLocation
-
-        let dx = currentMouseLocation.x - initialMouseLocation.x
-        let dy = currentMouseLocation.y - initialMouseLocation.y
-
-        let newOrigin = NSPoint(x: initialWindowOrigin.x + dx,
-                                y: initialWindowOrigin.y + dy)
-
-        if newOrigin != self.frame.origin {
-            self.setFrameOrigin(newOrigin)
-            windowDidMoveContinuously(to: newOrigin)
-        }
-    }
-     */
-
-    /*
-    private func windowDidMoveContinuously(to origin: NSPoint) {
-        // print("Live moved to: \(origin)")
-        // let roundedOrigin = NSPoint(x: round(origin.x), y: round(origin.y))
-
-        myWindowController?.scheduleDebouncedUpdate(frame: NSRect(origin: origin, size: frame.size))
-        // Hier kannst du z. B. SCStream-Konfiguration aktualisieren
-    }
-    */
-}
-
-class GlassView: NSView {
-
-    let videoLayer = AVSampleBufferDisplayLayer()
-
-    override func makeBackingLayer() -> CALayer {
-        return videoLayer
-    }
-
-    override func viewDidMoveToWindow() {
-        super.viewDidMoveToWindow()
-        videoLayer.videoGravity = .resizeAspectFill
-    }
-
-    func displaySampleBuffer(_ buffer: CMSampleBuffer) {
-        if videoLayer.isReadyForMoreMediaData {
-            videoLayer.enqueue(buffer)
-        }
     }
 }
