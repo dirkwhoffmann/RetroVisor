@@ -37,6 +37,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var pipelineState1: MTLRenderPipelineState!
     var pipelineState2: MTLRenderPipelineState!
     var vertexBuffer: MTLBuffer!
+    var vertexBuffer2: MTLBuffer!
     var nearestSampler: MTLSamplerState!
     var linearSampler: MTLSamplerState!
 
@@ -163,8 +164,19 @@ class MyViewController: NSViewController, MTKViewDelegate {
             Vertex(pos: [ 1, -1, 0, 1], tex: [tx2, ty2]),
         ]
 
+        let vertices2: [Vertex] = [
+            Vertex(pos: [-1,  1, 0, 1], tex: [0, 0]),
+            Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
+            Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
+            Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1]),
+        ]
+
         vertexBuffer = device.makeBuffer(bytes: vertices,
                                          length: vertices.count * MemoryLayout<Vertex>.stride,
+                                         options: [])
+
+        vertexBuffer2 = device.makeBuffer(bytes: vertices2,
+                                         length: vertices2.count * MemoryLayout<Vertex>.stride,
                                          options: [])
 
     }
@@ -245,19 +257,14 @@ class MyViewController: NSViewController, MTKViewDelegate {
         w.myWindowController!.scheduleDebouncedUpdate(frame: theFrame2)
 
         intensity.move()
-        // if intensity.animates { print("intensity = \(intensity.current)") }
 
         let mouse = w.myWindowController!.trackingWindow?.initialMouseLocationNrm ?? .zero //  normalizedMouseLocation ?? .zero
-        // let trect = w.myWindowController!.textureRect ?? .zero
-        let mx = trect.minX + trect.width * mouse.x
-        let my = trect.maxY - trect.height * mouse.y
-        // print("mx = \(mx), my = \(my)")
         time += 0.01
         frame += 1
         uniforms.time = time
         uniforms.intensity = intensity.current
         uniforms.resolution = [Float(theFrame2.width),Float(theFrame2.height)]
-        uniforms.mouse = [Float(mx), Float(my)]
+        uniforms.mouse = [Float(mouse.x), Float(1.0 - mouse.y)]
 
         guard let drawable = view.currentDrawable,
               let commandBuffer = commandQueue.makeCommandBuffer() else { return }
@@ -297,7 +304,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState2)
-        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
         encoder.setFragmentTexture(intermediateTexture, index: 0) // use ripple output
         encoder.setFragmentSamplerState(intensity.current > 0 ? linearSampler : nearestSampler, index: 0)
 
