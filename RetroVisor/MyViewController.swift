@@ -22,6 +22,7 @@ struct Vertex {
 struct Uniforms {
 
     var time: Float
+    var zoom: Float
     var intensity: Float
     var resolution: SIMD2<Float>
     var center: SIMD2<Float>
@@ -42,6 +43,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var linearSampler: MTLSamplerState!
 
     var uniforms = Uniforms.init(time: 0.0,
+                                 zoom: 1.0,
                                  intensity: 0.0,
                                  resolution: [0,0],
                                  center: [0,0],
@@ -54,6 +56,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var intermediateTexture: MTLTexture?
 
     var time: Float = 0.0
+    var zoom: Float = 1.0
     var center: SIMD2<Float> = SIMD2(0.5, 0.5)
 
     var frame = 0
@@ -128,6 +131,35 @@ class MyViewController: NSViewController, MTKViewDelegate {
         } catch {
             fatalError("Failed to create pipeline state: \(error)")
         }
+
+        setupMagnificationGesture()
+    }
+
+    func setupMagnificationGesture() {
+
+        // guard let contentView = window?.contentView else { return }
+        let magnifyRecognizer = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnify(_:)))
+        view.addGestureRecognizer(magnifyRecognizer)
+    }
+
+    @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {
+
+        let delta = recognizer.magnification  // This is the delta since last call
+
+        print("delta = \(delta)")
+        zoom = min(8.0, max(1.0, zoom + Float(delta) * 0.1))
+
+        /*
+        // Apply magnification to a subview or layer
+        guard let view = view.subviews.first else { return }
+
+        view.wantsLayer = true
+
+        // Apply scaling — you can keep track of cumulative zoom yourself
+        let currentTransform = view.layer!.affineTransform()
+        let scale = 1.0 + delta
+        view.layer!.setAffineTransform(currentTransform.scaledBy(x: scale, y: scale))
+        */
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -144,12 +176,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
     func updateTextureRect(_ rect: CGRect) {
 
         trect = rect
-        /*
-        let tx1 = Float(0.0)
-        let tx2 = Float(1.0)
-        let ty1 = Float(0.0)
-        let ty2 = Float(1.0)
-        */
         let tx1 = Float(rect.minX)
         let tx2 = Float(rect.maxX)
         let ty1 = Float(rect.minY)
@@ -185,7 +211,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         let width = CVPixelBufferGetWidth(pixelBuffer)
         let height = CVPixelBufferGetHeight(pixelBuffer)
-        // let format = CVPixelBufferGetPixelFormatType(pixelBuffer)
 
         var cvTextureOut: CVMetalTexture?
         let result = CVMetalTextureCacheCreateTextureFromImage(nil,
@@ -245,16 +270,10 @@ class MyViewController: NSViewController, MTKViewDelegate {
     private let expectedFrameDuration: TimeInterval = 1.0 / 60.0  // for 60 FPS
     private let frameDropThresholdMultiplier = 1.5  // Consider frame dropped if duration > 1.5x expected
 
-    var theFrame = CGRect.zero
-    var theFrame2 = CGRect.zero
-
     func draw(in view: MTKView) {
 
         let w = view.window as! GlassWindow
-        theFrame2 = w.liveFrame
-        // print("liveFrame: \(w.liveFrame)")
-        // print("window.frame: \(w.frame)")
-        w.myWindowController!.scheduleDebouncedUpdate(frame: theFrame2)
+        w.myWindowController!.scheduleDebouncedUpdate(frame: w.liveFrame)
 
         intensity.move()
 
@@ -262,8 +281,9 @@ class MyViewController: NSViewController, MTKViewDelegate {
         time += 0.01
         frame += 1
         uniforms.time = time
+        uniforms.zoom = zoom
         uniforms.intensity = intensity.current
-        uniforms.resolution = [Float(theFrame2.width),Float(theFrame2.height)]
+        uniforms.resolution = [Float(w.liveFrame.width),Float(w.liveFrame.height)]
         uniforms.mouse = [Float(mouse.x), Float(1.0 - mouse.y)]
 
         guard let drawable = view.currentDrawable,
@@ -319,9 +339,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         commandBuffer.present(drawable)
         commandBuffer.commit()
-
-        theFrame2 = theFrame
-        theFrame = w.liveFrame
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {

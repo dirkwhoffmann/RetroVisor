@@ -13,6 +13,7 @@ struct VertexOut {
 
 struct Uniforms {
     float time;
+    float zoom;
     float intensity;
     float2 resolution;
     float2 center;
@@ -79,17 +80,19 @@ fragment float4 fragment_ripple(VertexOut in [[stage_in]],
                                 constant Uniforms& uniforms [[buffer(0)]],
                                 sampler sam [[sampler(0)]]) {
 
-    float2 uv = in.texCoord;
+    float2 shift = float2(0.5 - 0.5 / uniforms.zoom, 0.5 - 0.5 / uniforms.zoom);
+    float2 uv = in.texCoord / uniforms.zoom + shift;
+    float2 mouse = uniforms.mouse / uniforms.zoom + shift;
 
     if (uniforms.intensity > 0.0) {
 
-        float2 dir = uv - uniforms.mouse;
+        float2 dir = uv - mouse;
         float dist = length(dir);
 
         // Ripple parameters
-        float waveFreq = 60.0;      // More ripples
+        float waveFreq = 60.0;
         float waveSpeed = 10.0;
-        float waveAmp = 0.005 * uniforms.intensity;      // Stronger distortion
+        float waveAmp = 0.005 * uniforms.intensity;
         float brightnessDepth = 0.15 * uniforms.intensity;
 
         // Displace UVs outward along radial direction
@@ -106,8 +109,6 @@ fragment float4 fragment_ripple(VertexOut in [[stage_in]],
         color.rgb *= brightness;
 
         return color;
-        // return float4(0.0,0.5,1.0,0.5);
     }
     return tex.sample(sam, uv);
-    // return float4(0.5,1.0,0.5,0.5);
 }
