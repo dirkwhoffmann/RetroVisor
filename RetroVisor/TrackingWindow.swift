@@ -34,6 +34,13 @@ class TrackingWindow: NSWindow {
 
     var normalizedMouseLocation: NSPoint? {
         return normalizedPoint(inWindow: lastMouseLocationRel ?? .zero)
+        /*
+        if isResizing {
+            return NSPoint(x: 1.0, y: 0.0)
+        } else {
+            return normalizedPoint(inWindow: lastMouseLocationRel ?? .zero)
+        }
+        */
     }
 
     override func sendEvent(_ event: NSEvent) {

@@ -38,54 +38,54 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
 // Ripple
 
 /*
-fragment float4 fragment_main(float2 texCoord [[stage_in]],
-                              texture2d<float> texture [[texture(0)]],
-                              sampler textureSampler [[sampler(0)]],
-                              constant float &time [[buffer(0)]]) {
-    float2 uv = texCoord;
-    uv.y += 0.02 * sin(10.0 * uv.x + time * 2.0);
-    uv.x += 0.02 * sin(10.0 * uv.y + time * 2.0);
-    return texture.sample(textureSampler, uv);
-}
-*/
+ fragment float4 fragment_main(float2 texCoord [[stage_in]],
+ texture2d<float> texture [[texture(0)]],
+ sampler textureSampler [[sampler(0)]],
+ constant float &time [[buffer(0)]]) {
+ float2 uv = texCoord;
+ uv.y += 0.02 * sin(10.0 * uv.x + time * 2.0);
+ uv.x += 0.02 * sin(10.0 * uv.y + time * 2.0);
+ return texture.sample(textureSampler, uv);
+ }
+ */
 /*
-fragment float4 fragment_main(float2 texCoord [[stage_in]],
-                              constant float &time [[buffer(0)]]) {
-    float2 uv = texCoord * 2.0 - 1.0;
-    float angle = atan2(uv.y, uv.x);
-    float radius = length(uv);
+ fragment float4 fragment_main(float2 texCoord [[stage_in]],
+ constant float &time [[buffer(0)]]) {
+ float2 uv = texCoord * 2.0 - 1.0;
+ float angle = atan2(uv.y, uv.x);
+ float radius = length(uv);
 
-    float shade = sin(10.0 * angle + time * 3.0) + cos(10.0 / radius - time * 2.0);
-    float value = (shade + 2.0) / 4.0;
+ float shade = sin(10.0 * angle + time * 3.0) + cos(10.0 / radius - time * 2.0);
+ float value = (shade + 2.0) / 4.0;
 
-    return float4(value, value * 0.6, 1.0 - value, 1.0);
-}
-*/
+ return float4(value, value * 0.6, 1.0 - value, 1.0);
+ }
+ */
 /*
-fragment float4 fragment_ripple(VertexOut in [[stage_in]],
-                                texture2d<float> texture [[texture(0)]],
-                                sampler textureSampler [[sampler(0)]],
-                                constant float &time [[buffer(0)]],
-                                constant float2 &center [[buffer(1)]]) {
-    float2 uv = in.texCoord;
+ fragment float4 fragment_ripple(VertexOut in [[stage_in]],
+ texture2d<float> texture [[texture(0)]],
+ sampler textureSampler [[sampler(0)]],
+ constant float &time [[buffer(0)]],
+ constant float2 &center [[buffer(1)]]) {
+ float2 uv = in.texCoord;
 
-    float dist = distance(uv, center);
-    float ripple = 0.03 * sin(30.0 * (dist - time * 2.0));
+ float dist = distance(uv, center);
+ float ripple = 0.03 * sin(30.0 * (dist - time * 2.0));
 
-    float2 direction = normalize(uv - center);
-    uv += ripple * direction;
+ float2 direction = normalize(uv - center);
+ uv += ripple * direction;
 
-    return texture.sample(textureSampler, uv);
-}
-*/
+ return texture.sample(textureSampler, uv);
+ }
+ */
 
 float3 lavaColorMap(float t) {
     // Map a grayscale value to lava colors
     return mix(
-        mix(float3(0.2, 0.0, 0.0), float3(1.0, 0.4, 0.0), smoothstep(0.2, 0.6, t)), // dark to orange
-        float3(1.0, 1.0, 0.0),                                                     // to yellow
-        smoothstep(0.6, 1.0, t)
-    );
+               mix(float3(0.2, 0.0, 0.0), float3(1.0, 0.4, 0.0), smoothstep(0.2, 0.6, t)), // dark to orange
+               float3(1.0, 1.0, 0.0),                                                     // to yellow
+               smoothstep(0.6, 1.0, t)
+               );
 }
 
 
@@ -102,39 +102,41 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     if (uniforms.intensity > 0.0) {
 
         float2 dir = uv - uniforms.mouse;
-            float dist = length(dir);
+        float dist = length(dir);
 
-            // Ripple parameters
-            float waveFreq = 60.0;      // More ripples
-            float waveSpeed = 10.0;
-            float waveAmp = 0.005 * uniforms.intensity;      // Stronger distortion
-            float brightnessDepth = 0.2 * uniforms.intensity;
+        // Ripple parameters
+        float waveFreq = 60.0;      // More ripples
+        float waveSpeed = 10.0;
+        float waveAmp = 0.005 * uniforms.intensity;      // Stronger distortion
+        float brightnessDepth = 0.15 * uniforms.intensity;
 
-            // Displace UVs outward along radial direction
-            float ripple = sin((dist * waveFreq) - (uniforms.time * waveSpeed));
-            float offset = ripple * waveAmp;
-            float2 rippleUV = uv + (dist > 0.0001 ? normalize(dir) * offset : float2(0.0));
+        // Displace UVs outward along radial direction
+        float ripple = sin((dist * waveFreq) - (uniforms.time * waveSpeed));
+        float offset = ripple * waveAmp;
+        float2 rippleUV = uv + (dist > 0.0001 ? normalize(dir) * offset : float2(0.0));
 
-            // Sample the texture
-            float4 color = tex.sample(sam, rippleUV);
+        // Sample the texture
+        float4 color = tex.sample(sam, rippleUV);
 
-            // Darken wave fronts (multiply color)
-            float brightness = 1.0 - brightnessDepth * (cos((dist * waveFreq) - (uniforms.time * waveSpeed)) * 0.5 + 0.5);
-            color.rgb *= brightness;
+        // Darken wave fronts (multiply color)
+        // float brightness = 1.0 - brightnessDepth * (cos((dist * waveFreq) - (uniforms.time * waveSpeed)) * 0.5 + 0.5);
+        float brightness = 1.0 - brightnessDepth * (cos((dist * waveFreq) - (uniforms.time * waveSpeed)) * 0.5 + 0.5);
 
-            return color;
+        color.rgb *= brightness;
+
+        return color;
 
         /*
-        float2 uvMin = uniforms.texRect.xy;
-            float2 uvMax = uniforms.texRect.zw;
-            float2 localUV = (uv - uvMin) / (uvMax - uvMin);
+         float2 uvMin = uniforms.texRect.xy;
+         float2 uvMax = uniforms.texRect.zw;
+         float2 localUV = (uv - uvMin) / (uvMax - uvMin);
 
-            float2 dir = localUV - uniforms.center;
-            float dist = length(dir);
-            float ripple = uniforms.intensity * 0.015 * sin(30.0 * dist - uniforms.time * 10.0);
-            localUV += normalize(dir) * ripple;
+         float2 dir = localUV - uniforms.center;
+         float dist = length(dir);
+         float ripple = uniforms.intensity * 0.015 * sin(30.0 * dist - uniforms.time * 10.0);
+         localUV += normalize(dir) * ripple;
 
-            uv = mix(uvMin, uvMax, localUV);
+         uv = mix(uvMin, uvMax, localUV);
          */
     }
 
