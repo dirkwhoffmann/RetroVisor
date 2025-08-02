@@ -60,20 +60,28 @@ class TrackingWindow: NSWindow {
     // Indicates if a resize operation is ongoing
     private(set) var isResizing: Bool = false
 
+    // Window position at the beginning of a drag or resize event
+    private(set) var initialWindowOrigin: NSPoint?
+
     // Mouse position at the beginning of a drag or resize event
     private(set) var initialMouseLocationAbs : NSPoint?
     private(set) var initialMouseLocationRel : NSPoint?
     private(set) var initialMouseLocationNrm : NSPoint?
 
-    private var lastMouseLocation: NSPoint?
-    private var lastMouseLocationRel: NSPoint?
-    private var initialWindowOrigin: NSPoint?
-    private var prevOrigin: NSPoint?
+    // Timer to determine the end of a resize operation
     private var resizeDebounceTimer: Timer?
 
+    // Convenience accessors
     private var trackingDelegate : TrackingWindowDelegate? { delegate as? TrackingWindowDelegate }
 
-    private func recordInitialMouseLocation() {
+    //
+    // Functions
+    //
+
+    private func recordLocations() {
+
+        // Get the window origin
+        initialWindowOrigin = frame.origin
 
         // Get mouse location in screen coordinates
         initialMouseLocationAbs = NSEvent.mouseLocation
@@ -85,6 +93,14 @@ class TrackingWindow: NSWindow {
         initialMouseLocationNrm = NSPoint(x: initialMouseLocationRel!.x / frame.width,
                                           y: initialMouseLocationRel!.y / frame.height)
 
+    }
+
+    private func clearLocations() {
+
+        initialWindowOrigin = nil
+        initialMouseLocationAbs = nil
+        initialMouseLocationRel = nil
+        initialMouseLocationNrm = nil
     }
 
     override func sendEvent(_ event: NSEvent) {
@@ -102,50 +118,37 @@ class TrackingWindow: NSWindow {
 
             } else {
 
-                lastMouseLocation = NSEvent.mouseLocation
-                lastMouseLocationRel = event.locationInWindow
-                initialWindowOrigin = self.frame.origin
-                recordInitialMouseLocation()
+                // Record the window's origin and the mouse coordinate
+                recordLocations()
 
-                if (dragAnywhere) {
-                    self.performDrag(with: event)
-                }
+                // Perform a drag operation in 'dragAnywhere' mode
+                if (dragAnywhere) { self.performDrag(with: event) }
             }
 
         case .leftMouseDragged:
 
             if !isDragging {
-                isDragging = true
 
+                isDragging = true
                 if debug { print("windowDidStartDrag(\(self))") }
                 trackingDelegate?.windowDidStartDrag(self)
             }
 
-            if let lastLocation = lastMouseLocation,
-               let startOrigin = initialWindowOrigin {
+            if let initialLocation = initialMouseLocationAbs,
+               let initialOrigin = initialWindowOrigin {
 
-                let currentLocation = NSEvent.mouseLocation // event.locationInWindow
-                let delta = NSPoint(x: currentLocation.x - lastLocation.x,
-                                    y: currentLocation.y - lastLocation.y)
+                // Determine the new origin
+                let location = NSEvent.mouseLocation
+                var newOrigin = NSPoint(x: initialOrigin.x + location.x - initialLocation.x,
+                                        y: initialOrigin.y + location.y - initialLocation.y)
 
-                // Update window position (in screen coordinates)
-                var newOrigin = startOrigin
-                newOrigin.x += delta.x
-                newOrigin.y += delta.y
+                // Snap to pixel grid (optional)
+                newOrigin.x = floor(newOrigin.x) // round?
+                newOrigin.y = floor(newOrigin.y) // round?
 
-                // Snap to pixel grid (optional, avoids subpixel fuzziness)
-                /*
-                 newOrigin.x = round(newOrigin.x)
-                 newOrigin.y = round(newOrigin.y)
-                 */
-                newOrigin.x = floor(newOrigin.x)
-                newOrigin.y = floor(newOrigin.y)
+                if newOrigin != liveFrame.origin {
 
-                liveFrame = NSRect(origin: newOrigin, size: self.frame.size)
-
-                if newOrigin != prevOrigin {
-
-                    prevOrigin = newOrigin
+                    liveFrame = NSRect(origin: newOrigin, size: self.frame.size)
                     if debug { print("windowDidDrag(\(self), frame: \(liveFrame))") }
                     trackingDelegate?.windowDidDrag(self, frame: liveFrame)
                 }
@@ -154,13 +157,12 @@ class TrackingWindow: NSWindow {
         case .leftMouseUp:
 
             if isDragging {
+
                 isDragging = false
+                clearLocations()
                 if debug { print("windowDidStopDrag(\(self))") }
                 trackingDelegate?.windowDidStopDrag(self)
             }
-
-            lastMouseLocation = nil
-            initialWindowOrigin = nil
 
         default:
             break;
@@ -173,6 +175,7 @@ class TrackingWindow: NSWindow {
 
         // Called frequently during live resizing
         if !isResizing {
+
             isResizing = true
             if debug { print("windowDidStartResize(\(self))") }
             trackingDelegate?.windowDidStartResize(self)
@@ -181,21 +184,23 @@ class TrackingWindow: NSWindow {
         // Reset timer to detect resize end
         resizeDebounceTimer?.invalidate()
         resizeDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
-            guard let self = self else { return }
-            self.isResizing = false
-            if debug { print("windowDidStopResize(\(self))") }
-            trackingDelegate?.windowDidStopResize(self)
+
+            if let self = self {
+
+                self.isResizing = false
+                if debug { print("windowDidStopResize(\(self))") }
+                trackingDelegate?.windowDidStopResize(self)
+            }
         }
 
         if (isResizing) {
 
-            recordInitialMouseLocation()
+            recordLocations()
             liveFrame = frame
         }
     }
 }
 
 extension NSWindow {
-
 
 }
