@@ -15,6 +15,7 @@ struct Uniforms {
     float time;
     float intensity;
     float2 center;
+    float2 mouse;
     float4 texRect;
 };
 
@@ -99,6 +100,31 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     float2 uv = in.texCoord;
 
     if (uniforms.intensity > 0.0) {
+
+        float2 dir = uv - uniforms.mouse;
+            float dist = length(dir);
+
+            // Ripple parameters
+            float waveFreq = 60.0;      // More ripples
+            float waveSpeed = 10.0;
+            float waveAmp = 0.005 * uniforms.intensity;      // Stronger distortion
+            float brightnessDepth = 0.2 * uniforms.intensity;
+
+            // Displace UVs outward along radial direction
+            float ripple = sin((dist * waveFreq) - (uniforms.time * waveSpeed));
+            float offset = ripple * waveAmp;
+            float2 rippleUV = uv + (dist > 0.0001 ? normalize(dir) * offset : float2(0.0));
+
+            // Sample the texture
+            float4 color = tex.sample(sam, rippleUV);
+
+            // Darken wave fronts (multiply color)
+            float brightness = 1.0 - brightnessDepth * (cos((dist * waveFreq) - (uniforms.time * waveSpeed)) * 0.5 + 0.5);
+            color.rgb *= brightness;
+
+            return color;
+
+        /*
         float2 uvMin = uniforms.texRect.xy;
             float2 uvMax = uniforms.texRect.zw;
             float2 localUV = (uv - uvMin) / (uvMax - uvMin);
@@ -109,6 +135,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
             localUV += normalize(dir) * ripple;
 
             uv = mix(uvMin, uvMax, localUV);
+         */
     }
 
     // Sample texture color

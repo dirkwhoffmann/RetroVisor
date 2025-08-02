@@ -24,6 +24,7 @@ struct Uniforms {
     var time: Float
     var intensity: Float
     var center: SIMD2<Float>
+    var mouse: SIMD2<Float>
     var texRect: SIMD4<Float>
 }
 
@@ -37,7 +38,11 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var nearestSampler: MTLSamplerState!
     var linearSampler: MTLSamplerState!
 
-    var uniforms = Uniforms.init(time: 0.0, intensity: 0.0, center: [0,0], texRect: [0,0,0,0])
+    var uniforms = Uniforms.init(time: 0.0,
+                                 intensity: 0.0,
+                                 center: [0,0],
+                                 mouse: [0,0],
+                                 texRect: [0,0,0,0])
 
     var textureCache: CVMetalTextureCache!
     var currentTexture: MTLTexture?
@@ -121,8 +126,11 @@ class MyViewController: NSViewController, MTKViewDelegate {
         return device.makeSamplerState(descriptor: descriptor)!
     }
 
+    var trect: CGRect = .zero
+
     func updateTextureRect(_ rect: CGRect) {
 
+        trect = rect
         /*
         let tx1 = Float(0.0)
         let tx2 = Float(1.0)
@@ -201,11 +209,17 @@ class MyViewController: NSViewController, MTKViewDelegate {
         intensity.move()
         // if intensity.animates { print("intensity = \(intensity.current)") }
 
+        let mouse = w.myWindowController!.trackingWindow?.normalizedMouseLocation ?? .zero
+        // let trect = w.myWindowController!.textureRect ?? .zero
+        let mx = trect.minX + trect.width * mouse.x
+        let my = trect.maxY - trect.height * mouse.y
+        print("mx = \(mx), my = \(my)")
         time += 0.01
         frame += 1
         uniforms.time = time
         uniforms.intensity = intensity.current
-        
+        uniforms.mouse = [Float(mx), Float(my)]
+
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState)
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
