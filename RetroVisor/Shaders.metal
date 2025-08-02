@@ -100,7 +100,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     // Apply a subtle offset opposite to drag direction
     float2 uv = in.texCoord;
 
-    if (uniforms.intensity > 0.0) {
+    if (uniforms.intensity < 0.0) {
 
         float2 dir = uv - uniforms.mouse;
         float dist = length(dir);
@@ -194,3 +194,40 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     */
 }
 
+fragment float4 fragment_ripple(VertexOut in [[stage_in]],
+                                texture2d<float> tex [[texture(0)]],
+                                constant Uniforms& uniforms [[buffer(0)]],
+                                sampler sam [[sampler(0)]]) {
+
+    float2 uv = in.texCoord;
+
+    if (uniforms.intensity > 0.0) {
+
+        float2 dir = uv - uniforms.mouse;
+        float dist = length(dir);
+
+        // Ripple parameters
+        float waveFreq = 60.0;      // More ripples
+        float waveSpeed = 10.0;
+        float waveAmp = 0.005 * uniforms.intensity;      // Stronger distortion
+        float brightnessDepth = 0.15 * uniforms.intensity;
+
+        // Displace UVs outward along radial direction
+        float ripple = sin((dist * waveFreq) - (uniforms.time * waveSpeed));
+        float offset = ripple * waveAmp;
+        float2 rippleUV = uv + (dist > 0.0001 ? normalize(dir) * offset : float2(0.0));
+
+        // Sample the texture
+        float4 color = tex.sample(sam, rippleUV);
+
+        // Darken wave fronts (multiply color)
+        float brightness = 1.0 - brightnessDepth * (cos((dist * waveFreq) - (uniforms.time * waveSpeed)) * 0.5 + 0.5);
+
+        color.rgb *= brightness;
+
+        return color;
+        // return float4(0.0,0.5,1.0,0.5);
+    }
+    return tex.sample(sam, uv);
+    // return float4(0.5,1.0,0.5,0.5);
+}

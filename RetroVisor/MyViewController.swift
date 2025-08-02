@@ -34,7 +34,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var mtkView: MTKView!
     var device: MTLDevice!
     var commandQueue: MTLCommandQueue!
-    var pipelineState: MTLRenderPipelineState!
+    var pipelineState1: MTLRenderPipelineState!
+    var pipelineState2: MTLRenderPipelineState!
     var vertexBuffer: MTLBuffer!
     var nearestSampler: MTLSamplerState!
     var linearSampler: MTLSamplerState!
@@ -49,6 +50,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var textureCache: CVMetalTextureCache!
     var currentTexture: MTLTexture?
     // var timeBuffer: MTLBuffer!
+    var intermediateTexture: MTLTexture?
 
     var time: Float = 0.0
     var center: SIMD2<Float> = SIMD2(0.5, 0.5)
@@ -82,6 +84,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let defaultLibrary = device.makeDefaultLibrary()!
         let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
         let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_main")!
+        let rippleFunc = defaultLibrary.makeFunction(name: "fragment_ripple")!
 
         // Create texture samplers
         nearestSampler = makeSamplerState(minFilter: .nearest, magFilter: .nearest)
@@ -105,15 +108,22 @@ class MyViewController: NSViewController, MTKViewDelegate {
         vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
         vertexDescriptor.attributes[1].bufferIndex = 0
 
-        // Create pipeline descriptor
-        let pipelineDescriptor = MTLRenderPipelineDescriptor()
-        pipelineDescriptor.vertexFunction = vertexFunc
-        pipelineDescriptor.fragmentFunction = fragmentFunc
-        pipelineDescriptor.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
-        pipelineDescriptor.vertexDescriptor = vertexDescriptor
+        // Create pipeline descriptors
+        let pipelineDescriptor1 = MTLRenderPipelineDescriptor()
+        pipelineDescriptor1.vertexFunction = vertexFunc
+        pipelineDescriptor1.fragmentFunction = fragmentFunc
+        pipelineDescriptor1.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
+        pipelineDescriptor1.vertexDescriptor = vertexDescriptor
+
+        let pipelineDescriptor2 = MTLRenderPipelineDescriptor()
+        pipelineDescriptor2.vertexFunction = vertexFunc
+        pipelineDescriptor2.fragmentFunction = rippleFunc
+        pipelineDescriptor2.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
+        pipelineDescriptor2.vertexDescriptor = vertexDescriptor
 
         do {
-            pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+            pipelineState1 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor1)
+            pipelineState2 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor2)
         } catch {
             fatalError("Failed to create pipeline state: \(error)")
         }
@@ -182,11 +192,41 @@ class MyViewController: NSViewController, MTKViewDelegate {
     }
 
     func update(with pixelBuffer: CVPixelBuffer) {
+
         // Convert pixelBuffer to Metal texture (or store it)
         self.currentTexture = texture(from: pixelBuffer)
 
+        let width = currentTexture!.width
+        let height = currentTexture!.height
+
+        // Create a fitting intermediate texture
+        if intermediateTexture == nil ||
+            intermediateTexture!.width != width ||
+            intermediateTexture!.height != height {
+
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
+                                                                      width: width,
+                                                                      height: height,
+                                                                      mipmapped: false)
+            descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
+            descriptor.storageMode = .private
+
+            intermediateTexture = device.makeTexture(descriptor: descriptor)
+        }
+
         // Trigger view redraw
         mtkView.setNeedsDisplay(mtkView.bounds)
+    }
+
+    func makeIntermediateTexture(device: MTLDevice, width: Int, height: Int) -> MTLTexture? {
+        let textureDescriptor = MTLTextureDescriptor()
+        textureDescriptor.pixelFormat = .bgra8Unorm             // typical color format
+        textureDescriptor.width = width
+        textureDescriptor.height = height
+        textureDescriptor.usage = [.renderTarget, .shaderRead]  // render target and readable in shaders
+        textureDescriptor.storageMode = .private                 // optimized for GPU-only access
+
+        return device.makeTexture(descriptor: textureDescriptor)
     }
 
     private var lastFrameTime: TimeInterval = CACurrentMediaTime()
@@ -204,10 +244,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
         // print("window.frame: \(w.frame)")
         w.myWindowController!.scheduleDebouncedUpdate(frame: theFrame2)
 
-        guard let drawable = view.currentDrawable,
-              let commandBuffer = commandQueue.makeCommandBuffer(),
-              let passDescriptor = view.currentRenderPassDescriptor else { return }
-
         intensity.move()
         // if intensity.animates { print("intensity = \(intensity.current)") }
 
@@ -223,15 +259,47 @@ class MyViewController: NSViewController, MTKViewDelegate {
         uniforms.resolution = [Float(theFrame2.width),Float(theFrame2.height)]
         uniforms.mouse = [Float(mx), Float(my)]
 
-        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
-        encoder.setRenderPipelineState(pipelineState)
-        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        encoder.setFragmentSamplerState(intensity.current > 0 ? linearSampler : nearestSampler, index: 0)
-        // encoder.setFragmentBuffer(timeBuffer, offset: 0, index: 0)
+        guard let drawable = view.currentDrawable,
+              let commandBuffer = commandQueue.makeCommandBuffer() else { return }
 
-        if let texture = currentTexture {
-            encoder.setFragmentTexture(texture, index: 0)
+
+        //
+        // First pass
+        //
+
+        if intermediateTexture == nil {
+            intermediateTexture = makeIntermediateTexture(device: device, width: Int(trect.width), height: Int(trect.height))
         }
+        let ripplePassDescriptor = MTLRenderPassDescriptor()
+        ripplePassDescriptor.colorAttachments[0].texture = intermediateTexture
+        ripplePassDescriptor.colorAttachments[0].loadAction = .clear
+        ripplePassDescriptor.colorAttachments[0].storeAction = .store
+        ripplePassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
+
+        if let rippleEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: ripplePassDescriptor) {
+            rippleEncoder.setRenderPipelineState(pipelineState1)
+            rippleEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+            rippleEncoder.setFragmentTexture(currentTexture, index: 0)
+            rippleEncoder.setFragmentSamplerState(linearSampler, index: 0)
+            rippleEncoder.setFragmentBytes(&uniforms,
+                                           length: MemoryLayout<Uniforms>.stride,
+                                           index: 0)
+
+            rippleEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+            rippleEncoder.endEncoding()
+        }
+
+        //
+        // Second pass
+        //
+
+        guard let passDescriptor = view.currentRenderPassDescriptor else { return }
+
+        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
+        encoder.setRenderPipelineState(pipelineState2)
+        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        encoder.setFragmentTexture(intermediateTexture, index: 0) // use ripple output
+        encoder.setFragmentSamplerState(intensity.current > 0 ? linearSampler : nearestSampler, index: 0)
 
         // Pass uniforms: time and center
         encoder.setFragmentBytes(&uniforms,
