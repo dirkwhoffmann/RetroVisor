@@ -213,7 +213,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         // let trect = w.myWindowController!.textureRect ?? .zero
         let mx = trect.minX + trect.width * mouse.x
         let my = trect.maxY - trect.height * mouse.y
-        print("mx = \(mx), my = \(my)")
+        // print("mx = \(mx), my = \(my)")
         time += 0.01
         frame += 1
         uniforms.time = time

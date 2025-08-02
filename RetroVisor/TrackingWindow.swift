@@ -23,6 +23,7 @@ class TrackingWindow: NSWindow {
 
     var liveFrame = NSRect.zero
     var dragAnywhere = true
+    var debug = true
 
     private var isDragging = false
     private var isResizing = false
@@ -32,15 +33,17 @@ class TrackingWindow: NSWindow {
     private var prevOrigin: NSPoint?
     private var resizeDebounceTimer: Timer?
 
+    private var trackingDelegate : TrackingWindowDelegate? { delegate as? TrackingWindowDelegate }
+
     var normalizedMouseLocation: NSPoint? {
         return normalizedPoint(inWindow: lastMouseLocationRel ?? .zero)
         /*
-        if isResizing {
-            return NSPoint(x: 1.0, y: 0.0)
-        } else {
-            return normalizedPoint(inWindow: lastMouseLocationRel ?? .zero)
-        }
-        */
+         if isResizing {
+         return NSPoint(x: 1.0, y: 0.0)
+         } else {
+         return normalizedPoint(inWindow: lastMouseLocationRel ?? .zero)
+         }
+         */
     }
 
     override func sendEvent(_ event: NSEvent) {
@@ -53,13 +56,15 @@ class TrackingWindow: NSWindow {
 
             if event.clickCount == 2 {
 
-                (delegate as? TrackingWindowDelegate)?.windowWasDoubleClicked(self)
+                if debug { print("windowWasDoubleClicked(\(self))") }
+                trackingDelegate?.windowWasDoubleClicked(self)
 
             } else {
 
                 lastMouseLocation = NSEvent.mouseLocation
                 lastMouseLocationRel = event.locationInWindow
                 initialWindowOrigin = self.frame.origin
+
                 if (dragAnywhere) {
                     self.performDrag(with: event)
                 }
@@ -69,7 +74,9 @@ class TrackingWindow: NSWindow {
 
             if !isDragging {
                 isDragging = true
-                (delegate as? TrackingWindowDelegate)?.windowDidStartDrag(self)
+
+                if debug { print("windowDidStartDrag(\(self))") }
+                trackingDelegate?.windowDidStartDrag(self)
             }
 
             if let lastLocation = lastMouseLocation,
@@ -97,7 +104,8 @@ class TrackingWindow: NSWindow {
                 if newOrigin != prevOrigin {
 
                     prevOrigin = newOrigin
-                    (delegate as? TrackingWindowDelegate)?.windowDidDrag(self, frame: liveFrame)
+                    if debug { print("windowDidDrag(\(self), frame: \(liveFrame))") }
+                    trackingDelegate?.windowDidDrag(self, frame: liveFrame)
                 }
             }
 
@@ -105,7 +113,8 @@ class TrackingWindow: NSWindow {
 
             if isDragging {
                 isDragging = false
-                (delegate as? TrackingWindowDelegate)?.windowDidStopDrag(self)
+                if debug { print("windowDidStopDrag(\(self))") }
+                trackingDelegate?.windowDidStopDrag(self)
             }
 
             lastMouseLocation = nil
@@ -123,7 +132,8 @@ class TrackingWindow: NSWindow {
         // Called frequently during live resizing
         if !isResizing {
             isResizing = true
-            (delegate as? TrackingWindowDelegate)?.windowDidStartResize(self)
+            if debug { print("windowDidStartResize(\(self))") }
+            trackingDelegate?.windowDidStartResize(self)
         }
 
         // Reset timer to detect resize end
@@ -131,8 +141,20 @@ class TrackingWindow: NSWindow {
         resizeDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
             guard let self = self else { return }
             self.isResizing = false
-            (delegate as? TrackingWindowDelegate)?.windowDidStopResize(self)
+            if debug { print("windowDidStopResize(\(self))") }
+            trackingDelegate?.windowDidStopResize(self)
         }
+
+        guard let contentView = self.contentView else { return }
+
+        // Step 1: Mouse location in screen coordinates
+        let mouseLocationInScreen = NSEvent.mouseLocation
+
+        // Step 2: Convert to window coordinates (origin at bottom-left of window)
+        let mouseLocationInWindow = self.convertFromScreen(NSRect(origin: mouseLocationInScreen, size: .zero)).origin
+
+        // Step 3: Convert to content view coordinates (origin at bottom-left of contentView)
+        lastMouseLocationRel = contentView.convert(mouseLocationInWindow, from: nil)
     }
 }
 
@@ -142,7 +164,7 @@ extension NSWindow {
     func normalizedPoint(inWindow point: NSPoint) -> CGPoint {
 
         if let contentSize = contentView?.bounds.size {
-            print("contentSize = \(contentSize) point = \(point)")
+            // print("contentSize = \(contentSize) point = \(point)")
             if contentSize.width > 0, contentSize.height > 0 {
                 return CGPoint(x: max(0.0, min(1.0, point.x / contentSize.width)),
                                y: max(0.0, min(1.0, point.y / contentSize.height)))
