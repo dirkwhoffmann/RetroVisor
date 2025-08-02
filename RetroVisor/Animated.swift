@@ -7,7 +7,7 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
-struct AnimatedValue<T: BinaryFloatingPoint> {
+struct Animated<T: BinaryFloatingPoint> {
     
     var current: T
     var delta: T = 0

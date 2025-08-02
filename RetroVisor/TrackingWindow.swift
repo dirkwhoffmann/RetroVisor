@@ -27,9 +27,14 @@ class TrackingWindow: NSWindow {
     private var isDragging = false
     private var isResizing = false
     private var lastMouseLocation: NSPoint?
+    private var lastMouseLocationRel: NSPoint?
     private var initialWindowOrigin: NSPoint?
     private var prevOrigin: NSPoint?
     private var resizeDebounceTimer: Timer?
+
+    var normalizedMouseLocation: NSPoint? {
+        return normalizedPoint(inWindow: lastMouseLocationRel ?? .zero)
+    }
 
     override func sendEvent(_ event: NSEvent) {
 
@@ -46,6 +51,7 @@ class TrackingWindow: NSWindow {
             } else {
 
                 lastMouseLocation = NSEvent.mouseLocation
+                lastMouseLocationRel = event.locationInWindow
                 initialWindowOrigin = self.frame.origin
                 if (dragAnywhere) {
                     self.performDrag(with: event)
@@ -120,5 +126,21 @@ class TrackingWindow: NSWindow {
             self.isResizing = false
             (delegate as? TrackingWindowDelegate)?.windowDidStopResize(self)
         }
+    }
+}
+
+extension NSWindow {
+
+    // Converts a point in window coordinates to normalized (0.0–1.0) space
+    func normalizedPoint(inWindow point: NSPoint) -> CGPoint {
+
+        if let contentSize = contentView?.bounds.size {
+            print("contentSize = \(contentSize) point = \(point)")
+            if contentSize.width > 0, contentSize.height > 0 {
+                return CGPoint(x: max(0.0, min(1.0, point.x / contentSize.width)),
+                               y: max(0.0, min(1.0, point.y / contentSize.height)))
+            }
+        }
+        return .zero
     }
 }

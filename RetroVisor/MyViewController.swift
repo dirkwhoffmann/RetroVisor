@@ -49,7 +49,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var frame = 0
     var animate: Bool = false
 
-    var intensity = AnimatedValue<Float>(0.0)
+    var intensity = Animated<Float>(0.0)
 
     override func loadView() {
         // Create MTKView programmatically as the main view
@@ -76,13 +76,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
         let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_main")!
 
-        /*
-        let samplerDescriptor = MTLSamplerDescriptor()
-        samplerDescriptor.minFilter = .nearest
-        samplerDescriptor.magFilter = .nearest
-        samplerDescriptor.mipFilter = .notMipmapped
-        samplerState = device.makeSamplerState(descriptor: samplerDescriptor)
-         */
+        // Create texture samplers
         nearestSampler = makeSamplerState(minFilter: .nearest, magFilter: .nearest)
         linearSampler  = makeSamplerState(minFilter: .linear,  magFilter: .linear)
 
@@ -111,9 +105,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
         pipelineDescriptor.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
 
-        // Create uniforms
-        // timeBuffer = device.makeBuffer(length: MemoryLayout<Float>.stride, options: [])
-
         do {
             pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         } catch {
@@ -140,8 +131,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
         */
         let tx1 = Float(rect.minX)
         let tx2 = Float(rect.maxX)
-//        let ty1 = Float(1.0 - rect.maxY)
-//        let ty2 = Float(1.0 - rect.minY)
         let ty1 = Float(rect.minY)
         let ty2 = Float(rect.maxY)
 
@@ -182,19 +171,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
         return nil
     }
 
-    /*
-    override func mouseUp(with event: NSEvent) {
-        super.mouseUp(with: event)
-        print("MyViewController.mouseUp \(Date())")
-        if let controller = view.window?.windowController as? MyWindowController {
-            Task {
-                print("Heureka \(Date())")
-                await controller.recorder.restart(receiver: controller)
-            }
-        }
-    }
-    */
-
     func update(with pixelBuffer: CVPixelBuffer) {
         // Convert pixelBuffer to Metal texture (or store it)
         self.currentTexture = texture(from: pixelBuffer)
@@ -223,9 +199,9 @@ class MyViewController: NSViewController, MTKViewDelegate {
               let passDescriptor = view.currentRenderPassDescriptor else { return }
 
         intensity.move()
-        if intensity.animates { print("intensity = \(intensity.current)") }
+        // if intensity.animates { print("intensity = \(intensity.current)") }
 
-        if (time > 0) { time += 0.01 }
+        time += 0.01
         frame += 1
         uniforms.time = time
         uniforms.intensity = intensity.current
@@ -241,8 +217,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
         }
 
         // Pass uniforms: time and center
-        // encoder.setFragmentBytes(&time, length: MemoryLayout<Float>.size, index: 0)
-        // encoder.setFragmentBytes(&center, length: MemoryLayout<SIMD2<Float>>.size, index: 1)
         encoder.setFragmentBytes(&uniforms,
                                  length: MemoryLayout<Uniforms>.stride,
                                  index: 0)

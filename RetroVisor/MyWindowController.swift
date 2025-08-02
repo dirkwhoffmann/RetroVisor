@@ -14,6 +14,7 @@ class MyWindowController: NSWindowController {
 
     var recorder = ScreenRecorder()
     var viewController : MyViewController? { return self.contentViewController as? MyViewController }
+    var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
 
     var liveMode: Bool = false
     var debounceTimer: Timer?
@@ -149,29 +150,30 @@ extension MyWindowController: TrackingWindowDelegate {
 
     func windowDidStartResize(_ window: TrackingWindow) {
         print("windowDidStartResize")
-        viewController!.time = 1.0
+        // viewController!.time = 1.0
         viewController!.intensity.target = 1.0
         viewController!.intensity.steps = 15
     }
 
     func windowDidStopResize(_ window: TrackingWindow) {
         print("windowDidStopResize")
-        viewController!.time = 0.0
+        // viewController!.time = 0.0
         viewController!.intensity.target = 0.0
         viewController!.intensity.steps = 15
     }
 
     func windowDidStartDrag(_ window: TrackingWindow) {
         print("Started dragging")
-        viewController!.time = 1.0
+        // viewController!.time = 1.0
         viewController!.intensity.target = 1.0
         viewController!.intensity.steps = 25
 
+        print("Mouse: \(trackingWindow?.normalizedMouseLocation ?? .zero)")
     }
 
     func windowDidStopDrag(_ window: TrackingWindow) {
         print("Stopped dragging")
-        viewController!.time = 0.0
+        // viewController!.time = 0.0
         viewController!.intensity.target = 0.0
         viewController!.intensity.steps = 25
     }
