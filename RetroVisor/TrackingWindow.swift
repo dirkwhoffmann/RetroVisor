@@ -95,6 +95,7 @@ class TrackingWindow: NSWindow {
 
     }
 
+    /*
     private func clearLocations() {
 
         initialWindowOrigin = nil
@@ -102,6 +103,7 @@ class TrackingWindow: NSWindow {
         initialMouseLocationRel = nil
         initialMouseLocationNrm = nil
     }
+    */
 
     override func sendEvent(_ event: NSEvent) {
 
@@ -159,7 +161,7 @@ class TrackingWindow: NSWindow {
             if isDragging {
 
                 isDragging = false
-                clearLocations()
+                // clearLocations()
                 if debug { print("windowDidStopDrag(\(self))") }
                 trackingDelegate?.windowDidStopDrag(self)
             }

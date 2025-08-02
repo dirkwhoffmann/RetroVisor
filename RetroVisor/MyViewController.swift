@@ -23,6 +23,7 @@ struct Uniforms {
 
     var time: Float
     var intensity: Float
+    var resolution: SIMD2<Float>
     var center: SIMD2<Float>
     var mouse: SIMD2<Float>
     var texRect: SIMD4<Float>
@@ -40,6 +41,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     var uniforms = Uniforms.init(time: 0.0,
                                  intensity: 0.0,
+                                 resolution: [0,0],
                                  center: [0,0],
                                  mouse: [0,0],
                                  texRect: [0,0,0,0])
@@ -218,6 +220,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         frame += 1
         uniforms.time = time
         uniforms.intensity = intensity.current
+        uniforms.resolution = [Float(theFrame2.width),Float(theFrame2.height)]
         uniforms.mouse = [Float(mx), Float(my)]
 
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!

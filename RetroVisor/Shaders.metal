@@ -14,6 +14,7 @@ struct VertexOut {
 struct Uniforms {
     float time;
     float intensity;
+    float2 resolution;
     float2 center;
     float2 mouse;
     float4 texRect;
@@ -140,6 +141,42 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
          */
     }
 
+    {
+        // float2 uv = in.texCoord;
+
+        float2 texOrigin = uniforms.texRect.xy;
+        float2 texSize = uniforms.texRect.zw;
+
+        // Normalize the texture coordinate:
+        float2 normuv = (in.texCoord - texOrigin) / texSize;
+        float2 uv = in.texCoord;
+
+        // --- Barrel distortion ---
+        /*
+        float2 center = float2(0.5, 0.5);
+        float2 offset = uv - center;
+        float dist = dot(offset, offset);
+        uv = center + offset * (1.0 + dist * 0.1); // Adjust 0.1 to control distortion
+        */
+
+        // --- Sample texture ---
+        float4 color = tex.sample(sam, uv);
+
+        // --- Scanlines ---
+        float scanline = 0.85 + 0.15 * sin(normuv.y * uniforms.resolution.y * 3.14159);
+        color.rgb *= scanline;
+
+        // --- Slight color shift (RGB offset) for chromatic aberration ---
+        float2 shift = float2(1.0 / uniforms.resolution.x, 1.0 / uniforms.resolution.x);
+        float r = tex.sample(sam, uv - shift).r;
+        float g = tex.sample(sam, uv).g;
+        float b = tex.sample(sam, uv + shift).b;
+        color.rgb = float3(r, g, b) * scanline;
+
+        return color;
+    }
+
+    /*
     // Sample texture color
     float4 color = tex.sample(sam, uv);
 
@@ -154,5 +191,6 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     // green *= 0.9 + 0.1 * sin(in.texCoord.y * 800.0); // horizontal scanline modulation
 
     return float4(green, 1.0);
+    */
 }
 
