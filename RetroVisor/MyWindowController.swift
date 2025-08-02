@@ -167,8 +167,6 @@ extension MyWindowController: TrackingWindowDelegate {
         // viewController!.time = 1.0
         viewController!.intensity.target = 1.0
         viewController!.intensity.steps = 25
-
-        print("Mouse: \(trackingWindow?.normalizedMouseLocation ?? .zero)")
     }
 
     func windowDidStopDrag(_ window: TrackingWindow) {
@@ -199,7 +197,7 @@ extension MyWindowController: TrackingWindowDelegate {
     func windowDidResize(_ notification: Notification) {
         // print("resize")
         if let win = window as? GlassWindow {
-            win.liveFrame = NSRect(origin: window!.frame.origin, size: window!.frame.size)
+            // win.liveFrame = NSRect(origin: window!.frame.origin, size: window!.frame.size)
         }
     }
 

@@ -209,7 +209,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         intensity.move()
         // if intensity.animates { print("intensity = \(intensity.current)") }
 
-        let mouse = w.myWindowController!.trackingWindow?.normalizedMouseLocation ?? .zero
+        let mouse = w.myWindowController!.trackingWindow?.initialMouseLocationNrm ?? .zero //  normalizedMouseLocation ?? .zero
         // let trect = w.myWindowController!.textureRect ?? .zero
         let mx = trect.minX + trect.width * mouse.x
         let my = trect.maxY - trect.height * mouse.y
