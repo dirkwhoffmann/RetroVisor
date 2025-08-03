@@ -341,6 +341,16 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Format" id="GEO-Iw-cKr">
                                     <items>
+                                        <menuItem title="Zoom In" keyEquivalent="+" id="AcI-D1-wWT">
+                                            <connections>
+                                                <action selector="zoomInAction:" target="Ady-hI-5gd" id="zW0-da-MoB"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Zoom Out" keyEquivalent="-" id="mg3-Rj-Bt1">
+                                            <connections>
+                                                <action selector="zoomOutAction:" target="Ady-hI-5gd" id="lcB-wd-mNJ"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Font" id="Gi5-1S-RQB">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Font" systemMenu="font" id="aXa-aM-Jaq">

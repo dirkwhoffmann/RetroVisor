@@ -56,7 +56,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var intermediateTexture: MTLTexture?
 
     var time: Float = 0.0
-    var zoom: Float = 1.0
+    var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
     var center: SIMD2<Float> = SIMD2(0.5, 0.5)
 
     var frame = 0
@@ -144,22 +144,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {
 
-        let delta = recognizer.magnification  // This is the delta since last call
-
-        print("delta = \(delta)")
-        zoom = min(8.0, max(1.0, zoom + Float(delta) * 0.1))
-
-        /*
-        // Apply magnification to a subview or layer
-        guard let view = view.subviews.first else { return }
-
-        view.wantsLayer = true
-
-        // Apply scaling — you can keep track of cumulative zoom yourself
-        let currentTransform = view.layer!.affineTransform()
-        let scale = 1.0 + delta
-        view.layer!.setAffineTransform(currentTransform.scaledBy(x: scale, y: scale))
-        */
+        zoom += Float(recognizer.magnification) * 0.1
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -343,5 +328,17 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         // Handle view size changes if needed
+    }
+
+    @IBAction func zoomInAction(_ sender: NSMenuItem) {
+
+        print("zoomInAction")
+        zoom += 0.5
+    }
+
+    @IBAction func zoomOutAction(_ sender: NSMenuItem) {
+
+        print("zoomOutAction")
+        zoom -= 0.5
     }
 }
