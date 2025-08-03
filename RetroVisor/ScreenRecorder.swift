@@ -155,13 +155,16 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             )
             display = content.displays.first
 
-            // Create a content filter with the current app excluded
-            let exclude = content.applications.filter {
+            // Create a content filter with the main window excluded
+            let excludedApps = content.applications.filter {
                 app in Bundle.main.bundleIdentifier == app.bundleIdentifier
             }
+            let mainWindow = content.windows.filter {
+                win in window!.windowNumber == win.windowID
+            }
             filter = SCContentFilter(display: display!,
-                                     excludingApplications: exclude,
-                                     exceptingWindows: [])
+                                     excludingApplications: mainWindow.isEmpty ? excludedApps : [],
+                                     exceptingWindows: mainWindow)
 
             // Configure the stream
             let config = SCStreamConfiguration()
@@ -170,15 +173,13 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             config.capturesAudio = false
 
             // Configure video capture
-            let rect = sourceRect ?? display!.frame // windowInScreenCoords()
+            let rect = sourceRect ?? display!.frame
             config.sourceRect = rect
+            config.showsCursor = false
             config.width = Int(rect.width)
             config.height = Int(rect.height)
-            // config.width = display!.width
-            // config.height = display!.height
             config.pixelFormat = kCVPixelFormatType_32BGRA
             config.colorSpaceName = CGColorSpace.sRGB
-            // config.sourceRect = windowInScreenCoords()
             config.minimumFrameInterval = CMTime(value: 1, timescale: 60)
             config.queueDepth = 5
 

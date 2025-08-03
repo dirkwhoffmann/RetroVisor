@@ -17,6 +17,7 @@
 		50BA96562E3C80D6006BA8DF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50BA96482E3C80D6006BA8DF /* Main.storyboard */; };
 		50BA96592E3C80F5006BA8DF /* TrackingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */; };
 		50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA965A2E3D4861006BA8DF /* Animated.swift */; };
+		50BA965F2E3F6AA1006BA8DF /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 50BA965E2E3F6AA1006BA8DF /* Credits.rtf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		50BA964D2E3C80D6006BA8DF /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingWindow.swift; sourceTree = "<group>"; };
 		50BA965A2E3D4861006BA8DF /* Animated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animated.swift; sourceTree = "<group>"; };
+		50BA965E2E3F6AA1006BA8DF /* Credits.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,8 +77,17 @@
 				50BA96482E3C80D6006BA8DF /* Main.storyboard */,
 				50BA964B2E3C80D6006BA8DF /* RetroVisor.entitlements */,
 				50BA96452E3C80D6006BA8DF /* Assets.xcassets */,
+				50BA96602E3F6AB9006BA8DF /* Resources */,
 			);
 			path = RetroVisor;
+			sourceTree = "<group>";
+		};
+		50BA96602E3F6AB9006BA8DF /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				50BA965E2E3F6AA1006BA8DF /* Credits.rtf */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -141,6 +152,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				50BA96552E3C80D6006BA8DF /* Assets.xcassets in Resources */,
+				50BA965F2E3F6AA1006BA8DF /* Credits.rtf in Resources */,
 				50BA96562E3C80D6006BA8DF /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
