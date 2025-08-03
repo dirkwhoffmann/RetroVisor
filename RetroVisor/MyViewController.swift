@@ -25,6 +25,7 @@ struct Uniforms {
     var zoom: Float
     var intensity: Float
     var resolution: SIMD2<Float>
+    var window: SIMD2<Float>
     var center: SIMD2<Float>
     var mouse: SIMD2<Float>
     var texRect: SIMD4<Float>
@@ -46,6 +47,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
                                  zoom: 1.0,
                                  intensity: 0.0,
                                  resolution: [0,0],
+                                 window: [0,0],
                                  center: [0,0],
                                  mouse: [0,0],
                                  texRect: [0,0,0,0])
@@ -269,7 +271,10 @@ class MyViewController: NSViewController, MTKViewDelegate {
         uniforms.time = time
         uniforms.zoom = zoom
         uniforms.intensity = intensity.current
-        uniforms.resolution = [Float(w.liveFrame.width),Float(w.liveFrame.height)]
+        uniforms.resolution = [Float(intermediateTexture?.width ?? 100),Float(intermediateTexture?.height ?? 100)]
+        uniforms.window = [Float(w.liveFrame.width),Float(w.liveFrame.height)]
+        // print("interm: \(intermediateTexture?.width ?? 0) \(intermediateTexture?.height ?? 0)")
+        // print("frame: \(w.liveFrame.width) \(w.liveFrame.height)")
         uniforms.mouse = [Float(mouse.x), Float(1.0 - mouse.y)]
 
         guard let drawable = view.currentDrawable,

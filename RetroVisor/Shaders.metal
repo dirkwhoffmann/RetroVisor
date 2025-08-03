@@ -16,6 +16,7 @@ struct Uniforms {
     float zoom;
     float intensity;
     float2 resolution;
+    float2 window;
     float2 center;
     float2 mouse;
     float4 texRect;
@@ -250,8 +251,8 @@ fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
     crtUniforms.SHARPNESS_V = 1.0;
 
     float2 texture_size = uniforms.resolution;
-    float2 video_size = float2(640,320);
-    float2 output_size = float2(1280,960);
+    float2 video_size = uniforms.window;
+    float2 output_size = uniforms.window;
 
     return crt_easymode(texture_size,
                         video_size,
