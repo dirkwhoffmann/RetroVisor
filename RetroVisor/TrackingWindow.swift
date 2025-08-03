@@ -52,7 +52,16 @@ class TrackingWindow: NSWindow {
     var debug: Bool = true
 
     // The live-tracked window position (updated more frequently than `frame`)
-    private(set) var liveFrame: NSRect = .zero
+    private var trackedFrame: NSRect = .zero
+
+    var liveFrame: NSRect {
+
+        var result = trackedFrame
+        if let screen = self.screen {
+            result.origin.y = min(result.origin.y, screen.visibleFrame.maxY - result.height)
+        }
+        return result
+    }
 
     // Indicates if a drag operation is ongoing
     private(set) var isDragging: Bool = false
@@ -148,9 +157,9 @@ class TrackingWindow: NSWindow {
                 newOrigin.x = floor(newOrigin.x) // round?
                 newOrigin.y = floor(newOrigin.y) // round?
 
-                if newOrigin != liveFrame.origin {
+                if newOrigin != trackedFrame.origin {
 
-                    liveFrame = NSRect(origin: newOrigin, size: self.frame.size)
+                    trackedFrame = NSRect(origin: newOrigin, size: self.frame.size)
                     if debug { print("windowDidDrag(\(self), frame: \(liveFrame))") }
                     trackingDelegate?.windowDidDrag(self, frame: liveFrame)
                 }
@@ -198,7 +207,7 @@ class TrackingWindow: NSWindow {
         if (isResizing) {
 
             recordLocations()
-            liveFrame = frame
+            trackedFrame = frame
         }
     }
 }
