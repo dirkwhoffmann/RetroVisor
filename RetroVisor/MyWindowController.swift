@@ -156,10 +156,11 @@ extension MyWindowController: TrackingWindowDelegate {
     }
 
     func windowDidStopResize(_ window: TrackingWindow) {
-        print("windowDidStopResize")
+        print("windowDidStopResize \(window.frame) \(window.liveFrame)")
         // viewController!.time = 0.0
         viewController!.intensity.target = 0.0
         viewController!.intensity.steps = 15
+        viewController!.updateIntermediateTexture(width: 1 * Int(window.frame.width), height: 1 * Int(window.frame.height))
     }
 
     func windowDidStartDrag(_ window: TrackingWindow) {

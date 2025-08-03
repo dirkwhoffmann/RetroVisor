@@ -221,10 +221,11 @@ class MyViewController: NSViewController, MTKViewDelegate {
         // Convert pixelBuffer to Metal texture (or store it)
         self.currentTexture = texture(from: pixelBuffer)
 
-        let width = currentTexture!.width
-        let height = currentTexture!.height
+        // let width = currentTexture!.width
+        // let height = currentTexture!.height
 
         // Create a fitting intermediate texture
+        /*
         if intermediateTexture == nil ||
             intermediateTexture!.width != width ||
             intermediateTexture!.height != height {
@@ -238,20 +239,37 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
             intermediateTexture = device.makeTexture(descriptor: descriptor)
         }
+         */
 
         // Trigger view redraw
         mtkView.setNeedsDisplay(mtkView.bounds)
     }
 
+    func updateIntermediateTexture(width: Int, height: Int) {
+
+        if (intermediateTexture?.width == width && intermediateTexture?.height == height) { return }
+        intermediateTexture = makeIntermediateTexture(device: device, width: width, height: height)
+        print("interm: \(intermediateTexture!.width) \(intermediateTexture!.height)")
+    }
+
     func makeIntermediateTexture(device: MTLDevice, width: Int, height: Int) -> MTLTexture? {
+        /*
         let textureDescriptor = MTLTextureDescriptor()
         textureDescriptor.pixelFormat = .bgra8Unorm             // typical color format
         textureDescriptor.width = width
         textureDescriptor.height = height
-        textureDescriptor.usage = [.renderTarget, .shaderRead]  // render target and readable in shaders
+        textureDescriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
         textureDescriptor.storageMode = .private                 // optimized for GPU-only access
+        */
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
+                                                                  width: width,
+                                                                  height: height,
+                                                                  mipmapped: false)
+        descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
+        descriptor.storageMode = .private
 
-        return device.makeTexture(descriptor: textureDescriptor)
+
+        return device.makeTexture(descriptor: descriptor)
     }
 
     private var lastFrameTime: TimeInterval = CACurrentMediaTime()
@@ -271,7 +289,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         uniforms.time = time
         uniforms.zoom = zoom
         uniforms.intensity = intensity.current
-        uniforms.resolution = [Float(intermediateTexture?.width ?? 100),Float(intermediateTexture?.height ?? 100)]
+        uniforms.resolution = [Float(currentTexture?.width ?? 100),Float(currentTexture?.height ?? 100)]
         uniforms.window = [Float(w.liveFrame.width),Float(w.liveFrame.height)]
         // print("interm: \(intermediateTexture?.width ?? 0) \(intermediateTexture?.height ?? 0)")
         // print("frame: \(w.liveFrame.width) \(w.liveFrame.height)")
@@ -286,7 +304,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
         //
 
         if intermediateTexture == nil {
-            intermediateTexture = makeIntermediateTexture(device: device, width: Int(trect.width), height: Int(trect.height))
+            // intermediateTexture = makeIntermediateTexture(device: device, width: Int(trect.width), height: Int(trect.height))
+            intermediateTexture = makeIntermediateTexture(device: device, width: Int(800), height: Int(600))
         }
         let ripplePassDescriptor = MTLRenderPassDescriptor()
         ripplePassDescriptor.colorAttachments[0].texture = intermediateTexture
