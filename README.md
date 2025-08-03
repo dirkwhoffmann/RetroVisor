@@ -3,7 +3,7 @@
 # About
 RetroVisor will be a macOS application that lets you apply real-time shader-based visual effects to any running window on your desktop. Whether you're enhancing a retro emulator, modern game, or media player, RetroVisor can give your applications the look and feel of old CRTs, vintage displays, or stylized aesthetics — all without modifying the original software.
 
-RetroVisor is inspired by ShaderGlass, which pioneered the concept of applying real-time shader effects to desktop applications on Windows.
+RetroVisor is inspired by [ShaderGlass](https://github.com/mausimus/ShaderGlass), which pioneered the concept of applying real-time shader effects to desktop applications on Windows.
 
 ## ⚠️ Early Development Notice
 
