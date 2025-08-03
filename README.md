@@ -1,4 +1,4 @@
-<img width="1538" height="581" alt="Image" src="https://github.com/user-attachments/assets/2107b13c-5615-452d-9fcb-041fd64e2336" />
+<img width="1757" height="791" alt="Image" src="https://github.com/user-attachments/assets/e5415fcc-8acb-4917-8643-7fb18c51f60b" />
 
 # About
 RetroVisor will be a macOS application that lets you apply real-time shader-based visual effects to any running window on your desktop. Whether you're enhancing a retro emulator, modern game, or media player, RetroVisor can give your applications the look and feel of old CRTs, vintage displays, or stylized aesthetics — all without modifying the original software.
