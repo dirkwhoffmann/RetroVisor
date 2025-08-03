@@ -87,7 +87,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
         // Load shaders from default library
         let defaultLibrary = device.makeDefaultLibrary()!
         let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
-        let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_main")!
+        // let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_main")!
+        let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_crt_easymode")!
         let rippleFunc = defaultLibrary.makeFunction(name: "fragment_ripple")!
 
         // Create texture samplers
