@@ -104,16 +104,6 @@ class TrackingWindow: NSWindow {
 
     }
 
-    /*
-    private func clearLocations() {
-
-        initialWindowOrigin = nil
-        initialMouseLocationAbs = nil
-        initialMouseLocationRel = nil
-        initialMouseLocationNrm = nil
-    }
-    */
-
     override func sendEvent(_ event: NSEvent) {
 
         super.sendEvent(event)

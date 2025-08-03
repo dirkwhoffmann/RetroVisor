@@ -18,6 +18,8 @@
 		50BA96592E3C80F5006BA8DF /* TrackingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */; };
 		50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA965A2E3D4861006BA8DF /* Animated.swift */; };
 		50BA965F2E3F6AA1006BA8DF /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 50BA965E2E3F6AA1006BA8DF /* Credits.rtf */; };
+		50BA96642E3FF0B3006BA8DF /* crt-easymode.metal in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96632E3FF0B3006BA8DF /* crt-easymode.metal */; };
+		50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96652E3FF176006BA8DF /* ShaderTypes.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +36,8 @@
 		50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingWindow.swift; sourceTree = "<group>"; };
 		50BA965A2E3D4861006BA8DF /* Animated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animated.swift; sourceTree = "<group>"; };
 		50BA965E2E3F6AA1006BA8DF /* Credits.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
+		50BA96632E3FF0B3006BA8DF /* crt-easymode.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = "crt-easymode.metal"; sourceTree = "<group>"; };
+		50BA96652E3FF176006BA8DF /* ShaderTypes.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ShaderTypes.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,7 +77,7 @@
 				50BA96492E3C80D6006BA8DF /* MyViewController.swift */,
 				50BA964A2E3C80D6006BA8DF /* MyWindowController.swift */,
 				50BA964C2E3C80D6006BA8DF /* ScreenRecorder.swift */,
-				50BA964D2E3C80D6006BA8DF /* Shaders.metal */,
+				50BA96672E3FF19B006BA8DF /* Shaders */,
 				50BA96482E3C80D6006BA8DF /* Main.storyboard */,
 				50BA964B2E3C80D6006BA8DF /* RetroVisor.entitlements */,
 				50BA96452E3C80D6006BA8DF /* Assets.xcassets */,
@@ -88,6 +92,16 @@
 				50BA965E2E3F6AA1006BA8DF /* Credits.rtf */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		50BA96672E3FF19B006BA8DF /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				50BA96652E3FF176006BA8DF /* ShaderTypes.metal */,
+				50BA964D2E3C80D6006BA8DF /* Shaders.metal */,
+				50BA96632E3FF0B3006BA8DF /* crt-easymode.metal */,
+			);
+			path = Shaders;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -168,7 +182,9 @@
 				50BA96502E3C80D6006BA8DF /* GlassWindow.swift in Sources */,
 				50BA96592E3C80F5006BA8DF /* TrackingWindow.swift in Sources */,
 				50BA96512E3C80D6006BA8DF /* MyViewController.swift in Sources */,
+				50BA96642E3FF0B3006BA8DF /* crt-easymode.metal in Sources */,
 				50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */,
+				50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */,
 				50BA96522E3C80D6006BA8DF /* MyWindowController.swift in Sources */,
 				50BA96532E3C80D6006BA8DF /* ScreenRecorder.swift in Sources */,
 				50BA96542E3C80D6006BA8DF /* Shaders.metal in Sources */,
