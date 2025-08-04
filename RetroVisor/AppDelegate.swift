@@ -9,12 +9,16 @@
 
 import Cocoa
 
+/*
 class ClickThroughView: NSView {
 
 }
+*/
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
+
+    var settingsWindowController: SettingsWindowController?
 
     var windowController: MyWindowController? {
         return NSApplication.shared.windows.first?.windowController as? MyWindowController
@@ -34,4 +38,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             window.makeKeyAndOrderFront(nil)
         }
     }
+
+    @IBAction func showSettings(_ sender: Any?) {
+
+        print("showSettings")
+        if settingsWindowController == nil {
+            settingsWindowController = SettingsWindowController(windowNibName: "SettingsWindow")
+        }
+        settingsWindowController?.showWindow(self)
+        NSApp.activate(ignoringOtherApps: true) // optional, bring to front
+    }
+
 }

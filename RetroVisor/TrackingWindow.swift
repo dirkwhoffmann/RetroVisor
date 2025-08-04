@@ -49,7 +49,7 @@ class TrackingWindow: NSWindow {
     var dragAnywhere: Bool = true
 
     // Enables debug output to the console
-    var debug: Bool = true
+    var debug: Bool = false
 
     // The live-tracked window position (updated more frequently than `frame`)
     private var trackedFrame: NSRect = .zero
