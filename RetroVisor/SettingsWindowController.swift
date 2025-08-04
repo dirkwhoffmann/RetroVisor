@@ -14,6 +14,10 @@ struct ShaderSetting {
     let range: ClosedRange<Double>?
     let step: Float
     let help: String?
+
+    var formatString: String {
+        return step < 0.1 ? "%.2f" : step < 1.0 ? "%.1f" : "%.0f"
+    }
 }
 
 var shaderSettings: [ShaderSetting] = [
@@ -248,27 +252,8 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         guard let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "settingsCell"), owner: self) as? ShaderSettingCell else { return nil }
 
-        // let item = shaderSettings[row]
         cell.shaderSetting = shaderSettings[row]
         cell.value = get(key: shaderSettings[row].key)
-
-        /*
-        cell.optionLabel.stringValue = item.name
-        cell.subLabel.stringValue = item.key
-        cell.helpButtom.isHidden = item.help == nil
-        if let range = item.range {
-            cell.checkbox.isHidden = true
-            cell.valueSlider.isHidden = false
-            cell.valueSlider.minValue = range.lowerBound
-            cell.valueSlider.maxValue = range.upperBound
-            cell.valueSlider.floatValue = value
-        } else {
-            cell.checkbox.isHidden = false
-            cell.valueSlider.isHidden = true
-        }
-        cell.valueLabel.stringValue = String(format: "%.2f", value)
-        */
-
         return cell
     }
 

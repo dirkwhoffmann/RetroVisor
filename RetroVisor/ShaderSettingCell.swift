@@ -42,9 +42,10 @@ class ShaderSettingCell: NSTableCellView {
         didSet {
             if shaderSetting.range != nil {
                 valueSlider.floatValue = value
-                valueLabel.stringValue = String(format: "%.2f", value)
+                valueLabel.stringValue = String(format: shaderSetting.formatString, value)
             } else {
-                valueLabel.stringValue = value != 0 ? "Enabled" : "Disabled"
+                valueLabel.stringValue = value != 0 ? "Yes" : "No"
+                checkbox.title = ""
             }
         }
     }
@@ -57,17 +58,20 @@ class ShaderSettingCell: NSTableCellView {
 
     @IBAction func sliderAction(_ sender: NSSlider) {
 
-        let value = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
+        let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
-        controller.set(key: subLabel.stringValue, value: value)
+        controller.set(key: subLabel.stringValue, value: rounded)
+        value = controller.get(key: subLabel.stringValue)
+        /*
         let readBack = controller.get(key: subLabel.stringValue)
         valueLabel.stringValue = String(format: "%.2f", readBack)
+        */
     }
 
     @IBAction func enableAction(_ sender: NSButton) {
 
         controller.set(key: subLabel.stringValue, value: sender.state == .on ? 1.0 : 0.0)
-        valueLabel.stringValue = sender.state == .on ? "On" : "Off"
+        value = controller.get(key: subLabel.stringValue)
     }
 
     @IBAction func helpButton(_ sender: NSButton) {
