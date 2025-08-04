@@ -12,13 +12,23 @@ import Cocoa
 
 class ShaderSettingCell: NSTableCellView {
 
-    @IBOutlet weak var userNameLabel: NSTextField!
-    @IBOutlet weak var roleLabel: NSTextField!
+    @IBOutlet weak var optionImage: NSImageView!
+    @IBOutlet weak var optionLabel: NSTextField!
+    @IBOutlet weak var subLabel: NSTextField!
+    @IBOutlet weak var valueSlider: NSSlider!
+    @IBOutlet weak var valueLabel: NSTextField!
+    @IBOutlet weak var helpButtom: NSButton!
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
 
         // Drawing code here.
+    }
+
+    @IBAction func sliderAction(_ sender: NSSlider) {
+
+        let val = sender.doubleValue
+        print("Slider: \(sender.doubleValue)")
     }
 
     @IBAction func helpButton(_ sender: Any) {
