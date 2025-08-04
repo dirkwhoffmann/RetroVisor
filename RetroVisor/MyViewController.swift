@@ -67,7 +67,7 @@ struct CrtUniforms {
         SCANLINE_BEAM_WIDTH_MIN: 1.5,
         SCANLINE_BRIGHT_MAX: 0.65,
         SCANLINE_BRIGHT_MIN: 0.35,
-        SCANLINE_CUTOFF: 400.0,
+        SCANLINE_CUTOFF: 1000.0,
         SCANLINE_STRENGTH: 1.0,
         SHARPNESS_H: 0.5,
         SHARPNESS_V: 1.0,
@@ -217,6 +217,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let ty1 = Float(rect.minY)
         let ty2 = Float(rect.maxY)
 
+        print("tx1: \(tx1), tx2: \(tx2), ty1: \(ty1), ty2: \(ty2)")
         uniforms.texRect = [tx1, ty1, tx2, ty2];
 
         let vertices: [Vertex] = [

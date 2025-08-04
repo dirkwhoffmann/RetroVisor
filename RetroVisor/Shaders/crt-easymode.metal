@@ -69,6 +69,7 @@ inline float3 filter_lanczos(float4 coeffs, float4x4 color_matrix) {
 inline float4 crt_easymode(float2 texture_size,
                            float2 video_size,
                            float2 output_size,
+                           float2 tex_norm,
                            float2 coords,
                            texture2d<float> tex,
                            sampler sam,
@@ -116,7 +117,11 @@ inline float4 crt_easymode(float2 texture_size,
                             u.SCANLINE_BEAM_WIDTH_MIN,
                             u.SCANLINE_BEAM_WIDTH_MAX);
 
+    /*
     float scan_weight = 1.0 - pow(cos(coords.y * 2.0 * M_PI * texture_size.y) * 0.5 + 0.5,
+                                  scan_beam) * u.SCANLINE_STRENGTH;
+     */
+    float scan_weight = 1.0 - pow(cos(tex_norm.y * 0.5 * M_PI * output_size.y) * 0.5 + 0.5,
                                   scan_beam) * u.SCANLINE_STRENGTH;
 
     float mask = 1.0 - u.MASK_STRENGTH;
@@ -150,33 +155,20 @@ fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
                                       constant CrtUniforms& crtUniforms [[buffer(1)]],
                                       sampler sam [[sampler(0)]]) {
 
-    /*
-    CrtUniforms crtUniforms;
-    crtUniforms.BRIGHT_BOOST = 1.2;
-    crtUniforms.DILATION = 1.0;
-    crtUniforms.GAMMA_INPUT = 2.0;
-    crtUniforms.GAMMA_OUTPUT = 1.8;
-    crtUniforms.MASK_SIZE = 1.0;
-    crtUniforms.MASK_STAGGER = 0.0;
-    crtUniforms.MASK_STRENGTH = 0.3;
-    crtUniforms.MASK_DOT_WIDTH = 1.0;
-    crtUniforms.MASK_DOT_HEIGHT = 1.0;
-    crtUniforms.SCANLINE_BEAM_WIDTH_MAX = 1.5;
-    crtUniforms.SCANLINE_BEAM_WIDTH_MIN = 1.5;
-    crtUniforms.SCANLINE_BRIGHT_MAX = 0.65;
-    crtUniforms.SCANLINE_BRIGHT_MIN = 0.35;
-    crtUniforms.SCANLINE_CUTOFF = 400.0;
-    crtUniforms.SCANLINE_STRENGTH = 1.0;
-    crtUniforms.SHARPNESS_H = 0.5;
-    crtUniforms.SHARPNESS_V = 1.0;
-    */
     float2 texture_size = uniforms.resolution;
     float2 video_size =  uniforms.window;
     float2 output_size = uniforms.window;
 
+    // Normalize the texture coordinate:
+    // float2 uv = in.texCoord;
+    float2 texOrigin = uniforms.texRect.xy;
+    float2 texSize = uniforms.texRect.zw - uniforms.texRect.xy;
+    float2 normuv = (in.texCoord - texOrigin) / texSize;
+
     return crt_easymode(texture_size,
                         video_size,
                         output_size,
+                        normuv,
                         in.texCoord,
                         tex,
                         sam,
