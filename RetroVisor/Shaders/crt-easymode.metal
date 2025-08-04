@@ -121,12 +121,15 @@ inline float4 crt_easymode(float2 texture_size,
     float scan_weight = 1.0 - pow(cos(coords.y * 2.0 * M_PI * texture_size.y) * 0.5 + 0.5,
                                   scan_beam) * u.SCANLINE_STRENGTH;
      */
-    float scan_weight = 1.0 - pow(cos(tex_norm.y * 0.5 * M_PI * output_size.y) * 0.5 + 0.5,
+    float scan_weight = 1.0 - pow(cos(tex_norm.y * 0.25 * M_PI * output_size.y) * 0.5 + 0.5,
                                   scan_beam) * u.SCANLINE_STRENGTH;
 
     float mask = 1.0 - u.MASK_STRENGTH;
+    /*
     float2 mod_fac = floor(coords * output_size * texture_size / (video_size *
                           float2(u.MASK_SIZE, u.MASK_DOT_HEIGHT * u.MASK_SIZE)));
+     */
+    float2 mod_fac = floor(tex_norm * output_size / float2(u.MASK_SIZE, u.MASK_DOT_HEIGHT * u.MASK_SIZE));
     int dot_no = int(fmod((mod_fac.x + fmod(mod_fac.y, 2.0) * u.MASK_STAGGER) / u.MASK_DOT_WIDTH, 3.0));
     float3 mask_weight;
 
@@ -147,6 +150,7 @@ inline float4 crt_easymode(float2 texture_size,
     col = pow(col, float3(1.0 / u.GAMMA_OUTPUT));
 
     return float4(col * u.BRIGHT_BOOST, 1.0);
+    // return float4(scan_weight, scan_weight, scan_weight, 1.0);
 }
 
 fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],

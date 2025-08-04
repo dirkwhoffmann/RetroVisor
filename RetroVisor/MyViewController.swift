@@ -217,7 +217,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let ty1 = Float(rect.minY)
         let ty2 = Float(rect.maxY)
 
-        print("tx1: \(tx1), tx2: \(tx2), ty1: \(ty1), ty2: \(ty2)")
+        // print("tx1: \(tx1), tx2: \(tx2), ty1: \(ty1), ty2: \(ty2)")
         uniforms.texRect = [tx1, ty1, tx2, ty2];
 
         let vertices: [Vertex] = [
@@ -276,8 +276,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     func updateIntermediateTexture(width: Int, height: Int) {
 
-        if (intermediateTexture?.width == width && intermediateTexture?.height == height) { return }
-        intermediateTexture = makeIntermediateTexture(device: device, width: width, height: height)
+        if (intermediateTexture?.width == 2 * width && intermediateTexture?.height == 2 * height) { return }
+        intermediateTexture = makeIntermediateTexture(device: device, width: 2 * width, height: 2 * height)
         print("interm: \(intermediateTexture!.width) \(intermediateTexture!.height)")
     }
 
