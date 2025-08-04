@@ -248,8 +248,11 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         guard let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "settingsCell"), owner: self) as? ShaderSettingCell else { return nil }
 
-        let item = shaderSettings[row]
-        let value = get(key: item.key)
+        // let item = shaderSettings[row]
+        cell.shaderSetting = shaderSettings[row]
+        cell.value = get(key: shaderSettings[row].key)
+
+        /*
         cell.optionLabel.stringValue = item.name
         cell.subLabel.stringValue = item.key
         cell.helpButtom.isHidden = item.help == nil
@@ -264,8 +267,8 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
             cell.valueSlider.isHidden = true
         }
         cell.valueLabel.stringValue = String(format: "%.2f", value)
-        cell.step = item.step
-        
+        */
+
         return cell
     }
 

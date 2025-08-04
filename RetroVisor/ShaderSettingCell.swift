@@ -21,7 +21,33 @@ class ShaderSettingCell: NSTableCellView {
     @IBOutlet weak var valueLabel: NSTextField!
     @IBOutlet weak var helpButtom: NSButton!
 
-    var step: Float = 0.1
+    var shaderSetting: ShaderSetting! {
+        didSet {
+            optionLabel.stringValue = shaderSetting.name
+            subLabel.stringValue = shaderSetting.key
+            helpButtom.isHidden = shaderSetting.help == nil
+            if let range = shaderSetting.range {
+                checkbox.isHidden = true
+                valueSlider.isHidden = false
+                valueSlider.minValue = range.lowerBound
+                valueSlider.maxValue = range.upperBound
+            } else {
+                checkbox.isHidden = false
+                valueSlider.isHidden = true
+            }
+        }
+    }
+
+    var value: Float! {
+        didSet {
+            if shaderSetting.range != nil {
+                valueSlider.floatValue = value
+                valueLabel.stringValue = String(format: "%.2f", value)
+            } else {
+                valueLabel.stringValue = value != 0 ? "Enabled" : "Disabled"
+            }
+        }
+    }
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
@@ -31,7 +57,7 @@ class ShaderSettingCell: NSTableCellView {
 
     @IBAction func sliderAction(_ sender: NSSlider) {
 
-        let value = round(sender.floatValue / step) * step
+        let value = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
         controller.set(key: subLabel.stringValue, value: value)
         let readBack = controller.get(key: subLabel.stringValue)
