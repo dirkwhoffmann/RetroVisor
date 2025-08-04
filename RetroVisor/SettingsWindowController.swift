@@ -186,7 +186,7 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
 
     @IBOutlet weak var tableView: NSTableView!
 
-    var uniforms = CrtUniforms.defaults
+    var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
 
     override func windowDidLoad() {
         super.windowDidLoad()
@@ -197,24 +197,24 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
     func get(key: String) -> Float {
 
         switch key {
-        case "BRIGHT_BOOST":print("get: \(uniforms.BRIGHT_BOOST)");  return uniforms.BRIGHT_BOOST
-        case "DILATION": return uniforms.DILATION
-        case "GAMMA_INPUT": return uniforms.GAMMA_INPUT
-        case "GAMMA_OUTPUT": return uniforms.GAMMA_OUTPUT
-        case "MASK_SIZE": return uniforms.MASK_SIZE
-        case "MASK_STAGGER": return uniforms.MASK_STAGGER
-        case "MASK_STRENGTH": return uniforms.MASK_STRENGTH
-        case "MASK_DOT_WIDTH": return uniforms.MASK_DOT_WIDTH
-        case "MASK_DOT_HEIGHT": return uniforms.MASK_DOT_HEIGHT
-        case "SCANLINE_BEAM_WIDTH_MAX": return uniforms.SCANLINE_BEAM_WIDTH_MAX
-        case "SCANLINE_BEAM_WIDTH_MIN": return uniforms.SCANLINE_BEAM_WIDTH_MIN
-        case "SCANLINE_BRIGHT_MAX": return uniforms.SCANLINE_BRIGHT_MAX
-        case "SCANLINE_BRIGHT_MIN": return uniforms.SCANLINE_BRIGHT_MIN
-        case "SCANLINE_CUTOFF": return uniforms.SCANLINE_CUTOFF
-        case "SCANLINE_STRENGTH": return uniforms.SCANLINE_STRENGTH
-        case "SHARPNESS_H": return uniforms.SHARPNESS_H
-        case "SHARPNESS_V": return uniforms.SHARPNESS_V
-        case "ENABLE_LANCZOS": return Float(uniforms.ENABLE_LANCZOS)
+        case "BRIGHT_BOOST": return appDelegate.uniforms.BRIGHT_BOOST
+        case "DILATION": return appDelegate.uniforms.DILATION
+        case "GAMMA_INPUT": return appDelegate.uniforms.GAMMA_INPUT
+        case "GAMMA_OUTPUT": return appDelegate.uniforms.GAMMA_OUTPUT
+        case "MASK_SIZE": return appDelegate.uniforms.MASK_SIZE
+        case "MASK_STAGGER": return appDelegate.uniforms.MASK_STAGGER
+        case "MASK_STRENGTH": return appDelegate.uniforms.MASK_STRENGTH
+        case "MASK_DOT_WIDTH": return appDelegate.uniforms.MASK_DOT_WIDTH
+        case "MASK_DOT_HEIGHT": return appDelegate.uniforms.MASK_DOT_HEIGHT
+        case "SCANLINE_BEAM_WIDTH_MAX": return appDelegate.uniforms.SCANLINE_BEAM_WIDTH_MAX
+        case "SCANLINE_BEAM_WIDTH_MIN": return appDelegate.uniforms.SCANLINE_BEAM_WIDTH_MIN
+        case "SCANLINE_BRIGHT_MAX": return appDelegate.uniforms.SCANLINE_BRIGHT_MAX
+        case "SCANLINE_BRIGHT_MIN": return appDelegate.uniforms.SCANLINE_BRIGHT_MIN
+        case "SCANLINE_CUTOFF": return appDelegate.uniforms.SCANLINE_CUTOFF
+        case "SCANLINE_STRENGTH": return appDelegate.uniforms.SCANLINE_STRENGTH
+        case "SHARPNESS_H": return appDelegate.uniforms.SHARPNESS_H
+        case "SHARPNESS_V": return appDelegate.uniforms.SHARPNESS_V
+        case "ENABLE_LANCZOS": return Float(appDelegate.uniforms.ENABLE_LANCZOS)
 
         default:
             NSSound.beep()
@@ -227,24 +227,24 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
         print("key: \(key) value: \(value)")
 
         switch key {
-        case "BRIGHT_BOOST": uniforms.BRIGHT_BOOST = value
-        case "DILATION": uniforms.DILATION = value
-        case "GAMMA_INPUT": uniforms.GAMMA_INPUT = value
-        case "GAMMA_OUTPUT": uniforms.GAMMA_OUTPUT = value
-        case "MASK_SIZE": uniforms.MASK_SIZE = value
-        case "MASK_STAGGER": uniforms.MASK_STAGGER = value
-        case "MASK_STRENGTH": uniforms.MASK_STRENGTH = value
-        case "MASK_DOT_WIDTH": uniforms.MASK_DOT_WIDTH = value
-        case "MASK_DOT_HEIGHT": uniforms.MASK_DOT_HEIGHT = value
-        case "SCANLINE_BEAM_WIDTH_MAX": uniforms.SCANLINE_BEAM_WIDTH_MAX = value
-        case "SCANLINE_BEAM_WIDTH_MIN": uniforms.SCANLINE_BEAM_WIDTH_MIN = value
-        case "SCANLINE_BRIGHT_MAX": uniforms.SCANLINE_BRIGHT_MAX = value
-        case "SCANLINE_BRIGHT_MIN": uniforms.SCANLINE_BRIGHT_MIN = value
-        case "SCANLINE_CUTOFF": uniforms.SCANLINE_CUTOFF = value
-        case "SCANLINE_STRENGTH": uniforms.SCANLINE_STRENGTH = value
-        case "SHARPNESS_H": uniforms.SHARPNESS_H = value
-        case "SHARPNESS_V": uniforms.SHARPNESS_V = value
-        case "ENABLE_LANCZOS": uniforms.ENABLE_LANCZOS = Int32(value)
+        case "BRIGHT_BOOST": appDelegate.uniforms.BRIGHT_BOOST = value
+        case "DILATION": appDelegate.uniforms.DILATION = value
+        case "GAMMA_INPUT": appDelegate.uniforms.GAMMA_INPUT = value
+        case "GAMMA_OUTPUT": appDelegate.uniforms.GAMMA_OUTPUT = value
+        case "MASK_SIZE": appDelegate.uniforms.MASK_SIZE = value
+        case "MASK_STAGGER": appDelegate.uniforms.MASK_STAGGER = value
+        case "MASK_STRENGTH": appDelegate.uniforms.MASK_STRENGTH = value
+        case "MASK_DOT_WIDTH": appDelegate.uniforms.MASK_DOT_WIDTH = value
+        case "MASK_DOT_HEIGHT": appDelegate.uniforms.MASK_DOT_HEIGHT = value
+        case "SCANLINE_BEAM_WIDTH_MAX": appDelegate.uniforms.SCANLINE_BEAM_WIDTH_MAX = value
+        case "SCANLINE_BEAM_WIDTH_MIN": appDelegate.uniforms.SCANLINE_BEAM_WIDTH_MIN = value
+        case "SCANLINE_BRIGHT_MAX": appDelegate.uniforms.SCANLINE_BRIGHT_MAX = value
+        case "SCANLINE_BRIGHT_MIN": appDelegate.uniforms.SCANLINE_BRIGHT_MIN = value
+        case "SCANLINE_CUTOFF": appDelegate.uniforms.SCANLINE_CUTOFF = value
+        case "SCANLINE_STRENGTH": appDelegate.uniforms.SCANLINE_STRENGTH = value
+        case "SHARPNESS_H": appDelegate.uniforms.SHARPNESS_H = value
+        case "SHARPNESS_V": appDelegate.uniforms.SHARPNESS_V = value
+        case "ENABLE_LANCZOS": appDelegate.uniforms.ENABLE_LANCZOS = Int32(value)
 
         default:
             NSSound.beep()

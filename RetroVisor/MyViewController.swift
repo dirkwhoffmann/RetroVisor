@@ -77,6 +77,8 @@ struct CrtUniforms {
 
 class MyViewController: NSViewController, MTKViewDelegate {
 
+    var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
+
     var mtkView: MTKView!
     var device: MTLDevice!
     var commandQueue: MTLCommandQueue!
@@ -96,7 +98,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
                                  mouse: [0,0],
                                  texRect: [0,0,0,0])
 
-    var crtUniforms = CrtUniforms.defaults
+    // var crtUniforms = CrtUniforms.defaults
 
     var textureCache: CVMetalTextureCache!
     var currentTexture: MTLTexture?
@@ -367,7 +369,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
             rippleEncoder.setFragmentBytes(&uniforms,
                                            length: MemoryLayout<Uniforms>.stride,
                                            index: 0)
-            rippleEncoder.setFragmentBytes(&crtUniforms,
+            rippleEncoder.setFragmentBytes(&appDelegate.uniforms,
                                            length: MemoryLayout<CrtUniforms>.stride,
                                            index: 1)
 

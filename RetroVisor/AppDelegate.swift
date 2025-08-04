@@ -18,6 +18,8 @@ class ClickThroughView: NSView {
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
 
+    var uniforms = CrtUniforms.defaults
+    
     var settingsWindowController: SettingsWindowController?
 
     var windowController: MyWindowController? {
