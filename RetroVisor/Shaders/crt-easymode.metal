@@ -72,7 +72,7 @@ inline float4 crt_easymode(float2 texture_size,
                            float2 coords,
                            texture2d<float> tex,
                            sampler sam,
-                           thread CrtUniforms& u) {
+                           constant CrtUniforms& u) {
 
     float2 dx = float2(1.0 / texture_size.x, 0.0);
     float2 dy = float2(0.0, 1.0 / texture_size.y);
@@ -144,10 +144,11 @@ inline float4 crt_easymode(float2 texture_size,
 fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
                                       texture2d<float> tex [[texture(0)]],
                                       constant Uniforms& uniforms [[buffer(0)]],
+                                      constant CrtUniforms& crtUniforms [[buffer(1)]],
                                       sampler sam [[sampler(0)]]) {
 
+    /*
     CrtUniforms crtUniforms;
-    crtUniforms.BRIGHT_BOOST = 1.2;
     crtUniforms.BRIGHT_BOOST = 1.2;
     crtUniforms.DILATION = 1.0;
     crtUniforms.GAMMA_INPUT = 2.0;
@@ -165,7 +166,7 @@ fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
     crtUniforms.SCANLINE_STRENGTH = 1.0;
     crtUniforms.SHARPNESS_H = 0.5;
     crtUniforms.SHARPNESS_V = 1.0;
-
+    */
     float2 texture_size = uniforms.resolution;
     float2 video_size =  uniforms.window;
     float2 output_size = uniforms.window;

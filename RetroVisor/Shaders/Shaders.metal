@@ -18,6 +18,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
 // Fragment shader
 //
 
+/*
 fragment float4 fragment_main(VertexOut in [[stage_in]],
                               texture2d<float> tex [[texture(0)]],
                               constant Uniforms& uniforms [[buffer(0)]],
@@ -32,12 +33,6 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     float2 normuv = (in.texCoord - texOrigin) / texSize;
 
     // --- Barrel distortion ---
-    /*
-     float2 center = float2(0.5, 0.5);
-     float2 offset = uv - center;
-     float dist = dot(offset, offset);
-     uv = center + offset * (1.0 + dist * 0.1); // Adjust 0.1 to control distortion
-     */
 
     // --- Sample texture ---
     float4 color = tex.sample(sam, uv);
@@ -55,6 +50,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
 
     return color;
 }
+*/
 
 fragment float4 fragment_ripple(VertexOut in [[stage_in]],
                                 texture2d<float> tex [[texture(0)]],

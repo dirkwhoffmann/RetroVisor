@@ -46,8 +46,8 @@ struct CrtUniforms {
     float MASK_SIZE;
     float MASK_STAGGER;
     float MASK_STRENGTH;
-    float MASK_DOT_HEIGHT;
     float MASK_DOT_WIDTH;
+    float MASK_DOT_HEIGHT;
     float SCANLINE_BEAM_WIDTH_MAX;
     float SCANLINE_BEAM_WIDTH_MIN;
     float SCANLINE_BRIGHT_MAX;

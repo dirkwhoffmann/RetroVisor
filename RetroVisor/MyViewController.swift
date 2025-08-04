@@ -31,6 +31,48 @@ struct Uniforms {
     var texRect: SIMD4<Float>
 }
 
+struct CrtUniforms {
+
+    var BRIGHT_BOOST: Float
+    var DILATION: Float
+    var GAMMA_INPUT: Float
+    var GAMMA_OUTPUT: Float
+    var MASK_SIZE: Float
+    var MASK_STAGGER: Float
+    var MASK_STRENGTH: Float
+    var MASK_DOT_WIDTH: Float
+    var MASK_DOT_HEIGHT: Float
+    var SCANLINE_BEAM_WIDTH_MAX: Float
+    var SCANLINE_BEAM_WIDTH_MIN: Float
+    var SCANLINE_BRIGHT_MAX: Float
+    var SCANLINE_BRIGHT_MIN: Float
+    var SCANLINE_CUTOFF: Float
+    var SCANLINE_STRENGTH: Float
+    var SHARPNESS_H: Float
+    var SHARPNESS_V: Float
+
+    static let defaults = CrtUniforms(
+
+        BRIGHT_BOOST: 1.2,
+        DILATION: 1.0,
+        GAMMA_INPUT: 2.0,
+        GAMMA_OUTPUT: 1.8,
+        MASK_SIZE: 1.0,
+        MASK_STAGGER: 0.0,
+        MASK_STRENGTH: 0.3,
+        MASK_DOT_WIDTH: 1.0,
+        MASK_DOT_HEIGHT: 1.0,
+        SCANLINE_BEAM_WIDTH_MAX: 1.5,
+        SCANLINE_BEAM_WIDTH_MIN: 1.5,
+        SCANLINE_BRIGHT_MAX: 0.65,
+        SCANLINE_BRIGHT_MIN: 0.35,
+        SCANLINE_CUTOFF: 400.0,
+        SCANLINE_STRENGTH: 1.0,
+        SHARPNESS_H: 0.5,
+        SHARPNESS_V: 1.0
+    )
+}
+
 class MyViewController: NSViewController, MTKViewDelegate {
 
     var mtkView: MTKView!
@@ -51,6 +93,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
                                  center: [0,0],
                                  mouse: [0,0],
                                  texRect: [0,0,0,0])
+
+    var crtUniforms = CrtUniforms.defaults
 
     var textureCache: CVMetalTextureCache!
     var currentTexture: MTLTexture?
@@ -321,6 +365,9 @@ class MyViewController: NSViewController, MTKViewDelegate {
             rippleEncoder.setFragmentBytes(&uniforms,
                                            length: MemoryLayout<Uniforms>.stride,
                                            index: 0)
+            rippleEncoder.setFragmentBytes(&crtUniforms,
+                                           length: MemoryLayout<CrtUniforms>.stride,
+                                           index: 1)
 
             rippleEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
             rippleEncoder.endEncoding()
