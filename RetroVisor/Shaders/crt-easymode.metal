@@ -121,7 +121,7 @@ inline float4 crt_easymode(float2 texture_size,
     float scan_weight = 1.0 - pow(cos(coords.y * 2.0 * M_PI * texture_size.y) * 0.5 + 0.5,
                                   scan_beam) * u.SCANLINE_STRENGTH;
      */
-    float scan_weight = 1.0 - pow(cos(tex_norm.y * 0.25 * M_PI * output_size.y) * 0.5 + 0.5,
+    float scan_weight = 1.0 - pow(cos(tex_norm.y * 0.5 * M_PI * output_size.y) * 0.5 + 0.5,
                                   scan_beam) * u.SCANLINE_STRENGTH;
 
     float mask = 1.0 - u.MASK_STRENGTH;
