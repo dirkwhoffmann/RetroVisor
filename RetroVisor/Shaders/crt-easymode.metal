@@ -82,26 +82,29 @@ inline float4 crt_easymode(float2 texture_size,
     float curve_x;
     float3 col, col2;
 
-#if ENABLE_LANCZOS
-    curve_x = curve_distance(dist.x, u.SHARPNESS_H * u.SHARPNESS_H);
+    if (u.ENABLE_LANCZOS) {
 
-    float4 coeffs = M_PI * float4(1.0 + curve_x, curve_x, 1.0 - curve_x, 2.0 - curve_x);
-    coeffs = max(abs(coeffs), 1e-5);
-    coeffs = 2.0 * sin(coeffs) * sin(coeffs / 2.0) / (coeffs * coeffs);
-    coeffs /= dot(coeffs, float4(1.0));
+        curve_x = curve_distance(dist.x, u.SHARPNESS_H * u.SHARPNESS_H);
 
-    col = filter_lanczos(coeffs, get_color_matrix(tex, sam, tex_co, dx, u.DILATION));
-    col2 = filter_lanczos(coeffs, get_color_matrix(tex, sam, tex_co + dy, dx, u.DILATION));
-#else
-    curve_x = curve_distance(dist.x, u.SHARPNESS_H);
+        float4 coeffs = M_PI * float4(1.0 + curve_x, curve_x, 1.0 - curve_x, 2.0 - curve_x);
+        coeffs = max(abs(coeffs), 1e-5);
+        coeffs = 2.0 * sin(coeffs) * sin(coeffs / 2.0) / (coeffs * coeffs);
+        coeffs /= dot(coeffs, float4(1.0));
 
-    col = mix(tex.sample(sam, tex_co).rgb,
-              tex.sample(sam, tex_co + dx).rgb,
-              curve_x);
-    col2 = mix(tex.sample(sam, tex_co + dy).rgb,
-               tex.sample(sam, tex_co + dx + dy).rgb,
-               curve_x);
-#endif
+        col = filter_lanczos(coeffs, get_color_matrix(tex, sam, tex_co, dx, u.DILATION));
+        col2 = filter_lanczos(coeffs, get_color_matrix(tex, sam, tex_co + dy, dx, u.DILATION));
+
+    } else {
+
+        curve_x = curve_distance(dist.x, u.SHARPNESS_H);
+
+        col = mix(tex.sample(sam, tex_co).rgb,
+                  tex.sample(sam, tex_co + dx).rgb,
+                  curve_x);
+        col2 = mix(tex.sample(sam, tex_co + dy).rgb,
+                   tex.sample(sam, tex_co + dx + dy).rgb,
+                   curve_x);
+    }
 
     col = mix(col, col2, curve_distance(dist.y, u.SHARPNESS_V));
     col = pow(col, float3(u.GAMMA_INPUT / (u.DILATION + 1.0)));

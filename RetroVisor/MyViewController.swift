@@ -50,6 +50,7 @@ struct CrtUniforms {
     var SCANLINE_STRENGTH: Float
     var SHARPNESS_H: Float
     var SHARPNESS_V: Float
+    var ENABLE_LANCZOS: Int32
 
     static let defaults = CrtUniforms(
 
@@ -69,7 +70,8 @@ struct CrtUniforms {
         SCANLINE_CUTOFF: 400.0,
         SCANLINE_STRENGTH: 1.0,
         SHARPNESS_H: 0.5,
-        SHARPNESS_V: 1.0
+        SHARPNESS_V: 1.0,
+        ENABLE_LANCZOS: 1
     )
 }
 

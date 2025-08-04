@@ -56,6 +56,7 @@ struct CrtUniforms {
     float SCANLINE_STRENGTH;
     float SHARPNESS_H;
     float SHARPNESS_V;
+    uint  ENABLE_LANCZOS;
 };
 
 #endif
