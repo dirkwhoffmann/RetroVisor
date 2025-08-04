@@ -17,8 +17,11 @@ class ShaderSettingCell: NSTableCellView {
     @IBOutlet weak var optionLabel: NSTextField!
     @IBOutlet weak var subLabel: NSTextField!
     @IBOutlet weak var valueSlider: NSSlider!
+    @IBOutlet weak var checkbox: NSButton!
     @IBOutlet weak var valueLabel: NSTextField!
     @IBOutlet weak var helpButtom: NSButton!
+
+    var step: Float = 0.1
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
@@ -28,11 +31,20 @@ class ShaderSettingCell: NSTableCellView {
 
     @IBAction func sliderAction(_ sender: NSSlider) {
 
-        controller.set(key: subLabel.stringValue, value: sender.floatValue)
-        valueLabel.stringValue = String(format: "%.2f", sender.floatValue)
+        let value = round(sender.floatValue / step) * step
+
+        controller.set(key: subLabel.stringValue, value: value)
+        let readBack = controller.get(key: subLabel.stringValue)
+        valueLabel.stringValue = String(format: "%.2f", readBack)
     }
 
-    @IBAction func helpButton(_ sender: Any) {
+    @IBAction func enableAction(_ sender: NSButton) {
+
+        controller.set(key: subLabel.stringValue, value: sender.state == .on ? 1.0 : 0.0)
+        valueLabel.stringValue = sender.state == .on ? "On" : "Off"
+    }
+
+    @IBAction func helpButton(_ sender: NSButton) {
 
         print("Need help")
     }

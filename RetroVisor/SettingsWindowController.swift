@@ -11,8 +11,7 @@ struct ShaderSetting {
 
     let name: String
     let key: String
-    // var value: Float
-    let range: ClosedRange<Double>
+    let range: ClosedRange<Double>?
     let step: Float
     let help: String?
 }
@@ -22,7 +21,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Brightness Boost",
         key: "BRIGHT_BOOST",
-        // value: 1.2,
         range: 0.0...2.0,
         step: 0.01,
         help: nil
@@ -31,7 +29,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Horizontal Sharpness",
         key: "SHARPNESS_H",
-        // value: 0.5,
         range: 0.0...1.0,
         step: 0.05,
         help: nil
@@ -40,7 +37,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Vertical Sharpness",
         key: "SHARPNESS_V",
-        // value: 1.0,
         range: 0.0...1.0,
         step: 0.05,
         help: nil
@@ -49,7 +45,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Dilation",
         key: "DILATION",
-        // value: 1.0,
         range: 0.0...1.0,
         step: 0.05,
         help: nil
@@ -58,7 +53,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Gamma Input",
         key: "GAMMA_INPUT",
-        // value: 2.0,
         range: 0.1...5.0,
         step: 0.1,
         help: nil
@@ -67,7 +61,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Gamma Output",
         key: "GAMMA_OUTPUT",
-        // value: 1.8,
         range: 0.1...5.0,
         step: 0.1,
         help: nil
@@ -76,7 +69,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Dot Mask Strength",
         key: "MASK_STRENGTH",
-        // value: 0.3,
         range: 0.0...1.0,
         step: 0.01,
         help: nil
@@ -85,7 +77,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Dot Mask Width",
         key: "MASK_DOT_WIDTH",
-        // value: 1.0,
         range: 1.0...100.0,
         step: 1.0,
         help: nil
@@ -94,7 +85,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Dot Mask Height",
         key: "MASK_DOT_HEIGHT",
-        // value: 1.0,
         range: 1.0...100.0,
         step: 1.0,
         help: nil
@@ -103,7 +93,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Dot Mask Stagger",
         key: "MASK_STAGGER",
-        // value: 0.0,
         range: 0.0...100.0,
         step: 1.0,
         help: nil
@@ -112,7 +101,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Dot Mask Size",
         key: "MASK_SIZE",
-        // value: 1.0,
         range: 1.0...100.0,
         step: 1.0,
         help: nil
@@ -121,7 +109,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Scanline Strength",
         key: "SCANLINE_STRENGTH",
-        // value: 1.0,
         range: 0.0...1.0,
         step: 0.05,
         help: nil
@@ -130,7 +117,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Scanline Minimum Beam Width",
         key: "SCANLINE_BEAM_WIDTH_MIN",
-        // value: 1.5,
         range: 0.5...5.0,
         step: 0.5,
         help: nil
@@ -139,7 +125,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Scanline Maximum Beam Width",
         key: "SCANLINE_BEAM_WIDTH_MAX",
-        // value: 1.5,
         range: 0.5...5.0,
         step: 0.5,
         help: nil
@@ -148,7 +133,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Scanline Minimum Brightness",
         key: "SCANLINE_BRIGHT_MIN",
-        // value: 0.35,
         range: 0.0...1.0,
         step: 0.05,
         help: nil
@@ -157,7 +141,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Scanline Maximum Brightness",
         key: "SCANLINE_BRIGHT_MAX",
-        // value: 0.35,
         range: 0.0...1.0,
         step: 0.05,
         help: nil
@@ -166,7 +149,6 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Scanline Cutoff",
         key: "SCANLINE_CUTOFF",
-        // value: 400.0,
         range: 1.0...1000.0,
         step: 1.0,
         help: nil
@@ -175,8 +157,7 @@ var shaderSettings: [ShaderSetting] = [
     ShaderSetting(
         name: "Lanczos Filter",
         key: "ENABLE_LANCZOS",
-        // value: 1.0,
-        range: 0.0...1.0,
+        range: nil,
         step: 1.0,
         help: nil
     ),
@@ -187,11 +168,20 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
     @IBOutlet weak var tableView: NSTableView!
 
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
+    var oldSettings: CrtUniforms!
 
+    /*
     override func windowDidLoad() {
-        super.windowDidLoad()
 
-        // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
+        super.windowDidLoad()
+    }
+    */
+
+    override func showWindow(_ sender: Any?) {
+
+        super.showWindow(sender)
+        oldSettings = appDelegate.uniforms
+        tableView.reloadData()
     }
 
     func get(key: String) -> Float {
@@ -224,7 +214,7 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
 
     func set(key: String, value: Float) {
 
-        print("key: \(key) value: \(value)")
+        // print("key: \(key) value: \(value)")
 
         switch key {
         case "BRIGHT_BOOST": appDelegate.uniforms.BRIGHT_BOOST = value
@@ -249,12 +239,6 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
         default:
             NSSound.beep()
         }
-
-        /*
-        if let index = shaderSettings.firstIndex(where: { $0.key == key }) {
-            shaderSettings[index].value = value
-        }
-        */
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int {
@@ -269,12 +253,37 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
         cell.optionLabel.stringValue = item.name
         cell.subLabel.stringValue = item.key
         cell.helpButtom.isHidden = item.help == nil
-        cell.valueSlider.minValue = item.range.lowerBound
-        cell.valueSlider.maxValue = item.range.upperBound
-        cell.valueSlider.floatValue = value
+        if let range = item.range {
+            cell.checkbox.isHidden = true
+            cell.valueSlider.isHidden = false
+            cell.valueSlider.minValue = range.lowerBound
+            cell.valueSlider.maxValue = range.upperBound
+            cell.valueSlider.floatValue = value
+        } else {
+            cell.checkbox.isHidden = false
+            cell.valueSlider.isHidden = true
+        }
         cell.valueLabel.stringValue = String(format: "%.2f", value)
-
+        cell.step = item.step
+        
         return cell
+    }
+
+    @IBAction func defaultsAction(_ sender: NSButton) {
+
+        appDelegate.uniforms.self = CrtUniforms.defaults
+        tableView.reloadData()
+    }
+
+    @IBAction func cancelAction(_ sender: NSButton) {
+
+        appDelegate.uniforms.self = oldSettings
+        window?.close()
+    }
+
+    @IBAction func okAction(_ sender: NSButton) {
+
+        window?.close()
     }
 
 }

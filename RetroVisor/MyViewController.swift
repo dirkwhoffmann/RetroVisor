@@ -269,26 +269,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
         // Convert pixelBuffer to Metal texture (or store it)
         self.currentTexture = texture(from: pixelBuffer)
 
-        // let width = currentTexture!.width
-        // let height = currentTexture!.height
-
-        // Create a fitting intermediate texture
-        /*
-        if intermediateTexture == nil ||
-            intermediateTexture!.width != width ||
-            intermediateTexture!.height != height {
-
-            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
-                                                                      width: width,
-                                                                      height: height,
-                                                                      mipmapped: false)
-            descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-            descriptor.storageMode = .private
-
-            intermediateTexture = device.makeTexture(descriptor: descriptor)
-        }
-         */
-
         // Trigger view redraw
         mtkView.setNeedsDisplay(mtkView.bounds)
     }

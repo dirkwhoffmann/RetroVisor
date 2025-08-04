@@ -87,7 +87,7 @@
                                                         <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eRT-ZN-xDk">
                                                             <rect key="frame" x="343" y="18" width="132" height="24"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                            <sliderCell key="cell" controlSize="small" continuous="YES" alignment="left" maxValue="100" doubleValue="52.982003348214292" tickMarkPosition="above" sliderType="linear" id="FTI-rv-aKG"/>
+                                                            <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="61.704799107142861" tickMarkPosition="above" sliderType="linear" id="FTI-rv-aKG"/>
                                                             <connections>
                                                                 <action selector="sliderAction:" target="dc4-U3-tXd" id="4pD-dV-UoC"/>
                                                             </connections>
@@ -103,8 +103,20 @@
                                                                 <action selector="helpButton:" target="dc4-U3-tXd" id="TVK-er-5Ow"/>
                                                             </connections>
                                                         </button>
+                                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Hbh-6s-BXB">
+                                                            <rect key="frame" x="406" y="22" width="18" height="18"/>
+                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                            <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="vJG-Cd-f42">
+                                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                                <font key="font" metaFont="system"/>
+                                                            </buttonCell>
+                                                            <connections>
+                                                                <action selector="enableAction:" target="dc4-U3-tXd" id="mpb-gW-BaT"/>
+                                                            </connections>
+                                                        </button>
                                                     </subviews>
                                                     <connections>
+                                                        <outlet property="checkbox" destination="Hbh-6s-BXB" id="ty9-zp-Uao"/>
                                                         <outlet property="controller" destination="-2" id="afe-1E-lrY"/>
                                                         <outlet property="helpButtom" destination="Lwf-j7-OFS" id="cH5-TH-cv0"/>
                                                         <outlet property="imageView" destination="Nj1-bP-dTN" id="npY-TN-1xs"/>
@@ -134,12 +146,46 @@
                         </scroller>
                     </scrollView>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3LO-BQ-rm6">
-                        <rect key="frame" x="518" y="13" width="69" height="32"/>
+                        <rect key="frame" x="495" y="13" width="92" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
-                        <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Djs-Rm-Pch">
+                        <buttonCell key="cell" type="push" title="OK" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Djs-Rm-Pch">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
+                            <string key="keyEquivalent" base64-UTF8="YES">
+DQ
+</string>
                         </buttonCell>
+                        <connections>
+                            <action selector="okAction:" target="-2" id="0F3-aP-qdS"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XRG-zC-4T1">
+                        <rect key="frame" x="405" y="13" width="92" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                        <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="JYH-zo-vRi">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                            <string key="keyEquivalent" base64-UTF8="YES">
+Gw
+</string>
+                        </buttonCell>
+                        <connections>
+                            <action selector="cancelAction:" target="-2" id="y3W-Sa-WXN"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Zce-gc-Hp1">
+                        <rect key="frame" x="13" y="13" width="135" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                        <buttonCell key="cell" type="push" title="Restore Defaults" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="mZ5-Ur-Xlk">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                            <string key="keyEquivalent" base64-UTF8="YES">
+Gw
+</string>
+                        </buttonCell>
+                        <connections>
+                            <action selector="defaultsAction:" target="-2" id="3S6-ZI-yim"/>
+                        </connections>
                     </button>
                 </subviews>
             </view>

@@ -105,41 +105,8 @@ class MyWindowController: NSWindowController {
             window.contentView?.layer?.borderColor = NSColor.systemBlue.cgColor
             window.contentView?.layer?.borderWidth = 2
             window.contentView?.layer?.cornerRadius = 10
-            // startTrackingWindowLive()
         }
     }
-
-    /*
-    var eventMonitor: Any?
-    var lastWindowFrame: NSRect = .zero
-
-    func startTrackingWindowLive() {
-        lastWindowFrame = window?.frame ?? .zero
-
-        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDragged]) { [weak self] _ in
-            print("monitor")
-            guard let self = self, let window = self.window else { return }
-            let newFrame = window.frame
-            print("newFrame  \(newFrame)")
-            if newFrame != self.lastWindowFrame {
-                self.lastWindowFrame = newFrame
-                self.windowDidActuallyMove(to: newFrame)
-            }
-        }
-        print("eventMonitor = \(eventMonitor)")
-    }
-
-    func stopTrackingWindowLive() {
-        if let monitor = eventMonitor {
-            NSEvent.removeMonitor(monitor)
-            eventMonitor = nil
-        }
-    }
-
-    func windowDidActuallyMove(to frame: NSRect) {
-        print("Window moved to \(frame)")
-    }
-     */
 }
 
 extension MyWindowController: TrackingWindowDelegate {
@@ -195,12 +162,14 @@ extension MyWindowController: TrackingWindowDelegate {
         freeze()
     }
 
+    /*
     func windowDidResize(_ notification: Notification) {
         // print("resize")
         if let win = window as? GlassWindow {
             // win.liveFrame = NSRect(origin: window!.frame.origin, size: window!.frame.size)
         }
     }
+    */
 
     func scheduleDebouncedUpdate(frame: NSRect? = nil) {
 
