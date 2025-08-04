@@ -12,6 +12,7 @@ import Cocoa
 
 class ShaderSettingCell: NSTableCellView {
 
+    @IBOutlet weak var controller: SettingsWindowController!
     @IBOutlet weak var optionImage: NSImageView!
     @IBOutlet weak var optionLabel: NSTextField!
     @IBOutlet weak var subLabel: NSTextField!
@@ -27,8 +28,8 @@ class ShaderSettingCell: NSTableCellView {
 
     @IBAction func sliderAction(_ sender: NSSlider) {
 
-        let val = sender.doubleValue
-        print("Slider: \(sender.doubleValue)")
+        controller.set(key: subLabel.stringValue, value: sender.floatValue)
+        valueLabel.stringValue = String(format: "%.2f", sender.floatValue)
     }
 
     @IBAction func helpButton(_ sender: Any) {

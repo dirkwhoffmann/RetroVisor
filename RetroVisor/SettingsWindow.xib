@@ -7,6 +7,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SettingsWindowController" customModule="RetroVisor" customModuleProvider="target">
             <connections>
+                <outlet property="tableView" destination="437-iL-bgN" id="HB8-O0-EiL"/>
                 <outlet property="window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
             </connections>
         </customObject>
@@ -104,6 +105,7 @@
                                                         </button>
                                                     </subviews>
                                                     <connections>
+                                                        <outlet property="controller" destination="-2" id="afe-1E-lrY"/>
                                                         <outlet property="helpButtom" destination="Lwf-j7-OFS" id="cH5-TH-cv0"/>
                                                         <outlet property="imageView" destination="Nj1-bP-dTN" id="npY-TN-1xs"/>
                                                         <outlet property="optionLabel" destination="f4s-BI-VXL" id="EjA-Au-voa"/>
