@@ -81,7 +81,7 @@ extension MyWindowController: TrackingWindowDelegate {
 
         print("windowDidStopResize")
         if !recorder.responsive {
-            recorder.capture(receiver: self, window: window)
+            recorder.capture(window: window)
         }
     }
 
@@ -98,7 +98,7 @@ extension MyWindowController: TrackingWindowDelegate {
 
         print("windowDidStopDrag")
         if !recorder.responsive {
-            recorder.capture(receiver: self, window: window)
+            recorder.capture(window: window)
         }
 
     }
@@ -112,14 +112,7 @@ extension MyWindowController: TrackingWindowDelegate {
 
         if (recorder.responsive) {
 
-            recorder.capture(receiver: self, window: trackingWindow!)
-            if let textureRect = recorder.textureRect {
-                viewController?.updateTextureRect(textureRect)
-            }
-
-        } else {
-
-            // recorder.capture(receiver: self, view: self.window!.contentView!, frame: frame)
+            recorder.capture(window: trackingWindow!)
         }
     }
 }
@@ -127,13 +120,17 @@ extension MyWindowController: TrackingWindowDelegate {
 extension MyWindowController: CapturerDelegate {
 
     func textureRectDidChange(rect: CGRect) {
+
         print("textureRectDidChange \(rect)")
+        viewController?.updateTextureRect(rect)
     }
     func captureRectDidChange(rect: CGRect) {
+
         print("captureRectDidChange \(rect)")
     }
 
     func recorderDidStart() {
+
         print("recorderDidRestart")
     }
 
@@ -141,7 +138,7 @@ extension MyWindowController: CapturerDelegate {
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
-        // Pass pixel buffer to view controller
+        // Process the pixel buffer in the view controller
         DispatchQueue.main.async { [weak self] in
             if let vc = self?.contentViewController as? MyViewController {
                 vc.update(with: pixelBuffer)

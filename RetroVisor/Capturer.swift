@@ -40,7 +40,7 @@ class Capturer: NSObject, SCStreamDelegate
     var textureRect: CGRect?
 
     // In responsive mode, the entire screen is recorded
-    var responsive = false
+    var responsive = true
 
     func normalize(rect: CGRect) -> CGRect {
 
@@ -52,7 +52,7 @@ class Capturer: NSObject, SCStreamDelegate
         )
     }
 
-    func capture(receiver: CapturerDelegate, window: TrackingWindow)
+    func capture(window: TrackingWindow)
     {
         let newSourceRect = window.screenCoordinates
         var newCaptureRect: CGRect!
@@ -109,7 +109,7 @@ class Capturer: NSObject, SCStreamDelegate
 
     func launch(sourceRect: CGRect? = nil) async
     {
-        print("setup")
+        print("launch")
 
         do {
 
@@ -154,109 +154,10 @@ class Capturer: NSObject, SCStreamDelegate
             try stream!.addStreamOutput(delegate!, type: .screen, sampleHandlerQueue: videoQueue)
 
             try await stream!.startCapture()
-            print("Stream capturer launched.")
+            print("Stream capturer launched")
 
         } catch {
             print("Error: \(error)")
         }
     }
-
-    /*
-    func restart(receiver: SCStreamOutput) async
-    {
-        print("restart")
-
-        do {
-
-            // Stop current stream
-            try await stream?.stopCapture()
-
-            // Get the display to capture
-            let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
-            display = content.displays.first
-
-            if (display == nil) {
-                fatalError("Failed to select display")
-            }
-
-            // Create a content filter with the current app excluded
-            let excludedApps = content.applications.filter {
-                app in Bundle.main.bundleIdentifier == app.bundleIdentifier
-            }
-            filter = SCContentFilter(display: display!,
-                                     excludingApplications: excludedApps,
-                                     exceptingWindows: [])
-
-            // Setup the stream with new config
-            stream = SCStream(filter: filter!, configuration: streamConfiguration, delegate: self)
-
-            // Prepare to receive streamed data
-            try stream!.addStreamOutput(receiver, type: .screen, sampleHandlerQueue: videoQueue)
-
-            print("Restarting stream capture...")
-            try await stream!.startCapture()
-
-        } catch {
-            print("Error: \(error)")
-            return
-        }
-    }
-    */
-
-    func viewRectInScreenPixelsNew(view: NSView) -> CGRect? {
-
-        // View frame relative to window
-        let viewFrame = view.convert(view.bounds, to: nil)
-
-        // Window frame relative to screen (points)
-        let windowFrame = view.window!.frame
-
-        // View frame in screen points
-        let screenRectPoints = CGRect(
-            x: windowFrame.origin.x + viewFrame.origin.x,
-            y: windowFrame.origin.y + viewFrame.origin.y,
-            width: viewFrame.width,
-            height: viewFrame.height)
-
-        // Convert screen points to pixels (multiply by display.scale)
-
-        let screenRectPixels = CGRect(
-            x: screenRectPoints.origin.x * 2,
-            y: screenRectPoints.origin.y * 2,
-            width: screenRectPoints.width * 2,
-            height: screenRectPoints.height * 2)
-
-        return screenRectPixels
-    }
-
-
-    func viewRectInScreenPixels(view: NSView) -> CGRect? {
-
-        // View frame relative to window
-        let viewFrame = view.convert(view.bounds, to: nil)
-
-        // Window frame relative to screen (points)
-        let windowFrame = view.window!.frame
-
-        // View frame in screen points
-        let screenRectPoints = CGRect(
-            x: windowFrame.origin.x + viewFrame.origin.x,
-            y: windowFrame.origin.y + viewFrame.origin.y,
-            width: viewFrame.width,
-            height: viewFrame.height)
-
-        // Convert screen points to pixels (multiply by display.scale)
-        let scalex = CGFloat(1.0) / CGFloat(display?.width ?? 1)
-        let scaley = CGFloat(1.0) / CGFloat(display?.height ?? 1)
-
-        let screenRectPixels = CGRect(
-            x: screenRectPoints.origin.x * scalex,
-            y: screenRectPoints.origin.y * scaley,
-            width: screenRectPoints.width * scalex,
-            height: screenRectPoints.height * scaley)
-
-        return screenRectPixels
-    }
-
-
 }
