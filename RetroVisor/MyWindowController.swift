@@ -19,10 +19,10 @@ class MyWindowController: NSWindowController {
     var recorder = ScreenRecorder()
 
     // Source rectangle of the screen capturer
-    var captureRect: CGRect?
+    // var captureRect: CGRect?
 
     // Displayed texture cutout
-    var textureRect: CGRect?
+    // var textureRect: CGRect?
 
     // Indicates if the window is click-through
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }
@@ -112,19 +112,7 @@ extension MyWindowController: TrackingWindowDelegate {
 
         print("windowDidStopDrag")
         if !recorder.responsive {
-
-            /*
-            guard let display = recorder.display else { return }
-            let newCaptureRect = display.frame
-            let newTextureRect = recorder.viewRectInScreenPixelsNew(view: window.contentView!)!
-            print("newCaptureRect = \(newCaptureRect)")
-            print("newTextureRect = \(newTextureRect)")
-            */
-
-            // let frame = window.frame
-            // let theFrame = NSRect(x: frame.minX, y: frame.minY, width: frame.width * 2, height: frame.height * 2)
-            // let the = recorder.viewRectInScreenPixels(view: window.contentView!)
-            recorder.capture(receiver: self, view: self.window!.contentView!, frame: window.frame)
+            recorder.capture(receiver: self, view: window.contentView!)
         }
 
     }

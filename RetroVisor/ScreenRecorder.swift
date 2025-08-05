@@ -9,6 +9,11 @@
 
 import ScreenCaptureKit
 
+protocol RecorderDelegate {
+
+    func textureRectDidChange(rect: CGRect)
+}
+
 @MainActor
 class ScreenRecorder: NSObject, SCStreamDelegate
 {
@@ -17,6 +22,9 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     var filter: SCContentFilter?
     var window: NSWindow?
     let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
+
+    // The recorder delegate
+    var delegate: RecorderDelegate?
 
     // Source rectangle of the screen capturer
     var captureRect: CGRect?
@@ -40,10 +48,10 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         )
     }
 
-    func inScreenCoords(view: NSView) -> CGRect {
+    func inScreenCoords(view: NSView, frame: NSRect? = nil) -> CGRect {
 
         let window = view.window!
-        let windowFrame = window.frame
+        let windowFrame = frame ?? window.frame
         let screenFrame = window.screen?.frame ?? .zero
 
         return CGRect(
@@ -53,33 +61,6 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             height: windowFrame.height
         )
     }
-
-    func inScreenCoords(view: NSView, frame: NSRect) -> CGRect {
-
-        let window = view.window!
-        let windowFrame = frame
-        let screenFrame = window.screen?.frame ?? .zero
-
-        return CGRect(
-            x: windowFrame.origin.x,
-            y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
-            width: windowFrame.width,
-            height: windowFrame.height
-        )
-    }
-
-    /*
-    func normalizedInScreenCoords(view: NSView) -> CGRect {
-
-        let rect = inScreenCoords(view: view)
-        return CGRect(
-            x: rect.minX / CGFloat(display!.width),
-            y: rect.minY / CGFloat(display!.height),
-            width: rect.width / CGFloat(display!.width),
-            height: rect.height / CGFloat(display!.height)
-        )
-    }
-    */
 
     func normalize(rect: CGRect) -> CGRect {
 
@@ -91,16 +72,12 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         )
     }
 
-    func capture(receiver: SCStreamOutput, view: NSView, frame: NSRect?)
+    func capture(receiver: SCStreamOutput, view: NSView, frame: NSRect? = nil)
     {
-        if let frame = frame {
-            capture(receiver: receiver, sourceRect: inScreenCoords(view: view, frame: frame))
-        } else {
-            capture(receiver: receiver, sourceRect: inScreenCoords(view: view))
-        }
+        capture(receiver: receiver, sourceRect: inScreenCoords(view: view, frame: frame))
     }
 
-    func capture(receiver: SCStreamOutput, sourceRect: CGRect)
+    private func capture(receiver: SCStreamOutput, sourceRect: CGRect)
     {
         var newCaptureRect = CGRect.zero
         var newTextureRect = CGRect.zero
