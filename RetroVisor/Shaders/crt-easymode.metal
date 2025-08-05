@@ -7,10 +7,12 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
-// MSL port of https://github.com/libretro/common-shaders/blob/master/crt/shaders/crt-easymode.cg
+// This shader is an experimental MSL port of
+// https://github.com/libretro/common-shaders/blob/master/crt/shaders/crt-easymode.cg
 
 #include <metal_stdlib>
 #include "ShaderTypes.metal"
+
 using namespace metal;
 
 constant constexpr float M_PI = 3.14159265358979323846264338327950288;

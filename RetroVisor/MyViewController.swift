@@ -8,9 +8,8 @@
 // -----------------------------------------------------------------------------
 
 import Cocoa
-
-import Cocoa
 import MetalKit
+import MetalPerformanceShaders
 
 struct Vertex {
 
@@ -104,6 +103,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
     var currentTexture: MTLTexture?
     // var timeBuffer: MTLBuffer!
     var intermediateTexture: MTLTexture?
+    var intermediateTexture2: MTLTexture?
 
     var time: Float = 0.0
     var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
@@ -278,6 +278,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         if (intermediateTexture?.width == 2 * width && intermediateTexture?.height == 2 * height) { return }
         intermediateTexture = makeIntermediateTexture(device: device, width: 2 * width, height: 2 * height)
+        intermediateTexture2 = makeIntermediateTexture(device: device, width: 2 * width, height: 2 * height)
         print("interm: \(intermediateTexture!.width) \(intermediateTexture!.height)")
     }
 
@@ -295,7 +296,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
                                                                   height: height,
                                                                   mipmapped: false)
         descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        descriptor.storageMode = .private
+        // descriptor.storageMode = .private
 
 
         return device.makeTexture(descriptor: descriptor)
@@ -304,6 +305,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
     private var lastFrameTime: TimeInterval = CACurrentMediaTime()
     private let expectedFrameDuration: TimeInterval = 1.0 / 60.0  // for 60 FPS
     private let frameDropThresholdMultiplier = 1.5  // Consider frame dropped if duration > 1.5x expected
+
+    var animation = 0.0
 
     func draw(in view: MTKView) {
 
@@ -333,8 +336,8 @@ class MyViewController: NSViewController, MTKViewDelegate {
         //
 
         if intermediateTexture == nil {
-            // intermediateTexture = makeIntermediateTexture(device: device, width: Int(trect.width), height: Int(trect.height))
             intermediateTexture = makeIntermediateTexture(device: device, width: Int(800), height: Int(600))
+            intermediateTexture2 = makeIntermediateTexture(device: device, width: Int(800), height: Int(600))
         }
         let ripplePassDescriptor = MTLRenderPassDescriptor()
         ripplePassDescriptor.colorAttachments[0].texture = intermediateTexture
@@ -359,6 +362,20 @@ class MyViewController: NSViewController, MTKViewDelegate {
         }
 
         //
+        // Experimental
+        //
+
+
+        let radius = 9.0 * uniforms.intensity
+        let intRadius = Int(radius) | 1
+        // let gauss = MPSImageGaussianBlur(device: device, sigma: 4.0 * uniforms.intensity)
+        let blur = MPSImageBox(device: device, kernelWidth: intRadius, kernelHeight: intRadius)
+
+        blur.encode(commandBuffer: commandBuffer,
+                      inPlaceTexture: &intermediateTexture!, fallbackCopyAllocator: nil)
+
+
+        //
         // Second pass
         //
 
@@ -367,7 +384,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState2)
         encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
-        encoder.setFragmentTexture(intermediateTexture, index: 0) // use ripple output
+        encoder.setFragmentTexture(intermediateTexture, index: 0)
         encoder.setFragmentSamplerState(intensity.current > 0 ? linearSampler : nearestSampler, index: 0)
 
         // Pass uniforms: time and center
