@@ -75,16 +75,14 @@ class Capturer: NSObject, SCStreamDelegate
         )
     }
 
-    func capture(receiver: CapturerDelegate, view: NSView)
+    func capture(receiver: CapturerDelegate, window: NSWindow)
     {
-        print("view \(view.frame)")
-        print("window \(view.window!.frame)")
-        capture(receiver: receiver, view: view, frame: view.window!.frame)
+        capture(receiver: receiver, window: window, frame: window.frame)
     }
 
-    func capture(receiver: CapturerDelegate, view: NSView, frame: NSRect)
+    func capture(receiver: CapturerDelegate, window: NSWindow, frame: NSRect)
     {
-        let sourceRect = inScreenCoords(view: view, frame: frame)
+        let sourceRect = inScreenCoords(view: window.contentView!, frame: frame)
         var newCaptureRect = CGRect.zero
         var newTextureRect = CGRect.zero
 

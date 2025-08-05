@@ -95,7 +95,7 @@ extension MyWindowController: TrackingWindowDelegate {
 
         print("windowDidStopResize")
         if !recorder.responsive {
-            recorder.capture(receiver: self, view: self.window!.contentView!, frame: window.frame)
+            recorder.capture(receiver: self, window: self.window!, frame: window.frame)
         }
     }
 
@@ -112,7 +112,7 @@ extension MyWindowController: TrackingWindowDelegate {
 
         print("windowDidStopDrag")
         if !recorder.responsive {
-            recorder.capture(receiver: self, view: window.contentView!)
+            recorder.capture(receiver: self, window: window)
         }
 
     }
@@ -126,7 +126,7 @@ extension MyWindowController: TrackingWindowDelegate {
 
         if (recorder.responsive) {
 
-            recorder.capture(receiver: self, view: self.window!.contentView!, frame: frame)
+            recorder.capture(receiver: self, window: self.window!, frame: frame)
             if let textureRect = recorder.textureRect {
                 viewController?.updateTextureRect(textureRect)
             }
