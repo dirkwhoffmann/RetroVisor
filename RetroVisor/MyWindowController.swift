@@ -12,18 +12,23 @@ import ScreenCaptureKit
 
 class MyWindowController: NSWindowController {
 
-    var recorder = ScreenRecorder()
     var viewController : MyViewController? { return self.contentViewController as? MyViewController }
     var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
 
     var liveMode: Bool = false
     var debounceTimer: Timer?
 
+    // The screen recorder
+    var recorder = ScreenRecorder()
+
     // Source rectangle of the screen capturer
     var captureRect: CGRect?
 
     // Displayed texture cutout
     var textureRect: CGRect?
+
+    // Indicates if the window is currently frozen
+    var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }
 
     func updateRects() {
 
@@ -136,25 +141,10 @@ extension MyWindowController: TrackingWindowDelegate {
         viewController!.intensity.steps = 25
     }
 
-    /*
-    func windowDidDrag(_ window: TrackingWindow, frame: NSRect) {
-
-    }
-    */
-
     func windowWasDoubleClicked(_ window: TrackingWindow) {
-        print("Double clicked:")
+
         freeze()
     }
-
-    /*
-    func windowDidResize(_ notification: Notification) {
-        // print("resize")
-        if let win = window as? GlassWindow {
-            // win.liveFrame = NSRect(origin: window!.frame.origin, size: window!.frame.size)
-        }
-    }
-    */
 
     func scheduleDebouncedUpdate(frame: NSRect? = nil) {
 
@@ -183,14 +173,33 @@ extension MyWindowController: SCStreamOutput {
 
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
-        // print("🎥 Frame received at: \(Date())")
-
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
         // Pass pixel buffer to view controller
         DispatchQueue.main.async { [weak self] in
             if let vc = self?.contentViewController as? MyViewController {
                 vc.update(with: pixelBuffer)
             }
         }
+    }
+}
+
+extension MyWindowController: NSMenuItemValidation {
+
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+
+        switch menuItem.action {
+
+        case #selector(MyWindowController.freezeAction(_:)):
+            menuItem.title = isFrozen ? "Unfreeze" : "Freeze"
+            return true
+
+        default:
+            return true
+        }
+    }
+    @IBAction func freezeAction(_ sender: Any!) {
+
+        isFrozen ? unfreeze() : freeze()
     }
 }

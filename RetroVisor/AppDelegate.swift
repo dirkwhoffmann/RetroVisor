@@ -26,13 +26,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return NSApplication.shared.windows.first?.windowController as? MyWindowController
     }
 
-    /*
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
 
         windowController?.unfreeze()
         return true
     }
-     */
 
     func applicationDidBecomeActive(_ notification: Notification) {
 

@@ -130,6 +130,13 @@ class TrackingWindow: NSWindow, NSWindowDelegate {
         trackingDelegate?.windowDidResize(self, frame: trackedFrame)
     }
 
+    /*
+    func windowDidBecomeKey(_ notification: Notification) {
+
+        print("Become key")
+    }
+    */
+
     override func sendEvent(_ event: NSEvent) {
 
         super.sendEvent(event)
