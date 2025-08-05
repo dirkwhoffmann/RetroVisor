@@ -176,6 +176,15 @@ class MyViewController: NSViewController, MTKViewDelegate {
         pipelineDescriptor2.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
         pipelineDescriptor2.vertexDescriptor = vertexDescriptor
 
+        // Experimental
+        pipelineDescriptor2.colorAttachments[0].isBlendingEnabled = true
+        pipelineDescriptor2.colorAttachments[0].rgbBlendOperation = .add
+        pipelineDescriptor2.colorAttachments[0].alphaBlendOperation = .add
+        pipelineDescriptor2.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
+        pipelineDescriptor2.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
+        pipelineDescriptor2.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
+        pipelineDescriptor2.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
+
         do {
             pipelineState1 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor1)
             pipelineState2 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor2)
@@ -343,7 +352,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         ripplePassDescriptor.colorAttachments[0].texture = intermediateTexture
         ripplePassDescriptor.colorAttachments[0].loadAction = .clear
         ripplePassDescriptor.colorAttachments[0].storeAction = .store
-        ripplePassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
+        ripplePassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
 
         if let rippleEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: ripplePassDescriptor) {
             rippleEncoder.setRenderPipelineState(pipelineState1)
@@ -380,6 +389,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
         //
 
         guard let passDescriptor = view.currentRenderPassDescriptor else { return }
+        passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
 
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState2)

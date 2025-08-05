@@ -63,53 +63,36 @@ fragment float4 fragment_ripple(VertexOut in [[stage_in]],
 
     if (uniforms.intensity > 0.0) {
 
+        // Ripple parameters
+        float waveFreq        = 100.0; // 60
+        float waveSpeed       = 10.0;
+        float baseAmp         = 0.025 * uniforms.intensity; // 0.005
+        float brightnessDepth = 0.15 * uniforms.intensity;
+        float frequencyDrop   = 0.75;
+
+        // Compute distance to the center
         float2 dir = uv - mouse;
         float dist = length(dir);
 
-        // Ripple parameters
-        float waveFreq = 100.0; // 60
-        float waveSpeed = 10.0;
-        float waveAmp = 0.025 * uniforms.intensity; // 0.005
-        float brightnessDepth = 0.15 * uniforms.intensity;
+        // Make wavelength increase with distance
+        float variableFreq = waveFreq / (1.0 + dist * frequencyDrop);
 
-        // Make wavelength increase with distance (i.e., frequency drops)
-        float variableFreq = waveFreq / (1.0 + dist * 0.75);  // 5.0 is tunable
+        // Lower the amplitude with distance
+        float ampFalloff = exp(-dist * 0.5);
+        float rippleAmp = baseAmp * ampFalloff;
 
-        // Compute ripple and displacement
+        // Simulate ripple and displacement
         float ripple = sin((dist * variableFreq) - (uniforms.time * waveSpeed));
-        float offset = ripple * waveAmp;
+        float offset = ripple * rippleAmp;
         float2 rippleUV = uv + (dist > 0.0001 ? normalize(dir) * offset : float2(0.0));
 
-        // Sample and modulate brightness
+        // Rectify the coordinates at the border
+        rippleUV = clamp(rippleUV, float2(0.01), float2(0.99));
+
         float4 color = tex.sample(sam, rippleUV);
         float brightness = 1.0 - brightnessDepth * (cos((dist * variableFreq) - (uniforms.time * waveSpeed)) * 0.5 + 0.5);
         color.rgb *= brightness;
 
-        return color;
-
-
-        /*
-        float2 dir = uv - mouse;
-        float dist = length(dir);
-
-        // Ripple parameters
-        float waveFreq = 60.0;
-        float waveSpeed = 10.0;
-        float waveAmp = 0.005 * uniforms.intensity;
-        float brightnessDepth = 0.15 * uniforms.intensity;
-
-        // Displace UVs outward along radial direction
-        float ripple = sin((dist * waveFreq) - (uniforms.time * waveSpeed));
-        float offset = ripple * waveAmp;
-        float2 rippleUV = uv + (dist > 0.0001 ? normalize(dir) * offset : float2(0.0));
-
-        // Sample the texture
-        float4 color = tex.sample(sam, rippleUV);
-
-        // Darken wave fronts (multiply color)
-        float brightness = 1.0 - brightnessDepth * (cos((dist * waveFreq) - (uniforms.time * waveSpeed)) * 0.5 + 0.5);
-        color.rgb *= brightness;
-         */
         return color;
     }
 
