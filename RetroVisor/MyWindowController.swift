@@ -10,13 +10,13 @@
 import Cocoa
 import ScreenCaptureKit
 
-class MyWindowController: NSWindowController {
+class MyWindowController: NSWindowController  {
 
     var viewController : MyViewController? { return self.contentViewController as? MyViewController }
     var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
 
     // The screen recorder
-    var recorder = ScreenRecorder()
+    var recorder = Capturer()
 
     // Source rectangle of the screen capturer
     // var captureRect: CGRect?
@@ -122,7 +122,7 @@ extension MyWindowController: TrackingWindowDelegate {
         freeze()
     }
 
-    func capture(frame: NSRect? = nil) {
+    func capture(frame: NSRect) {
 
         if (recorder.responsive) {
 
@@ -135,23 +135,16 @@ extension MyWindowController: TrackingWindowDelegate {
 
             // recorder.capture(receiver: self, view: self.window!.contentView!, frame: frame)
         }
-        /*
-        // Cancel existing timer
-        debounceTimer?.invalidate()
-
-        // Schedule new timer
-        debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
-            Task {
-                await self!.recorder.capture(receiver: self!, view: self!.window!.contentView!, frame: nil)
-                await self!.viewController?.updateTextureRect(self!.recorder.textureRect!)
-            }
-        }
-        */
     }
 }
 
-extension MyWindowController: SCStreamOutput {
+extension MyWindowController: CapturerDelegate {
 
+    func textureRectDidChange(rect: CGRect) {
+
+        print("textureRectDidChange(\rect)")
+    }
+    
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }

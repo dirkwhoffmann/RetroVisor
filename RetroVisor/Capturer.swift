@@ -9,7 +9,7 @@
 
 import ScreenCaptureKit
 
-protocol RecorderDelegate {
+protocol CapturerDelegate : SCStreamOutput {
 
     func textureRectDidChange(rect: CGRect)
 }
@@ -24,12 +24,15 @@ class Capturer: NSObject, SCStreamDelegate
     let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
 
     // The recorder delegate
-    var delegate: RecorderDelegate?
+    var delegate: CapturerDelegate?
 
-    // Source rectangle of the screen capturer
+    // The source rectangle covered by the glass window
+    var sourceRect: CGRect?
+
+    // The source rectangle of the screen capturer
     var captureRect: CGRect?
 
-    // Displayed texture cutout
+    // The displayed texture cutout
     var textureRect: CGRect?
 
     // In responsive mode, the entire screen is recorded
@@ -72,12 +75,12 @@ class Capturer: NSObject, SCStreamDelegate
         )
     }
 
-    func capture(receiver: SCStreamOutput, view: NSView, frame: NSRect? = nil)
+    func capture(receiver: CapturerDelegate, view: NSView, frame: NSRect? = nil)
     {
         capture(receiver: receiver, sourceRect: inScreenCoords(view: view, frame: frame))
     }
 
-    private func capture(receiver: SCStreamOutput, sourceRect: CGRect)
+    private func capture(receiver: CapturerDelegate, sourceRect: CGRect)
     {
         var newCaptureRect = CGRect.zero
         var newTextureRect = CGRect.zero
@@ -121,9 +124,11 @@ class Capturer: NSObject, SCStreamDelegate
         }
     }
 
-    func launch(receiver: SCStreamOutput, sourceRect: CGRect? = nil) async
+    func launch(receiver: CapturerDelegate, sourceRect: CGRect? = nil) async
     {
         print("setup")
+
+        delegate = receiver
 
         do {
 

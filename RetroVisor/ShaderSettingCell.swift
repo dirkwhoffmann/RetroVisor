@@ -65,7 +65,7 @@ class ShaderSettingCell: NSTableCellView {
 
     @IBAction func sliderAction(_ sender: NSControl) {
 
-        var rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
+        let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
         controller.set(key: subLabel.stringValue, value: rounded)
         value = controller.get(key: subLabel.stringValue)
