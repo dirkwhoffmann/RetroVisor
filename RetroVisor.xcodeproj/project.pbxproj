@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
-		50BA96502E3C80D6006BA8DF /* GlassWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96462E3C80D6006BA8DF /* GlassWindow.swift */; };
 		50BA96512E3C80D6006BA8DF /* MyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* MyViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* MyWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* MyWindowController.swift */; };
 		50BA96532E3C80D6006BA8DF /* ScreenRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964C2E3C80D6006BA8DF /* ScreenRecorder.swift */; };
@@ -29,7 +28,6 @@
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		50BA96462E3C80D6006BA8DF /* GlassWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassWindow.swift; sourceTree = "<group>"; };
 		50BA96472E3C80D6006BA8DF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		50BA96492E3C80D6006BA8DF /* MyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyViewController.swift; sourceTree = "<group>"; };
 		50BA964A2E3C80D6006BA8DF /* MyWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyWindowController.swift; sourceTree = "<group>"; };
@@ -79,7 +77,6 @@
 				50BA965A2E3D4861006BA8DF /* Animated.swift */,
 				50BA96442E3C80D6006BA8DF /* AppDelegate.swift */,
 				50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */,
-				50BA96462E3C80D6006BA8DF /* GlassWindow.swift */,
 				50BA96492E3C80D6006BA8DF /* MyViewController.swift */,
 				50BA964A2E3C80D6006BA8DF /* MyWindowController.swift */,
 				50BA964C2E3C80D6006BA8DF /* ScreenRecorder.swift */,
@@ -189,7 +186,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */,
-				50BA96502E3C80D6006BA8DF /* GlassWindow.swift in Sources */,
 				50BA96592E3C80F5006BA8DF /* TrackingWindow.swift in Sources */,
 				50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */,
 				50BA96512E3C80D6006BA8DF /* MyViewController.swift in Sources */,

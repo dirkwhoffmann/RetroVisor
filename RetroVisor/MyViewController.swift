@@ -77,8 +77,8 @@ struct CrtUniforms {
 class MyViewController: NSViewController, MTKViewDelegate {
 
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
-    var glassWindow: GlassWindow? { view.window as? GlassWindow }
-    var windowController: MyWindowController? { return glassWindow?.myWindowController }
+    var glassWindow: TrackingWindow? { view.window as? TrackingWindow }
+    var windowController: MyWindowController? { return glassWindow?.windowController as? MyWindowController }
     var trackingWindow: TrackingWindow? { return windowController?.trackingWindow }
 
     var mtkView: MTKView!
@@ -322,7 +322,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     func draw(in view: MTKView) {
 
-        // let w = view.window as! GlassWindow
         guard let glassWindow = glassWindow else { return }
 
         windowController?.scheduleDebouncedUpdate(frame: glassWindow.liveFrame)
