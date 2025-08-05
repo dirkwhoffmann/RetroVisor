@@ -171,6 +171,11 @@ fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
     float2 texSize = uniforms.texRect.zw - uniforms.texRect.xy;
     float2 normuv = (in.texCoord - texOrigin) / texSize;
 
+    /*
+    float4 color = tex.sample(sam, in.texCoord);
+    return color;
+    */
+
     return crt_easymode(texture_size,
                         video_size,
                         output_size,

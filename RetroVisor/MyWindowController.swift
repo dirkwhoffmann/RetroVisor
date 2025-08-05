@@ -15,11 +15,6 @@ class MyWindowController: NSWindowController {
     var viewController : MyViewController? { return self.contentViewController as? MyViewController }
     var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
 
-    // In live mode, the texture updates when dragging and resizing
-    var liveMode: Bool = true
-
-    var debounceTimer: Timer?
-
     // The screen recorder
     var recorder = ScreenRecorder()
 
@@ -32,43 +27,13 @@ class MyWindowController: NSWindowController {
     // Indicates if the window is click-through
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }
 
-    /*
-    func updateRects() {
-
-        updateRects(area: .zero)
-    }
-
-    func updateRects(area: CGRect) {
-
-        print("updateRects(\(area))")
-
-        guard let display = recorder.display else { return }
-
-        if liveMode == false {
-
-            let newCaptureRect = display.frame
-            let newTextureRect = recorder.viewRectInScreenPixels(view: window!.contentView!)!
-            print("newCaptureRect = \(newCaptureRect)")
-            print("newTextureRect = \(newTextureRect)")
-
-            if captureRect != newCaptureRect {
-                print("Need to restart server")
-            }
-            captureRect = newCaptureRect
-            textureRect = newTextureRect
-        }
-    }
-     */
-
     override func windowDidLoad() {
 
         super.windowDidLoad()
 
-        print("windowDidLoad")
-
-        // Example customizations:
         if let window = self.window as? TrackingWindow {
 
+            // Setup the window
             window.isOpaque = false
             window.hasShadow = true
             window.level = .floating

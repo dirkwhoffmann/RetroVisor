@@ -229,7 +229,11 @@ class MyViewController: NSViewController, MTKViewDelegate {
         let ty2 = Float(rect.maxY)
 
         // print("tx1: \(tx1), tx2: \(tx2), ty1: \(ty1), ty2: \(ty2)")
-        uniforms.texRect = [tx1, ty1, tx2, ty2];
+        if windowController?.recorder.responsive == true {
+            uniforms.texRect = [tx1, ty1, tx2, ty2];
+        } else {
+            uniforms.texRect = [0.0, 0.0, 1.0, 1.0];
+        }
 
         let vertices: [Vertex] = [
             Vertex(pos: [-1,  1, 0, 1], tex: [tx1, ty1]),

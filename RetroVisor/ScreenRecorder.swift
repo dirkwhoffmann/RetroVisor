@@ -24,7 +24,8 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     // Displayed texture cutout
     var textureRect: CGRect?
 
-    var responsive = true
+    // In responsive mode, the entire screen is recorded
+    var responsive = false
 
     func windowInScreenCoords() -> CGRect {
 
