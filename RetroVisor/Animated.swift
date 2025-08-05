@@ -11,18 +11,8 @@ struct Animated<T: BinaryFloatingPoint> {
     
     var current: T
     var delta: T = 0
-    var steps: Int = 1 {
-        didSet {
-            let s = T(steps == 0 ? 1 : steps)
-            delta = (target - current) / s
-        }
-    }
-    var target: T {
-        didSet {
-            let s = T(steps == 0 ? 1 : steps)
-            delta = (target - current) / s
-        }
-    }
+    var steps: Int = 1 { didSet { delta = (target - current) / T(steps == 0 ? 1 : steps) } }
+    var target: T { didSet { delta = (target - current) / T(steps == 0 ? 1 : steps) } }
     var animates: Bool { current != target }
     var clamped: T { min(max(current, 0), 1) }
 

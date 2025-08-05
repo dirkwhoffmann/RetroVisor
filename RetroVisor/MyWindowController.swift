@@ -66,7 +66,6 @@ class MyWindowController: NSWindowController {
         if let window = self.window as? TrackingWindow {
 
             window.isOpaque = false
-            // window.backgroundColor = NSColor.systemBlue.withAlphaComponent(0.2)
             window.hasShadow = true
             window.level = .floating
             window.makeKeyAndOrderFront(nil)
@@ -93,7 +92,6 @@ class MyWindowController: NSWindowController {
 
             window.ignoresMouseEvents = true
             window.styleMask = [.titled, .nonactivatingPanel, .fullSizeContentView]
-            window.backgroundColor = NSColor.gray.withAlphaComponent(0.2)
             window.contentView?.layer?.borderColor = NSColor.systemGray.cgColor
             window.contentView?.layer?.borderWidth = 0
             window.contentView?.layer?.cornerRadius = 10
@@ -106,8 +104,7 @@ class MyWindowController: NSWindowController {
 
             window.ignoresMouseEvents = false
             window.styleMask = [.titled, .closable, .resizable, .miniaturizable, .nonactivatingPanel, .fullSizeContentView]
-            window.backgroundColor = NSColor.systemBlue.withAlphaComponent(0.2)
-            window.contentView?.layer?.borderColor = NSColor.systemBlue.cgColor
+            window.contentView?.layer?.borderColor = NSColor.systemRed.cgColor
             window.contentView?.layer?.borderWidth = 2
             window.contentView?.layer?.cornerRadius = 10
         }

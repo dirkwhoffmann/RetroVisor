@@ -9,18 +9,14 @@
 
 import Cocoa
 
-/*
-class ClickThroughView: NSView {
-
-}
-*/
-
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    var uniforms = CrtUniforms.defaults
-    
+    // Window controller of the settings dialog
     var settingsWindowController: SettingsWindowController?
+
+    // Customizable shader parameters
+    var uniforms = CrtUniforms.defaults
 
     var windowController: MyWindowController? {
         return NSApplication.shared.windows.first?.windowController as? MyWindowController
@@ -56,7 +52,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             settingsWindowController = SettingsWindowController(windowNibName: "SettingsWindow")
         }
         settingsWindowController?.showWindow(self)
-        NSApp.activate(ignoringOtherApps: true) // optional, bring to front
     }
 
 }
