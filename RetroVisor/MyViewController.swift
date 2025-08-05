@@ -323,7 +323,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         guard let trackingWindow = trackingWindow else { return }
 
-        windowController?.scheduleDebouncedUpdate(frame: trackingWindow.liveFrame)
+        windowController?.capture(frame: trackingWindow.liveFrame)
 
         intensity.move()
 
@@ -359,7 +359,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         if let rippleEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: ripplePassDescriptor) {
             rippleEncoder.setRenderPipelineState(pipelineState1)
-            rippleEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+            rippleEncoder.setVertexBuffer((windowController?.recorder.responsive)! ? vertexBuffer : vertexBuffer2, offset: 0, index: 0)
             rippleEncoder.setFragmentTexture(currentTexture, index: 0)
             rippleEncoder.setFragmentSamplerState(linearSampler, index: 0)
             rippleEncoder.setFragmentBytes(&uniforms,

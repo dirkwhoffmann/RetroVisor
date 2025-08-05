@@ -15,7 +15,9 @@ class MyWindowController: NSWindowController {
     var viewController : MyViewController? { return self.contentViewController as? MyViewController }
     var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
 
-    var liveMode: Bool = false
+    // In live mode, the texture updates when dragging and resizing
+    var liveMode: Bool = true
+
     var debounceTimer: Timer?
 
     // The screen recorder
@@ -27,9 +29,10 @@ class MyWindowController: NSWindowController {
     // Displayed texture cutout
     var textureRect: CGRect?
 
-    // Indicates if the window is currently frozen
+    // Indicates if the window is click-through
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }
 
+    /*
     func updateRects() {
 
         updateRects(area: .zero)
@@ -55,6 +58,7 @@ class MyWindowController: NSWindowController {
             textureRect = newTextureRect
         }
     }
+     */
 
     override func windowDidLoad() {
 
@@ -74,9 +78,8 @@ class MyWindowController: NSWindowController {
             window.trackingDelegate = self
             unfreeze()
 
-            // updateRects()
-
             Task {
+
                 // Setup the recorder
                 recorder.window = self.window
                 await recorder.launch(receiver: self)
@@ -124,6 +127,11 @@ extension MyWindowController: TrackingWindowDelegate {
         viewController!.intensity.target = 0.0
         viewController!.intensity.steps = 15
         viewController!.updateIntermediateTexture(width: 1 * Int(window.frame.width), height: 1 * Int(window.frame.height))
+
+        print("windowDidStopResize")
+        if !recorder.responsive {
+            recorder.capture(receiver: self, view: self.window!.contentView!, frame: window.frame)
+        }
     }
 
     func windowDidStartDrag(_ window: TrackingWindow) {
@@ -136,6 +144,24 @@ extension MyWindowController: TrackingWindowDelegate {
 
         viewController!.intensity.target = 0.0
         viewController!.intensity.steps = 25
+
+        print("windowDidStopDrag")
+        if !recorder.responsive {
+
+            /*
+            guard let display = recorder.display else { return }
+            let newCaptureRect = display.frame
+            let newTextureRect = recorder.viewRectInScreenPixelsNew(view: window.contentView!)!
+            print("newCaptureRect = \(newCaptureRect)")
+            print("newTextureRect = \(newTextureRect)")
+            */
+
+            // let frame = window.frame
+            // let theFrame = NSRect(x: frame.minX, y: frame.minY, width: frame.width * 2, height: frame.height * 2)
+            // let the = recorder.viewRectInScreenPixels(view: window.contentView!)
+            recorder.capture(receiver: self, view: self.window!.contentView!, frame: window.frame)
+        }
+
     }
 
     func windowWasDoubleClicked(_ window: TrackingWindow) {
@@ -143,7 +169,7 @@ extension MyWindowController: TrackingWindowDelegate {
         freeze()
     }
 
-    func scheduleDebouncedUpdate(frame: NSRect? = nil) {
+    func capture(frame: NSRect? = nil) {
 
         if (recorder.responsive) {
 
@@ -151,8 +177,12 @@ extension MyWindowController: TrackingWindowDelegate {
             if let textureRect = recorder.textureRect {
                 viewController?.updateTextureRect(textureRect)
             }
-            return
+
+        } else {
+
+            // recorder.capture(receiver: self, view: self.window!.contentView!, frame: frame)
         }
+        /*
         // Cancel existing timer
         debounceTimer?.invalidate()
 
@@ -163,6 +193,7 @@ extension MyWindowController: TrackingWindowDelegate {
                 await self!.viewController?.updateTextureRect(self!.recorder.textureRect!)
             }
         }
+        */
     }
 }
 

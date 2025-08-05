@@ -239,6 +239,33 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     }
     */
 
+    func viewRectInScreenPixelsNew(view: NSView) -> CGRect? {
+
+        // View frame relative to window
+        let viewFrame = view.convert(view.bounds, to: nil)
+
+        // Window frame relative to screen (points)
+        let windowFrame = view.window!.frame
+
+        // View frame in screen points
+        let screenRectPoints = CGRect(
+            x: windowFrame.origin.x + viewFrame.origin.x,
+            y: windowFrame.origin.y + viewFrame.origin.y,
+            width: viewFrame.width,
+            height: viewFrame.height)
+
+        // Convert screen points to pixels (multiply by display.scale)
+
+        let screenRectPixels = CGRect(
+            x: screenRectPoints.origin.x * 2,
+            y: screenRectPoints.origin.y * 2,
+            width: screenRectPoints.width * 2,
+            height: screenRectPoints.height * 2)
+
+        return screenRectPixels
+    }
+
+
     func viewRectInScreenPixels(view: NSView) -> CGRect? {
 
         // View frame relative to window
