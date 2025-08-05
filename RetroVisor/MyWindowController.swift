@@ -18,12 +18,6 @@ class MyWindowController: NSWindowController  {
     // The screen recorder
     var recorder = Capturer()
 
-    // Source rectangle of the screen capturer
-    // var captureRect: CGRect?
-
-    // Displayed texture cutout
-    // var textureRect: CGRect?
-
     // Indicates if the window is click-through
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }
 
@@ -31,51 +25,43 @@ class MyWindowController: NSWindowController  {
 
         super.windowDidLoad()
 
-        if let window = self.window as? TrackingWindow {
+        let window = self.window as! TrackingWindow
 
-            // Setup the window
-            window.isOpaque = false
-            window.hasShadow = true
-            window.level = .floating
-            window.makeKeyAndOrderFront(nil)
-            window.titleVisibility = .hidden
-            window.titlebarAppearsTransparent = true
-            window.trackingDelegate = self
-            unfreeze()
+        // Setup the window
+        window.isOpaque = false
+        window.hasShadow = true
+        window.level = .floating
+        window.makeKeyAndOrderFront(nil)
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
+        window.trackingDelegate = self
+        unfreeze()
 
-            Task {
-
-                // Setup the recorder
-                recorder.window = self.window
-                await recorder.launch(receiver: self)
-                let rect = recorder.viewRectInScreenPixels(view: window.contentView!)!
-                viewController?.updateTextureRect(rect)
-            }
-        }
+        // Setup the recorder
+        recorder.window = self.window
+        recorder.delegate = self
     }
 
     func freeze() {
 
-        if let window = self.window {
+        let window = self.window as! TrackingWindow
 
-            window.ignoresMouseEvents = true
-            window.styleMask = [.titled, .nonactivatingPanel, .fullSizeContentView]
-            window.contentView?.layer?.borderColor = NSColor.systemGray.cgColor
-            window.contentView?.layer?.borderWidth = 0
-            window.contentView?.layer?.cornerRadius = 10
-        }
+        window.ignoresMouseEvents = true
+        window.styleMask = [.titled, .nonactivatingPanel, .fullSizeContentView]
+        window.contentView?.layer?.borderColor = NSColor.systemGray.cgColor
+        window.contentView?.layer?.borderWidth = 0
+        window.contentView?.layer?.cornerRadius = 10
     }
 
     func unfreeze() {
 
-        if let window = self.window {
+        let window = self.window as! TrackingWindow
 
-            window.ignoresMouseEvents = false
-            window.styleMask = [.titled, .closable, .resizable, .miniaturizable, .nonactivatingPanel, .fullSizeContentView]
-            window.contentView?.layer?.borderColor = NSColor.systemRed.cgColor
-            window.contentView?.layer?.borderWidth = 2
-            window.contentView?.layer?.cornerRadius = 10
-        }
+        window.ignoresMouseEvents = false
+        window.styleMask = [.titled, .closable, .resizable, .miniaturizable, .nonactivatingPanel, .fullSizeContentView]
+        window.contentView?.layer?.borderColor = NSColor.systemRed.cgColor
+        window.contentView?.layer?.borderWidth = 2
+        window.contentView?.layer?.cornerRadius = 10
     }
 }
 
@@ -141,13 +127,13 @@ extension MyWindowController: TrackingWindowDelegate {
 extension MyWindowController: CapturerDelegate {
 
     func textureRectDidChange(rect: CGRect) {
-        print("textureRectDidChange(\rect)")
+        print("textureRectDidChange \(rect)")
     }
     func captureRectDidChange(rect: CGRect) {
-        print("textureRectDidChange(\rect)")
+        print("captureRectDidChange \(rect)")
     }
 
-    func recorderDidRestart() {
+    func recorderDidStart() {
         print("recorderDidRestart")
     }
 

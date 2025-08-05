@@ -103,7 +103,6 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     var textureCache: CVMetalTextureCache!
     var currentTexture: MTLTexture?
-    // var timeBuffer: MTLBuffer!
     var intermediateTexture: MTLTexture?
     var intermediateTexture2: MTLTexture?
 

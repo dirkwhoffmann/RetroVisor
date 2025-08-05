@@ -13,7 +13,7 @@ protocol CapturerDelegate : SCStreamOutput {
 
     func textureRectDidChange(rect: CGRect)
     func captureRectDidChange(rect: CGRect)
-    func recorderDidRestart()
+    func recorderDidStart()
 }
 
 @MainActor
@@ -26,7 +26,9 @@ class Capturer: NSObject, SCStreamDelegate
     let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
 
     // The recorder delegate
-    var delegate: CapturerDelegate?
+    var delegate: CapturerDelegate? {
+        didSet { if delegate != nil { Task { await launch() } } }
+    }
 
     // The source rectangle covered by the glass window
     var sourceRect: CGRect?
@@ -38,33 +40,7 @@ class Capturer: NSObject, SCStreamDelegate
     var textureRect: CGRect?
 
     // In responsive mode, the entire screen is recorded
-    var responsive = true
-
-    func windowInScreenCoords() -> CGRect {
-
-        let windowFrame = window!.frame
-        let screenFrame = window!.screen?.frame ?? .zero
-
-        return CGRect(
-            x: windowFrame.origin.x,
-            y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
-            width: windowFrame.width,
-            height: windowFrame.height
-        )
-    }
-
-    func inScreenCoords(view: NSView, frame: NSRect) -> CGRect {
-
-        let windowFrame = frame
-        let screenFrame = view.window?.screen?.frame ?? .zero
-
-        return CGRect(
-            x: windowFrame.origin.x,
-            y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
-            width: windowFrame.width,
-            height: windowFrame.height
-        )
-    }
+    var responsive = false
 
     func normalize(rect: CGRect) -> CGRect {
 
@@ -78,7 +54,7 @@ class Capturer: NSObject, SCStreamDelegate
 
     func capture(receiver: CapturerDelegate, window: TrackingWindow)
     {
-        let newSourceRect = inScreenCoords(view: window.contentView!, frame: window.liveFrame)
+        let newSourceRect = window.screenCoordinates
         var newCaptureRect: CGRect!
         var newTextureRect: CGRect!
 
@@ -105,10 +81,10 @@ class Capturer: NSObject, SCStreamDelegate
             delegate?.textureRectDidChange(rect: newTextureRect)
         }
 
-        if (captureRect != newCaptureRect) {
+        if (stream == nil || captureRect != newCaptureRect) {
 
             captureRect = newCaptureRect
-            delegate?.captureRectDidChange(rect: newTextureRect)
+            delegate?.captureRectDidChange(rect: newCaptureRect)
 
             Task {
 
@@ -119,10 +95,10 @@ class Capturer: NSObject, SCStreamDelegate
                     try await stream?.stopCapture()
 
                     // Relaunch
-                    await launch(receiver: receiver, sourceRect: captureRect)
+                    await launch(sourceRect: captureRect)
 
                     // Inform the delegate
-                    delegate?.recorderDidRestart()
+                    delegate?.recorderDidStart()
 
                 } catch {
                     print("Error: \(error)")
@@ -131,11 +107,9 @@ class Capturer: NSObject, SCStreamDelegate
         }
     }
 
-    func launch(receiver: CapturerDelegate, sourceRect: CGRect? = nil) async
+    func launch(sourceRect: CGRect? = nil) async
     {
         print("setup")
-
-        delegate = receiver
 
         do {
 
@@ -177,7 +151,7 @@ class Capturer: NSObject, SCStreamDelegate
             stream = SCStream(filter: filter!, configuration: config, delegate: self)
 
             // Register the stream receiver
-            try stream!.addStreamOutput(receiver, type: .screen, sampleHandlerQueue: videoQueue)
+            try stream!.addStreamOutput(delegate!, type: .screen, sampleHandlerQueue: videoQueue)
 
             try await stream!.startCapture()
             print("Stream capturer launched.")
