@@ -26,10 +26,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return NSApplication.shared.windows.first?.windowController as? MyWindowController
     }
 
+    /*
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
 
         windowController?.unfreeze()
         return true
+    }
+     */
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+
+        windowController?.unfreeze()
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -41,9 +48,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return true
+    }
+
     @IBAction func showSettings(_ sender: Any?) {
 
-        print("showSettings")
         if settingsWindowController == nil {
             settingsWindowController = SettingsWindowController(windowNibName: "SettingsWindow")
         }
