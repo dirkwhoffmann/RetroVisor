@@ -77,9 +77,8 @@ struct CrtUniforms {
 class MyViewController: NSViewController, MTKViewDelegate {
 
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
-    var glassWindow: TrackingWindow? { view.window as? TrackingWindow }
-    var windowController: MyWindowController? { return glassWindow?.windowController as? MyWindowController }
-    var trackingWindow: TrackingWindow? { return windowController?.trackingWindow }
+    var trackingWindow: TrackingWindow? { view.window as? TrackingWindow }
+    var windowController: MyWindowController? { return trackingWindow?.windowController as? MyWindowController }
 
     var mtkView: MTKView!
     var device: MTLDevice!
@@ -322,20 +321,20 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     func draw(in view: MTKView) {
 
-        guard let glassWindow = glassWindow else { return }
+        guard let trackingWindow = trackingWindow else { return }
 
-        windowController?.scheduleDebouncedUpdate(frame: glassWindow.liveFrame)
+        windowController?.scheduleDebouncedUpdate(frame: trackingWindow.liveFrame)
 
         intensity.move()
 
-        let mouse = trackingWindow?.initialMouseLocationNrm ?? .zero
+        let mouse = trackingWindow.initialMouseLocationNrm ?? .zero
         time += 0.01
         frame += 1
         uniforms.time = time
         uniforms.zoom = zoom
         uniforms.intensity = intensity.current
         uniforms.resolution = [Float(currentTexture?.width ?? 100),Float(currentTexture?.height ?? 100)]
-        uniforms.window = [Float(glassWindow.liveFrame.width),Float(glassWindow.liveFrame.height)]
+        uniforms.window = [Float(trackingWindow.liveFrame.width),Float(trackingWindow.liveFrame.height)]
         // print("interm: \(intermediateTexture?.width ?? 0) \(intermediateTexture?.height ?? 0)")
         // print("frame: \(w.liveFrame.width) \(w.liveFrame.height)")
         uniforms.mouse = [Float(mouse.x), Float(1.0 - mouse.y)]
