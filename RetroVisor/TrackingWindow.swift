@@ -40,6 +40,7 @@ protocol TrackingWindowDelegate {
     func windowDidStopDrag(_ window: TrackingWindow)
     func windowDidStartResize(_ window: TrackingWindow)
     func windowDidResize(_ window: TrackingWindow, frame: NSRect)
+    func windowDidMove(_ window: TrackingWindow, frame: NSRect)
     func windowDidStopResize(_ window: TrackingWindow)
     func windowWasDoubleClicked(_ window: TrackingWindow)
 }
@@ -51,11 +52,12 @@ extension TrackingWindowDelegate {
     func windowDidStopDrag(_ window: TrackingWindow) {}
     func windowDidStartResize(_ window: TrackingWindow) {}
     func windowDidResize(_ window: TrackingWindow, frame: NSRect) {}
+    func windowDidMove(_ window: TrackingWindow, frame: NSRect) {}
     func windowDidStopResize(_ window: TrackingWindow) {}
     func windowWasDoubleClicked(_ window: TrackingWindow) {}
 }
 
-class TrackingWindow: NSWindow, NSWindowDelegate {
+class TrackingWindow: NSWindow {
 
     // The window delegate
     var trackingDelegate: TrackingWindowDelegate?
@@ -122,20 +124,6 @@ class TrackingWindow: NSWindow, NSWindowDelegate {
                                           y: initialMouseLocationRel!.y / frame.height)
 
     }
-
-    func windowDidResize(_ notification: Notification) {
-
-        trackedFrame = frame
-        if debug { print("windowDidResize(\(self))") }
-        trackingDelegate?.windowDidResize(self, frame: trackedFrame)
-    }
-
-    /*
-    func windowDidBecomeKey(_ notification: Notification) {
-
-        print("Become key")
-    }
-    */
 
     override func sendEvent(_ event: NSEvent) {
 
@@ -232,5 +220,22 @@ class TrackingWindow: NSWindow, NSWindowDelegate {
             recordLocations()
             trackedFrame = frame
         }
+    }
+}
+
+extension TrackingWindow : NSWindowDelegate {
+
+    func windowDidResize(_ notification: Notification) {
+
+        trackedFrame = frame
+        if debug { print("windowDidResize(\(self))") }
+        trackingDelegate?.windowDidResize(self, frame: trackedFrame)
+    }
+
+    func windowDidMove(_ notification: Notification) {
+
+        trackedFrame = frame
+        if debug { print("windowDidMove(\(self))") }
+        trackingDelegate?.windowDidMove(self, frame: trackedFrame)
     }
 }
