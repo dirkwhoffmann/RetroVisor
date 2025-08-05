@@ -33,17 +33,32 @@ import AppKit
  *    are useful for tasks such as mapping mouse positions or aligning UI elements.
  */
 
-protocol TrackingWindowDelegate: NSWindowDelegate {
+protocol TrackingWindowDelegate {
 
     func windowDidStartDrag(_ window: TrackingWindow)
+    func windowDidDrag(_ window: TrackingWindow, frame: NSRect)
     func windowDidStopDrag(_ window: TrackingWindow)
     func windowDidStartResize(_ window: TrackingWindow)
+    func windowDidResize(_ window: TrackingWindow, frame: NSRect)
     func windowDidStopResize(_ window: TrackingWindow)
-    func windowDidDrag(_ window: TrackingWindow, frame: NSRect)
     func windowWasDoubleClicked(_ window: TrackingWindow)
 }
 
-class TrackingWindow: NSWindow {
+extension TrackingWindowDelegate {
+
+    func windowDidStartDrag(_ window: TrackingWindow) {}
+    func windowDidDrag(_ window: TrackingWindow, frame: NSRect) {}
+    func windowDidStopDrag(_ window: TrackingWindow) {}
+    func windowDidStartResize(_ window: TrackingWindow) {}
+    func windowDidResize(_ window: TrackingWindow, frame: NSRect) {}
+    func windowDidStopResize(_ window: TrackingWindow) {}
+    func windowWasDoubleClicked(_ window: TrackingWindow) {}
+}
+
+class TrackingWindow: NSWindow, NSWindowDelegate {
+
+    // The window delegate
+    var trackingDelegate: TrackingWindowDelegate?
 
     // Enables window dragging by clicking anywhere inside the window
     var dragAnywhere: Bool = true
@@ -80,12 +95,16 @@ class TrackingWindow: NSWindow {
     // Timer to determine the end of a resize operation
     private var resizeDebounceTimer: Timer?
 
-    // Convenience accessors
-    private var trackingDelegate : TrackingWindowDelegate? { delegate as? TrackingWindowDelegate }
 
     //
     // Functions
     //
+
+    override func awakeFromNib() {
+
+        super.awakeFromNib()
+        delegate = self
+    }
 
     private func recordLocations() {
 
@@ -102,6 +121,13 @@ class TrackingWindow: NSWindow {
         initialMouseLocationNrm = NSPoint(x: initialMouseLocationRel!.x / frame.width,
                                           y: initialMouseLocationRel!.y / frame.height)
 
+    }
+
+    func windowDidResize(_ notification: Notification) {
+
+        trackedFrame = frame
+        if debug { print("windowDidResize(\(self))") }
+        trackingDelegate?.windowDidResize(self, frame: trackedFrame)
     }
 
     override func sendEvent(_ event: NSEvent) {
@@ -200,8 +226,4 @@ class TrackingWindow: NSWindow {
             trackedFrame = frame
         }
     }
-}
-
-extension NSWindow {
-
 }

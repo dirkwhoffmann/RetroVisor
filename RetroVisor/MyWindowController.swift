@@ -58,7 +58,7 @@ class MyWindowController: NSWindowController {
         print("windowDidLoad")
 
         // Example customizations:
-        if let window = self.window {
+        if let window = self.window as? TrackingWindow {
 
             window.isOpaque = false
             // window.backgroundColor = NSColor.systemBlue.withAlphaComponent(0.2)
@@ -67,7 +67,7 @@ class MyWindowController: NSWindowController {
             window.makeKeyAndOrderFront(nil)
             window.titleVisibility = .hidden
             window.titlebarAppearsTransparent = true
-            window.delegate = self
+            window.trackingDelegate = self
             unfreeze()
 
             // updateRects()
@@ -111,51 +111,36 @@ class MyWindowController: NSWindowController {
 
 extension MyWindowController: TrackingWindowDelegate {
 
-    func windowDidMove(_ notification: Notification) {
-        // print("\(viewController?.frame ?? 0) windowDidMove: \(window?.frame ?? NSRect.zero)")
-    }
-
     func windowDidStartResize(_ window: TrackingWindow) {
-        print("windowDidStartResize")
-        // viewController!.time = 1.0
+
         viewController!.intensity.target = 1.0
         viewController!.intensity.steps = 15
     }
 
     func windowDidStopResize(_ window: TrackingWindow) {
-        print("windowDidStopResize \(window.frame) \(window.liveFrame)")
-        // viewController!.time = 0.0
+
         viewController!.intensity.target = 0.0
         viewController!.intensity.steps = 15
         viewController!.updateIntermediateTexture(width: 1 * Int(window.frame.width), height: 1 * Int(window.frame.height))
     }
 
     func windowDidStartDrag(_ window: TrackingWindow) {
-        print("Started dragging")
-        // viewController!.time = 1.0
+
         viewController!.intensity.target = 1.0
         viewController!.intensity.steps = 25
     }
 
     func windowDidStopDrag(_ window: TrackingWindow) {
-        print("Stopped dragging")
-        // viewController!.time = 0.0
+
         viewController!.intensity.target = 0.0
         viewController!.intensity.steps = 25
     }
 
+    /*
     func windowDidDrag(_ window: TrackingWindow, frame: NSRect) {
-        // print("\(viewController?.frame ?? 0) Dragging: \(frame)")
 
-        /*
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm:ss.S" // S = tenths of a second
-        let timestamp = formatter.string(from: Date())
-        print("[\(timestamp)] \(viewController?.frame ?? 0) Dragging: \(frame)")
-
-        // scheduleDebouncedUpdate(frame: frame)
-        */
     }
+    */
 
     func windowWasDoubleClicked(_ window: TrackingWindow) {
         print("Double clicked:")
