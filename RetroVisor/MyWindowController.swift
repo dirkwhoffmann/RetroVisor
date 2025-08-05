@@ -95,7 +95,7 @@ extension MyWindowController: TrackingWindowDelegate {
 
         print("windowDidStopResize")
         if !recorder.responsive {
-            recorder.capture(receiver: self, window: self.window!, frame: window.frame)
+            recorder.capture(receiver: self, window: window)
         }
     }
 
@@ -126,7 +126,7 @@ extension MyWindowController: TrackingWindowDelegate {
 
         if (recorder.responsive) {
 
-            recorder.capture(receiver: self, window: self.window!, frame: frame)
+            recorder.capture(receiver: self, window: trackingWindow!)
             if let textureRect = recorder.textureRect {
                 viewController?.updateTextureRect(textureRect)
             }
@@ -141,10 +141,16 @@ extension MyWindowController: TrackingWindowDelegate {
 extension MyWindowController: CapturerDelegate {
 
     func textureRectDidChange(rect: CGRect) {
-
         print("textureRectDidChange(\rect)")
     }
-    
+    func captureRectDidChange(rect: CGRect) {
+        print("textureRectDidChange(\rect)")
+    }
+
+    func recorderDidRestart() {
+        print("recorderDidRestart")
+    }
+
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }

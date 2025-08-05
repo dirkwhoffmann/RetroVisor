@@ -12,6 +12,8 @@ import ScreenCaptureKit
 protocol CapturerDelegate : SCStreamOutput {
 
     func textureRectDidChange(rect: CGRect)
+    func captureRectDidChange(rect: CGRect)
+    func recorderDidRestart()
 }
 
 @MainActor
@@ -36,7 +38,7 @@ class Capturer: NSObject, SCStreamDelegate
     var textureRect: CGRect?
 
     // In responsive mode, the entire screen is recorded
-    var responsive = false
+    var responsive = true
 
     func windowInScreenCoords() -> CGRect {
 
@@ -74,51 +76,53 @@ class Capturer: NSObject, SCStreamDelegate
         )
     }
 
-    func capture(receiver: CapturerDelegate, window: NSWindow)
+    func capture(receiver: CapturerDelegate, window: TrackingWindow)
     {
-        capture(receiver: receiver, window: window, frame: window.frame)
-    }
+        let newSourceRect = inScreenCoords(view: window.contentView!, frame: window.liveFrame)
+        var newCaptureRect: CGRect!
+        var newTextureRect: CGRect!
 
-    func capture(receiver: CapturerDelegate, window: NSWindow, frame: NSRect)
-    {
-        let newSourceRect = inScreenCoords(view: window.contentView!, frame: frame)
-        guard newSourceRect != sourceRect else { return }
-
-        sourceRect = newSourceRect
-        var newCaptureRect = CGRect.zero
-        var newTextureRect = CGRect.zero
-
+        guard let display = display else { return }
 
         if responsive {
 
             // Grab the entire screen and draw a portion of the texture
-            guard let display = display else { return }
             newCaptureRect = display.frame
-            newTextureRect = normalize(rect: sourceRect!)
+            newTextureRect = normalize(rect: newSourceRect)
 
         } else {
 
             // Grab a portion of the screen and draw the entire texture
-            newCaptureRect = sourceRect!
+            newCaptureRect = newSourceRect
             newTextureRect = CGRect(x: 0, y: 0, width: 1, height: 1)
         }
 
-        textureRect = newTextureRect
+        sourceRect = newSourceRect
+
+        if textureRect != newTextureRect {
+
+            textureRect = newTextureRect
+            delegate?.textureRectDidChange(rect: newTextureRect)
+        }
 
         if (captureRect != newCaptureRect) {
 
             captureRect = newCaptureRect
-
-            // Restart the recorder
-            print("Restarting the recorder...")
+            delegate?.captureRectDidChange(rect: newTextureRect)
 
             Task {
+
+                // Restart the capturer
                 do {
+
                     // Stop current stream
                     try await stream?.stopCapture()
 
                     // Relaunch
                     await launch(receiver: receiver, sourceRect: captureRect)
+
+                    // Inform the delegate
+                    delegate?.recorderDidRestart()
 
                 } catch {
                     print("Error: \(error)")

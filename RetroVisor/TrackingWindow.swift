@@ -80,6 +80,19 @@ class TrackingWindow: NSWindow {
         return result
     }
 
+    var screenCoordinates: CGRect {
+
+        guard let screenFrame = screen?.frame else { return .zero }
+        let windowFrame = liveFrame
+
+        return CGRect(
+            x: windowFrame.origin.x,
+            y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
+            width: windowFrame.width,
+            height: windowFrame.height
+        )
+    }
+
     // Indicates if a drag operation is ongoing
     private(set) var isDragging: Bool = false
 
@@ -239,3 +252,21 @@ extension TrackingWindow : NSWindowDelegate {
         trackingDelegate?.windowDidMove(self, frame: trackedFrame)
     }
 }
+
+/*
+extension NSView {
+
+    func inScreenCoords(frame: NSRect) -> CGRect {
+
+        let windowFrame = frame
+        let screenFrame = view.window?.screen?.frame ?? .zero
+
+        return CGRect(
+            x: windowFrame.origin.x,
+            y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
+            width: windowFrame.width,
+            height: windowFrame.height
+        )
+    }
+}
+*/
