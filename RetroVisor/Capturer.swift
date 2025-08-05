@@ -51,11 +51,10 @@ class Capturer: NSObject, SCStreamDelegate
         )
     }
 
-    func inScreenCoords(view: NSView, frame: NSRect? = nil) -> CGRect {
+    func inScreenCoords(view: NSView, frame: NSRect) -> CGRect {
 
-        let window = view.window!
-        let windowFrame = frame ?? window.frame
-        let screenFrame = window.screen?.frame ?? .zero
+        let windowFrame = frame
+        let screenFrame = view.window?.screen?.frame ?? .zero
 
         return CGRect(
             x: windowFrame.origin.x,
@@ -82,22 +81,25 @@ class Capturer: NSObject, SCStreamDelegate
 
     func capture(receiver: CapturerDelegate, window: NSWindow, frame: NSRect)
     {
-        let sourceRect = inScreenCoords(view: window.contentView!, frame: frame)
+        let newSourceRect = inScreenCoords(view: window.contentView!, frame: frame)
+        guard newSourceRect != sourceRect else { return }
+
+        sourceRect = newSourceRect
         var newCaptureRect = CGRect.zero
         var newTextureRect = CGRect.zero
 
-        guard let display = display else { return }
 
         if responsive {
 
             // Grab the entire screen and draw a portion of the texture
+            guard let display = display else { return }
             newCaptureRect = display.frame
-            newTextureRect = normalize(rect: sourceRect)
+            newTextureRect = normalize(rect: sourceRect!)
 
         } else {
 
             // Grab a portion of the screen and draw the entire texture
-            newCaptureRect = sourceRect
+            newCaptureRect = sourceRect!
             newTextureRect = CGRect(x: 0, y: 0, width: 1, height: 1)
         }
 
