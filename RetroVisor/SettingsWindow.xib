@@ -17,7 +17,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="196" y="240" width="600" height="441"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1728" height="1079"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="3440" height="1415"/>
             <view key="contentView" id="se5-gp-TjO">
                 <rect key="frame" x="0.0" y="0.0" width="600" height="441"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -36,7 +36,7 @@
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                     <tableColumns>
-                                        <tableColumn identifier="AutomaticTableColumnIdentifier.0" width="544.5" minWidth="300" maxWidth="3000" id="rZX-TV-sZL">
+                                        <tableColumn identifier="AutomaticTableColumnIdentifier.0" width="545" minWidth="300" maxWidth="3000" id="rZX-TV-sZL">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -49,7 +49,7 @@
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                             <prototypeCellViews>
                                                 <tableCellView identifier="settingsCell" id="dc4-U3-tXd" customClass="ShaderSettingCell" customModule="RetroVisor" customModuleProvider="target">
-                                                    <rect key="frame" x="8" y="0.0" width="539" height="60"/>
+                                                    <rect key="frame" x="8" y="0.0" width="540" height="60"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
                                                         <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="f4s-BI-VXL">
@@ -62,7 +62,7 @@
                                                             </textFieldCell>
                                                         </textField>
                                                         <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Rdz-ib-Wwh" userLabel="Value">
-                                                            <rect key="frame" x="488" y="22" width="50" height="16"/>
+                                                            <rect key="frame" x="489" y="22" width="50" height="16"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="142.01" id="8Lp-Sm-yXh">
                                                                 <font key="font" metaFont="system"/>
@@ -85,7 +85,7 @@
                                                             <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSAdvanced" id="Gio-LG-qPo"/>
                                                         </imageView>
                                                         <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eRT-ZN-xDk">
-                                                            <rect key="frame" x="343" y="18" width="132" height="24"/>
+                                                            <rect key="frame" x="320" y="18" width="132" height="24"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                             <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="61.704799107142861" tickMarkPosition="above" sliderType="linear" id="FTI-rv-aKG"/>
                                                             <connections>
@@ -93,7 +93,7 @@
                                                             </connections>
                                                         </slider>
                                                         <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Lwf-j7-OFS">
-                                                            <rect key="frame" x="305" y="16" width="25" height="25"/>
+                                                            <rect key="frame" x="287" y="16" width="25" height="25"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                             <buttonCell key="cell" type="help" bezelStyle="helpButton" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="QM7-KQ-1ku">
                                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -104,8 +104,8 @@
                                                             </connections>
                                                         </button>
                                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Hbh-6s-BXB">
-                                                            <rect key="frame" x="456" y="21" width="53" height="18"/>
-                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                            <rect key="frame" x="456" y="21" width="18" height="18"/>
+                                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                             <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="vJG-Cd-f42">
                                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                 <font key="font" metaFont="system"/>
@@ -114,6 +114,14 @@
                                                                 <action selector="enableAction:" target="dc4-U3-tXd" id="mpb-gW-BaT"/>
                                                             </connections>
                                                         </button>
+                                                        <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="acS-yK-5UP">
+                                                            <rect key="frame" x="455" y="16" width="19" height="28"/>
+                                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                                            <stepperCell key="cell" continuous="YES" alignment="left" maxValue="100" id="Qa9-TA-Kl3"/>
+                                                            <connections>
+                                                                <action selector="stepperAction:" target="dc4-U3-tXd" id="XQt-aq-TVI"/>
+                                                            </connections>
+                                                        </stepper>
                                                     </subviews>
                                                     <connections>
                                                         <outlet property="checkbox" destination="Hbh-6s-BXB" id="ty9-zp-Uao"/>
@@ -124,6 +132,7 @@
                                                         <outlet property="subLabel" destination="lnZ-ly-2gU" id="bC3-Hk-pdH"/>
                                                         <outlet property="valueLabel" destination="Rdz-ib-Wwh" id="w5V-dK-aJy"/>
                                                         <outlet property="valueSlider" destination="eRT-ZN-xDk" id="C38-xg-5Xd"/>
+                                                        <outlet property="valueStepper" destination="acS-yK-5UP" id="MKU-jV-RMA"/>
                                                     </connections>
                                                 </tableCellView>
                                             </prototypeCellViews>

@@ -17,6 +17,7 @@ class ShaderSettingCell: NSTableCellView {
     @IBOutlet weak var optionLabel: NSTextField!
     @IBOutlet weak var subLabel: NSTextField!
     @IBOutlet weak var valueSlider: NSSlider!
+    @IBOutlet weak var valueStepper: NSStepper!
     @IBOutlet weak var checkbox: NSButton!
     @IBOutlet weak var valueLabel: NSTextField!
     @IBOutlet weak var helpButtom: NSButton!
@@ -31,8 +32,13 @@ class ShaderSettingCell: NSTableCellView {
                 valueSlider.isHidden = false
                 valueSlider.minValue = range.lowerBound
                 valueSlider.maxValue = range.upperBound
+                valueStepper.increment = Double(shaderSetting.step)
+                valueStepper.minValue = Double(range.lowerBound)
+                valueStepper.maxValue = Double(range.upperBound)
+
             } else {
                 checkbox.isHidden = false
+                valueStepper.isHidden = true
                 valueSlider.isHidden = true
             }
         }
@@ -42,6 +48,7 @@ class ShaderSettingCell: NSTableCellView {
         didSet {
             if shaderSetting.range != nil {
                 valueSlider.floatValue = value
+                valueStepper.floatValue = value
                 valueLabel.stringValue = String(format: shaderSetting.formatString, value)
             } else {
                 valueLabel.stringValue = value != 0 ? "Yes" : "No"
@@ -56,16 +63,24 @@ class ShaderSettingCell: NSTableCellView {
         // Drawing code here.
     }
 
-    @IBAction func sliderAction(_ sender: NSSlider) {
+    @IBAction func sliderAction(_ sender: NSControl) {
 
-        let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
+        var rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
         controller.set(key: subLabel.stringValue, value: rounded)
         value = controller.get(key: subLabel.stringValue)
+    }
+
+    @IBAction func stepperAction(_ sender: NSStepper) {
+
+        sliderAction(sender)
+
         /*
-        let readBack = controller.get(key: subLabel.stringValue)
-        valueLabel.stringValue = String(format: "%.2f", readBack)
-        */
+        let tmp = sender.floatValue
+
+        controller.set(key: subLabel.stringValue, value: rounded)
+        value = controller.get(key: subLabel.stringValue)
+         */
     }
 
     @IBAction func enableAction(_ sender: NSButton) {
