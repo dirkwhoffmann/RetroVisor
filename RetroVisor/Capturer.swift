@@ -38,7 +38,7 @@ class Capturer: NSObject, SCStreamDelegate
     var textureRect: CGRect?
 
     // In responsive mode, the entire screen is recorded
-    var responsive = true
+    var responsive = true { didSet { if responsive != oldValue { relaunch() } } }
 
     func normalize(rect: CGRect) -> CGRect {
 

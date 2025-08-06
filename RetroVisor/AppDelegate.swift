@@ -23,6 +23,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var windowController: MyWindowController? {
         return NSApplication.shared.windows.first?.windowController as? MyWindowController
     }
+    var recorder: Capturer? {
+        return windowController?.recorder
+    }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
 

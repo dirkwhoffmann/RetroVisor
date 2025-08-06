@@ -168,6 +168,7 @@ extension MyWindowController: NSMenuItemValidation {
             return true
         }
     }
+    
     @IBAction func freezeAction(_ sender: Any!) {
 
         isFrozen ? unfreeze() : freeze()

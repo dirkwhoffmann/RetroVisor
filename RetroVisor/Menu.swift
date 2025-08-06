@@ -10,7 +10,7 @@
 import Cocoa
 
 @MainActor
-extension AppDelegate {
+extension AppDelegate : NSMenuItemValidation {
 
     //
     // Status Bar Menu
@@ -26,37 +26,55 @@ extension AppDelegate {
 
         let menu = NSMenu()
 
-        menu.addItem(NSMenuItem(
+        let liveDragging = NSMenuItem(
             title: "Live Dragging",
             action: #selector(liveDraggingAction(_:)),
             keyEquivalent: ""
-        ))
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(
+        )
+        liveDragging.target = self
+
+        let restart = NSMenuItem(
             title: "Restart Screen Capturer",
             action: #selector(restartScreenCapturer(_:)),
             keyEquivalent: ""
-        ))
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(
+        )
+        restart.target = self
+
+        let quit = NSMenuItem(
             title: "Quit \(Bundle.main.appName)",
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: ""
-        ))
+        )
+
+        menu.addItem(liveDragging)
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(restart)
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(quit)
 
         statusItem.menu = menu
     }
 
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+
+        switch menuItem.action {
+
+        case #selector(AppDelegate.liveDraggingAction(_:)):
+            menuItem.state = recorder?.responsive == true ? .on : .off
+            return true
+
+        default:
+            return true
+        }
+    }
+
     @objc func restartScreenCapturer(_ sender: Any?) {
-        print("🔁 Restart Screen Capturer clicked")
-        // Your restart logic goes here
+
+        recorder?.relaunch()
     }
 
     @objc func liveDraggingAction(_ sender: Any?) {
-        print("🔁 liveDraggingAction")
 
-        if let recorder = windowController?.recorder {
-            recorder.responsive.toggle()
-        }
+        recorder?.responsive.toggle()
     }
 }
