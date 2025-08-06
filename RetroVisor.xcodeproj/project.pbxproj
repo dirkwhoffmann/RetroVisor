@@ -12,7 +12,7 @@
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* WindowController.swift */; };
-		50BA96532E3C80D6006BA8DF /* Capturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964C2E3C80D6006BA8DF /* Capturer.swift */; };
+		50BA96532E3C80D6006BA8DF /* ScreenRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964C2E3C80D6006BA8DF /* ScreenRecorder.swift */; };
 		50BA96542E3C80D6006BA8DF /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964D2E3C80D6006BA8DF /* Shaders.metal */; };
 		50BA96552E3C80D6006BA8DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 50BA96452E3C80D6006BA8DF /* Assets.xcassets */; };
 		50BA96562E3C80D6006BA8DF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50BA96482E3C80D6006BA8DF /* Main.storyboard */; };
@@ -36,7 +36,7 @@
 		50BA96492E3C80D6006BA8DF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		50BA964A2E3C80D6006BA8DF /* WindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
 		50BA964B2E3C80D6006BA8DF /* RetroVisor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RetroVisor.entitlements; sourceTree = "<group>"; };
-		50BA964C2E3C80D6006BA8DF /* Capturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capturer.swift; sourceTree = "<group>"; };
+		50BA964C2E3C80D6006BA8DF /* ScreenRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenRecorder.swift; sourceTree = "<group>"; };
 		50BA964D2E3C80D6006BA8DF /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingWindow.swift; sourceTree = "<group>"; };
 		50BA965A2E3D4861006BA8DF /* Animated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animated.swift; sourceTree = "<group>"; };
@@ -93,7 +93,7 @@
 				50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */,
 				50BA964A2E3C80D6006BA8DF /* WindowController.swift */,
 				50BA96492E3C80D6006BA8DF /* ViewController.swift */,
-				50BA964C2E3C80D6006BA8DF /* Capturer.swift */,
+				50BA964C2E3C80D6006BA8DF /* ScreenRecorder.swift */,
 				50BA96682E409381006BA8DF /* SettingsWindowController.swift */,
 				50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */,
 				50BA96672E3FF19B006BA8DF /* Shaders */,
@@ -210,7 +210,7 @@
 				50079E712E43813C005BC5FD /* Extensions.swift in Sources */,
 				50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */,
 				50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */,
-				50BA96532E3C80D6006BA8DF /* Capturer.swift in Sources */,
+				50BA96532E3C80D6006BA8DF /* ScreenRecorder.swift in Sources */,
 				50BA96542E3C80D6006BA8DF /* Shaders.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
