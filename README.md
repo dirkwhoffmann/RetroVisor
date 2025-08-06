@@ -18,7 +18,7 @@ RetroVisor uses ScreenCaptureKit to capture your screen in real-time. The captur
 
 ⚠️ Note: Screen recording on macOS requires user permission. You'll need to grant screen recording access in System Settings > Privacy & Security > Screen Recording. Without these permissions, the app won’t function.
 
-# Roadmap
+## Roadmap
 
 RetroVisor is being developed in two stages:
 
