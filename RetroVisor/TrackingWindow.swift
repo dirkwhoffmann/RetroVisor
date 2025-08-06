@@ -43,6 +43,7 @@ protocol TrackingWindowDelegate {
     func windowDidMove(_ window: TrackingWindow, frame: NSRect)
     func windowDidStopResize(_ window: TrackingWindow)
     func windowWasDoubleClicked(_ window: TrackingWindow)
+    func windowDidChangeScreen(_ window: TrackingWindow)
 }
 
 extension TrackingWindowDelegate {
@@ -55,6 +56,7 @@ extension TrackingWindowDelegate {
     func windowDidMove(_ window: TrackingWindow, frame: NSRect) {}
     func windowDidStopResize(_ window: TrackingWindow) {}
     func windowWasDoubleClicked(_ window: TrackingWindow) {}
+    func windowDidChangeScreen(_ window: TrackingWindow) {}
 }
 
 class TrackingWindow: NSWindow {
@@ -250,6 +252,13 @@ extension TrackingWindow : NSWindowDelegate {
         trackedFrame = frame
         if debug { print("windowDidMove(\(self))") }
         trackingDelegate?.windowDidMove(self, frame: trackedFrame)
+    }
+
+    func windowDidChangeScreen(_ notification: Notification) {
+
+        trackedFrame = frame
+        if debug { print("windowDidChangeScreen(\(self))") }
+        trackingDelegate?.windowDidChangeScreen(self)
     }
 }
 

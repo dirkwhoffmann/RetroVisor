@@ -103,12 +103,14 @@ extension MyWindowController: TrackingWindowDelegate {
 
         print("windowDidStopDrag")
         if recorder.updateRects() { recorder.relaunch() }
-        /*
-        if !recorder.responsive {
-            recorder.capture(window: window)
-        }
-        */
 
+        print("window: \(window.frame)")
+        print("sourceRect: \(recorder.sourceRect!)")
+        print("captureRect: \(recorder.captureRect!)")
+        print("textureRect: \(recorder.textureRect!)")
+
+        print("display: \(recorder.display!.frame)")
+        print("screen: \(window.screen!.frame) * \(window.screen!.backingScaleFactor)")
     }
 
     func windowWasDoubleClicked(_ window: TrackingWindow) {
@@ -116,19 +118,16 @@ extension MyWindowController: TrackingWindowDelegate {
         freeze()
     }
 
-    /*
-    func capture(frame: NSRect) {
+    func windowDidChangeScreen(_ window: TrackingWindow) {
 
-        if recorder.updateRects() { recorder.relaunch() }
+        recorder.relaunch()
     }
-    */
 }
 
 extension MyWindowController: CapturerDelegate {
 
     func textureRectDidChange(rect: CGRect) {
 
-        print("textureRectDidChange \(rect)")
         viewController?.updateTextureRect(rect)
     }
     func captureRectDidChange(rect: CGRect) {
@@ -144,6 +143,12 @@ extension MyWindowController: CapturerDelegate {
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
+        /*
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
+        print("Captured buffer size: \(width)x\(height)")
+        */
 
         // Process the pixel buffer in the view controller
         DispatchQueue.main.async { [weak self] in

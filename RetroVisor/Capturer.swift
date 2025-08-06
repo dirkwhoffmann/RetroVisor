@@ -40,6 +40,9 @@ class Capturer: NSObject, SCStreamDelegate
     // In responsive mode, the entire screen is recorded
     var responsive = true { didSet { if responsive != oldValue { relaunch() } } }
 
+    private var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }
+    private var fullRect: CGRect { CGRect(x: 0, y: 0, width: display?.width ?? 0, height: display?.height ?? 0) }
+
     func normalize(rect: CGRect) -> CGRect {
 
         guard let display = display else { return .zero }
@@ -57,13 +60,27 @@ class Capturer: NSObject, SCStreamDelegate
         guard let window = self.window else { return false }
         guard let display = self.display else { return false }
 
-        let newSourceRect = window.screenCoordinates
+        var newSourceRect = window.screenCoordinates
         var newCaptureRect: CGRect
         var newTextureRect: CGRect
+
+
+        let origin = window.screen!.frame.origin
+        newSourceRect = CGRect(x: newSourceRect.origin.x - origin.x,
+                               y: newSourceRect.origin.y + origin.y,
+                               width: newSourceRect.width,
+                               height: newSourceRect.height)
 
         if responsive {
 
             // Grab the entire screen and draw a portion of the texture
+            /*
+            var fr = display.frame
+            fr = CGRect(x: 0,
+                      y: 0,
+                      width: fr.width,
+                      height: fr.height)
+            */
             newCaptureRect = display.frame
             newTextureRect = normalize(rect: newSourceRect)
 
@@ -110,12 +127,14 @@ class Capturer: NSObject, SCStreamDelegate
                 print("Could not find a display ID")
                 return
             }
+            // print("screen frame: \(screen.frame)")
 
             display = content.displays.first(where: { $0.displayID == displayID })
             if display == nil {
                 print("Could not find a matching display")
                 return
             }
+            // print("display frame: \(display!.frame)")
 
             // Compute the capture coordinates
             updateRects()
@@ -139,10 +158,10 @@ class Capturer: NSObject, SCStreamDelegate
 
             // Configure video capture
             let rect = captureRect ?? display!.frame
-            config.sourceRect = rect
+            if (!responsive) { config.sourceRect = rect }
             config.showsCursor = false
-            config.width = Int(rect.width)
-            config.height = Int(rect.height)
+            config.width = Int(rect.width) * scaleFactor
+            config.height = Int(rect.height) * scaleFactor
             config.pixelFormat = kCVPixelFormatType_32BGRA
             config.colorSpaceName = CGColorSpace.sRGB
             config.minimumFrameInterval = CMTime(value: 1, timescale: 60)
