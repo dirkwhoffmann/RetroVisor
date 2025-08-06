@@ -155,7 +155,7 @@ class ViewController: NSViewController, MTKViewDelegate {
         CVMetalTextureCacheCreate(nil, nil, device, nil, &textureCache)
 
         // Setup the vertex buffers
-        updateTextureRect(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
+        updateVertexBuffers(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
 
         // Load shaders from the default library
         let defaultLibrary = device.makeDefaultLibrary()!
@@ -221,7 +221,7 @@ class ViewController: NSViewController, MTKViewDelegate {
         return device.makeSamplerState(descriptor: descriptor)!
     }
 
-    func updateTextureRect(_ rect: CGRect?) {
+    func updateVertexBuffers(_ rect: CGRect?) {
 
         guard let rect = rect else { return }
 
@@ -258,8 +258,30 @@ class ViewController: NSViewController, MTKViewDelegate {
 
     }
 
-    func texture(from pixelBuffer: CVPixelBuffer) -> MTLTexture? {
+    func updateTextures(rect: NSRect) {
 
+        updateTextures(width: Int(rect.width), height: Int(rect.height))
+    }
+
+    func updateTextures(width: Int, height: Int) {
+
+        let w = NSScreen.scaleFactor * width
+        let h = NSScreen.scaleFactor * width
+
+        if outTexture?.width != w || outTexture?.height != h {
+
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
+                                                                      width: w,
+                                                                      height: h,
+                                                                      mipmapped: false)
+            descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
+            outTexture = device.makeTexture(descriptor: descriptor)
+        }
+    }
+
+    func update(with pixelBuffer: CVPixelBuffer) {
+
+        // Convert the CVPixelBuffer to a Metal texture
         let width = CVPixelBufferGetWidth(pixelBuffer)
         let height = CVPixelBufferGetHeight(pixelBuffer)
 
@@ -273,50 +295,15 @@ class ViewController: NSViewController, MTKViewDelegate {
                                                                height,
                                                                0,
                                                                &cvTextureOut)
-        if result == kCVReturnSuccess, let cvTexture = cvTextureOut {
-            return CVMetalTextureGetTexture(cvTexture)
+
+        if result == kCVReturnSuccess && cvTextureOut != nil {
+
+            // Trigger a view redraw
+            inTexture = CVMetalTextureGetTexture(cvTextureOut!)
+            mtkView.setNeedsDisplay(mtkView.bounds)
         }
-        return nil
     }
 
-    func update(with pixelBuffer: CVPixelBuffer) {
-
-        // Convert pixelBuffer to Metal texture (or store it)
-        self.inTexture = texture(from: pixelBuffer)
-
-        // Trigger view redraw
-        mtkView.setNeedsDisplay(mtkView.bounds)
-    }
-
-    func updateTextures(rect: NSRect) {
-
-        updateTextures(width: Int(rect.width), height: Int(rect.height))
-    }
-
-    func updateTextures(width: Int, height: Int) {
-
-        let w = NSScreen.scaleFactor * width
-        let h = NSScreen.scaleFactor * width
-
-        if (outTexture?.width == w && outTexture?.height == h) { return }
-        outTexture = makeIntermediateTexture(device: device, width: w, height: h)
-    }
-
-    func makeIntermediateTexture(device: MTLDevice, width: Int, height: Int) -> MTLTexture? {
-
-        let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
-                                                                  width: width,
-                                                                  height: height,
-                                                                  mipmapped: false)
-        descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        return device.makeTexture(descriptor: descriptor)
-    }
-
-    private var lastFrameTime: TimeInterval = CACurrentMediaTime()
-    private let expectedFrameDuration: TimeInterval = 1.0 / 60.0  // for 60 FPS
-    private let frameDropThresholdMultiplier = 1.5  // Consider frame dropped if duration > 1.5x expected
-
-    var animation = 0.0
 
     func draw(in view: MTKView) {
 

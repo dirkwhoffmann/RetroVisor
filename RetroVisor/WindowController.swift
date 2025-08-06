@@ -122,7 +122,7 @@ extension WindowController: ScreenRecorderDelegate {
 
     func textureRectDidChange(rect: CGRect?) {
 
-        viewController?.updateTextureRect(rect)
+        viewController?.updateVertexBuffers(rect)
     }
 
     func recorderDidStart() {
