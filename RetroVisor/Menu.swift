@@ -9,6 +9,7 @@
 
 import Cocoa
 
+@MainActor
 extension AppDelegate {
 
     //
@@ -53,5 +54,9 @@ extension AppDelegate {
 
     @objc func liveDraggingAction(_ sender: Any?) {
         print("🔁 liveDraggingAction")
+
+        if let recorder = windowController?.recorder {
+            recorder.responsive.toggle()
+        }
     }
 }

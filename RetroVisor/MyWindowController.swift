@@ -38,8 +38,8 @@ class MyWindowController: NSWindowController  {
         unfreeze()
 
         // Setup the recorder
-        recorder.window = self.window
         recorder.delegate = self
+        recorder.window = trackingWindow
     }
 
     func freeze() {

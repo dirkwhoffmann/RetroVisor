@@ -22,13 +22,14 @@ class Capturer: NSObject, SCStreamDelegate
     var stream: SCStream?
     var display: SCDisplay?
     var filter: SCContentFilter?
-    var window: NSWindow?
+    var window: TrackingWindow? { didSet { if window != nil { capture(window: window!) } } }
     let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
 
     // The recorder delegate
-    var delegate: CapturerDelegate? {
+    var delegate: CapturerDelegate?
+    /*{
         didSet { if delegate != nil { Task { await launch() } } }
-    }
+    }*/
 
     // The source rectangle covered by the glass window
     var sourceRect: CGRect?
@@ -44,26 +45,28 @@ class Capturer: NSObject, SCStreamDelegate
 
     func normalize(rect: CGRect) -> CGRect {
 
+        guard let display = display else { return .zero }
         return CGRect(
-            x: rect.minX / CGFloat(display!.width),
-            y: rect.minY / CGFloat(display!.height),
-            width: rect.width / CGFloat(display!.width),
-            height: rect.height / CGFloat(display!.height)
+            x: rect.minX / CGFloat(display.width),
+            y: rect.minY / CGFloat(display.height),
+            width: rect.width / CGFloat(display.width),
+            height: rect.height / CGFloat(display.height)
         )
     }
 
     func capture(window: TrackingWindow)
     {
         let newSourceRect = window.screenCoordinates
-        var newCaptureRect: CGRect!
-        var newTextureRect: CGRect!
+        var newCaptureRect: CGRect?
+        var newTextureRect: CGRect?
 
-        guard let display = display else { return }
+        print("capture \(window)")
+        // guard let display = display else { return }
 
         if responsive {
 
             // Grab the entire screen and draw a portion of the texture
-            newCaptureRect = display.frame
+            newCaptureRect = display?.frame
             newTextureRect = normalize(rect: newSourceRect)
 
         } else {
@@ -78,13 +81,14 @@ class Capturer: NSObject, SCStreamDelegate
         if textureRect != newTextureRect {
 
             textureRect = newTextureRect
-            delegate?.textureRectDidChange(rect: newTextureRect)
+            delegate?.textureRectDidChange(rect: newTextureRect ?? .zero)
         }
 
         if (stream == nil || captureRect != newCaptureRect) {
 
+            print("captureRect = \(newCaptureRect ?? .zero)")
             captureRect = newCaptureRect
-            delegate?.captureRectDidChange(rect: newCaptureRect)
+            delegate?.captureRectDidChange(rect: newCaptureRect ?? .zero)
 
             Task {
 
