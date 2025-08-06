@@ -40,6 +40,9 @@ class Capturer: NSObject, SCStreamDelegate
     // In responsive mode, the entire screen is recorded
     var responsive = true { didSet { if responsive != oldValue { relaunch() } } }
 
+    // Indicates whether the current settings require a relaunch
+    var needsRestart: Bool = false
+
     private var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }
     private var fullRect: CGRect { CGRect(x: 0, y: 0, width: display?.width ?? 0, height: display?.height ?? 0) }
 
@@ -54,11 +57,10 @@ class Capturer: NSObject, SCStreamDelegate
         )
     }
 
-    @discardableResult
-    func updateRects() -> Bool  // Returns true if the capturer needs a restart
+    func updateRects()
     {
-        guard let window = self.window else { return false }
-        guard let display = self.display else { return false }
+        guard let window = self.window else { return }
+        guard let display = self.display else { return }
 
         var newSourceRect = window.screenCoordinates
         var newCaptureRect: CGRect
@@ -74,13 +76,6 @@ class Capturer: NSObject, SCStreamDelegate
         if responsive {
 
             // Grab the entire screen and draw a portion of the texture
-            /*
-            var fr = display.frame
-            fr = CGRect(x: 0,
-                      y: 0,
-                      width: fr.width,
-                      height: fr.height)
-            */
             newCaptureRect = display.frame
             newTextureRect = normalize(rect: newSourceRect)
 
@@ -101,13 +96,10 @@ class Capturer: NSObject, SCStreamDelegate
 
         if (captureRect != newCaptureRect) {
 
-            print("captureRect = \(newCaptureRect)")
             captureRect = newCaptureRect
             delegate?.captureRectDidChange(rect: newCaptureRect)
-            return true
+            needsRestart = true
         }
-
-        return false
     }
 
     func launch() async
@@ -176,6 +168,8 @@ class Capturer: NSObject, SCStreamDelegate
             try await stream!.startCapture()
             print("Stream capturer launched")
 
+            needsRestart = false
+
         } catch {
             print("Error: \(error)")
         }
@@ -185,4 +179,10 @@ class Capturer: NSObject, SCStreamDelegate
     {
         Task { await launch() }
     }
+
+    func relaunchIfNeeded()
+    {
+        if (needsRestart) { relaunch() }
+    }
+
 }
