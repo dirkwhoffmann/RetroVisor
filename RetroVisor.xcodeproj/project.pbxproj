@@ -10,8 +10,8 @@
 		50079E6E2E4331F5005BC5FD /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50079E6D2E4331F2005BC5FD /* Menu.swift */; };
 		50079E712E43813C005BC5FD /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50079E702E438139005BC5FD /* Extensions.swift */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
-		50BA96512E3C80D6006BA8DF /* MyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* MyViewController.swift */; };
-		50BA96522E3C80D6006BA8DF /* MyWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* MyWindowController.swift */; };
+		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
+		50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* WindowController.swift */; };
 		50BA96532E3C80D6006BA8DF /* Capturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964C2E3C80D6006BA8DF /* Capturer.swift */; };
 		50BA96542E3C80D6006BA8DF /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964D2E3C80D6006BA8DF /* Shaders.metal */; };
 		50BA96552E3C80D6006BA8DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 50BA96452E3C80D6006BA8DF /* Assets.xcassets */; };
@@ -33,8 +33,8 @@
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		50BA96472E3C80D6006BA8DF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		50BA96492E3C80D6006BA8DF /* MyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyViewController.swift; sourceTree = "<group>"; };
-		50BA964A2E3C80D6006BA8DF /* MyWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyWindowController.swift; sourceTree = "<group>"; };
+		50BA96492E3C80D6006BA8DF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		50BA964A2E3C80D6006BA8DF /* WindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
 		50BA964B2E3C80D6006BA8DF /* RetroVisor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RetroVisor.entitlements; sourceTree = "<group>"; };
 		50BA964C2E3C80D6006BA8DF /* Capturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capturer.swift; sourceTree = "<group>"; };
 		50BA964D2E3C80D6006BA8DF /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
@@ -91,8 +91,8 @@
 				50BA96442E3C80D6006BA8DF /* AppDelegate.swift */,
 				50079E6D2E4331F2005BC5FD /* Menu.swift */,
 				50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */,
-				50BA964A2E3C80D6006BA8DF /* MyWindowController.swift */,
-				50BA96492E3C80D6006BA8DF /* MyViewController.swift */,
+				50BA964A2E3C80D6006BA8DF /* WindowController.swift */,
+				50BA96492E3C80D6006BA8DF /* ViewController.swift */,
 				50BA964C2E3C80D6006BA8DF /* Capturer.swift */,
 				50BA96682E409381006BA8DF /* SettingsWindowController.swift */,
 				50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */,
@@ -202,14 +202,14 @@
 				50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */,
 				50BA96592E3C80F5006BA8DF /* TrackingWindow.swift in Sources */,
 				50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */,
-				50BA96512E3C80D6006BA8DF /* MyViewController.swift in Sources */,
+				50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */,
 				50BA96642E3FF0B3006BA8DF /* crt-easymode.metal in Sources */,
 				50BA966B2E409381006BA8DF /* SettingsWindowController.swift in Sources */,
 				50079E6E2E4331F5005BC5FD /* Menu.swift in Sources */,
 				50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */,
 				50079E712E43813C005BC5FD /* Extensions.swift in Sources */,
 				50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */,
-				50BA96522E3C80D6006BA8DF /* MyWindowController.swift in Sources */,
+				50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */,
 				50BA96532E3C80D6006BA8DF /* Capturer.swift in Sources */,
 				50BA96542E3C80D6006BA8DF /* Shaders.metal in Sources */,
 			);

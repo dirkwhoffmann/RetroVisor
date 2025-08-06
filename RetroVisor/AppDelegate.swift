@@ -20,8 +20,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Customizable shader parameters
     var uniforms = CrtUniforms.defaults
 
-    var windowController: MyWindowController? {
-        return NSApplication.shared.windows.first?.windowController as? MyWindowController
+    var windowController: WindowController? {
+        return NSApplication.shared.windows.first?.windowController as? WindowController
     }
     var recorder: ScreenRecorder? {
         return windowController?.recorder

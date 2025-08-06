@@ -10,9 +10,9 @@
 import Cocoa
 import ScreenCaptureKit
 
-class MyWindowController: NSWindowController  {
+class WindowController: NSWindowController  {
 
-    var viewController : MyViewController? { return self.contentViewController as? MyViewController }
+    var viewController : ViewController? { return self.contentViewController as? ViewController }
     var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
 
     // The screen recorder
@@ -67,7 +67,7 @@ class MyWindowController: NSWindowController  {
     }
 }
 
-extension MyWindowController: TrackingWindowDelegate {
+extension WindowController: TrackingWindowDelegate {
 
     func windowDidStartResize(_ window: TrackingWindow) {
 
@@ -118,7 +118,7 @@ extension MyWindowController: TrackingWindowDelegate {
     }
 }
 
-extension MyWindowController: ScreenRecorderDelegate {
+extension WindowController: ScreenRecorderDelegate {
 
     func textureRectDidChange(rect: CGRect?) {
 
@@ -136,7 +136,7 @@ extension MyWindowController: ScreenRecorderDelegate {
 
             // Process the pixel buffer in the view controller
             DispatchQueue.main.async { [weak self] in
-                if let vc = self?.contentViewController as? MyViewController {
+                if let vc = self?.contentViewController as? ViewController {
                     vc.update(with: pixelBuffer)
                 }
             }

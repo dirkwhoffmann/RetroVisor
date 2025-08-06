@@ -74,11 +74,11 @@ struct CrtUniforms {
     )
 }
 
-class MyViewController: NSViewController, MTKViewDelegate {
+class ViewController: NSViewController, MTKViewDelegate {
 
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
     var trackingWindow: TrackingWindow? { view.window as? TrackingWindow }
-    var windowController: MyWindowController? { return trackingWindow?.windowController as? MyWindowController }
+    var windowController: WindowController? { return trackingWindow?.windowController as? WindowController }
 
     var mtkView: MTKView!
     var device: MTLDevice!
