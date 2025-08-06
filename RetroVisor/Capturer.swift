@@ -9,15 +9,15 @@
 
 import ScreenCaptureKit
 
-protocol CapturerDelegate : SCStreamOutput {
+protocol ScreenRecorderDelegate : SCStreamOutput {
 
-    func textureRectDidChange(rect: CGRect)
-    func captureRectDidChange(rect: CGRect)
+    func textureRectDidChange(rect: CGRect?)
+    func captureRectDidChange(rect: CGRect?)
     func recorderDidStart()
 }
 
 @MainActor
-class Capturer: NSObject, SCStreamDelegate
+class ScreenRecorder: NSObject, SCStreamDelegate
 {
     var stream: SCStream?
     var display: SCDisplay?
@@ -26,12 +26,12 @@ class Capturer: NSObject, SCStreamDelegate
     let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
 
     // The recorder delegate
-    var delegate: CapturerDelegate?
+    var delegate: ScreenRecorderDelegate?
 
     // The source rectangle covered by the glass window
     var sourceRect: CGRect?
 
-    // The source rectangle of the screen capturer
+    // The source rectangle of the screen recorder
     var captureRect: CGRect?
 
     // The displayed texture cutout
@@ -63,8 +63,8 @@ class Capturer: NSObject, SCStreamDelegate
         guard let display = self.display else { return }
 
         var newSourceRect = window.screenCoordinates
-        var newCaptureRect: CGRect
-        var newTextureRect: CGRect
+        var newCaptureRect: CGRect?
+        var newTextureRect: CGRect?
 
 
         let origin = window.screen!.frame.origin
@@ -76,7 +76,7 @@ class Capturer: NSObject, SCStreamDelegate
         if responsive {
 
             // Grab the entire screen and draw a portion of the texture
-            newCaptureRect = display.frame
+            newCaptureRect = nil
             newTextureRect = normalize(rect: newSourceRect)
 
         } else {
@@ -166,7 +166,6 @@ class Capturer: NSObject, SCStreamDelegate
             try stream!.addStreamOutput(delegate!, type: .screen, sampleHandlerQueue: videoQueue)
 
             try await stream!.startCapture()
-            print("Stream capturer launched")
 
             needsRestart = false
 

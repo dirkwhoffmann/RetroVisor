@@ -26,6 +26,13 @@ extension AppDelegate : NSMenuItemValidation {
 
         let menu = NSMenu()
 
+        let freeze = NSMenuItem(
+            title: "Freeze",
+            action: #selector(freezeAction(_:)),
+            keyEquivalent: ""
+        )
+        freeze.target = self
+
         let liveDragging = NSMenuItem(
             title: "Live Dragging",
             action: #selector(liveDraggingAction(_:)),
@@ -34,8 +41,8 @@ extension AppDelegate : NSMenuItemValidation {
         liveDragging.target = self
 
         let restart = NSMenuItem(
-            title: "Restart Screen Capturer",
-            action: #selector(restartScreenCapturer(_:)),
+            title: "Restart Screen Recorder",
+            action: #selector(restartScreenRecorder(_:)),
             keyEquivalent: ""
         )
         restart.target = self
@@ -46,9 +53,10 @@ extension AppDelegate : NSMenuItemValidation {
             keyEquivalent: ""
         )
 
-        menu.addItem(liveDragging)
-        menu.addItem(NSMenuItem.separator())
+        menu.addItem(freeze)
         menu.addItem(restart)
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(liveDragging)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(quit)
 
@@ -59,6 +67,10 @@ extension AppDelegate : NSMenuItemValidation {
 
         switch menuItem.action {
 
+        case #selector(AppDelegate.freezeAction(_:)):
+            menuItem.title = windowController?.isFrozen == true ? "Unfreeze" : "Freeze"
+            return true
+
         case #selector(AppDelegate.liveDraggingAction(_:)):
             menuItem.state = recorder?.responsive == true ? .on : .off
             return true
@@ -68,13 +80,20 @@ extension AppDelegate : NSMenuItemValidation {
         }
     }
 
-    @objc func restartScreenCapturer(_ sender: Any?) {
+    @objc func freezeAction(_ sender: Any?) {
 
-        recorder?.relaunch()
+        if let controller = windowController {
+            controller.isFrozen ? controller.unfreeze() : controller.freeze()
+        }
     }
 
     @objc func liveDraggingAction(_ sender: Any?) {
 
         recorder?.responsive.toggle()
+    }
+
+    @objc func restartScreenRecorder(_ sender: Any?) {
+
+        recorder?.relaunch()
     }
 }

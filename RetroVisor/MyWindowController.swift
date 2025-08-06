@@ -16,7 +16,7 @@ class MyWindowController: NSWindowController  {
     var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
 
     // The screen recorder
-    var recorder = Capturer()
+    var recorder = ScreenRecorder()
 
     // Indicates if the window is click-through
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }
@@ -60,7 +60,7 @@ class MyWindowController: NSWindowController  {
 
         window.ignoresMouseEvents = false
         window.styleMask = [.titled, .closable, .resizable, .miniaturizable, .nonactivatingPanel, .fullSizeContentView]
-        window.contentView?.layer?.borderColor = NSColor.systemRed.cgColor
+        window.contentView?.layer?.borderColor = NSColor.systemBlue.cgColor
         window.contentView?.layer?.borderWidth = 2
         window.contentView?.layer?.cornerRadius = 10
     }
@@ -96,17 +96,15 @@ extension MyWindowController: TrackingWindowDelegate {
         viewController!.intensity.target = 0.0
         viewController!.intensity.steps = 25
 
-        print("windowDidStopDrag")
         recorder.updateRects()
         recorder.relaunchIfNeeded()
 
+        /*
         print("window: \(window.frame)")
-        print("sourceRect: \(recorder.sourceRect!)")
-        print("captureRect: \(recorder.captureRect!)")
-        print("textureRect: \(recorder.textureRect!)")
-
-        print("display: \(recorder.display!.frame)")
-        print("screen: \(window.screen!.frame) * \(window.screen!.backingScaleFactor)")
+        print("sourceRect: \(recorder.sourceRect ?? .null)")
+        print("captureRect: \(recorder.captureRect ?? .null)")
+        print("textureRect: \(recorder.textureRect ?? .null)")
+        */
     }
 
     func windowWasDoubleClicked(_ window: TrackingWindow) {
@@ -120,15 +118,15 @@ extension MyWindowController: TrackingWindowDelegate {
     }
 }
 
-extension MyWindowController: CapturerDelegate {
+extension MyWindowController: ScreenRecorderDelegate {
 
-    func textureRectDidChange(rect: CGRect) {
+    func textureRectDidChange(rect: CGRect?) {
 
-        viewController?.updateTextureRect(rect)
+        if let rect = rect { viewController?.updateTextureRect(rect) }
     }
-    func captureRectDidChange(rect: CGRect) {
+    func captureRectDidChange(rect: CGRect?) {
 
-        print("captureRectDidChange \(rect)")
+        print("captureRectDidChange \(rect  ?? .null)")
     }
 
     func recorderDidStart() {

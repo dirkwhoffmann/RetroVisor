@@ -23,7 +23,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var windowController: MyWindowController? {
         return NSApplication.shared.windows.first?.windowController as? MyWindowController
     }
-    var recorder: Capturer? {
+    var recorder: ScreenRecorder? {
         return windowController?.recorder
     }
 
