@@ -23,9 +23,31 @@ extension TrackingWindowDelegate {
     func recorderDidStart() {}
 }
 
+/* This class uses ScreenCaptureKit to record screen content and feed it into the post-processor.
+ *
+ * The recorder operates in two modes, controlled by the `responsive` flag:
+ *
+ *   responsive = true:
+ *
+ *   In this mode, the recorder captures the entire screen but renders only a portion
+ *   of the texture. This approach is more resource-intensive but allows for smooth,
+ *   real-time updates during window drag and resize operations. Recommended for modern systems.
+ *
+ *   responsive = false:
+ *
+ *   The recorder captures only a portion of the screen and always renders the full texture.
+ *   This mode is more efficient, as ScreenCaptureKit streams only the required area.
+ *   However, moving or resizing the effect window requires restarting the stream,
+ *   resulting in less fluid animations compared to responsive mode.
+ */
+
 @MainActor
 class ScreenRecorder: NSObject, SCStreamDelegate
 {
+    // Capture mode
+    var responsive = true { didSet { if responsive != oldValue { relaunch() } } }
+
+    // ScreenCaptureKit entities
     var stream: SCStream?
     var display: SCDisplay?
     var filter: SCContentFilter?
@@ -35,7 +57,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     // The recorder delegate
     var delegate: ScreenRecorderDelegate?
 
-    // The source rectangle covered by the glass window
+    // The source rectangle covered by the effect window
     var sourceRect: CGRect?
 
     // The source rectangle of the screen recorder
@@ -44,14 +66,8 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     // The displayed texture cutout
     var textureRect: CGRect?
 
-    // In responsive mode, the entire screen is recorded
-    var responsive = true { didSet { if responsive != oldValue { relaunch() } } }
-
     // Indicates whether the current settings require a relaunch
-    var needsRestart: Bool = false
-
-    // private var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }
-    private var fullRect: CGRect { CGRect(x: 0, y: 0, width: display?.width ?? 0, height: display?.height ?? 0) }
+    private var needsRestart: Bool = false
 
     func normalize(rect: CGRect) -> CGRect {
 
@@ -71,7 +87,6 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         var newSourceRect = window.screenCoordinates
         var newCaptureRect: CGRect?
         var newTextureRect: CGRect?
-
 
         let origin = window.screen!.frame.origin
         newSourceRect = CGRect(x: newSourceRect.origin.x - origin.x,
@@ -110,7 +125,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
     func launch() async
     {
-        print("launch")
+        print("Launching the screen recorder...")
 
         do {
 
@@ -122,17 +137,16 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             // Match the NSWindow's screen to a SCDisplay
             guard let screen = window?.screen,
                   let displayID = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID else {
-                print("Could not find a display ID")
+                print("Could not acquire the display ID")
                 return
             }
-            // print("screen frame: \(screen.frame)")
 
+            // Get the SCDisplay with a matching display ID
             display = content.displays.first(where: { $0.displayID == displayID })
             if display == nil {
-                print("Could not find a matching display")
+                print("Could not find a matching display ID")
                 return
             }
-            // print("display frame: \(display!.frame)")
 
             // Compute the capture coordinates
             updateRects()
@@ -189,5 +203,4 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     {
         if (needsRestart) { relaunch() }
     }
-
 }
