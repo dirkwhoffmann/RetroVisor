@@ -40,6 +40,7 @@ class MyWindowController: NSWindowController  {
         // Setup the recorder
         recorder.delegate = self
         recorder.window = trackingWindow
+        recorder.relaunch()
     }
 
     func freeze() {
@@ -80,9 +81,13 @@ extension MyWindowController: TrackingWindowDelegate {
         viewController!.updateIntermediateTexture(width: 1 * Int(window.frame.width), height: 1 * Int(window.frame.height))
 
         print("windowDidStopResize")
+        if recorder.updateRects() { recorder.relaunch() }
+
+        /*
         if !recorder.responsive {
             recorder.capture(window: window)
         }
+        */
     }
 
     func windowDidStartDrag(_ window: TrackingWindow) {
@@ -97,9 +102,12 @@ extension MyWindowController: TrackingWindowDelegate {
         viewController!.intensity.steps = 25
 
         print("windowDidStopDrag")
+        if recorder.updateRects() { recorder.relaunch() }
+        /*
         if !recorder.responsive {
             recorder.capture(window: window)
         }
+        */
 
     }
 
@@ -108,13 +116,12 @@ extension MyWindowController: TrackingWindowDelegate {
         freeze()
     }
 
+    /*
     func capture(frame: NSRect) {
 
-        if (recorder.responsive) {
-
-            recorder.capture(window: trackingWindow!)
-        }
+        if recorder.updateRects() { recorder.relaunch() }
     }
+    */
 }
 
 extension MyWindowController: CapturerDelegate {

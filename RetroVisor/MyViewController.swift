@@ -326,7 +326,7 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
         guard let trackingWindow = trackingWindow else { return }
 
-        windowController?.capture(frame: trackingWindow.liveFrame)
+        windowController?.recorder.updateRects()
 
         intensity.move()
 

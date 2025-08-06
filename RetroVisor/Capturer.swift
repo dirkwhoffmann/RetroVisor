@@ -22,14 +22,11 @@ class Capturer: NSObject, SCStreamDelegate
     var stream: SCStream?
     var display: SCDisplay?
     var filter: SCContentFilter?
-    var window: TrackingWindow? { didSet { if window != nil { capture(window: window!) } } }
+    var window: TrackingWindow?
     let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
 
     // The recorder delegate
     var delegate: CapturerDelegate?
-    /*{
-        didSet { if delegate != nil { Task { await launch() } } }
-    }*/
 
     // The source rectangle covered by the glass window
     var sourceRect: CGRect?
@@ -54,19 +51,20 @@ class Capturer: NSObject, SCStreamDelegate
         )
     }
 
-    func capture(window: TrackingWindow)
+    @discardableResult
+    func updateRects() -> Bool  // Returns true if the capturer needs a restart
     {
-        let newSourceRect = window.screenCoordinates
-        var newCaptureRect: CGRect?
-        var newTextureRect: CGRect?
+        guard let window = self.window else { return false }
+        guard let display = self.display else { return false }
 
-        print("capture \(window)")
-        // guard let display = display else { return }
+        let newSourceRect = window.screenCoordinates
+        var newCaptureRect: CGRect
+        var newTextureRect: CGRect
 
         if responsive {
 
             // Grab the entire screen and draw a portion of the texture
-            newCaptureRect = display?.frame
+            newCaptureRect = display.frame
             newTextureRect = normalize(rect: newSourceRect)
 
         } else {
@@ -81,37 +79,21 @@ class Capturer: NSObject, SCStreamDelegate
         if textureRect != newTextureRect {
 
             textureRect = newTextureRect
-            delegate?.textureRectDidChange(rect: newTextureRect ?? .zero)
+            delegate?.textureRectDidChange(rect: newTextureRect)
         }
 
-        if (stream == nil || captureRect != newCaptureRect) {
+        if (captureRect != newCaptureRect) {
 
-            print("captureRect = \(newCaptureRect ?? .zero)")
+            print("captureRect = \(newCaptureRect)")
             captureRect = newCaptureRect
-            delegate?.captureRectDidChange(rect: newCaptureRect ?? .zero)
-
-            Task {
-
-                // Restart the capturer
-                do {
-
-                    // Stop current stream
-                    try await stream?.stopCapture()
-
-                    // Relaunch
-                    await launch(sourceRect: captureRect)
-
-                    // Inform the delegate
-                    delegate?.recorderDidStart()
-
-                } catch {
-                    print("Error: \(error)")
-                }
-            }
+            delegate?.captureRectDidChange(rect: newCaptureRect)
+            return true
         }
+
+        return false
     }
 
-    func launch(sourceRect: CGRect? = nil) async
+    func launch() async
     {
         print("launch")
 
@@ -121,7 +103,22 @@ class Capturer: NSObject, SCStreamDelegate
             let content = try await SCShareableContent.excludingDesktopWindows(
                 false, onScreenWindowsOnly: true
             )
-            display = content.displays.first
+
+            // Match the NSWindow's screen to a SCDisplay
+            guard let screen = window?.screen,
+                  let displayID = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID else {
+                print("Could not find a display ID")
+                return
+            }
+
+            display = content.displays.first(where: { $0.displayID == displayID })
+            if display == nil {
+                print("Could not find a matching display")
+                return
+            }
+
+            // Compute the capture coordinates
+            updateRects()
 
             // Create a content filter with the main window excluded
             let excludedApps = content.applications.filter {
@@ -141,7 +138,7 @@ class Capturer: NSObject, SCStreamDelegate
             config.capturesAudio = false
 
             // Configure video capture
-            let rect = sourceRect ?? display!.frame
+            let rect = captureRect ?? display!.frame
             config.sourceRect = rect
             config.showsCursor = false
             config.width = Int(rect.width)
@@ -163,5 +160,10 @@ class Capturer: NSObject, SCStreamDelegate
         } catch {
             print("Error: \(error)")
         }
+    }
+
+    func relaunch()
+    {
+        Task { await launch() }
     }
 }
