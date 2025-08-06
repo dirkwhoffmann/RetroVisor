@@ -18,7 +18,7 @@ class MyWindowController: NSWindowController  {
     // The screen recorder
     var recorder = ScreenRecorder()
 
-    // Indicates if the window is click-through
+    // Indicates if the window is passive (click-through state)
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }
 
     override func windowDidLoad() {
@@ -59,7 +59,8 @@ class MyWindowController: NSWindowController  {
         let window = self.window as! TrackingWindow
 
         window.ignoresMouseEvents = false
-        window.styleMask = [.titled, .closable, .resizable, .miniaturizable, .nonactivatingPanel, .fullSizeContentView]
+        window.styleMask = [.titled, .closable, .resizable, .miniaturizable,
+            .nonactivatingPanel, .fullSizeContentView]
         window.contentView?.layer?.borderColor = NSColor.systemBlue.cgColor
         window.contentView?.layer?.borderWidth = 2
         window.contentView?.layer?.cornerRadius = 10
@@ -78,9 +79,8 @@ extension MyWindowController: TrackingWindowDelegate {
 
         viewController!.intensity.target = 0.0
         viewController!.intensity.steps = 15
-        viewController!.updateIntermediateTexture(width: 1 * Int(window.frame.width), height: 1 * Int(window.frame.height))
+        viewController!.updateTextures(rect: window.frame)
 
-        print("windowDidStopResize")
         recorder.updateRects()
         recorder.relaunchIfNeeded()
     }
@@ -122,11 +122,7 @@ extension MyWindowController: ScreenRecorderDelegate {
 
     func textureRectDidChange(rect: CGRect?) {
 
-        if let rect = rect { viewController?.updateTextureRect(rect) }
-    }
-    func captureRectDidChange(rect: CGRect?) {
-
-        print("captureRectDidChange \(rect  ?? .null)")
+        viewController?.updateTextureRect(rect)
     }
 
     func recorderDidStart() {
@@ -134,42 +130,16 @@ extension MyWindowController: ScreenRecorderDelegate {
         print("recorderDidRestart")
     }
 
-    func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
+    func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        if let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) {
 
-        /*
-        let width = CVPixelBufferGetWidth(pixelBuffer)
-        let height = CVPixelBufferGetHeight(pixelBuffer)
-        print("Captured buffer size: \(width)x\(height)")
-        */
-
-        // Process the pixel buffer in the view controller
-        DispatchQueue.main.async { [weak self] in
-            if let vc = self?.contentViewController as? MyViewController {
-                vc.update(with: pixelBuffer)
+            // Process the pixel buffer in the view controller
+            DispatchQueue.main.async { [weak self] in
+                if let vc = self?.contentViewController as? MyViewController {
+                    vc.update(with: pixelBuffer)
+                }
             }
         }
-    }
-}
-
-extension MyWindowController: NSMenuItemValidation {
-
-    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-
-        switch menuItem.action {
-
-        case #selector(MyWindowController.freezeAction(_:)):
-            menuItem.title = isFrozen ? "Unfreeze" : "Freeze"
-            return true
-
-        default:
-            return true
-        }
-    }
-    
-    @IBAction func freezeAction(_ sender: Any!) {
-
-        isFrozen ? unfreeze() : freeze()
     }
 }

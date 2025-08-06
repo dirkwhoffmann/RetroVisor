@@ -219,7 +219,9 @@ class MyViewController: NSViewController, MTKViewDelegate {
 
     var trect: CGRect = .zero
 
-    func updateTextureRect(_ rect: CGRect) {
+    func updateTextureRect(_ rect: CGRect?) {
+
+        guard let rect = rect else { return }
 
         trect = rect
         let tx1 = Float(rect.minX)
@@ -288,12 +290,20 @@ class MyViewController: NSViewController, MTKViewDelegate {
         mtkView.setNeedsDisplay(mtkView.bounds)
     }
 
-    func updateIntermediateTexture(width: Int, height: Int) {
+    func updateTextures(rect: NSRect) {
 
-        if (intermediateTexture?.width == 2 * width && intermediateTexture?.height == 2 * height) { return }
-        intermediateTexture = makeIntermediateTexture(device: device, width: 2 * width, height: 2 * height)
-        intermediateTexture2 = makeIntermediateTexture(device: device, width: 2 * width, height: 2 * height)
-        print("interm: \(intermediateTexture!.width) \(intermediateTexture!.height)")
+        updateTextures(width: Int(rect.width), height: Int(rect.height))
+    }
+
+    func updateTextures(width: Int, height: Int) {
+
+        let w = NSScreen.scaleFactor * width
+        let h = NSScreen.scaleFactor * width
+
+        if (intermediateTexture?.width == w && intermediateTexture?.height == h) { return }
+        intermediateTexture = makeIntermediateTexture(device: device, width: w, height: h)
+        intermediateTexture2 = makeIntermediateTexture(device: device, width: w, height: h)
+        // print("interm: \(intermediateTexture!.width) \(intermediateTexture!.height)")
     }
 
     func makeIntermediateTexture(device: MTLDevice, width: Int, height: Int) -> MTLTexture? {

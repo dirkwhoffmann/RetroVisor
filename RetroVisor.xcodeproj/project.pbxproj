@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		50079E6E2E4331F5005BC5FD /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50079E6D2E4331F2005BC5FD /* Menu.swift */; };
+		50079E712E43813C005BC5FD /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50079E702E438139005BC5FD /* Extensions.swift */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* MyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* MyViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* MyWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* MyWindowController.swift */; };
@@ -27,6 +28,7 @@
 
 /* Begin PBXFileReference section */
 		50079E6D2E4331F2005BC5FD /* Menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
+		50079E702E438139005BC5FD /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -60,6 +62,7 @@
 		50079E6F2E433206005BC5FD /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				50079E702E438139005BC5FD /* Extensions.swift */,
 				50BA965A2E3D4861006BA8DF /* Animated.swift */,
 			);
 			path = Utilities;
@@ -204,6 +207,7 @@
 				50BA966B2E409381006BA8DF /* SettingsWindowController.swift in Sources */,
 				50079E6E2E4331F5005BC5FD /* Menu.swift in Sources */,
 				50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */,
+				50079E712E43813C005BC5FD /* Extensions.swift in Sources */,
 				50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */,
 				50BA96522E3C80D6006BA8DF /* MyWindowController.swift in Sources */,
 				50BA96532E3C80D6006BA8DF /* Capturer.swift in Sources */,

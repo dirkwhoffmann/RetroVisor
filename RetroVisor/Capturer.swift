@@ -16,6 +16,13 @@ protocol ScreenRecorderDelegate : SCStreamOutput {
     func recorderDidStart()
 }
 
+extension TrackingWindowDelegate {
+    
+    func textureRectDidChange(rect: CGRect?) {}
+    func captureRectDidChange(rect: CGRect?) {}
+    func recorderDidStart() {}
+}
+
 @MainActor
 class ScreenRecorder: NSObject, SCStreamDelegate
 {
@@ -43,7 +50,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     // Indicates whether the current settings require a relaunch
     var needsRestart: Bool = false
 
-    private var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }
+    // private var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }
     private var fullRect: CGRect { CGRect(x: 0, y: 0, width: display?.width ?? 0, height: display?.height ?? 0) }
 
     func normalize(rect: CGRect) -> CGRect {
@@ -152,8 +159,8 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             let rect = captureRect ?? display!.frame
             if (!responsive) { config.sourceRect = rect }
             config.showsCursor = false
-            config.width = Int(rect.width) * scaleFactor
-            config.height = Int(rect.height) * scaleFactor
+            config.width = Int(rect.width) * NSScreen.scaleFactor
+            config.height = Int(rect.height) * NSScreen.scaleFactor
             config.pixelFormat = kCVPixelFormatType_32BGRA
             config.colorSpaceName = CGColorSpace.sRGB
             config.minimumFrameInterval = CMTime(value: 1, timescale: 60)

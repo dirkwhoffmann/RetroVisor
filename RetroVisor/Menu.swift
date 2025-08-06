@@ -10,6 +10,28 @@
 import Cocoa
 
 @MainActor
+extension MyWindowController: NSMenuItemValidation {
+
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+
+        switch menuItem.action {
+
+        case #selector(MyWindowController.freezeAction(_:)):
+            menuItem.title = isFrozen ? "Unfreeze" : "Freeze"
+            return true
+
+        default:
+            return true
+        }
+    }
+
+    @IBAction func freezeAction(_ sender: Any!) {
+
+        isFrozen ? unfreeze() : freeze()
+    }
+}
+
+@MainActor
 extension AppDelegate : NSMenuItemValidation {
 
     //
