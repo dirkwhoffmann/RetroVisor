@@ -1,14 +1,13 @@
+// -----------------------------------------------------------------------------
+// This file is part of RetroVisor
 //
-//  ShaderSettingCell.swift
-//  RetroVisor
+// Copyright (C) Dirk W. Hoffmann. www.dirkwhoffmann.de
+// Licensed under the GNU General Public License v3
 //
-//  Created by Dirk Hoffmann on 04.08.25.
-//
+// See https://www.gnu.org for license information
+// -----------------------------------------------------------------------------
 
 import Cocoa
-
-
-
 
 class ShaderSettingCell: NSTableCellView {
 
@@ -23,11 +22,15 @@ class ShaderSettingCell: NSTableCellView {
     @IBOutlet weak var helpButtom: NSButton!
 
     var shaderSetting: ShaderSetting! {
+
         didSet {
+
             optionLabel.stringValue = shaderSetting.name
             subLabel.stringValue = shaderSetting.key
             helpButtom.isHidden = shaderSetting.help == nil
+
             if let range = shaderSetting.range {
+
                 checkbox.isHidden = true
                 valueSlider.isHidden = false
                 valueSlider.minValue = range.lowerBound
@@ -37,6 +40,7 @@ class ShaderSettingCell: NSTableCellView {
                 valueStepper.maxValue = Double(range.upperBound)
 
             } else {
+
                 checkbox.isHidden = false
                 valueStepper.isHidden = true
                 valueSlider.isHidden = true
@@ -45,22 +49,21 @@ class ShaderSettingCell: NSTableCellView {
     }
 
     var value: Float! {
+
         didSet {
+
             if shaderSetting.range != nil {
+
                 valueSlider.floatValue = value
                 valueStepper.floatValue = value
                 valueLabel.stringValue = String(format: shaderSetting.formatString, value)
+
             } else {
+
                 valueLabel.stringValue = value != 0 ? "Yes" : "No"
                 checkbox.title = ""
             }
         }
-    }
-
-    override func draw(_ dirtyRect: NSRect) {
-        super.draw(dirtyRect)
-
-        // Drawing code here.
     }
 
     @IBAction func sliderAction(_ sender: NSControl) {
@@ -71,16 +74,9 @@ class ShaderSettingCell: NSTableCellView {
         value = controller.get(key: subLabel.stringValue)
     }
 
-    @IBAction func stepperAction(_ sender: NSStepper) {
+    @IBAction func stepperAction(_ sender: NSControl) {
 
         sliderAction(sender)
-
-        /*
-        let tmp = sender.floatValue
-
-        controller.set(key: subLabel.stringValue, value: rounded)
-        value = controller.get(key: subLabel.stringValue)
-         */
     }
 
     @IBAction func enableAction(_ sender: NSButton) {
@@ -91,7 +87,7 @@ class ShaderSettingCell: NSTableCellView {
 
     @IBAction func helpButton(_ sender: NSButton) {
 
-        print("Need help")
+        print("Not implemented yet")
     }
 
 }

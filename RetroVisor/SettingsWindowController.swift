@@ -1,9 +1,11 @@
+// -----------------------------------------------------------------------------
+// This file is part of RetroVisor
 //
-//  SettingsWindowController.swift
-//  RetroVisor
+// Copyright (C) Dirk W. Hoffmann. www.dirkwhoffmann.de
+// Licensed under the GNU General Public License v3
 //
-//  Created by Dirk Hoffmann on 04.08.25.
-//
+// See https://www.gnu.org for license information
+// -----------------------------------------------------------------------------
 
 import Cocoa
 
@@ -174,13 +176,6 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
     var oldSettings: CrtUniforms!
 
-    /*
-    override func windowDidLoad() {
-
-        super.windowDidLoad()
-    }
-    */
-
     override func showWindow(_ sender: Any?) {
 
         super.showWindow(sender)
@@ -217,8 +212,6 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
     }
 
     func set(key: String, value: Float) {
-
-        // print("key: \(key) value: \(value)")
 
         switch key {
         case "BRIGHT_BOOST": appDelegate.crtUniforms.BRIGHT_BOOST = value
@@ -273,5 +266,4 @@ class SettingsWindowController: NSWindowController, NSTableViewDelegate, NSTable
 
         window?.close()
     }
-
 }

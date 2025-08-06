@@ -11,6 +11,7 @@
 #define SHADER_TYPES
 
 #include <metal_stdlib>
+
 using namespace metal;
 
 struct VertexIn {
