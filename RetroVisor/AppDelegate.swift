@@ -18,7 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var settingsWindowController: SettingsWindowController?
 
     // Customizable shader parameters
-    var uniforms = CrtUniforms.defaults
+    var crtUniforms = CrtUniforms.defaults
 
     var windowController: WindowController? {
         return NSApplication.shared.windows.first?.windowController as? WindowController

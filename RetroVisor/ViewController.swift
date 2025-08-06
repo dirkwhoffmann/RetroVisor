@@ -124,7 +124,7 @@ class ViewController: NSViewController, MTKViewDelegate {
     var time: Float = 0.0
     var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
 
-    var frame = 0
+    // var frame = 0
     var animate: Bool = false
 
     var intensity = Animated<Float>(0.0)
@@ -296,108 +296,109 @@ class ViewController: NSViewController, MTKViewDelegate {
                                                                0,
                                                                &cvTextureOut)
 
+        // Trigger the view to redraw
         if result == kCVReturnSuccess && cvTextureOut != nil {
 
-            // Trigger a view redraw
             inTexture = CVMetalTextureGetTexture(cvTextureOut!)
             mtkView.setNeedsDisplay(mtkView.bounds)
         }
     }
 
-
     func draw(in view: MTKView) {
 
-        guard let trackingWindow = self.trackingWindow else { return }
+        guard let inTexture = self.inTexture else { return }
         guard var outTexture = self.outTexture else { return }
+        guard let trackingWindow = self.trackingWindow else { return }
 
         windowController?.recorder.updateRects()
 
+        // Progress the animation parameters
         intensity.move()
-
-        let mouse = trackingWindow.initialMouseLocationNrm ?? .zero
         time += 0.01
-        frame += 1
+
+        // Get the location of the latest mouse down event
+        let mouse = trackingWindow.initialMouseLocationNrm ?? .zero
+
+        // Setup uniforms
         uniforms.time = time
         uniforms.zoom = zoom
         uniforms.intensity = intensity.current
-        uniforms.resolution = [Float(inTexture?.width ?? 100),Float(inTexture?.height ?? 100)]
-        uniforms.window = [Float(trackingWindow.liveFrame.width),Float(trackingWindow.liveFrame.height)]
-        // print("interm: \(intermediateTexture?.width ?? 0) \(intermediateTexture?.height ?? 0)")
-        // print("frame: \(w.liveFrame.width) \(w.liveFrame.height)")
+        uniforms.resolution = [Float(inTexture.width), Float(inTexture.height)]
+        uniforms.window = [Float(trackingWindow.liveFrame.width), Float(trackingWindow.liveFrame.height)]
         uniforms.mouse = [Float(mouse.x), Float(1.0 - mouse.y)]
 
-        guard let drawable = view.currentDrawable,
-              let commandBuffer = commandQueue.makeCommandBuffer() else { return }
-
+        // Get the next drawable and create the command buffer
+        guard let drawable = view.currentDrawable else { return }
+        guard let commandBuffer = commandQueue.makeCommandBuffer() else { return }
 
         //
-        // First pass
+        // First pass: CRT effect
         //
 
-        let ripplePassDescriptor = MTLRenderPassDescriptor()
-        ripplePassDescriptor.colorAttachments[0].texture = outTexture
-        ripplePassDescriptor.colorAttachments[0].loadAction = .clear
-        ripplePassDescriptor.colorAttachments[0].storeAction = .store
-        ripplePassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
+        let renderPass1 = MTLRenderPassDescriptor()
+        renderPass1.colorAttachments[0].texture = outTexture
+        renderPass1.colorAttachments[0].loadAction = .clear
+        renderPass1.colorAttachments[0].storeAction = .store
+        renderPass1.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
 
-        if let rippleEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: ripplePassDescriptor) {
-            rippleEncoder.setRenderPipelineState(pipelineState1)
-            rippleEncoder.setVertexBuffer((windowController?.recorder.responsive)! ? vertexBuffer1 : vertexBuffer2, offset: 0, index: 0)
-            rippleEncoder.setFragmentTexture(inTexture, index: 0)
-            rippleEncoder.setFragmentSamplerState(linearSampler, index: 0)
-            rippleEncoder.setFragmentBytes(&uniforms,
-                                           length: MemoryLayout<Uniforms>.stride,
-                                           index: 0)
-            rippleEncoder.setFragmentBytes(&appDelegate.uniforms,
-                                           length: MemoryLayout<CrtUniforms>.stride,
-                                           index: 1)
+        if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass1) {
 
-            rippleEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-            rippleEncoder.endEncoding()
+            encoder.setRenderPipelineState(pipelineState1)
+            encoder.setVertexBuffer(vertexBuffer1, offset: 0, index: 0)
+            encoder.setFragmentTexture(inTexture, index: 0)
+            encoder.setFragmentSamplerState(linearSampler, index: 0)
+            encoder.setFragmentBytes(&uniforms,
+                                     length: MemoryLayout<Uniforms>.stride,
+                                     index: 0)
+            encoder.setFragmentBytes(&appDelegate.crtUniforms,
+                                     length: MemoryLayout<CrtUniforms>.stride,
+                                     index: 1)
+
+            encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+            encoder.endEncoding()
         }
 
         //
-        // Experimental
+        // Second pass: In-texture blurring
         //
 
+        if (uniforms.intensity > 0) {
 
-        let radius = 9.0 * uniforms.intensity
-        let intRadius = Int(radius) | 1
-        // let gauss = MPSImageGaussianBlur(device: device, sigma: 4.0 * uniforms.intensity)
-        let blur = MPSImageBox(device: device, kernelWidth: intRadius, kernelHeight: intRadius)
-
-        blur.encode(commandBuffer: commandBuffer,
-                      inPlaceTexture: &outTexture, fallbackCopyAllocator: nil)
-
+            let radius = Int(9.0 * uniforms.intensity) | 1
+            let blur = MPSImageBox(device: device, kernelWidth: radius, kernelHeight: radius)
+            blur.encode(commandBuffer: commandBuffer,
+                        inPlaceTexture: &outTexture, fallbackCopyAllocator: nil)
+        }
 
         //
-        // Second pass
+        // Third pass: Water-ripple effect
         //
 
-        guard let passDescriptor = view.currentRenderPassDescriptor else { return }
-        passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
+        guard let renderPass2 = view.currentRenderPassDescriptor else { return }
+        renderPass2.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
 
-        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
-        encoder.setRenderPipelineState(pipelineState2)
-        encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
-        encoder.setFragmentTexture(outTexture, index: 0)
-        encoder.setFragmentSamplerState(intensity.current > 0 ? linearSampler : nearestSampler, index: 0)
+        if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass2) {
 
-        // Pass uniforms: time and center
-        encoder.setFragmentBytes(&uniforms,
-                                 length: MemoryLayout<Uniforms>.stride,
-                                 index: 0)
+            encoder.setRenderPipelineState(pipelineState2)
+            encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
+            encoder.setFragmentTexture(outTexture, index: 0)
+            encoder.setFragmentSamplerState(intensity.current > 0 ? linearSampler : nearestSampler, index: 0)
 
+            // Pass uniforms: time and center
+            encoder.setFragmentBytes(&uniforms,
+                                     length: MemoryLayout<Uniforms>.stride,
+                                     index: 0)
 
-        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-        encoder.endEncoding()
+            encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+            encoder.endEncoding()
+        }
 
         commandBuffer.present(drawable)
         commandBuffer.commit()
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        // Handle view size changes if needed
+        
     }
 
     @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {
@@ -407,13 +408,11 @@ class ViewController: NSViewController, MTKViewDelegate {
 
     @IBAction func zoomInAction(_ sender: NSMenuItem) {
 
-        print("zoomInAction")
         zoom += 0.5
     }
 
     @IBAction func zoomOutAction(_ sender: NSMenuItem) {
 
-        print("zoomOutAction")
         zoom -= 0.5
     }
 }
