@@ -11,10 +11,28 @@ import Cocoa
 import MetalKit
 import MetalPerformanceShaders
 
+/* The current GPU pipeline consists of three stages:
+ *
+ * Stage 1: Main Processing
+ *
+ *          Applies the CRT effect shader to the input texture. This is the core
+ *          rendering stage.
+ *
+ * Stage 2: Post-Processing (Blur Filter)
+ *
+ *          Applies a Gaussian-like blur during window animations (i.e., move or
+ *          resize) to produce a smoother visual experience.
+ *
+ * Stage 3: Post-Processing (Ripple Effect)
+ *
+ *          Adds a water ripple effect during window drag and resize operations,
+ *          enhancing visual feedback with a dynamic distortion.
+ */
+
 struct Vertex {
 
-    var pos: SIMD4<Float>              // 16 bytes
-    var tex: SIMD2<Float>              // 8 bytes
+    var pos: SIMD4<Float>
+    var tex: SIMD2<Float>
     var pad: SIMD2<Float> = [0, 0]
 }
 
@@ -85,7 +103,7 @@ class ViewController: NSViewController, MTKViewDelegate {
     var commandQueue: MTLCommandQueue!
     var pipelineState1: MTLRenderPipelineState!
     var pipelineState2: MTLRenderPipelineState!
-    var vertexBuffer: MTLBuffer!
+    var vertexBuffer1: MTLBuffer!
     var vertexBuffer2: MTLBuffer!
     var nearestSampler: MTLSamplerState!
     var linearSampler: MTLSamplerState!
@@ -99,16 +117,12 @@ class ViewController: NSViewController, MTKViewDelegate {
                                  mouse: [0,0],
                                  texRect: [0,0,0,0])
 
-    // var crtUniforms = CrtUniforms.defaults
-
     var textureCache: CVMetalTextureCache!
-    var currentTexture: MTLTexture?
-    var intermediateTexture: MTLTexture?
-    var intermediateTexture2: MTLTexture?
+    var inTexture: MTLTexture?
+    var outTexture: MTLTexture?
 
     var time: Float = 0.0
     var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
-    var center: SIMD2<Float> = SIMD2(0.5, 0.5)
 
     var frame = 0
     var animate: Bool = false
@@ -116,29 +130,36 @@ class ViewController: NSViewController, MTKViewDelegate {
     var intensity = Animated<Float>(0.0)
 
     override func loadView() {
-        // Create MTKView programmatically as the main view
+
         device = MTLCreateSystemDefaultDevice()
+
+        // Create an MTKView programatically
         mtkView = MTKView(frame: .zero, device: device)
         mtkView.clearColor = MTLClearColorMake(0, 0, 0, 1)
         mtkView.delegate = self
         mtkView.enableSetNeedsDisplay = true
         mtkView.framebufferOnly = false
+
+        // Set it as the main view
         self.view = mtkView
     }
 
     override func viewDidLoad() {
+
         super.viewDidLoad()
 
-        CVMetalTextureCacheCreate(nil, nil, device, nil, &textureCache)
-
+        // Create a command queue
         commandQueue = device.makeCommandQueue()
 
+        // Create a texture cache
+        CVMetalTextureCacheCreate(nil, nil, device, nil, &textureCache)
+
+        // Setup the vertex buffers
         updateTextureRect(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
 
-        // Load shaders from default library
+        // Load shaders from the default library
         let defaultLibrary = device.makeDefaultLibrary()!
         let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
-        // let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_main")!
         let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_crt_easymode")!
         let rippleFunc = defaultLibrary.makeFunction(name: "fragment_ripple")!
 
@@ -146,7 +167,7 @@ class ViewController: NSViewController, MTKViewDelegate {
         nearestSampler = makeSamplerState(minFilter: .nearest, magFilter: .nearest)
         linearSampler  = makeSamplerState(minFilter: .linear,  magFilter: .linear)
 
-        // Setup vertex descriptor
+        // Setup a vertex descriptor
         let vertexDescriptor = MTLVertexDescriptor()
 
         // Single interleaved buffer
@@ -164,28 +185,21 @@ class ViewController: NSViewController, MTKViewDelegate {
         vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
         vertexDescriptor.attributes[1].bufferIndex = 0
 
-        // Create pipeline descriptors
+        // Setup the pipelin descriptor for the core rendering phase
         let pipelineDescriptor1 = MTLRenderPipelineDescriptor()
         pipelineDescriptor1.vertexFunction = vertexFunc
         pipelineDescriptor1.fragmentFunction = fragmentFunc
         pipelineDescriptor1.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
         pipelineDescriptor1.vertexDescriptor = vertexDescriptor
 
+        // Setup the pipelin descriptor for the post-processing phase
         let pipelineDescriptor2 = MTLRenderPipelineDescriptor()
         pipelineDescriptor2.vertexFunction = vertexFunc
         pipelineDescriptor2.fragmentFunction = rippleFunc
         pipelineDescriptor2.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
         pipelineDescriptor2.vertexDescriptor = vertexDescriptor
 
-        // Experimental
-        pipelineDescriptor2.colorAttachments[0].isBlendingEnabled = true
-        pipelineDescriptor2.colorAttachments[0].rgbBlendOperation = .add
-        pipelineDescriptor2.colorAttachments[0].alphaBlendOperation = .add
-        pipelineDescriptor2.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
-        pipelineDescriptor2.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
-        pipelineDescriptor2.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
-        pipelineDescriptor2.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
-
+        // Create the pipeline states
         do {
             pipelineState1 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor1)
             pipelineState2 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor2)
@@ -193,19 +207,9 @@ class ViewController: NSViewController, MTKViewDelegate {
             fatalError("Failed to create pipeline state: \(error)")
         }
 
-        setupMagnificationGesture()
-    }
-
-    func setupMagnificationGesture() {
-
-        // guard let contentView = window?.contentView else { return }
+        // Enable the magnification gesture
         let magnifyRecognizer = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnify(_:)))
         view.addGestureRecognizer(magnifyRecognizer)
-    }
-
-    @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {
-
-        zoom += Float(recognizer.magnification) * 0.1
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -217,32 +221,26 @@ class ViewController: NSViewController, MTKViewDelegate {
         return device.makeSamplerState(descriptor: descriptor)!
     }
 
-    var trect: CGRect = .zero
-
     func updateTextureRect(_ rect: CGRect?) {
 
         guard let rect = rect else { return }
 
-        trect = rect
         let tx1 = Float(rect.minX)
         let tx2 = Float(rect.maxX)
         let ty1 = Float(rect.minY)
         let ty2 = Float(rect.maxY)
 
-        // print("tx1: \(tx1), tx2: \(tx2), ty1: \(ty1), ty2: \(ty2)")
-        if windowController?.recorder.responsive == true {
-            uniforms.texRect = [tx1, ty1, tx2, ty2];
-        } else {
-            uniforms.texRect = [0.0, 0.0, 1.0, 1.0];
-        }
+        uniforms.texRect = [tx1, ty1, tx2, ty2];
 
-        let vertices: [Vertex] = [
+        // Quad rendered in the main stage (CRT effect)
+        let vertices1: [Vertex] = [
             Vertex(pos: [-1,  1, 0, 1], tex: [tx1, ty1]),
             Vertex(pos: [-1, -1, 0, 1], tex: [tx1, ty2]),
             Vertex(pos: [ 1,  1, 0, 1], tex: [tx2, ty1]),
             Vertex(pos: [ 1, -1, 0, 1], tex: [tx2, ty2]),
         ]
 
+        // Quad rendered in the post-processing stage (drag and resize animation)
         let vertices2: [Vertex] = [
             Vertex(pos: [-1,  1, 0, 1], tex: [0, 0]),
             Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
@@ -250,8 +248,8 @@ class ViewController: NSViewController, MTKViewDelegate {
             Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1]),
         ]
 
-        vertexBuffer = device.makeBuffer(bytes: vertices,
-                                         length: vertices.count * MemoryLayout<Vertex>.stride,
+        vertexBuffer1 = device.makeBuffer(bytes: vertices1,
+                                         length: vertices1.count * MemoryLayout<Vertex>.stride,
                                          options: [])
 
         vertexBuffer2 = device.makeBuffer(bytes: vertices2,
@@ -284,7 +282,7 @@ class ViewController: NSViewController, MTKViewDelegate {
     func update(with pixelBuffer: CVPixelBuffer) {
 
         // Convert pixelBuffer to Metal texture (or store it)
-        self.currentTexture = texture(from: pixelBuffer)
+        self.inTexture = texture(from: pixelBuffer)
 
         // Trigger view redraw
         mtkView.setNeedsDisplay(mtkView.bounds)
@@ -300,29 +298,17 @@ class ViewController: NSViewController, MTKViewDelegate {
         let w = NSScreen.scaleFactor * width
         let h = NSScreen.scaleFactor * width
 
-        if (intermediateTexture?.width == w && intermediateTexture?.height == h) { return }
-        intermediateTexture = makeIntermediateTexture(device: device, width: w, height: h)
-        intermediateTexture2 = makeIntermediateTexture(device: device, width: w, height: h)
-        // print("interm: \(intermediateTexture!.width) \(intermediateTexture!.height)")
+        if (outTexture?.width == w && outTexture?.height == h) { return }
+        outTexture = makeIntermediateTexture(device: device, width: w, height: h)
     }
 
     func makeIntermediateTexture(device: MTLDevice, width: Int, height: Int) -> MTLTexture? {
-        /*
-        let textureDescriptor = MTLTextureDescriptor()
-        textureDescriptor.pixelFormat = .bgra8Unorm             // typical color format
-        textureDescriptor.width = width
-        textureDescriptor.height = height
-        textureDescriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        textureDescriptor.storageMode = .private                 // optimized for GPU-only access
-        */
+
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
                                                                   width: width,
                                                                   height: height,
                                                                   mipmapped: false)
         descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        // descriptor.storageMode = .private
-
-
         return device.makeTexture(descriptor: descriptor)
     }
 
@@ -334,7 +320,8 @@ class ViewController: NSViewController, MTKViewDelegate {
 
     func draw(in view: MTKView) {
 
-        guard let trackingWindow = trackingWindow else { return }
+        guard let trackingWindow = self.trackingWindow else { return }
+        guard var outTexture = self.outTexture else { return }
 
         windowController?.recorder.updateRects()
 
@@ -346,7 +333,7 @@ class ViewController: NSViewController, MTKViewDelegate {
         uniforms.time = time
         uniforms.zoom = zoom
         uniforms.intensity = intensity.current
-        uniforms.resolution = [Float(currentTexture?.width ?? 100),Float(currentTexture?.height ?? 100)]
+        uniforms.resolution = [Float(inTexture?.width ?? 100),Float(inTexture?.height ?? 100)]
         uniforms.window = [Float(trackingWindow.liveFrame.width),Float(trackingWindow.liveFrame.height)]
         // print("interm: \(intermediateTexture?.width ?? 0) \(intermediateTexture?.height ?? 0)")
         // print("frame: \(w.liveFrame.width) \(w.liveFrame.height)")
@@ -360,20 +347,16 @@ class ViewController: NSViewController, MTKViewDelegate {
         // First pass
         //
 
-        if intermediateTexture == nil {
-            intermediateTexture = makeIntermediateTexture(device: device, width: Int(800), height: Int(600))
-            intermediateTexture2 = makeIntermediateTexture(device: device, width: Int(800), height: Int(600))
-        }
         let ripplePassDescriptor = MTLRenderPassDescriptor()
-        ripplePassDescriptor.colorAttachments[0].texture = intermediateTexture
+        ripplePassDescriptor.colorAttachments[0].texture = outTexture
         ripplePassDescriptor.colorAttachments[0].loadAction = .clear
         ripplePassDescriptor.colorAttachments[0].storeAction = .store
         ripplePassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
 
         if let rippleEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: ripplePassDescriptor) {
             rippleEncoder.setRenderPipelineState(pipelineState1)
-            rippleEncoder.setVertexBuffer((windowController?.recorder.responsive)! ? vertexBuffer : vertexBuffer2, offset: 0, index: 0)
-            rippleEncoder.setFragmentTexture(currentTexture, index: 0)
+            rippleEncoder.setVertexBuffer((windowController?.recorder.responsive)! ? vertexBuffer1 : vertexBuffer2, offset: 0, index: 0)
+            rippleEncoder.setFragmentTexture(inTexture, index: 0)
             rippleEncoder.setFragmentSamplerState(linearSampler, index: 0)
             rippleEncoder.setFragmentBytes(&uniforms,
                                            length: MemoryLayout<Uniforms>.stride,
@@ -397,7 +380,7 @@ class ViewController: NSViewController, MTKViewDelegate {
         let blur = MPSImageBox(device: device, kernelWidth: intRadius, kernelHeight: intRadius)
 
         blur.encode(commandBuffer: commandBuffer,
-                      inPlaceTexture: &intermediateTexture!, fallbackCopyAllocator: nil)
+                      inPlaceTexture: &outTexture, fallbackCopyAllocator: nil)
 
 
         //
@@ -410,7 +393,7 @@ class ViewController: NSViewController, MTKViewDelegate {
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
         encoder.setRenderPipelineState(pipelineState2)
         encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
-        encoder.setFragmentTexture(intermediateTexture, index: 0)
+        encoder.setFragmentTexture(outTexture, index: 0)
         encoder.setFragmentSamplerState(intensity.current > 0 ? linearSampler : nearestSampler, index: 0)
 
         // Pass uniforms: time and center
@@ -428,6 +411,11 @@ class ViewController: NSViewController, MTKViewDelegate {
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         // Handle view size changes if needed
+    }
+
+    @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {
+
+        zoom += Float(recognizer.magnification) * 0.1
     }
 
     @IBAction func zoomInAction(_ sender: NSMenuItem) {

@@ -67,7 +67,6 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     func updateRects()
     {
         guard let window = self.window else { return }
-        guard let display = self.display else { return }
 
         var newSourceRect = window.screenCoordinates
         var newCaptureRect: CGRect?
