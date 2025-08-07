@@ -1,277 +1,178 @@
-<!DOCTYPE HTML>
-<!--
-	Arcana by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
+	<!DOCTYPE HTML>
+	<!--
+		Arcana by HTML5 UP
+		html5up.net | @ajlkn
+		Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+	-->
+	<html>
 
-<head>
-	<!-- <title>Arcana by HTML5 UP</title> -->
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-	<link rel="stylesheet" href="assets/css/main.css" />
+	<head>
+		<!-- <title>Arcana by HTML5 UP</title> -->
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
 
-	<!-- web emulator view stuff start-->
-	<style>
-		.emulator_view {
-			width: 100%;
-		}
-		#vAmigaWeb{
-			border-radius: 10px;
-		}
+	<body class="is-preload" onload="switch_cinema_display()">
+		<div id="page-wrapper">
 
-		#player_container {
-			background-color: gray;
-			border-radius: 10px;
-			box-shadow: inset 0 0 0.1em black, 1em 1em 2em #2a2a2a;
-			animation: player_launch 10s ease-in;
-		}
-		@keyframes player_launch {
-			0% {
-				box-shadow: inset 0 0 0.1em black, 0 0 0.2em gray;
-			}
-			20% {
-				box-shadow: inset 0 0 0.1em black, 0 0 2em  #cccccc;
-			}
-			80% {
-				box-shadow: inset 0 0 0.1em black, 0 0 2em  #cccccc;
-			}
-			100% {
-				box-shadow: inset 0 0 0.1em black, 1em 1em 2em #222222;
-			}
-		}
-		.teaser_img {
-			width: 100%;
-			aspect-ratio: 320 / 232;			
-			border-radius: 10px;
-		}
+			<!-- Header -->
+			<div id="header">
 
+				<!-- Logo -->
+				<h1><a href="index.html" id="logo">RetroVisor<em> for macOS</em></a></h1>
 
-		#player_container div:last-child {
-			margin-left: 5px;
-			margin-right: 5px;
-		}
-
-		.player_icon_btn {
-			background-color: transparent;
-			color: #eeeeee;
-			margin-right: 15px;
-			cursor: grab;
-		}
-		[player="on"] .style1 {
-			background-color: #555555;
-			color: #999999;
-			animation: go_dark 2s ease-out;
-		}
-		[player="off"] .style1 {
-			animation: go_light 1s ease-in;
-		}
-		[player="on"] a {
-			color: #cccccc;
-			animation: a_go_dark 2s ease-out;
-		}
-		[player="off"] a {
-			animation: a_go_light 1s ease-in;
-		}
-		@keyframes a_go_dark {
-			0% {
-				color: #448DBC;
-			}
-			100% {
-				color: #cccccc;
-			}
-		} 
-		@keyframes a_go_light {
-			0% {
-				color: #cccccc;
-			}
-			100% {
-				color: #448DBC;
-			}
-		}
-		@keyframes go_dark {
-			0% {
-				background-color: #ffffff;
-				color: #474747;
-			}
-			100% {
-				background-color: #555555;
-				color: #999999;
-			}
-		} 
-		@keyframes go_light {
-			0% {
-				background-color: #555555;
-				color: #999999;
-			}
-			100% {
-				background-color: #ffffff;
-				color: #474747;
-			}
-			
-		} 
-	</style>
-	<script src="https://vamigaweb.github.io/js/vAmigaWeb_player.js"></script>
-	<script>
-		function switch_cinema_display(){
-			var observer= new MutationObserver(function(mutations){
-				let player_on=false;
-				for(var mutation of mutations)
-				{
-					for(var node of mutation.addedNodes)
-					{
-						if(node.id=="player_container")
-						{
-							player_on=true;
-							break;
-						}
-					};	
-				}
-				document.body.setAttribute("player",player_on?"on":"off");
-			});
-			var emulator_views=document.querySelectorAll(".emulator_view");
-			for(emulator_view of emulator_views)
-				observer.observe(emulator_view, { childList:true});
-		}
-	</script>
-	<!-- web emulator view stuff end-->	
-</head>
-
-<body class="is-preload" onload="switch_cinema_display()">
-	<div id="page-wrapper">
-
-		<!-- Header -->
-		<div id="header">
-
-			<!-- Logo -->
-			<h1><a href="index.html" id="logo">vAmiga<em> for macOS</em></a></h1>
-
-			<!-- Nav -->
-			<nav id="nav">
-				<ul>
-					<li><a href="index.html">About</a></li>
-					<li class="current"><a href="news.html">News</a></li>
-					<li><a href="docs/index.html">Documentation</a></li>
-					<li><a href="https://github.com/dirkwhoffmann/vAmiga">Code</a></li>
-					<li><a href="https://github.com/dirkwhoffmann/vAmiga/issues">Issues</a></li>
-					<li><a href="https://github.com/dirkwhoffmann/vAmiga/discussions">Discussions</a></li>
-					<li><a href="impressum.html">Impressum</a></li>
-				</ul>
-			</nav>
-		</div>
-
-		<section class="wrapper style1">
-			<div class="container">
-				<div id="content">
-					<article>
-						<span class="image featured"><img src="images/va-plain.jpg" alt="" /></span>
-					</article>
-				</div>
+				<!-- Nav -->
+				<nav id="nav">
+					<ul>
+						<li><a href="index.html">About</a></li>
+						<li class="current"><a href="news.html">News</a></li>
+						<li><a href="https://github.com/dirkwhoffmann/RetroVisor">Code</a></li>
+						<li><a href="https://github.com/dirkwhoffmann/RetroVisor/issues">Issues</a></li>
+						<li><a href="https://github.com/dirkwhoffmann/RetroVisor/discussions">Discussions</a></li>
+						<li><a href="impressum.html">Impressum</a></li>
+					</ul>
+				</nav>
 			</div>
-		</section>
 
-		<!-- Main -->
-		<section class="wrapper style1">
-			<div class="container">
-				<div class="row gtr-200">
-					<div class="col-8 col-12-narrower imp-narrower">
-						<div id="content">
+			<!-- Main -->
+			<section class="wrapper style1">
+				<div class="container">
+					<div class="row gtr-200">
+						<div class="col-8 col-12-narrower imp-narrower">
+							<div id="content">
 
-							<!-- Content -->
+								<!-- Content -->
 
-							<article>
-								<header>
-									<h2>News</h2>
-								</header>
-								<h3><em>23.2.2025 &nbsp;</em><a href="https://github.com/dirkwhoffmann/vAmiga/releases/tag/v4.0">vAmiga 4.0 released.</a></h3>
-								<p>The latest vAmiga update introduces LZ4 snapshot compression, making snapshot saving faster and more efficient. Gamepad detection has also been improved, ensuring better support for controllers.
-								Several bugs have been fixed in this release. ExtendedADF support, which was previously broken, is now working correctly. An issue with folder import has been resolved, and vAmiga no longer attempts to boot from unbootable hard drives.
-								Enjoy the update, and happy emulating!<p>
-								<h3><em>8.1.2025 &nbsp;</em><a href="https://github.com/dirkwhoffmann/vAmiga/releases/tag/v3.1">vAmiga 3.1 released.</a></h3>
-								<h3><em>26.12.2024 &nbsp;</em><a href="https://github.com/dirkwhoffmann/vAmiga/releases/tag/v3.0">vAmiga 3.0 released.</a></h3>
-								<h3><em>27.6.2024 &nbsp;</em><a href="https://github.com/dirkwhoffmann/vAmiga/releases/tag/v2.6">vAmiga 2.6 released.</a></h3>
-								<h3><em>29.1.2024 &nbsp;</em><a href="https://github.com/dirkwhoffmann/vAmiga/releases/tag/v2.5">vAmiga 2.5 released.</a></h3>
-								<h3><em>25.4.2023 &nbsp;</em><a href="https://github.com/dirkwhoffmann/vAmiga/releases/tag/v2.4">vAmiga 2.4 released.</a></h3>
-								<h3><em>6.1.2023 &nbsp;</em><a href="https://github.com/dirkwhoffmann/vAmiga/releases/tag/v2.3">vAmiga 2.3 released.</a></h3>
-							</article>
+								<article>
+									<header>
+										<h2>News</h2>
+									</header>
+									<h3><em>7.8.2025</em> &nbsp; Announcing <a href="https://github.com/dirkwhoffmann/vAmiga/RetroVisor/tag/v0.9">🎉  RetroVisor 0.9</a> - First Public Release</h3>
+									<p>As of August 7, 2025, the first public version of <strong>RetroVisor</strong> is officially available!</p>
+									<p>
+										This release marks the end of the initial development stage and the beginning of the tool's journey as open-source software. 
+										The app draws inspiration from <a href="https://github.com/mausimus/ShaderGlass">ShaderGlass</a> on Windows and aims to bring a similar experience to macOS users, powered by Apple’s ScreenCaptureKit and Metal-based shaders.
+									</p>
 
+									<hr>
+
+									<h3>🛠️ What RetroVisor Does</h3>
+
+									<p>
+										When you launch <strong>RetroVisor</strong>, it creates a floating <em>effect window</em> that you can position over any other application. 
+										Double-click the effect window to lock it in place — it becomes visually synced to the underlying window, applying 
+										real-time visual effects such as scanlines or phosphor glow. To unlock the window, simply use the menu bar 
+										icon or click the app icon in the dock.
+									</p>
+
+									<p>
+										Behind the scenes, <strong>RetroVisor</strong> captures a portion of your screen using ScreenCaptureKit, processes it through 
+										a GPU shader pipeline, and displays the result in a tightly aligned overlay — simulating a transparent CRT filter over your target app.
+									</p>
+
+									<blockquote>
+										📌 Important: <strong>RetroVisor</strong> requires screen recording permission to function.
+										You’ll need to enable this in the macOS <em>System Settings</em>. 
+										Without it, the app won't work.
+									</blockquote>
+
+									<hr>
+
+									<h3>🧭 Roadmap</h3>
+
+									<p><strong>RetroVisor</strong> is being developed in two main stages:</p>
+
+									<ul>
+										<li>
+											<strong>Stage 1 (complete):</strong> Build the core infrastructure and demonstrate the concept with a built-in 
+											proof-of-concept shader (<em>CRT-Easymode</em>).
+										</li>
+										<li>
+											<strong>Stage 2 (next):</strong> Expand shader support and design a flexible system capable of integrating a wider 
+											variety of CRT-style and post-processing shaders. This will involve diving into popular shader formats and frameworks — 
+											and ideally, collaborating with the community to make it happen.
+										</li>
+									</ul>
+
+									<p>
+										If you enjoy tinkering with shaders, you're more than welcome to fork <strong>RetroVisor</strong> and experiment. 
+										Promising results will be merged back into the main project.
+									</p>
+								</article>
+
+							</div>
 						</div>
-					</div>
-					<div class="col-4 col-12-narrower">
-						<div id="sidebar2">
+						<div class="col-4 col-12-narrower">
+							<div id="sidebar2">
 
-							<!-- Sidebar -->
-							<section>
-								<h3>Project activity</h3>
-								<p>
-									<img alt="GitHub watchers"
-									src="https://img.shields.io/github/watchers/dirkwhoffmann/vAmiga?style=social">
-									<img alt="GitHub Repo stars"
-									src="https://img.shields.io/github/stars/dirkwhoffmann/vAmiga?style=social">
-									<img alt="GitHub forks"
-									src="https://img.shields.io/github/forks/dirkwhoffmann/vAmiga?style=social"><br><br>
-									<img alt="Multi-platform build"
-									src="https://github.com/dirkwhoffmann/vAmiga/workflows/CMake%20on%20multiple platforms/badge.svg"><br>
-									<img alt="MinGW build"
-									src="https://github.com/dirkwhoffmann/vAmiga/workflows/CMake%20with%20MinGW/badge.svg"><br>
-									<img alt="GitHub release (latest by date)"
-									src="https://img.shields.io/github/downloads/dirkwhoffmann/vAmiga/latest/total">
-									<img alt="GitHub all releases"
-									src="https://img.shields.io/github/downloads/dirkwhoffmann/vAmiga/total"><br>
-									<img alt="GitHub issues"
-									src="https://img.shields.io/github/issues/dirkwhoffmann/vAmiga">
-									<img alt="GitHub closed issues"
-									src="https://img.shields.io/github/issues-closed/dirkwhoffmann/vAmiga"><br>
-									<img alt="GitHub code size in bytes"
-									src="https://img.shields.io/github/languages/code-size/dirkwhoffmann/vAmiga">
-									<img alt="GitHub repo size"
-									src="https://img.shields.io/github/repo-size/dirkwhoffmann/vAmiga">
-								</p>
-							</section>							
+								<!-- Sidebar -->
+								<section>
+									<h3>Project activity</h3>
+									<p>
+										<img alt="GitHub watchers"
+										src="https://img.shields.io/github/watchers/dirkwhoffmann/RetroVisor?style=social">
+										<img alt="GitHub Repo stars"
+										src="https://img.shields.io/github/stars/dirkwhoffmann/RetroVisor?style=social">
+										<img alt="GitHub forks"
+										src="https://img.shields.io/github/forks/dirkwhoffmann/RetroVisor?style=social"><br><br>
+										<img alt="GitHub release (latest by date)"
+										src="https://img.shields.io/github/downloads/dirkwhoffmann/RetroVisor/latest/total">
+										<img alt="GitHub all releases"
+										src="https://img.shields.io/github/downloads/dirkwhoffmann/RetroVisor/total"><br>
+										<img alt="GitHub issues"
+										src="https://img.shields.io/github/issues/dirkwhoffmann/RetroVisor">
+										<img alt="GitHub closed issues"
+										src="https://img.shields.io/github/issues-closed/dirkwhoffmann/RetroVisor"><br>
+										<img alt="GitHub code size in bytes"
+										src="https://img.shields.io/github/languages/code-size/dirkwhoffmann/RetroVisor">
+										<img alt="GitHub repo size"
+										src="https://img.shields.io/github/repo-size/dirkwhoffmann/RetroVisor">
+									</p>
+								</section>							
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</section>
+			</section>
 
-		<!-- Footer -->
-		<div id="footer">
+			<!-- Footer -->
+			<div id="footer">
 
-			<!-- Icons -->
-			<ul class="icons">
-				<li>
-					<a href="https://www.amazon.de/Dirk-W-Hoffmann/e/B004580IPU" class="icon brands fa-amazon"><span class="label">Amazon</span></a>
-				</li>
-				<li>
-					<a href="https://github.com/dirkwhoffmann" class="icon brands fa-github"><span class="label">GitHub</span></a>
-				</li>
-				<li>
-					<a href="https://www.youtube.com/channel/UCk9tUTMPMSQdxhKeeJRpNAA" class="icon brands fa-youtube"><span class="label">Youtube</span></a>
-				</li>			
-			</ul>
-
-			<!-- Copyright -->
-			<div class="copyright">
-				<ul class="menu">
-					<li>&copy; <a href="http://www.dirkwhoffmann.de">Dirk W. Hoffmann</a></li>
-					<li><a href="impressum.html">Impressum</a></li>
-					<li><a href="impressum.html">Datenschutz</a></li>
-					<li><a href="http://html5up.net">HTML5 UP</a></li>
+				<!-- Icons -->
+				<ul class="icons">
+					<li>
+						<a href="https://www.amazon.de/Dirk-W-Hoffmann/e/B004580IPU" class="icon brands fa-amazon"><span class="label">Amazon</span></a>
+					</li>
+					<li>
+						<a href="https://github.com/dirkwhoffmann" class="icon brands fa-github"><span class="label">GitHub</span></a>
+					</li>
+					<li>
+						<a href="https://www.youtube.com/channel/UCk9tUTMPMSQdxhKeeJRpNAA" class="icon brands fa-youtube"><span class="label">Youtube</span></a>
+					</li>			
 				</ul>
+
+				<!-- Copyright -->
+				<div class="copyright">
+					<ul class="menu">
+						<li>&copy; <a href="http://www.dirkwhoffmann.de">Dirk W. Hoffmann</a></li>
+						<li><a href="impressum.html">Impressum</a></li>
+						<li><a href="impressum.html">Datenschutz</a></li>
+						<li><a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+				</div>
+
 			</div>
 
 		</div>
 
-	</div>
+		<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/jquery.dropotron.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+	</body>
 
-	<!-- Scripts -->
-	<script src="assets/js/jquery.min.js"></script>
-	<script src="assets/js/jquery.dropotron.min.js"></script>
-	<script src="assets/js/browser.min.js"></script>
-	<script src="assets/js/breakpoints.min.js"></script>
-	<script src="assets/js/util.js"></script>
-	<script src="assets/js/main.js"></script>
-</body>
-
-</html>
+	</html>
