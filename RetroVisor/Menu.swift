@@ -69,6 +69,13 @@ extension AppDelegate : NSMenuItemValidation {
         )
         restart.target = self
 
+        let stopRecording = NSMenuItem(
+            title: "Stop recording",
+            action: #selector(recorderAction(_:)),
+            keyEquivalent: ""
+        )
+        stopRecording.target = self
+
         let quit = NSMenuItem(
             title: "Quit \(Bundle.main.appName)",
             action: #selector(NSApplication.terminate(_:)),
@@ -76,6 +83,8 @@ extension AppDelegate : NSMenuItemValidation {
         )
 
         menu.addItem(freeze)
+        menu.addItem(stopRecording)
+        menu.addItem(NSMenuItem.separator())
         menu.addItem(restart)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(liveDragging)
@@ -95,6 +104,10 @@ extension AppDelegate : NSMenuItemValidation {
 
         case #selector(AppDelegate.liveDraggingAction(_:)):
             menuItem.state = recorder?.responsive == true ? .on : .off
+            return true
+
+        case #selector(AppDelegate.recorderAction(_:)):
+            menuItem.title = recorder?.isRecording == true ? "Stop Recording" : "Start Recording"
             return true
 
         default:
@@ -118,4 +131,19 @@ extension AppDelegate : NSMenuItemValidation {
 
         recorder?.relaunch()
     }
+
+    @objc func recorderAction(_ sender: Any?) {
+
+        guard let recorder = recorder else { return }
+        guard let texture = windowController?.viewController?.outTexture else { return }
+
+        if recorder.isRecording {
+            print("stopping recorder")
+            recorder.stopRecording { }
+        } else {
+            print("starting recorder")
+            recorder.startRecording(width: texture.width, height: texture.height)
+        }
+    }
+
 }

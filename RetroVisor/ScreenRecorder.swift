@@ -17,7 +17,7 @@ protocol ScreenRecorderDelegate : SCStreamOutput {
 }
 
 extension TrackingWindowDelegate {
-    
+
     func textureRectDidChange(rect: CGRect?) {}
     func captureRectDidChange(rect: CGRect?) {}
     func recorderDidStart() {}
@@ -53,6 +53,14 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     var filter: SCContentFilter?
     var window: TrackingWindow?
     let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
+
+    // AVWriter
+    private var assetWriter: AVAssetWriter?
+    private var writerInput: AVAssetWriterInput?
+    private var pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
+    private var startTime: CMTime?
+    var currentTime: CMTime?
+    var isRecording: Bool = false
 
     // The recorder delegate
     var delegate: ScreenRecorderDelegate?
@@ -176,7 +184,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             config.height = Int(rect.height) * NSScreen.scaleFactor
             config.pixelFormat = kCVPixelFormatType_32BGRA
             config.colorSpaceName = CGColorSpace.sRGB
-            config.minimumFrameInterval = CMTime(value: 1, timescale: 60)
+            config.minimumFrameInterval = CMTime(value: 1, timescale: 50)
             config.queueDepth = 5
 
             // Create the stream
@@ -202,5 +210,120 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     func relaunchIfNeeded()
     {
         if (needsRestart) { relaunch() }
+    }
+
+    var frame = 0
+
+    func record(buffer: CVPixelBuffer) {
+
+
+    }
+
+    func startIfNeeded(firstTimestamp: CMTime) {
+
+        if startTime == nil {
+
+            startTime = firstTimestamp
+            assetWriter!.startWriting()
+            assetWriter!.startSession(atSourceTime: firstTimestamp)
+        }
+    }
+
+    func startRecording(width: Int, height: Int) {
+
+        if isRecording { return }
+
+        let fileManager = FileManager.default
+
+        // Setup AVAssetWriter
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let url = docs.appendingPathComponent("output.mov")
+        print("Recording to \(url)")
+        if fileManager.fileExists(atPath: url.path) {
+            try? fileManager.removeItem(at: url)
+        }
+
+        do {
+            assetWriter = try AVAssetWriter(outputURL: url, fileType: .mov)
+        } catch {
+            print("Can't start recording: \(error)")
+            return
+        }
+
+        print("assetWriter = \(assetWriter.debugDescription)")
+        print("Recording size = \(width) x \(height)")
+
+        let videoSettings: [String: Any] = [
+            AVVideoCodecKey: AVVideoCodecType.h264,
+            AVVideoWidthKey: width,
+            AVVideoHeightKey: height,
+            AVVideoCompressionPropertiesKey: [
+                AVVideoAverageBitRateKey: 6000000,
+                AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel
+            ]
+        ]
+
+        writerInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+        writerInput!.expectsMediaDataInRealTime = true
+
+        pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(
+            assetWriterInput: writerInput!,
+            sourcePixelBufferAttributes: [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+            ])
+
+        guard assetWriter!.canAdd(writerInput!) else {
+            fatalError("Can't add input to asset writer")
+        }
+        assetWriter!.add(writerInput!)
+
+        // Start writing session
+        /*
+         guard assetWriter!.startWriting() else {
+         if let error = assetWriter!.error {
+         throw error
+         }
+         fatalError("Can't write")
+         }
+         */
+        isRecording = true
+    }
+
+    func stopRecording(completion: @escaping () -> Void) {
+
+        writerInput?.markAsFinished()
+        assetWriter?.finishWriting {
+            print("Recording finished")
+            completion()
+        }
+        isRecording = false
+    }
+
+    // Appends a video frame
+    func appendVideo(texture: MTLTexture) {
+
+        if !isRecording { return }
+
+        guard let time = currentTime else { return }
+
+        print("Recording frame")
+        startIfNeeded(firstTimestamp: time)
+
+        guard writerInput!.isReadyForMoreMediaData else { return }
+
+        var pb: CVPixelBuffer?
+        CVPixelBufferPoolCreatePixelBuffer(nil, pixelBufferAdaptor!.pixelBufferPool!, &pb)
+        guard let pixelBuffer = pb else { return }
+
+        // Copy Metal texture into CVPixelBuffer
+        CVPixelBufferLockBaseAddress(pixelBuffer, [])
+        let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
+        texture.getBytes(CVPixelBufferGetBaseAddress(pixelBuffer)!,
+                         bytesPerRow: bytesPerRow,
+                         from: MTLRegionMake2D(0, 0, texture.width, texture.height),
+                         mipmapLevel: 0)
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
+
+        pixelBufferAdaptor!.append(pixelBuffer, withPresentationTime: time)
     }
 }

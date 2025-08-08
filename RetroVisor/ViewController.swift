@@ -97,6 +97,7 @@ class ViewController: NSViewController, MTKViewDelegate {
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
     var trackingWindow: TrackingWindow? { view.window as? TrackingWindow }
     var windowController: WindowController? { return trackingWindow?.windowController as? WindowController }
+    var recorder: ScreenRecorder? { return windowController?.recorder }
 
     var mtkView: MTKView!
     var device: MTLDevice!
@@ -301,6 +302,7 @@ class ViewController: NSViewController, MTKViewDelegate {
 
             inTexture = CVMetalTextureGetTexture(cvTextureOut!)
             mtkView.setNeedsDisplay(mtkView.bounds)
+            if outTexture != nil { recorder?.appendVideo(texture: outTexture!) }
         }
     }
 

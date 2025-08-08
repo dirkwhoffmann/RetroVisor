@@ -137,9 +137,14 @@ extension WindowController: ScreenRecorderDelegate {
             // Process the pixel buffer in the view controller
             DispatchQueue.main.async { [weak self] in
                 if let vc = self?.contentViewController as? ViewController {
+
+                    let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
+                    self?.recorder.currentTime = pts
                     vc.update(with: pixelBuffer)
                 }
             }
+
+            // recorder.record(buffer: buffer, pixelBuffer: pixelBuffer)
         }
     }
 }
