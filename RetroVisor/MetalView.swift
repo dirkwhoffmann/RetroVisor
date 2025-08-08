@@ -29,7 +29,6 @@ import MetalPerformanceShaders
  *          enhancing visual feedback with a dynamic distortion.
  */
 
-/*
 struct Vertex {
 
     var pos: SIMD4<Float>
@@ -92,17 +91,16 @@ struct CrtUniforms {
         ENABLE_LANCZOS: 1
     )
 }
-*/
 
-class ViewController: NSViewController, MTKViewDelegate {
+class MetalView: MTKView, MTKViewDelegate {
 
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
-    var trackingWindow: TrackingWindow? { view.window as? TrackingWindow }
+    var trackingWindow: TrackingWindow!
     var windowController: WindowController? { return trackingWindow?.windowController as? WindowController }
     var recorder: ScreenRecorder? { return windowController?.recorder }
 
     var mtkView: MTKView!
-    var device: MTLDevice!
+    // var device: MTLDevice!
     var commandQueue: MTLCommandQueue!
     var pipelineState1: MTLRenderPipelineState!
     var pipelineState2: MTLRenderPipelineState!
@@ -132,9 +130,14 @@ class ViewController: NSViewController, MTKViewDelegate {
 
     var intensity = Animated<Float>(0.0)
 
-    override func loadView() {
+    required init(coder: NSCoder) {
+
+        super.init(coder: coder)
 
         device = MTLCreateSystemDefaultDevice()
+        guard let device = device else { return }
+
+        delegate = self
 
         // Create an MTKView programatically
         mtkView = MTKView(frame: .zero, device: device)
@@ -142,14 +145,6 @@ class ViewController: NSViewController, MTKViewDelegate {
         mtkView.delegate = self
         mtkView.enableSetNeedsDisplay = true
         mtkView.framebufferOnly = false
-
-        // Set it as the main view
-        self.view = mtkView
-    }
-
-    override func viewDidLoad() {
-
-        super.viewDidLoad()
 
         // Create a command queue
         commandQueue = device.makeCommandQueue()
@@ -212,7 +207,7 @@ class ViewController: NSViewController, MTKViewDelegate {
 
         // Enable the magnification gesture
         let magnifyRecognizer = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnify(_:)))
-        view.addGestureRecognizer(magnifyRecognizer)
+        addGestureRecognizer(magnifyRecognizer)
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -221,7 +216,7 @@ class ViewController: NSViewController, MTKViewDelegate {
         descriptor.minFilter = minFilter
         descriptor.magFilter = magFilter
         descriptor.mipFilter = .notMipmapped
-        return device.makeSamplerState(descriptor: descriptor)!
+        return device!.makeSamplerState(descriptor: descriptor)!
     }
 
     func updateVertexBuffers(_ rect: CGRect?) {
@@ -251,13 +246,13 @@ class ViewController: NSViewController, MTKViewDelegate {
             Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1]),
         ]
 
-        vertexBuffer1 = device.makeBuffer(bytes: vertices1,
-                                         length: vertices1.count * MemoryLayout<Vertex>.stride,
-                                         options: [])
+        vertexBuffer1 = device!.makeBuffer(bytes: vertices1,
+                                           length: vertices1.count * MemoryLayout<Vertex>.stride,
+                                           options: [])
 
-        vertexBuffer2 = device.makeBuffer(bytes: vertices2,
-                                         length: vertices2.count * MemoryLayout<Vertex>.stride,
-                                         options: [])
+        vertexBuffer2 = device!.makeBuffer(bytes: vertices2,
+                                           length: vertices2.count * MemoryLayout<Vertex>.stride,
+                                           options: [])
 
     }
 
@@ -278,7 +273,7 @@ class ViewController: NSViewController, MTKViewDelegate {
                                                                       height: h,
                                                                       mipmapped: false)
             descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-            outTexture = device.makeTexture(descriptor: descriptor)
+            outTexture = device!.makeTexture(descriptor: descriptor)
         }
     }
 
@@ -369,7 +364,7 @@ class ViewController: NSViewController, MTKViewDelegate {
         if (uniforms.intensity > 0) {
 
             let radius = Int(9.0 * uniforms.intensity) | 1
-            let blur = MPSImageBox(device: device, kernelWidth: radius, kernelHeight: radius)
+            let blur = MPSImageBox(device: device!, kernelWidth: radius, kernelHeight: radius)
             blur.encode(commandBuffer: commandBuffer,
                         inPlaceTexture: &outTexture, fallbackCopyAllocator: nil)
         }
@@ -402,7 +397,7 @@ class ViewController: NSViewController, MTKViewDelegate {
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        
+
     }
 
     @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {
