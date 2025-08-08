@@ -135,7 +135,7 @@ extension AppDelegate : NSMenuItemValidation {
     @objc func recorderAction(_ sender: Any?) {
 
         guard let recorder = recorder else { return }
-        guard let texture = windowController?.viewController?.outTexture else { return }
+        guard let texture = windowController?.metalView?.outTexture else { return }
 
         if recorder.isRecording {
             print("stopping recorder")

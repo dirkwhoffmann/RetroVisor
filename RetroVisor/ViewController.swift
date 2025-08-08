@@ -11,6 +11,15 @@ import Cocoa
 import MetalKit
 import MetalPerformanceShaders
 
+
+class ViewController: NSViewController {
+
+    @IBOutlet weak var metalView: MetalView!
+    var trackingWindow: TrackingWindow? { view.window as? TrackingWindow }
+}
+
+
+
 /* The current GPU pipeline consists of three stages:
  *
  * Stage 1: Main Processing
@@ -94,6 +103,7 @@ struct CrtUniforms {
 }
 */
 
+/*
 class ViewController: NSViewController, MTKViewDelegate {
 
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
@@ -420,3 +430,4 @@ class ViewController: NSViewController, MTKViewDelegate {
         zoom -= 0.5
     }
 }
+*/

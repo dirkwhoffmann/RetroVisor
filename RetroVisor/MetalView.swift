@@ -94,12 +94,16 @@ struct CrtUniforms {
 
 class MetalView: MTKView, MTKViewDelegate {
 
+    // @IBOutlet weak var trackingWindow: TrackingWindow!
+    var trackingWindow: TrackingWindow { window! as! TrackingWindow }
+    @IBOutlet weak var viewController: ViewController!
+
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
-    var trackingWindow: TrackingWindow!
-    var windowController: WindowController? { return trackingWindow?.windowController as? WindowController }
+    // var trackingWindow: TrackingWindow!
+    var windowController: WindowController? { return trackingWindow.windowController as? WindowController }
     var recorder: ScreenRecorder? { return windowController?.recorder }
 
-    var mtkView: MTKView!
+    // var mtkView: MTKView!
     // var device: MTLDevice!
     var commandQueue: MTLCommandQueue!
     var pipelineState1: MTLRenderPipelineState!
@@ -134,17 +138,16 @@ class MetalView: MTKView, MTKViewDelegate {
 
         super.init(coder: coder)
 
+        print("MetalView init")
+
         device = MTLCreateSystemDefaultDevice()
         guard let device = device else { return }
 
         delegate = self
-
-        // Create an MTKView programatically
-        mtkView = MTKView(frame: .zero, device: device)
-        mtkView.clearColor = MTLClearColorMake(0, 0, 0, 1)
-        mtkView.delegate = self
-        mtkView.enableSetNeedsDisplay = true
-        mtkView.framebufferOnly = false
+        clearColor = MTLClearColorMake(0, 0, 0, 1)
+        delegate = self
+        enableSetNeedsDisplay = true
+        framebufferOnly = false
 
         // Create a command queue
         commandQueue = device.makeCommandQueue()
@@ -187,14 +190,14 @@ class MetalView: MTKView, MTKViewDelegate {
         let pipelineDescriptor1 = MTLRenderPipelineDescriptor()
         pipelineDescriptor1.vertexFunction = vertexFunc
         pipelineDescriptor1.fragmentFunction = fragmentFunc
-        pipelineDescriptor1.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
+        pipelineDescriptor1.colorAttachments[0].pixelFormat = colorPixelFormat
         pipelineDescriptor1.vertexDescriptor = vertexDescriptor
 
         // Setup the pipelin descriptor for the post-processing phase
         let pipelineDescriptor2 = MTLRenderPipelineDescriptor()
         pipelineDescriptor2.vertexFunction = vertexFunc
         pipelineDescriptor2.fragmentFunction = rippleFunc
-        pipelineDescriptor2.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
+        pipelineDescriptor2.colorAttachments[0].pixelFormat = colorPixelFormat
         pipelineDescriptor2.vertexDescriptor = vertexDescriptor
 
         // Create the pipeline states
@@ -208,6 +211,8 @@ class MetalView: MTKView, MTKViewDelegate {
         // Enable the magnification gesture
         let magnifyRecognizer = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnify(_:)))
         addGestureRecognizer(magnifyRecognizer)
+
+        print("MetalView initialized")
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -266,6 +271,7 @@ class MetalView: MTKView, MTKViewDelegate {
         let w = NSScreen.scaleFactor * width
         let h = NSScreen.scaleFactor * width
 
+        print("updateTextures")
         if outTexture?.width != w || outTexture?.height != h {
 
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
@@ -298,16 +304,39 @@ class MetalView: MTKView, MTKViewDelegate {
         if result == kCVReturnSuccess && cvTextureOut != nil {
 
             inTexture = CVMetalTextureGetTexture(cvTextureOut!)
-            mtkView.setNeedsDisplay(mtkView.bounds)
+            setNeedsDisplay(bounds)
             if outTexture != nil { recorder?.appendVideo(texture: outTexture!) }
         }
     }
 
     func draw(in view: MTKView) {
 
+        /*
+        guard let drawable = view.currentDrawable,
+                  let commandQueue = device?.makeCommandQueue(),
+                  let commandBuffer = commandQueue.makeCommandBuffer(),
+                  let renderPassDescriptor = view.currentRenderPassDescriptor else {
+                return
+            }
+
+            // Set clear color to red
+            renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 1, green: 0, blue: 0, alpha: 1)
+            renderPassDescriptor.colorAttachments[0].loadAction = .clear
+
+            // Create a render command encoder
+            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
+            encoder.endEncoding()
+
+            // Present the drawable to screen
+            commandBuffer.present(drawable)
+            commandBuffer.commit()
+
+        return
+         */
+
         guard let inTexture = self.inTexture else { return }
         guard var outTexture = self.outTexture else { return }
-        guard let trackingWindow = self.trackingWindow else { return }
+        // guard let trackingWindow = self.trackingWindow else { return }
 
         windowController?.recorder.updateRects()
 
@@ -398,6 +427,7 @@ class MetalView: MTKView, MTKViewDelegate {
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
 
+        // print("mtkView drawableSizeWillChange")
     }
 
     @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {

@@ -41,9 +41,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
 
         if let window = NSApplication.shared.windows.first {
-            let frame = NSRect(x: 300, y: 300, width: 800, height: 600)
-            window.setFrame(frame, display: true)
-            window.makeKeyAndOrderFront(nil)
+            // let frame = NSRect(x: 300, y: 300, width: 800, height: 600)
+            // window.setFrame(frame, display: true)
+            // window.makeKeyAndOrderFront(nil)
 
             createStatusBarMenu()
         }

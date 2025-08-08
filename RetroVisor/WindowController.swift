@@ -14,6 +14,7 @@ class WindowController: NSWindowController  {
 
     var viewController : ViewController? { return self.contentViewController as? ViewController }
     var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
+    var metalView : MetalView? { return viewController?.metalView }
 
     // The screen recorder
     var recorder = ScreenRecorder()
@@ -28,13 +29,12 @@ class WindowController: NSWindowController  {
         let window = self.window as! TrackingWindow
 
         // Setup the window
-        window.isOpaque = false
         window.hasShadow = true
         window.level = .floating
-        window.makeKeyAndOrderFront(nil)
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.trackingDelegate = self
+        window.makeKeyAndOrderFront(nil)
         unfreeze()
 
         // Setup the recorder
@@ -51,6 +51,7 @@ class WindowController: NSWindowController  {
     }
 
     func showPermissionAlert() {
+
         let alert = NSAlert()
         alert.messageText = "Screen Recording Permission Required"
         alert.informativeText = """
@@ -89,15 +90,15 @@ extension WindowController: TrackingWindowDelegate {
 
     func windowDidStartResize(_ window: TrackingWindow) {
 
-        viewController!.intensity.target = 1.0
-        viewController!.intensity.steps = 15
+        metalView!.intensity.target = 1.0
+        metalView!.intensity.steps = 15
     }
 
     func windowDidStopResize(_ window: TrackingWindow) {
 
-        viewController!.intensity.target = 0.0
-        viewController!.intensity.steps = 15
-        viewController!.updateTextures(rect: window.frame)
+        metalView!.intensity.target = 0.0
+        metalView!.intensity.steps = 15
+        metalView!.updateTextures(rect: window.frame)
 
         recorder.updateRects()
         recorder.relaunchIfNeeded()
@@ -105,14 +106,14 @@ extension WindowController: TrackingWindowDelegate {
 
     func windowDidStartDrag(_ window: TrackingWindow) {
 
-        viewController!.intensity.target = 1.0
-        viewController!.intensity.steps = 25
+        metalView!.intensity.target = 1.0
+        metalView!.intensity.steps = 25
     }
 
     func windowDidStopDrag(_ window: TrackingWindow) {
 
-        viewController!.intensity.target = 0.0
-        viewController!.intensity.steps = 25
+        metalView!.intensity.target = 0.0
+        metalView!.intensity.steps = 25
 
         recorder.updateRects()
         recorder.relaunchIfNeeded()
@@ -140,7 +141,7 @@ extension WindowController: ScreenRecorderDelegate {
 
     func textureRectDidChange(rect: CGRect?) {
 
-        viewController?.updateVertexBuffers(rect)
+        metalView?.updateVertexBuffers(rect)
     }
 
     func recorderDidStart() {
@@ -152,13 +153,14 @@ extension WindowController: ScreenRecorderDelegate {
 
         if let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) {
 
-            // Process the pixel buffer in the view controller
+            // Process the pixel buffer in the Metal view
             DispatchQueue.main.async { [weak self] in
+
                 if let vc = self?.contentViewController as? ViewController {
 
                     let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
                     self?.recorder.currentTime = pts
-                    vc.update(with: pixelBuffer)
+                    vc.metalView.update(with: pixelBuffer)
                 }
             }
 

@@ -208,9 +208,12 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
             needsRestart = false
 
+            print("Lauch completed")
+            
         } catch {
             print("Error: \(error)")
         }
+
     }
 
     func relaunch()
