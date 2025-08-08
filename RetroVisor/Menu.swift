@@ -83,7 +83,7 @@ extension AppDelegate : NSMenuItemValidation {
         )
 
         menu.addItem(freeze)
-        menu.addItem(stopRecording)
+        // menu.addItem(stopRecording)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(restart)
         menu.addItem(NSMenuItem.separator())

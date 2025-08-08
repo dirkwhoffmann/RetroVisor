@@ -131,6 +131,17 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         }
     }
 
+    var canRecord: Bool {
+        get async {
+            do {
+                try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+                return true
+            } catch {
+                return false
+            }
+        }
+    }
+
     func launch() async
     {
         print("Launching the screen recorder...")

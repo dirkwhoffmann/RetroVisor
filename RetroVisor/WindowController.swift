@@ -40,7 +40,25 @@ class WindowController: NSWindowController  {
         // Setup the recorder
         recorder.delegate = self
         recorder.window = trackingWindow
-        recorder.relaunch()
+
+        Task {
+            if await recorder.canRecord {
+                await recorder.launch()
+            } else {
+                showPermissionAlert()
+            }
+        }
+    }
+
+    func showPermissionAlert() {
+        let alert = NSAlert()
+        alert.messageText = "Screen Recording Permission Required"
+        alert.informativeText = """
+        This app needs screen recording permission to capture content.
+        Please enable it in System Settings › Privacy & Security › Screen Recording, then restart the app.
+        """
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 
     func freeze() {
