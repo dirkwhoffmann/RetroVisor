@@ -63,6 +63,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let sb = NSStoryboard(name: "Main", bundle: nil)
         if let wc = sb.instantiateController(withIdentifier: "EffectWindow") as? NSWindowController {
             createStatusBarMenu()
+            wc.window?.setContentSize(NSSize(width: 800, height: 600))
+            wc.window?.center()
             wc.showWindow(self)
         }
     }

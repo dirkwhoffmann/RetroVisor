@@ -13,9 +13,13 @@ class PermissionViewController: NSViewController  {
 
     @IBOutlet weak var appIcon: NSImageView!
     @IBOutlet weak var permissionIcon: NSImageView!
-    @IBOutlet weak var capturePermissonText: NSTextField!
+    @IBOutlet weak var titleText: NSTextField!
+    @IBOutlet weak var captureText: NSTextField!
+    @IBOutlet weak var buttonText: NSTextField!
+    @IBOutlet weak var actionButton: NSButton!
 
     var permissionTimer: Timer?
+    var canLaunch: Bool = false
 
     override func viewDidLoad() {
 
@@ -31,20 +35,27 @@ class PermissionViewController: NSViewController  {
         Task {
             while true {
 
-                let allowed = await ScreenRecorder.permissions
-                if allowed {
+                canLaunch = await ScreenRecorder.permissions
+
+                if canLaunch {
+
                     DispatchQueue.main.async {
 
-                        self.permissionIcon.image = NSImage(named: "statusOk")
-                        self.capturePermissonText.stringValue = "Permission Granted"
+                        self.appIcon.image = NSImage(named: "statusOk")
+                        self.titleText.stringValue = "RetroVisor is ready to run."
+                        self.captureText.stringValue = "✅ Screen Capture Permissions"
+                        self.buttonText.isHidden = true
+                        self.actionButton.title = "Relaunch RetroVisor"
                     }
-                    // break
+
                 } else {
 
-                    self.permissionIcon.image = NSImage(named: "statusStop")
-                    self.capturePermissonText.stringValue = "RetroVisor needs this permission because it captures and processes your screen in real time using Apple’s ScreenCaptureKit to apply visual effects. Without screen recording access, it cannot function."
+                    self.appIcon.image = NSImage(named: "statusStop")
+                    self.titleText.stringValue = "RetroVisor requires additional permissions to run."
+                    self.captureText.stringValue = "🛑 Screen Capture Permissions"
+                    self.buttonText.isHidden = false
+                    self.actionButton.title = "Open System Preferences"
 
-                    print("So sad, no permissions")
                 }
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
             }
@@ -53,9 +64,17 @@ class PermissionViewController: NSViewController  {
 
     @IBAction func openSystemPrefsAction(_ sender: NSButton) {
 
-        print("open system prefs")
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
+        if canLaunch {
+
+            Process.launchedProcess(launchPath: "/usr/bin/open", arguments: ["-b", Bundle.main.bundleIdentifier!])
+              NSApp.terminate(self)
+            NSApplication.shared.terminate(nil)
+
+        } else {
+
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
                 NSWorkspace.shared.open(url)
             }
+        }
     }
 }
