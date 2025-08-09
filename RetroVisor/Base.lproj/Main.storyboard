@@ -807,7 +807,7 @@ DQ
                                                                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fpH-gu-bpu">
                                                                     <rect key="frame" x="10" y="2.5" width="64" height="72"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="NSTouchBarCommunicationVideoTemplate" id="Cy2-g5-DNW"/>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="recor" id="Cy2-g5-DNW"/>
                                                                 </imageView>
                                                             </subviews>
                                                         </view>
@@ -890,7 +890,7 @@ DQ
         </scene>
     </scenes>
     <resources>
-        <image name="NSTouchBarCommunicationVideoTemplate" width="24" height="17"/>
+        <image name="recor" width="128" height="128"/>
         <image name="statusStop" width="512" height="512"/>
     </resources>
 </document>

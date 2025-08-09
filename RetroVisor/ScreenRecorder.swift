@@ -44,6 +44,8 @@ extension TrackingWindowDelegate {
 @MainActor
 class ScreenRecorder: NSObject, SCStreamDelegate
 {
+    var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
+
     // Capture mode
     var responsive = true { didSet { if responsive != oldValue { relaunch() } } }
 
@@ -62,7 +64,10 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     private var pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
     private var startTime: CMTime?
     var currentTime: CMTime?
-    var recordingRect: NSRect?
+    var recordingRect: NSRect? {
+        didSet { appDelegate.updateStatusBarMenuIcon(recording: isRecording) }
+    }
+    
     var isRecording: Bool { recordingRect != nil }
 
     // The recorder delegate
@@ -251,7 +256,6 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
         if isRecording { return }
         recordingRect = NSRect(x: 0, y: 0, width: width, height: height)
-        // print("recordingRect: \(recordingRect)")
 
         let fileManager = FileManager.default
 
@@ -269,9 +273,6 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             print("Can't start recording: \(error)")
             return
         }
-
-        print("assetWriter = \(assetWriter.debugDescription)")
-        print("Recording size = \(width) x \(height)")
 
         let videoSettings: [String: Any] = [
             AVVideoCodecKey: AVVideoCodecType.h264,

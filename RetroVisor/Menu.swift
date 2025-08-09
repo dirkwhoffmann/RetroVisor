@@ -37,14 +37,19 @@ extension AppDelegate : NSMenuItemValidation {
     //
     // Status Bar Menu
     //
-    
+
+    func updateStatusBarMenuIcon(recording: Bool) {
+
+        if let button = statusItem.button {
+            button.image = NSImage(named: recording ? "RecordingTemplate" : "RetroVisorTemplate")!
+        }
+    }
+
     func createStatusBarMenu() {
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
-        if let button = statusItem.button {
-            button.image = NSImage(named: "RetroVisorTemplate")!
-        }
+        updateStatusBarMenuIcon(recording: false)
 
         let menu = NSMenu()
 

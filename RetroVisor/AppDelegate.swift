@@ -14,6 +14,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var statusItem: NSStatusItem!
 
+    var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
+    
     // Window controller of the settings dialog
     var settingsWindowController: SettingsWindowController?
 
@@ -51,7 +53,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 showPermissionWindow()
             }
         }
-
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
