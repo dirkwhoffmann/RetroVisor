@@ -24,6 +24,7 @@ class WindowController: NSWindowController  {
 
     override func windowDidLoad() {
 
+        print("WindowController.windowDidLoad")
         super.windowDidLoad()
 
         let window = self.window as! TrackingWindow
@@ -41,8 +42,9 @@ class WindowController: NSWindowController  {
         recorder.delegate = self
         recorder.window = trackingWindow
 
+
         Task {
-            if await recorder.canRecord {
+            if await ScreenRecorder.permissions {
                 await recorder.launch()
             } else {
                 showPermissionAlert()

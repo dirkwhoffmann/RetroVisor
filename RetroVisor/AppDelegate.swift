@@ -9,7 +9,7 @@
 
 import Cocoa
 
-@main
+@main @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     var statusItem: NSStatusItem!
@@ -40,17 +40,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
 
-        if let window = NSApplication.shared.windows.first {
-            // let frame = NSRect(x: 300, y: 300, width: 800, height: 600)
-            // window.setFrame(frame, display: true)
-            // window.makeKeyAndOrderFront(nil)
+        Task {
 
-            createStatusBarMenu()
+            if await ScreenRecorder.permissions {
+
+                showEffectWindow()
+
+            } else {
+
+                showPermissionWindow()
+            }
         }
+
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true
+    }
+
+    func showEffectWindow() {
+
+        let sb = NSStoryboard(name: "Main", bundle: nil)
+        if let wc = sb.instantiateController(withIdentifier: "EffectWindow") as? NSWindowController {
+            createStatusBarMenu()
+            wc.showWindow(self)
+        }
+    }
+
+    func showPermissionWindow() {
+
+        let sb = NSStoryboard(name: "Main", bundle: nil)
+        if let wc = sb.instantiateController(withIdentifier: "PermissionWindow") as? NSWindowController {
+            wc.window?.center()
+            wc.showWindow(self)
+        }
     }
 
     @IBAction func showSettings(_ sender: Any?) {
