@@ -44,7 +44,7 @@ class WindowController: NSWindowController  {
 
 
         Task {
-            if await ScreenRecorder.permissions {
+            if await ScreenRecorder.canRecord {
                 await recorder.launch()
             } else {
                 showPermissionAlert()
@@ -153,20 +153,32 @@ extension WindowController: ScreenRecorderDelegate {
 
     func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
-        if let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) {
+        switch type {
 
-            // Process the pixel buffer in the Metal view
-            DispatchQueue.main.async { [weak self] in
+        case .screen:
 
-                if let vc = self?.contentViewController as? ViewController {
+            if let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) {
 
-                    let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
-                    self?.recorder.currentTime = pts
-                    vc.metalView.update(with: pixelBuffer)
+                // Process the pixel buffer in the Metal view
+                DispatchQueue.main.async { [weak self] in
+
+                    if let vc = self?.contentViewController as? ViewController {
+
+                        let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
+                        self?.recorder.currentTime = pts
+                        vc.metalView.update(with: pixelBuffer)
+                    }
                 }
             }
 
-            // recorder.record(buffer: buffer, pixelBuffer: pixelBuffer)
+        case .audio:
+
+            // print("Got audio")
+            recorder.appendAudio(buffer: buffer)
+            break
+
+        default:
+            break
         }
     }
 }

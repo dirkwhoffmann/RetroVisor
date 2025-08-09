@@ -53,10 +53,12 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     var filter: SCContentFilter?
     var window: TrackingWindow?
     let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
+    let audioQueue = DispatchQueue(label: "de.dirkwhoffmann.AudioQueue")
 
     // AVWriter
     private var assetWriter: AVAssetWriter?
-    private var writerInput: AVAssetWriterInput?
+    private var videoInput: AVAssetWriterInput?
+    private var audioInput: AVAssetWriterInput?
     private var pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
     private var startTime: CMTime?
     var currentTime: CMTime?
@@ -132,20 +134,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         }
     }
 
-    /*
-    var canRecord: Bool {
-        get async {
-            do {
-                try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
-                return true
-            } catch {
-                return false
-            }
-        }
-    }
-    */
-
-    static var permissions: Bool {
+    static var canRecord: Bool {
         get async {
             do {
                 try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
@@ -199,7 +188,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             let config = SCStreamConfiguration()
 
             // Configure audio capture
-            config.capturesAudio = false
+            config.capturesAudio = true
 
             // Configure video capture
             let rect = captureRect ?? display!.frame
@@ -217,6 +206,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
             // Register the stream receiver
             try stream!.addStreamOutput(delegate!, type: .screen, sampleHandlerQueue: videoQueue)
+            try stream!.addStreamOutput(delegate!, type: .audio, sampleHandlerQueue: audioQueue)
 
             try await stream!.startCapture()
 
@@ -297,11 +287,11 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             ]
         ]
 
-        writerInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
-        writerInput!.expectsMediaDataInRealTime = true
+        videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+        videoInput!.expectsMediaDataInRealTime = true
 
         pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(
-            assetWriterInput: writerInput!,
+            assetWriterInput: videoInput!,
             sourcePixelBufferAttributes: [
                 kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
                 kCVPixelBufferWidthKey as String: width,
@@ -310,25 +300,31 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             ]
         )
 
-        guard assetWriter!.canAdd(writerInput!) else {
+        guard assetWriter!.canAdd(videoInput!) else {
             fatalError("Can't add input to asset writer")
         }
-        assetWriter!.add(writerInput!)
+        assetWriter!.add(videoInput!)
 
-        // Start writing session
-        /*
-         guard assetWriter!.startWriting() else {
-         if let error = assetWriter!.error {
-         throw error
-         }
-         fatalError("Can't write")
-         }
-         */
+        let audioSettings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatMPEG4AAC,
+            AVNumberOfChannelsKey: 2,
+            AVSampleRateKey: 44100,
+            AVEncoderBitRateKey: 128000
+        ]
+
+        audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioSettings)
+        audioInput!.expectsMediaDataInRealTime = true
+
+        if assetWriter!.canAdd(audioInput!) {
+            assetWriter!.add(audioInput!)
+        } else {
+            print("Cannot add audio input")
+        }
     }
 
     func stopRecording(completion: @escaping () -> Void) {
 
-        writerInput?.markAsFinished()
+        videoInput?.markAsFinished()
         assetWriter?.finishWriting {
             print("Recording finished")
             completion()
@@ -354,7 +350,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
         // print("Recording frame")
         startIfNeeded(firstTimestamp: time)
 
-        guard writerInput!.isReadyForMoreMediaData else { return }
+        guard videoInput!.isReadyForMoreMediaData else { return }
 
         var pb: CVPixelBuffer?
         CVPixelBufferPoolCreatePixelBuffer(nil, pixelBufferAdaptor!.pixelBufferPool!, &pb)
@@ -371,4 +367,15 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
         pixelBufferAdaptor!.append(pixelBuffer, withPresentationTime: time)
     }
+
+    func appendAudio(buffer: CMSampleBuffer) {
+
+        if !isRecording { return }
+        // guard let time = currentTime else { return }
+        if audioInput?.isReadyForMoreMediaData == true {
+            audioInput!.append(buffer)
+        }
+
+    }
+
 }

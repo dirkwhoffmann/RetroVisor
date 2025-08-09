@@ -42,7 +42,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         Task {
 
-            if await ScreenRecorder.permissions {
+            if await ScreenRecorder.canRecord {
 
                 showEffectWindow()
 
