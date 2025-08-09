@@ -14,5 +14,14 @@ class PermissionWindowController: NSWindowController  {
     override func windowDidLoad() {
 
         print("PermissionWindowController.windowDidLoad")
+
+        if let window = window {
+
+            window.hasShadow = true
+            // window.level = .floating
+            window.titleVisibility = .hidden
+            window.styleMask = [.titled, .closable, .resizable, .miniaturizable,
+                                .nonactivatingPanel, .fullSizeContentView]
+        }
     }
 }

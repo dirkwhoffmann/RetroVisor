@@ -23,11 +23,8 @@ class PermissionViewController: NSViewController  {
 
     override func viewDidLoad() {
 
-        if let icon = NSApp.applicationIconImage {
-            appIcon.image = icon
-            }
-
-        startPermissionPolling()
+        captureText.stringValue = "🛑 Screen Capture Permissions"
+        // startPermissionPolling()
     }
 
     func startPermissionPolling() {
