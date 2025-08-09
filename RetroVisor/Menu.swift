@@ -69,12 +69,12 @@ extension AppDelegate : NSMenuItemValidation {
         )
         restart.target = self
 
-        let stopRecording = NSMenuItem(
+        let record = NSMenuItem(
             title: "Stop recording",
             action: #selector(recorderAction(_:)),
             keyEquivalent: ""
         )
-        stopRecording.target = self
+        record.target = self
 
         let quit = NSMenuItem(
             title: "Quit \(Bundle.main.appName)",
@@ -83,7 +83,7 @@ extension AppDelegate : NSMenuItemValidation {
         )
 
         menu.addItem(freeze)
-        // menu.addItem(stopRecording)
+        menu.addItem(record)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(restart)
         menu.addItem(NSMenuItem.separator())

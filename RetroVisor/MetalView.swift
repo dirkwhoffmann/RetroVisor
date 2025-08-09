@@ -269,7 +269,7 @@ class MetalView: MTKView, MTKViewDelegate {
     func updateTextures(width: Int, height: Int) {
 
         let w = NSScreen.scaleFactor * width
-        let h = NSScreen.scaleFactor * width
+        let h = NSScreen.scaleFactor * height
 
         print("updateTextures")
         if outTexture?.width != w || outTexture?.height != h {

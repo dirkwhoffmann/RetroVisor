@@ -60,7 +60,8 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     private var pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
     private var startTime: CMTime?
     var currentTime: CMTime?
-    var isRecording: Bool = false
+    var recordingRect: NSRect?
+    var isRecording: Bool { recordingRect != nil }
 
     // The recorder delegate
     var delegate: ScreenRecorderDelegate?
@@ -259,6 +260,8 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     func startRecording(width: Int, height: Int) {
 
         if isRecording { return }
+        recordingRect = NSRect(x: 0, y: 0, width: width, height: height)
+        // print("recordingRect: \(recordingRect)")
 
         let fileManager = FileManager.default
 
@@ -286,7 +289,11 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             AVVideoHeightKey: height,
             AVVideoCompressionPropertiesKey: [
                 AVVideoAverageBitRateKey: 6000000,
-                AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel
+                AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
+                AVVideoPixelAspectRatioKey: [
+                        AVVideoPixelAspectRatioHorizontalSpacingKey: 1,
+                        AVVideoPixelAspectRatioVerticalSpacingKey: 1
+                    ]
             ]
         ]
 
@@ -297,7 +304,11 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             assetWriterInput: writerInput!,
             sourcePixelBufferAttributes: [
                 kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
-            ])
+                kCVPixelBufferWidthKey as String: width,
+                kCVPixelBufferHeightKey as String: height,
+                kCVPixelBufferMetalCompatibilityKey as String: true
+            ]
+        )
 
         guard assetWriter!.canAdd(writerInput!) else {
             fatalError("Can't add input to asset writer")
@@ -313,7 +324,6 @@ class ScreenRecorder: NSObject, SCStreamDelegate
          fatalError("Can't write")
          }
          */
-        isRecording = true
     }
 
     func stopRecording(completion: @escaping () -> Void) {
@@ -323,17 +333,25 @@ class ScreenRecorder: NSObject, SCStreamDelegate
             print("Recording finished")
             completion()
         }
-        isRecording = false
+
+        recordingRect = nil
     }
 
     // Appends a video frame
     func appendVideo(texture: MTLTexture) {
 
         if !isRecording { return }
-
         guard let time = currentTime else { return }
 
-        print("Recording frame")
+        let texW = CGFloat(texture.width)
+        let texH = CGFloat(texture.height)
+
+        // Stop recording, if the texture size did change
+        if recordingRect!.width != texW || recordingRect!.height != texH {
+            stopRecording { }
+        }
+
+        // print("Recording frame")
         startIfNeeded(firstTimestamp: time)
 
         guard writerInput!.isReadyForMoreMediaData else { return }
