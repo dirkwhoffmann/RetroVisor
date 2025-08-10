@@ -29,6 +29,12 @@ import MetalPerformanceShaders
  *          enhancing visual feedback with a dynamic distortion.
  */
 
+enum ShaderType {
+
+    case none
+    case crt
+}
+
 struct Vertex {
 
     var pos: SIMD4<Float>
@@ -94,15 +100,17 @@ struct CrtUniforms {
 
 class MetalView: MTKView, MTKViewDelegate {
 
-    // @IBOutlet weak var trackingWindow: TrackingWindow!
-    var trackingWindow: TrackingWindow { window! as! TrackingWindow }
     @IBOutlet weak var viewController: ViewController!
 
+    var trackingWindow: TrackingWindow { window! as! TrackingWindow }
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var windowController: WindowController? { return trackingWindow.windowController as? WindowController }
     var recorder: Recorder? { return windowController?.recorder }
 
+    var shaderType: ShaderType = .crt
+
     var commandQueue: MTLCommandQueue!
+    var pipelineState0: MTLRenderPipelineState!
     var pipelineState1: MTLRenderPipelineState!
     var pipelineState2: MTLRenderPipelineState!
     var vertexBuffer1: MTLBuffer!
@@ -158,6 +166,7 @@ class MetalView: MTKView, MTKViewDelegate {
         // Load shaders from the default library
         let defaultLibrary = device.makeDefaultLibrary()!
         let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
+        let bypassFunc = defaultLibrary.makeFunction(name: "fragment_bypass")!
         let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_crt_easymode")!
         let rippleFunc = defaultLibrary.makeFunction(name: "fragment_ripple")!
 
@@ -183,7 +192,13 @@ class MetalView: MTKView, MTKViewDelegate {
         vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
         vertexDescriptor.attributes[1].bufferIndex = 0
 
-        // Setup the pipelin descriptor for the core rendering phase
+        // Setup the pipelin descriptor for the bypass shader (no CRT effect)
+        let pipelineDescriptor0 = MTLRenderPipelineDescriptor()
+        pipelineDescriptor0.vertexFunction = vertexFunc
+        pipelineDescriptor0.fragmentFunction = bypassFunc
+        pipelineDescriptor0.colorAttachments[0].pixelFormat = colorPixelFormat
+        pipelineDescriptor0.vertexDescriptor = vertexDescriptor
+
         let pipelineDescriptor1 = MTLRenderPipelineDescriptor()
         pipelineDescriptor1.vertexFunction = vertexFunc
         pipelineDescriptor1.fragmentFunction = fragmentFunc
@@ -199,6 +214,7 @@ class MetalView: MTKView, MTKViewDelegate {
 
         // Create the pipeline states
         do {
+            pipelineState0 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor0)
             pipelineState1 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor1)
             pipelineState2 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor2)
         } catch {
@@ -307,36 +323,12 @@ class MetalView: MTKView, MTKViewDelegate {
 
     func draw(in view: MTKView) {
 
-        /*
-        guard let drawable = view.currentDrawable,
-                  let commandQueue = device?.makeCommandQueue(),
-                  let commandBuffer = commandQueue.makeCommandBuffer(),
-                  let renderPassDescriptor = view.currentRenderPassDescriptor else {
-                return
-            }
-
-            // Set clear color to red
-            renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 1, green: 0, blue: 0, alpha: 1)
-            renderPassDescriptor.colorAttachments[0].loadAction = .clear
-
-            // Create a render command encoder
-            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
-            encoder.endEncoding()
-
-            // Present the drawable to screen
-            commandBuffer.present(drawable)
-            commandBuffer.commit()
-
-        return
-         */
-
         guard let inTexture = self.inTexture else { return }
         guard var outTexture = self.outTexture else { return }
-        // guard let trackingWindow = self.trackingWindow else { return }
 
         windowController?.streamer.updateRects()
 
-        // Progress the animation parameters
+        // Advance the animation parameters
         intensity.move()
         time += 0.01
 
@@ -367,7 +359,7 @@ class MetalView: MTKView, MTKViewDelegate {
 
         if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass1) {
 
-            encoder.setRenderPipelineState(pipelineState1)
+            encoder.setRenderPipelineState(shaderType == .none ? pipelineState0 : pipelineState1)
             encoder.setVertexBuffer(vertexBuffer1, offset: 0, index: 0)
             encoder.setFragmentTexture(inTexture, index: 0)
             encoder.setFragmentSamplerState(linearSampler, index: 0)
