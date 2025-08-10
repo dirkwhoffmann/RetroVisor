@@ -16,7 +16,6 @@ class GeneralPreferencesViewController: NSViewController {
 
     override func viewDidLoad() {
 
-        print("GeneralPreferencesViewController.viewDidLoad")
         refresh()
     }
 

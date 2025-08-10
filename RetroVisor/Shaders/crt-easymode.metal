@@ -85,6 +85,11 @@ inline float4 crt_easymode(float2 texture_size,
     float curve_x;
     float3 col, col2;
 
+    if (!u.ENABLE) {
+
+        return float4(tex.sample(sam, tex_co).rgb, 1.0);
+    }
+
     if (u.ENABLE_LANCZOS) {
 
         curve_x = curve_distance(dist.x, u.SHARPNESS_H * u.SHARPNESS_H);
@@ -152,7 +157,6 @@ inline float4 crt_easymode(float2 texture_size,
     col = pow(col, float3(1.0 / u.GAMMA_OUTPUT));
 
     return float4(col * u.BRIGHT_BOOST, 1.0);
-    // return float4(scan_weight, scan_weight, scan_weight, 1.0);
 }
 
 fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
@@ -165,16 +169,10 @@ fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
     float2 video_size =  uniforms.window;
     float2 output_size = uniforms.window;
 
-    // Normalize the texture coordinate:
-    // float2 uv = in.texCoord;
+    // Normalize the texture coordinate
     float2 texOrigin = uniforms.texRect.xy;
     float2 texSize = uniforms.texRect.zw - uniforms.texRect.xy;
     float2 normuv = (in.texCoord - texOrigin) / texSize;
-
-    /*
-    float4 color = tex.sample(sam, in.texCoord);
-    return color;
-    */
 
     return crt_easymode(texture_size,
                         video_size,

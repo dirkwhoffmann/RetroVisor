@@ -39,7 +39,8 @@ struct Uniforms {
 };
 
 struct CrtUniforms {
-    
+
+    uint  ENABLE;
     float BRIGHT_BOOST;
     float DILATION;
     float GAMMA_INPUT;

@@ -172,22 +172,31 @@ var shaderSettings: [ShaderSetting] = [
 class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NSTableViewDataSource {
 
     @IBOutlet weak var tableView: NSTableView!
+    @IBOutlet weak var shaderSelector: NSPopUpButton!
 
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var oldSettings: CrtUniforms!
 
     override func viewDidLoad() {
 
-        print("ShaderPreferencesViewController.viewDidLoad")
         oldSettings = app.crtUniforms
+
         tableView.delegate = self
         tableView.dataSource = self
+
+        refresh()
+    }
+
+    func refresh() {
+
+        shaderSelector.selectItem(withTag: Int(app.crtUniforms.ENABLE))
         tableView.reloadData()
     }
 
     func get(key: String) -> Float {
 
         switch key {
+        case "ENABLE": return Float(app.crtUniforms.ENABLE)
         case "BRIGHT_BOOST": return app.crtUniforms.BRIGHT_BOOST
         case "DILATION": return app.crtUniforms.DILATION
         case "GAMMA_INPUT": return app.crtUniforms.GAMMA_INPUT
@@ -216,6 +225,7 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     func set(key: String, value: Float) {
 
         switch key {
+        case "ENABLE": app.crtUniforms.ENABLE = Int32(value)
         case "BRIGHT_BOOST": app.crtUniforms.BRIGHT_BOOST = value
         case "DILATION": app.crtUniforms.DILATION = value
         case "GAMMA_INPUT": app.crtUniforms.GAMMA_INPUT = value
@@ -241,8 +251,8 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int {
-        print("numberOfRows = \(shaderSettings.count)")
-        return shaderSettings.count
+
+        return app.crtUniforms.ENABLE == 0 ? 0 : shaderSettings.count
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
@@ -253,10 +263,16 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
         return cell
     }
 
+    @IBAction func shaderSelectAction(_ sender: NSPopUpButton) {
+
+        app.crtUniforms.ENABLE = Int32(sender.selectedTag())
+        refresh()
+    }
+
     @IBAction func defaultsAction(_ sender: NSButton) {
 
         app.crtUniforms.self = CrtUniforms.defaults
-        tableView.reloadData()
+        refresh()
     }
 
     @IBAction func cancelAction(_ sender: NSButton) {

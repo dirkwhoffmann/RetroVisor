@@ -56,6 +56,7 @@ struct Uniforms {
 
 struct CrtUniforms {
 
+    var ENABLE: Int32
     var BRIGHT_BOOST: Float
     var DILATION: Float
     var GAMMA_INPUT: Float
@@ -77,6 +78,7 @@ struct CrtUniforms {
 
     static let defaults = CrtUniforms(
 
+        ENABLE: 1,
         BRIGHT_BOOST: 1.2,
         DILATION: 1.0,
         GAMMA_INPUT: 2.0,
@@ -107,10 +109,7 @@ class MetalView: MTKView, MTKViewDelegate {
     var windowController: WindowController? { return trackingWindow.windowController as? WindowController }
     var recorder: Recorder? { return windowController?.recorder }
 
-    var shaderType: ShaderType = .crt
-
     var commandQueue: MTLCommandQueue!
-    var pipelineState0: MTLRenderPipelineState!
     var pipelineState1: MTLRenderPipelineState!
     var pipelineState2: MTLRenderPipelineState!
     var vertexBuffer1: MTLBuffer!
@@ -214,7 +213,6 @@ class MetalView: MTKView, MTKViewDelegate {
 
         // Create the pipeline states
         do {
-            pipelineState0 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor0)
             pipelineState1 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor1)
             pipelineState2 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor2)
         } catch {
@@ -359,7 +357,7 @@ class MetalView: MTKView, MTKViewDelegate {
 
         if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass1) {
 
-            encoder.setRenderPipelineState(shaderType == .none ? pipelineState0 : pipelineState1)
+            encoder.setRenderPipelineState(pipelineState1)
             encoder.setVertexBuffer(vertexBuffer1, offset: 0, index: 0)
             encoder.setFragmentTexture(inTexture, index: 0)
             encoder.setFragmentSamplerState(linearSampler, index: 0)
