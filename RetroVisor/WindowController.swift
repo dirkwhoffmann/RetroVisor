@@ -159,25 +159,24 @@ extension WindowController: ScreenRecorderDelegate {
 
         case .screen:
 
-            if let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) {
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
 
-                // Process the pixel buffer in the Metal view
-                DispatchQueue.main.async { [weak self] in
+            DispatchQueue.main.async { [weak self] in
 
-                    if let vc = self?.contentViewController as? ViewController {
+                if let vc = self?.contentViewController as? ViewController {
 
-                        let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
-                        self?.recorder.currentTime = pts
-                        vc.metalView.update(with: pixelBuffer)
-                    }
+                    let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
+                    self?.recorder.currentTime = pts
+                    vc.metalView.update(with: pixelBuffer)
                 }
             }
 
         case .audio:
 
-            // print("Got audio")
-            recorder.appendAudio(buffer: buffer)
-            break
+            DispatchQueue.main.async { [weak self] in
+
+                self?.recorder.appendAudio(buffer: buffer)
+            }
 
         default:
             break
