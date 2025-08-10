@@ -54,25 +54,11 @@ extension AppDelegate : NSMenuItemValidation {
         let menu = NSMenu()
 
         let freeze = NSMenuItem(
-            title: "Freeze",
+            title: "Freeze Effect Window",
             action: #selector(freezeAction(_:)),
             keyEquivalent: ""
         )
         freeze.target = self
-
-        let liveDragging = NSMenuItem(
-            title: "Live Dragging",
-            action: #selector(liveDraggingAction(_:)),
-            keyEquivalent: ""
-        )
-        liveDragging.target = self
-
-        let restart = NSMenuItem(
-            title: "Restart Screen Recorder",
-            action: #selector(restartScreenRecorder(_:)),
-            keyEquivalent: ""
-        )
-        restart.target = self
 
         let record = NSMenuItem(
             title: "Stop recording",
@@ -80,6 +66,13 @@ extension AppDelegate : NSMenuItemValidation {
             keyEquivalent: ""
         )
         record.target = self
+
+        let restart = NSMenuItem(
+            title: "Restart Stream Capturer",
+            action: #selector(restartScreenRecorder(_:)),
+            keyEquivalent: ""
+        )
+        restart.target = self
 
         let quit = NSMenuItem(
             title: "Quit \(Bundle.main.appName)",
@@ -92,8 +85,6 @@ extension AppDelegate : NSMenuItemValidation {
         menu.addItem(NSMenuItem.separator())
         menu.addItem(restart)
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(liveDragging)
-        menu.addItem(NSMenuItem.separator())
         menu.addItem(quit)
 
         statusItem.menu = menu
@@ -104,16 +95,23 @@ extension AppDelegate : NSMenuItemValidation {
         switch menuItem.action {
 
         case #selector(AppDelegate.freezeAction(_:)):
-            menuItem.title = windowController?.isFrozen == true ? "Unfreeze" : "Freeze"
-            return true
 
-        case #selector(AppDelegate.liveDraggingAction(_:)):
-            menuItem.state = recorder?.responsive == true ? .on : .off
+            if windowController?.isFrozen == true {
+                menuItem.title = "Unfreeze Effect Window"
+            } else {
+                menuItem.title = "Freeze Effect Window"
+            }
             return true
 
         case #selector(AppDelegate.recorderAction(_:)):
-            menuItem.title = recorder?.isRecording == true ? "Stop Recording" : "Start Recording"
+
+            if recorder?.isRecording == true {
+                menuItem.title = "Stop Recording"
+            } else {
+                menuItem.title = "Start Recording"
+            }
             return true
+
 
         default:
             return true
@@ -127,11 +125,6 @@ extension AppDelegate : NSMenuItemValidation {
         }
     }
 
-    @objc func liveDraggingAction(_ sender: Any?) {
-
-        recorder?.responsive.toggle()
-    }
-
     @objc func restartScreenRecorder(_ sender: Any?) {
 
         recorder?.relaunch()
@@ -143,10 +136,8 @@ extension AppDelegate : NSMenuItemValidation {
         guard let texture = windowController?.metalView?.outTexture else { return }
 
         if recorder.isRecording {
-            print("stopping recorder")
             recorder.stopRecording { }
         } else {
-            print("starting recorder")
             recorder.startRecording(width: texture.width, height: texture.height)
         }
     }
