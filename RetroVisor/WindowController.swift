@@ -12,13 +12,14 @@ import ScreenCaptureKit
 
 class WindowController: NSWindowController  {
 
+    var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var viewController : ViewController? { return self.contentViewController as? ViewController }
     var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
     var metalView : MetalView? { return viewController?.metalView }
 
     // Video source and sink
-    var streamer = Streamer()
     var recorder = Recorder()
+    var streamer: Streamer { return app.streamer! }
 
     // Indicates if the window is passive (click-through state)
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }

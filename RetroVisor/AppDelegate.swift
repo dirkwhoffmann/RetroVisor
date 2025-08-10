@@ -14,6 +14,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var statusItem: NSStatusItem!
 
+    var streamer: Streamer? = Streamer()
+
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
 
     // Customizable shader parameters
@@ -22,7 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var windowController: WindowController? {
         return NSApplication.shared.windows.first?.windowController as? WindowController
     }
-    var streamer: Streamer? { return windowController?.streamer }
+    // var streamer: Streamer? { return windowController?.streamer }
     var recorder: Recorder? { return windowController?.recorder }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
