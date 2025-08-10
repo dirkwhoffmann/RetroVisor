@@ -89,6 +89,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         settingsWindowController?.showWindow(self)
     }
 
+    @IBAction func showPreferencesWindow(_ sender: Any?) {
+        PreferencesWindowController.shared.show()
+    }
+
 }
 
 extension Bundle {

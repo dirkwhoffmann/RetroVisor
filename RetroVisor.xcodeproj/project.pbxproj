@@ -12,6 +12,11 @@
 		50292D902E4685E10084CFE3 /* MetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50292D8F2E4685D80084CFE3 /* MetalView.swift */; };
 		50292D942E471A330084CFE3 /* PermissionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50292D932E471A2C0084CFE3 /* PermissionWindowController.swift */; };
 		50292D962E471AAA0084CFE3 /* PermissionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50292D952E471AA40084CFE3 /* PermissionViewController.swift */; };
+		503FCC1E2E48670300EF49DA /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC1D2E4866FE00EF49DA /* PreferencesWindowController.swift */; };
+		503FCC212E48688600EF49DA /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC202E48687D00EF49DA /* SidebarViewController.swift */; };
+		503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC222E4868B200EF49DA /* PreferencesSplitViewController.swift */; };
+		503FCC252E4868E100EF49DA /* PreferencesViewControllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC242E4868D400EF49DA /* PreferencesViewControllers.swift */; };
+		503FCC272E486C5900EF49DA /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 503FCC262E486C5900EF49DA /* Preferences.storyboard */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* WindowController.swift */; };
@@ -35,6 +40,11 @@
 		50292D8F2E4685D80084CFE3 /* MetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalView.swift; sourceTree = "<group>"; };
 		50292D932E471A2C0084CFE3 /* PermissionWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionWindowController.swift; sourceTree = "<group>"; };
 		50292D952E471AA40084CFE3 /* PermissionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionViewController.swift; sourceTree = "<group>"; };
+		503FCC1D2E4866FE00EF49DA /* PreferencesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindowController.swift; sourceTree = "<group>"; };
+		503FCC202E48687D00EF49DA /* SidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewController.swift; sourceTree = "<group>"; };
+		503FCC222E4868B200EF49DA /* PreferencesSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSplitViewController.swift; sourceTree = "<group>"; };
+		503FCC242E4868D400EF49DA /* PreferencesViewControllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesViewControllers.swift; sourceTree = "<group>"; };
+		503FCC262E486C5900EF49DA /* Preferences.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Preferences.storyboard; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -74,6 +84,17 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
+		503FCC1F2E48670B00EF49DA /* Preferences */ = {
+			isa = PBXGroup;
+			children = (
+				503FCC222E4868B200EF49DA /* PreferencesSplitViewController.swift */,
+				503FCC202E48687D00EF49DA /* SidebarViewController.swift */,
+				503FCC1D2E4866FE00EF49DA /* PreferencesWindowController.swift */,
+				503FCC242E4868D400EF49DA /* PreferencesViewControllers.swift */,
+			);
+			path = Preferences;
+			sourceTree = "<group>";
+		};
 		509C8DD52E38F99E004BE11C = {
 			isa = PBXGroup;
 			children = (
@@ -94,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				50079E6F2E433206005BC5FD /* Utilities */,
+				503FCC1F2E48670B00EF49DA /* Preferences */,
 				50BA96442E3C80D6006BA8DF /* AppDelegate.swift */,
 				50079E6D2E4331F2005BC5FD /* Menu.swift */,
 				50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */,
@@ -111,6 +133,7 @@
 				50BA96452E3C80D6006BA8DF /* Assets.xcassets */,
 				50BA96602E3F6AB9006BA8DF /* Resources */,
 				50BA96692E409381006BA8DF /* SettingsWindow.xib */,
+				503FCC262E486C5900EF49DA /* Preferences.storyboard */,
 			);
 			path = RetroVisor;
 			sourceTree = "<group>";
@@ -198,6 +221,7 @@
 				50BA965F2E3F6AA1006BA8DF /* Credits.rtf in Resources */,
 				50BA966A2E409381006BA8DF /* SettingsWindow.xib in Resources */,
 				50BA96562E3C80D6006BA8DF /* Main.storyboard in Resources */,
+				503FCC272E486C5900EF49DA /* Preferences.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -213,8 +237,10 @@
 				50BA96592E3C80F5006BA8DF /* TrackingWindow.swift in Sources */,
 				50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */,
 				50292D942E471A330084CFE3 /* PermissionWindowController.swift in Sources */,
+				503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */,
 				50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */,
 				50BA96642E3FF0B3006BA8DF /* crt-easymode.metal in Sources */,
+				503FCC212E48688600EF49DA /* SidebarViewController.swift in Sources */,
 				50BA966B2E409381006BA8DF /* SettingsWindowController.swift in Sources */,
 				50079E6E2E4331F5005BC5FD /* Menu.swift in Sources */,
 				50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */,
@@ -222,6 +248,8 @@
 				50079E712E43813C005BC5FD /* Extensions.swift in Sources */,
 				50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */,
 				50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */,
+				503FCC252E4868E100EF49DA /* PreferencesViewControllers.swift in Sources */,
+				503FCC1E2E48670300EF49DA /* PreferencesWindowController.swift in Sources */,
 				50BA96532E3C80D6006BA8DF /* ScreenRecorder.swift in Sources */,
 				50BA96542E3C80D6006BA8DF /* Shaders.metal in Sources */,
 			);

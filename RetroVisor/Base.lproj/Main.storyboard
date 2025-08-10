@@ -25,7 +25,7 @@
                                         <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
                                         <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW">
                                             <connections>
-                                                <action selector="showSettings:" target="Voe-Tx-rLC" id="yk2-kj-7Zu"/>
+                                                <action selector="showPreferencesWindow:" target="Voe-Tx-rLC" id="Vqs-G5-j7K"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="wFC-TO-SCJ"/>
@@ -805,9 +805,9 @@ DQ
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fpH-gu-bpu">
-                                                                    <rect key="frame" x="10" y="2.5" width="64" height="72"/>
+                                                                    <rect key="frame" x="10" y="3" width="64" height="70"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="recor" id="Cy2-g5-DNW"/>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="video.circle" catalog="system" id="Cy2-g5-DNW"/>
                                                                 </imageView>
                                                             </subviews>
                                                         </view>
@@ -890,7 +890,7 @@ DQ
         </scene>
     </scenes>
     <resources>
-        <image name="recor" width="128" height="128"/>
         <image name="statusStop" width="512" height="512"/>
+        <image name="video.circle" catalog="system" width="15" height="15"/>
     </resources>
 </document>

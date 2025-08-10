@@ -67,7 +67,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
     var recordingRect: NSRect? {
         didSet { appDelegate.updateStatusBarMenuIcon(recording: isRecording) }
     }
-    
+
     var isRecording: Bool { recordingRect != nil }
 
     // The recorder delegate

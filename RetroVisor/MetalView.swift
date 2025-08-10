@@ -271,7 +271,6 @@ class MetalView: MTKView, MTKViewDelegate {
         let w = NSScreen.scaleFactor * width
         let h = NSScreen.scaleFactor * height
 
-        print("updateTextures")
         if outTexture?.width != w || outTexture?.height != h {
 
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
