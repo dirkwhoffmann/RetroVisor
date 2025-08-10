@@ -14,7 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var statusItem: NSStatusItem!
 
-    var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
+    var app: AppDelegate { NSApp.delegate as! AppDelegate }
 
     // Customizable shader parameters
     var crtUniforms = CrtUniforms.defaults

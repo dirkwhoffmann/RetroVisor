@@ -44,7 +44,7 @@ extension TrackingWindowDelegate {
 @MainActor
 class Streamer: NSObject, SCStreamDelegate
 {
-    var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
+    var app: AppDelegate { NSApp.delegate as! AppDelegate }
 
     // Capture mode
     var responsive = true { didSet { if responsive != oldValue { relaunch() } } }

@@ -98,10 +98,8 @@ class MetalView: MTKView, MTKViewDelegate {
     var trackingWindow: TrackingWindow { window! as! TrackingWindow }
     @IBOutlet weak var viewController: ViewController!
 
-    var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
-    // var trackingWindow: TrackingWindow!
+    var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var windowController: WindowController? { return trackingWindow.windowController as? WindowController }
-    // var streamer: Streamer? { return windowController?.streamer }
     var recorder: Recorder? { return windowController?.recorder }
 
     var commandQueue: MTLCommandQueue!
@@ -376,7 +374,7 @@ class MetalView: MTKView, MTKViewDelegate {
             encoder.setFragmentBytes(&uniforms,
                                      length: MemoryLayout<Uniforms>.stride,
                                      index: 0)
-            encoder.setFragmentBytes(&appDelegate.crtUniforms,
+            encoder.setFragmentBytes(&app.crtUniforms,
                                      length: MemoryLayout<CrtUniforms>.stride,
                                      index: 1)
 

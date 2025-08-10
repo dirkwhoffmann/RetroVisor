@@ -173,13 +173,13 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
 
     @IBOutlet weak var tableView: NSTableView!
 
-    var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
+    var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var oldSettings: CrtUniforms!
 
     override func viewDidLoad() {
 
         print("ShaderPreferencesViewController.viewDidLoad")
-        oldSettings = appDelegate.crtUniforms
+        oldSettings = app.crtUniforms
         tableView.delegate = self
         tableView.dataSource = self
         tableView.reloadData()
@@ -188,24 +188,24 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     func get(key: String) -> Float {
 
         switch key {
-        case "BRIGHT_BOOST": return appDelegate.crtUniforms.BRIGHT_BOOST
-        case "DILATION": return appDelegate.crtUniforms.DILATION
-        case "GAMMA_INPUT": return appDelegate.crtUniforms.GAMMA_INPUT
-        case "GAMMA_OUTPUT": return appDelegate.crtUniforms.GAMMA_OUTPUT
-        case "MASK_SIZE": return appDelegate.crtUniforms.MASK_SIZE
-        case "MASK_STAGGER": return appDelegate.crtUniforms.MASK_STAGGER
-        case "MASK_STRENGTH": return appDelegate.crtUniforms.MASK_STRENGTH
-        case "MASK_DOT_WIDTH": return appDelegate.crtUniforms.MASK_DOT_WIDTH
-        case "MASK_DOT_HEIGHT": return appDelegate.crtUniforms.MASK_DOT_HEIGHT
-        case "SCANLINE_BEAM_WIDTH_MAX": return appDelegate.crtUniforms.SCANLINE_BEAM_WIDTH_MAX
-        case "SCANLINE_BEAM_WIDTH_MIN": return appDelegate.crtUniforms.SCANLINE_BEAM_WIDTH_MIN
-        case "SCANLINE_BRIGHT_MAX": return appDelegate.crtUniforms.SCANLINE_BRIGHT_MAX
-        case "SCANLINE_BRIGHT_MIN": return appDelegate.crtUniforms.SCANLINE_BRIGHT_MIN
-        case "SCANLINE_CUTOFF": return appDelegate.crtUniforms.SCANLINE_CUTOFF
-        case "SCANLINE_STRENGTH": return appDelegate.crtUniforms.SCANLINE_STRENGTH
-        case "SHARPNESS_H": return appDelegate.crtUniforms.SHARPNESS_H
-        case "SHARPNESS_V": return appDelegate.crtUniforms.SHARPNESS_V
-        case "ENABLE_LANCZOS": return Float(appDelegate.crtUniforms.ENABLE_LANCZOS)
+        case "BRIGHT_BOOST": return app.crtUniforms.BRIGHT_BOOST
+        case "DILATION": return app.crtUniforms.DILATION
+        case "GAMMA_INPUT": return app.crtUniforms.GAMMA_INPUT
+        case "GAMMA_OUTPUT": return app.crtUniforms.GAMMA_OUTPUT
+        case "MASK_SIZE": return app.crtUniforms.MASK_SIZE
+        case "MASK_STAGGER": return app.crtUniforms.MASK_STAGGER
+        case "MASK_STRENGTH": return app.crtUniforms.MASK_STRENGTH
+        case "MASK_DOT_WIDTH": return app.crtUniforms.MASK_DOT_WIDTH
+        case "MASK_DOT_HEIGHT": return app.crtUniforms.MASK_DOT_HEIGHT
+        case "SCANLINE_BEAM_WIDTH_MAX": return app.crtUniforms.SCANLINE_BEAM_WIDTH_MAX
+        case "SCANLINE_BEAM_WIDTH_MIN": return app.crtUniforms.SCANLINE_BEAM_WIDTH_MIN
+        case "SCANLINE_BRIGHT_MAX": return app.crtUniforms.SCANLINE_BRIGHT_MAX
+        case "SCANLINE_BRIGHT_MIN": return app.crtUniforms.SCANLINE_BRIGHT_MIN
+        case "SCANLINE_CUTOFF": return app.crtUniforms.SCANLINE_CUTOFF
+        case "SCANLINE_STRENGTH": return app.crtUniforms.SCANLINE_STRENGTH
+        case "SHARPNESS_H": return app.crtUniforms.SHARPNESS_H
+        case "SHARPNESS_V": return app.crtUniforms.SHARPNESS_V
+        case "ENABLE_LANCZOS": return Float(app.crtUniforms.ENABLE_LANCZOS)
 
         default:
             NSSound.beep()
@@ -216,24 +216,24 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     func set(key: String, value: Float) {
 
         switch key {
-        case "BRIGHT_BOOST": appDelegate.crtUniforms.BRIGHT_BOOST = value
-        case "DILATION": appDelegate.crtUniforms.DILATION = value
-        case "GAMMA_INPUT": appDelegate.crtUniforms.GAMMA_INPUT = value
-        case "GAMMA_OUTPUT": appDelegate.crtUniforms.GAMMA_OUTPUT = value
-        case "MASK_SIZE": appDelegate.crtUniforms.MASK_SIZE = value
-        case "MASK_STAGGER": appDelegate.crtUniforms.MASK_STAGGER = value
-        case "MASK_STRENGTH": appDelegate.crtUniforms.MASK_STRENGTH = value
-        case "MASK_DOT_WIDTH": appDelegate.crtUniforms.MASK_DOT_WIDTH = value
-        case "MASK_DOT_HEIGHT": appDelegate.crtUniforms.MASK_DOT_HEIGHT = value
-        case "SCANLINE_BEAM_WIDTH_MAX": appDelegate.crtUniforms.SCANLINE_BEAM_WIDTH_MAX = value
-        case "SCANLINE_BEAM_WIDTH_MIN": appDelegate.crtUniforms.SCANLINE_BEAM_WIDTH_MIN = value
-        case "SCANLINE_BRIGHT_MAX": appDelegate.crtUniforms.SCANLINE_BRIGHT_MAX = value
-        case "SCANLINE_BRIGHT_MIN": appDelegate.crtUniforms.SCANLINE_BRIGHT_MIN = value
-        case "SCANLINE_CUTOFF": appDelegate.crtUniforms.SCANLINE_CUTOFF = value
-        case "SCANLINE_STRENGTH": appDelegate.crtUniforms.SCANLINE_STRENGTH = value
-        case "SHARPNESS_H": appDelegate.crtUniforms.SHARPNESS_H = value
-        case "SHARPNESS_V": appDelegate.crtUniforms.SHARPNESS_V = value
-        case "ENABLE_LANCZOS": appDelegate.crtUniforms.ENABLE_LANCZOS = Int32(value)
+        case "BRIGHT_BOOST": app.crtUniforms.BRIGHT_BOOST = value
+        case "DILATION": app.crtUniforms.DILATION = value
+        case "GAMMA_INPUT": app.crtUniforms.GAMMA_INPUT = value
+        case "GAMMA_OUTPUT": app.crtUniforms.GAMMA_OUTPUT = value
+        case "MASK_SIZE": app.crtUniforms.MASK_SIZE = value
+        case "MASK_STAGGER": app.crtUniforms.MASK_STAGGER = value
+        case "MASK_STRENGTH": app.crtUniforms.MASK_STRENGTH = value
+        case "MASK_DOT_WIDTH": app.crtUniforms.MASK_DOT_WIDTH = value
+        case "MASK_DOT_HEIGHT": app.crtUniforms.MASK_DOT_HEIGHT = value
+        case "SCANLINE_BEAM_WIDTH_MAX": app.crtUniforms.SCANLINE_BEAM_WIDTH_MAX = value
+        case "SCANLINE_BEAM_WIDTH_MIN": app.crtUniforms.SCANLINE_BEAM_WIDTH_MIN = value
+        case "SCANLINE_BRIGHT_MAX": app.crtUniforms.SCANLINE_BRIGHT_MAX = value
+        case "SCANLINE_BRIGHT_MIN": app.crtUniforms.SCANLINE_BRIGHT_MIN = value
+        case "SCANLINE_CUTOFF": app.crtUniforms.SCANLINE_CUTOFF = value
+        case "SCANLINE_STRENGTH": app.crtUniforms.SCANLINE_STRENGTH = value
+        case "SHARPNESS_H": app.crtUniforms.SHARPNESS_H = value
+        case "SHARPNESS_V": app.crtUniforms.SHARPNESS_V = value
+        case "ENABLE_LANCZOS": app.crtUniforms.ENABLE_LANCZOS = Int32(value)
 
         default:
             NSSound.beep()
@@ -255,13 +255,13 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
 
     @IBAction func defaultsAction(_ sender: NSButton) {
 
-        appDelegate.crtUniforms.self = CrtUniforms.defaults
+        app.crtUniforms.self = CrtUniforms.defaults
         tableView.reloadData()
     }
 
     @IBAction func cancelAction(_ sender: NSButton) {
 
-        appDelegate.crtUniforms.self = oldSettings
+        app.crtUniforms.self = oldSettings
         view.window?.close()
     }
 

@@ -20,8 +20,8 @@ class GeneralPreferencesViewController: NSViewController {
         refresh()
     }
 
-    var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
-    var recorder: Streamer? { appDelegate.streamer }
+    var app: AppDelegate { NSApp.delegate as! AppDelegate }
+    var recorder: Streamer? { app.streamer }
 
     func refresh() {
 
