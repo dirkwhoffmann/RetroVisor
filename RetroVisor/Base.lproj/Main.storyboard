@@ -1052,42 +1052,74 @@ DQ
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="U9W-bJ-ziL">
-                                <rect key="frame" x="35" y="312" width="465" height="91"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" selectable="YES" id="84j-UM-4rt">
-                                    <font key="font" metaFont="system"/>
-                                    <string key="title">In this mode, the recorder captures the entire screen but renders only a portion of the texture. This approach is more resource-intensive but allows for smooth, real-time updates during window drag and resize operations. Recommended for modern systems.</string>
-                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ubG-TF-fhL">
-                                <rect key="frame" x="18" y="411" width="107" height="18"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="radio" title="Entire Screen" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="JCn-pW-FUY">
-                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                            </button>
-                            <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9cM-bf-Hr2">
-                                <rect key="frame" x="35" y="213" width="453" height="91"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" selectable="YES" id="UrG-2z-H0A">
-                                    <font key="font" metaFont="system"/>
-                                    <string key="title">The recorder captures only a portion of the screen and always renders the full texture. This mode is more efficient, as ScreenCaptureKit streams only the required area. However, moving or resizing the effect window requires restarting the stream, resulting in less fluid animations compared to responsive mode.</string>
-                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aUm-m9-1HM">
-                                <rect key="frame" x="18" y="311" width="110" height="18"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="radio" title="Partial Screen" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="5pS-yB-knB">
-                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                            </button>
+                            <box fixedFrame="YES" title="Box" titlePosition="noTitle" transparent="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HmT-Py-UTN">
+                                <rect key="frame" x="29" y="16" width="588" height="414"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <view key="contentView" id="Kpf-im-56Z">
+                                    <rect key="frame" x="4" y="5" width="580" height="406"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QkQ-hq-DIX">
+                                            <rect key="frame" x="0.0" y="238" width="580" height="168"/>
+                                            <subviews>
+                                                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aUm-m9-1HM">
+                                                    <rect key="frame" x="-2" y="151" width="107" height="18"/>
+                                                    <buttonCell key="cell" type="radio" title="Entire Screen" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="5pS-yB-knB">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                </button>
+                                                <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="9cM-bf-Hr2">
+                                                    <rect key="frame" x="18" y="96" width="564" height="48"/>
+                                                    <textFieldCell key="cell" selectable="YES" id="UrG-2z-H0A">
+                                                        <font key="font" metaFont="system"/>
+                                                        <string key="title">The recorder captures the entire screen but renders only a portion of the texture. This approach is more resource-intensive but allows for smooth, real-time updates during window drag and resize operations. Recommended for modern systems.</string>
+                                                        <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xGQ-hT-7ru">
+                                                    <rect key="frame" x="-2" y="71" width="61" height="18"/>
+                                                    <buttonCell key="cell" type="radio" title="Radio" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="Ypu-DK-EoD">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                </button>
+                                                <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="Kp3-Ag-LVU">
+                                                    <rect key="frame" x="18" y="0.0" width="564" height="64"/>
+                                                    <textFieldCell key="cell" selectable="YES" id="jEj-pA-boR">
+                                                        <font key="font" metaFont="system"/>
+                                                        <string key="title">The recorder captures only a portion of the screen and always renders the full texture. This mode is more efficient, as ScreenCaptureKit streams only the required area. However, moving or resizing the effect window requires restarting the stream, resulting in less fluid animations compared to responsive mode.</string>
+                                                        <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="Kp3-Ag-LVU" firstAttribute="leading" secondItem="QkQ-hq-DIX" secondAttribute="leading" constant="20" id="COt-Qn-qwy"/>
+                                                <constraint firstItem="9cM-bf-Hr2" firstAttribute="leading" secondItem="QkQ-hq-DIX" secondAttribute="leading" constant="20" id="ZTr-JS-G7d"/>
+                                            </constraints>
+                                            <visibilityPriorities>
+                                                <integer value="1000"/>
+                                                <integer value="1000"/>
+                                                <integer value="1000"/>
+                                                <integer value="1000"/>
+                                            </visibilityPriorities>
+                                            <customSpacing>
+                                                <real value="3.4028234663852886e+38"/>
+                                                <real value="3.4028234663852886e+38"/>
+                                                <real value="3.4028234663852886e+38"/>
+                                                <real value="3.4028234663852886e+38"/>
+                                            </customSpacing>
+                                        </stackView>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstAttribute="trailing" secondItem="QkQ-hq-DIX" secondAttribute="trailing" id="9tT-Wx-0hE"/>
+                                        <constraint firstItem="QkQ-hq-DIX" firstAttribute="top" secondItem="Kpf-im-56Z" secondAttribute="top" id="ZaD-pT-v5U"/>
+                                        <constraint firstItem="QkQ-hq-DIX" firstAttribute="leading" secondItem="Kpf-im-56Z" secondAttribute="leading" id="vuV-EZ-yA9"/>
+                                    </constraints>
+                                </view>
+                            </box>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="ENG-5d-7AJ"/>
                         <viewLayoutGuide key="layoutMargins" id="9N2-ZV-ehK"/>
@@ -1130,20 +1162,118 @@ DQ
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vOT-tY-bbQ">
-                                <rect key="frame" x="171" y="374" width="60" height="16"/>
+                                <rect key="frame" x="25" y="444" width="99" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Recorder" id="gcd-e2-LDK">
-                                    <font key="font" usesAppearanceFont="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Video Settings" id="gcd-e2-LDK">
+                                    <font key="font" metaFont="systemBold"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d8U-Rd-KkQ">
+                                <rect key="frame" x="18" y="248" width="99" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Audio Settings" id="k1g-PK-TIY">
+                                    <font key="font" metaFont="systemBold"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uMs-FI-oJ7">
+                                <rect key="frame" x="84" y="399" width="86" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Video Codec:" id="bMf-z1-i4J">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZYL-Vq-0ZK">
+                                <rect key="frame" x="84" y="329" width="56" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Bit Rate:" id="uzz-pW-Lfo">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nN8-Sk-duI">
+                                <rect key="frame" x="84" y="364" width="77" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Frame Rate:" id="xma-id-5eN">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ODO-SV-pvG">
+                                <rect key="frame" x="181" y="393" width="195" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="H.264" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="nIj-dO-qOW" id="adL-x1-DGf">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="jjW-M5-O44">
+                                        <items>
+                                            <menuItem title="H.264" state="on" id="nIj-dO-qOW"/>
+                                            <menuItem title="HEVC" state="on" id="B6v-Sj-5sZ"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                            </popUpButton>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JiU-qQ-1Cc">
+                                <rect key="frame" x="181" y="356" width="195" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="6 Mbps" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="zqu-9B-nRn" id="pf0-9e-9zz">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="STF-nr-8eQ">
+                                        <items>
+                                            <menuItem title="6 Mbps" state="on" id="zqu-9B-nRn"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                            </popUpButton>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="87z-ye-1Iq">
+                                <rect key="frame" x="181" y="321" width="195" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="System Default" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="IxB-rQ-g4q" id="Go1-bQ-wn4">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="J0p-Zq-zfG">
+                                        <items>
+                                            <menuItem title="System Default" state="on" id="IxB-rQ-g4q"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                            </popUpButton>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yxo-aU-EV7">
+                                <rect key="frame" x="78" y="208" width="84" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Sample Rate:" id="MiN-4c-lMr">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DC5-Yg-YZ6">
+                                <rect key="frame" x="181" y="200" width="195" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="System Default" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="NYB-By-5mn" id="ZcI-b4-gJb">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="zMr-W3-HrS">
+                                        <items>
+                                            <menuItem title="System Default" state="on" id="NYB-By-5mn"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                            </popUpButton>
                         </subviews>
                     </view>
                 </viewController>
                 <customObject id="wES-pW-2mT" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2982" y="1697"/>
+            <point key="canvasLocation" x="2592" y="1697"/>
         </scene>
     </scenes>
     <resources>
