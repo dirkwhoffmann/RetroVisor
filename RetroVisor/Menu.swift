@@ -60,6 +60,13 @@ extension AppDelegate : NSMenuItemValidation {
         )
         freeze.target = self
 
+        let background = NSMenuItem(
+            title: "Run in Background",
+            action: #selector(backgroundAction(_:)),
+            keyEquivalent: ""
+        )
+        freeze.target = self
+
         let record = NSMenuItem(
             title: "Stop recording",
             action: #selector(recorderAction(_:)),
@@ -81,6 +88,8 @@ extension AppDelegate : NSMenuItemValidation {
         )
 
         menu.addItem(freeze)
+        menu.addItem(background)
+        menu.addItem(NSMenuItem.separator())
         menu.addItem(record)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(restart)
@@ -103,6 +112,15 @@ extension AppDelegate : NSMenuItemValidation {
             }
             return true
 
+        case #selector(AppDelegate.backgroundAction(_:)):
+
+            if windowController?.invisible == true {
+                menuItem.title = "Run Effect Window in Foreground"
+            } else {
+                menuItem.title = "Run Effect Window in Background"
+            }
+            return true
+
         case #selector(AppDelegate.recorderAction(_:)):
 
             if recorder.isRecording == true {
@@ -122,6 +140,13 @@ extension AppDelegate : NSMenuItemValidation {
 
         if let controller = windowController {
             controller.isFrozen ? controller.unfreeze() : controller.freeze()
+        }
+    }
+
+    @objc func backgroundAction(_ sender: Any?) {
+
+        if let controller = windowController {
+            controller.invisible.toggle()
         }
     }
 

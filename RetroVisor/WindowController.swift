@@ -24,6 +24,21 @@ class WindowController: NSWindowController  {
     // Indicates if the window is passive (click-through state)
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }
 
+    var invisible: Bool = false {
+        didSet {
+            if invisible {
+                window?.isOpaque = false
+                window?.backgroundColor = .clear
+                window?.isMovable = false
+                window?.alphaValue = 0.0
+            } else {
+                window?.isOpaque = true
+                window?.isMovable = true
+                window?.alphaValue = 1.0
+            }
+        }
+    }
+
     override func windowDidLoad() {
 
         print("WindowController.windowDidLoad")
