@@ -127,7 +127,7 @@ extension AppDelegate : NSMenuItemValidation {
 
     @objc func restartScreenRecorder(_ sender: Any?) {
 
-        recorder?.relaunch()
+        streamer?.relaunch()
     }
 
     @objc func recorderAction(_ sender: Any?) {

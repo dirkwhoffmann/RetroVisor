@@ -101,10 +101,9 @@ class MetalView: MTKView, MTKViewDelegate {
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
     // var trackingWindow: TrackingWindow!
     var windowController: WindowController? { return trackingWindow.windowController as? WindowController }
-    var recorder: Streamer? { return windowController?.streamer }
+    // var streamer: Streamer? { return windowController?.streamer }
+    var recorder: Recorder? { return windowController?.recorder }
 
-    // var mtkView: MTKView!
-    // var device: MTLDevice!
     var commandQueue: MTLCommandQueue!
     var pipelineState1: MTLRenderPipelineState!
     var pipelineState2: MTLRenderPipelineState!

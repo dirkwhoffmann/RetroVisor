@@ -21,7 +21,7 @@ class GeneralPreferencesViewController: NSViewController {
     }
 
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
-    var recorder: Streamer? { appDelegate.recorder }
+    var recorder: Streamer? { appDelegate.streamer }
 
     func refresh() {
 

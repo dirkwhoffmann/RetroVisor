@@ -166,7 +166,7 @@ extension WindowController: ScreenRecorderDelegate {
                     if let vc = self?.contentViewController as? ViewController {
 
                         let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
-                        self?.streamer.currentTime = pts
+                        self?.recorder.currentTime = pts
                         vc.metalView.update(with: pixelBuffer)
                     }
                 }
@@ -175,7 +175,7 @@ extension WindowController: ScreenRecorderDelegate {
         case .audio:
 
             // print("Got audio")
-            streamer.appendAudio(buffer: buffer)
+            recorder.appendAudio(buffer: buffer)
             break
 
         default:
