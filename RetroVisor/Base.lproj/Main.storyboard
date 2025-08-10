@@ -1068,6 +1068,9 @@ DQ
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
                                                     </buttonCell>
+                                                    <connections>
+                                                        <action selector="fullCaptureButton:" target="bLc-tn-zPG" id="aUl-cm-krg"/>
+                                                    </connections>
                                                 </button>
                                                 <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="9cM-bf-Hr2">
                                                     <rect key="frame" x="18" y="96" width="564" height="48"/>
@@ -1079,11 +1082,14 @@ DQ
                                                     </textFieldCell>
                                                 </textField>
                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xGQ-hT-7ru">
-                                                    <rect key="frame" x="-2" y="71" width="61" height="18"/>
-                                                    <buttonCell key="cell" type="radio" title="Radio" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="Ypu-DK-EoD">
+                                                    <rect key="frame" x="-2" y="71" width="142" height="18"/>
+                                                    <buttonCell key="cell" type="radio" title="Partial Screen Area" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="Ypu-DK-EoD">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
                                                     </buttonCell>
+                                                    <connections>
+                                                        <action selector="areaCaptureButton:" target="bLc-tn-zPG" id="joJ-Cn-zEK"/>
+                                                    </connections>
                                                 </button>
                                                 <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="Kp3-Ag-LVU">
                                                     <rect key="frame" x="18" y="0.0" width="564" height="64"/>
@@ -1124,6 +1130,10 @@ DQ
                         <viewLayoutGuide key="safeArea" id="ENG-5d-7AJ"/>
                         <viewLayoutGuide key="layoutMargins" id="9N2-ZV-ehK"/>
                     </view>
+                    <connections>
+                        <outlet property="areaCaptureButton" destination="xGQ-hT-7ru" id="PF7-Ve-uFf"/>
+                        <outlet property="fullCaptureButton" destination="aUm-m9-1HM" id="ArE-pN-ZJF"/>
+                    </connections>
                 </viewController>
                 <customObject id="iM7-m7-n28" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
