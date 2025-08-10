@@ -8,7 +8,6 @@ class PreferencesSplitViewController: NSSplitViewController {
 
     override func viewDidLoad() {
 
-        print("\(splitViewItems)")
         super.viewDidLoad()
         sidebarVC?.selectionHandler = { [weak self] item in
             self?.showContent(for: item)
@@ -21,10 +20,10 @@ class PreferencesSplitViewController: NSSplitViewController {
         switch item.identifier.rawValue {
         case "general":
             newVC = GeneralPreferencesViewController()
-        case "video":
-            newVC = VideoPreferencesViewController()
-        case "audio":
-            newVC = AudioPreferencesViewController()
+        case "shader":
+            newVC = ShaderPreferencesViewController()
+        case "recorder":
+            newVC = RecorderPreferencesViewController()
         default:
             newVC = NSViewController()
         }

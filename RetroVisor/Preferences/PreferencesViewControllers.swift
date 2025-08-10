@@ -13,10 +13,10 @@ class GeneralPreferencesViewController: NSViewController {
     }
 }
 
-class VideoPreferencesViewController: NSViewController {
+class ShaderPreferencesViewController: NSViewController {
     override func loadView() {
         self.view = NSView()
-        let label = NSTextField(labelWithString: "Video Preferences")
+        let label = NSTextField(labelWithString: "Shader Preferences")
         label.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(label)
         NSLayoutConstraint.activate([
@@ -26,7 +26,7 @@ class VideoPreferencesViewController: NSViewController {
     }
 }
 
-class AudioPreferencesViewController: NSViewController {
+class RecorderPreferencesViewController: NSViewController {
     override func loadView() {
         self.view = NSView()
         let label = NSTextField(labelWithString: "Audio Preferences")

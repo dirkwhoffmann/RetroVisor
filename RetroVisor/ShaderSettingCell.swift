@@ -89,5 +89,4 @@ class ShaderSettingCell: NSTableCellView {
 
         print("Not implemented yet")
     }
-
 }

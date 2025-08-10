@@ -7,14 +7,14 @@ struct SidebarItem {
     let identifier: NSUserInterfaceItemIdentifier
 }
 
-class SidebarViewController: NSViewController, NSOutlineViewDataSource, NSOutlineViewDelegate {
+class SidebarViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate {
 
-    @IBOutlet weak var outlineView: NSOutlineView!
+    @IBOutlet weak var tableView: NSTableView!
 
     let items: [SidebarItem] = [
-        SidebarItem(title: "General", iconName: "gearshape", identifier: .init("general")),
-        SidebarItem(title: "Video", iconName: "video", identifier: .init("video")),
-        SidebarItem(title: "Audio", iconName: "speaker.wave.2", identifier: .init("audio"))
+        SidebarItem(title: "General", iconName: "CategoryGeneral", identifier: .init("general")),
+        SidebarItem(title: "Shader", iconName: "CategoryShader", identifier: .init("shader")),
+        SidebarItem(title: "Recorder", iconName: "CategoryRecorder", identifier: .init("recorder"))
     ]
 
     var selectionHandler: ((SidebarItem) -> Void)?
@@ -23,43 +23,34 @@ class SidebarViewController: NSViewController, NSOutlineViewDataSource, NSOutlin
 
         print("SidebarViewController; viewDidLoad")
         super.viewDidLoad()
-        outlineView.dataSource = self
-        outlineView.delegate = self
-        outlineView.usesAutomaticRowHeights = false
-        outlineView.rowHeight = 48
-        outlineView.rowSizeStyle = .custom
-        // outlineView.selectionHighlightStyle = .sourceList
-        outlineView.reloadData()
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.usesAutomaticRowHeights = false
+        tableView.rowHeight = 48
+        tableView.rowSizeStyle = .custom
+        tableView.reloadData()
 
         // Select first item by default
-        outlineView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
     }
 
-    func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
+    func numberOfRows(in tableView: NSTableView) -> Int {
         return items.count
     }
 
-    func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
-        return false
-    }
+    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
 
-    func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
-        return items[index]
-    }
+        let item = items[row]
+        let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("SidebarCell"), owner: self) as? NSTableCellView
 
-    func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
-
-        guard let sidebarItem = item as? SidebarItem else { return nil }
-        let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("SidebarCell"), owner: self) as? NSTableCellView
-        print("\(cell)")
-        cell?.textField?.stringValue = sidebarItem.title
-        cell?.imageView?.image = NSImage(systemSymbolName: sidebarItem.iconName, accessibilityDescription: nil)
+        cell?.textField?.stringValue = item.title
+        cell?.imageView?.image = NSImage(named: item.iconName)
         return cell
     }
 
-    func outlineViewSelectionDidChange(_ notification: Notification) {
+    func tableViewSelectionDidChange(_ notification: Notification) {
 
-        let selectedIndex = outlineView.selectedRow
+        let selectedIndex = tableView.selectedRow
         if selectedIndex >= 0 {
             selectionHandler?(items[selectedIndex])
         }
