@@ -31,11 +31,11 @@ class PreferencesSplitViewController: NSSplitViewController {
 
         switch item.identifier.rawValue {
         case "general":
-            newVC = generalVC // GeneralPreferencesViewController()
+            newVC = generalVC
         case "shader":
-            newVC = shaderVC //ShaderPreferencesViewController()
+            newVC = shaderVC
         case "recorder":
-            newVC = recorderVC // RecorderPreferencesViewController()
+            newVC = recorderVC
         default:
             newVC = NSViewController()
         }

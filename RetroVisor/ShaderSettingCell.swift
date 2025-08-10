@@ -11,7 +11,7 @@ import Cocoa
 
 class ShaderSettingCell: NSTableCellView {
 
-    @IBOutlet weak var controller: SettingsWindowController!
+    @IBOutlet weak var controller: ShaderPreferencesViewController!
     @IBOutlet weak var optionImage: NSImageView!
     @IBOutlet weak var optionLabel: NSTextField!
     @IBOutlet weak var subLabel: NSTextField!
