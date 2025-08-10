@@ -28,8 +28,6 @@
 		50BA965F2E3F6AA1006BA8DF /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 50BA965E2E3F6AA1006BA8DF /* Credits.rtf */; };
 		50BA96642E3FF0B3006BA8DF /* crt-easymode.metal in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96632E3FF0B3006BA8DF /* crt-easymode.metal */; };
 		50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96652E3FF176006BA8DF /* ShaderTypes.metal */; };
-		50BA966A2E409381006BA8DF /* SettingsWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 50BA96692E409381006BA8DF /* SettingsWindow.xib */; };
-		50BA966B2E409381006BA8DF /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96682E409381006BA8DF /* SettingsWindowController.swift */; };
 		50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */; };
 /* End PBXBuildFile section */
 
@@ -57,8 +55,6 @@
 		50BA965E2E3F6AA1006BA8DF /* Credits.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		50BA96632E3FF0B3006BA8DF /* crt-easymode.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = "crt-easymode.metal"; sourceTree = "<group>"; };
 		50BA96652E3FF176006BA8DF /* ShaderTypes.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ShaderTypes.metal; sourceTree = "<group>"; };
-		50BA96682E409381006BA8DF /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
-		50BA96692E409381006BA8DF /* SettingsWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SettingsWindow.xib; sourceTree = "<group>"; };
 		50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderSettingCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -123,14 +119,12 @@
 				50BA96492E3C80D6006BA8DF /* ViewController.swift */,
 				50292D8F2E4685D80084CFE3 /* MetalView.swift */,
 				50BA964C2E3C80D6006BA8DF /* ScreenRecorder.swift */,
-				50BA96682E409381006BA8DF /* SettingsWindowController.swift */,
 				50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */,
 				50BA96672E3FF19B006BA8DF /* Shaders */,
 				50BA96482E3C80D6006BA8DF /* Main.storyboard */,
 				50BA964B2E3C80D6006BA8DF /* RetroVisor.entitlements */,
 				50BA96452E3C80D6006BA8DF /* Assets.xcassets */,
 				50BA96602E3F6AB9006BA8DF /* Resources */,
-				50BA96692E409381006BA8DF /* SettingsWindow.xib */,
 			);
 			path = RetroVisor;
 			sourceTree = "<group>";
@@ -216,7 +210,6 @@
 			files = (
 				50BA96552E3C80D6006BA8DF /* Assets.xcassets in Resources */,
 				50BA965F2E3F6AA1006BA8DF /* Credits.rtf in Resources */,
-				50BA966A2E409381006BA8DF /* SettingsWindow.xib in Resources */,
 				50BA96562E3C80D6006BA8DF /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -237,7 +230,6 @@
 				50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */,
 				50BA96642E3FF0B3006BA8DF /* crt-easymode.metal in Sources */,
 				503FCC212E48688600EF49DA /* SidebarViewController.swift in Sources */,
-				50BA966B2E409381006BA8DF /* SettingsWindowController.swift in Sources */,
 				50079E6E2E4331F5005BC5FD /* Menu.swift in Sources */,
 				50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */,
 				50292D902E4685E10084CFE3 /* MetalView.swift in Sources */,

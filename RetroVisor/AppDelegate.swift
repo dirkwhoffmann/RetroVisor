@@ -16,9 +16,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
     
-    // Window controller of the settings dialog
-    var settingsWindowController: SettingsWindowController?
-
     // Customizable shader parameters
     var crtUniforms = CrtUniforms.defaults
 
@@ -79,14 +76,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             wc.window?.center()
             wc.showWindow(self)
         }
-    }
-
-    @IBAction func showSettings(_ sender: Any?) {
-
-        if settingsWindowController == nil {
-            settingsWindowController = SettingsWindowController(windowNibName: "SettingsWindow")
-        }
-        settingsWindowController?.showWindow(self)
     }
 
     @IBAction func showPreferencesWindow(_ sender: Any?) {

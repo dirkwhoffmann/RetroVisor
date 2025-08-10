@@ -286,26 +286,15 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     @IBAction func cancelAction(_ sender: NSButton) {
 
         appDelegate.crtUniforms.self = oldSettings
-        // window?.close()
+        view.window?.close()
     }
 
     @IBAction func okAction(_ sender: NSButton) {
 
-        // window?.close()
+        view.window?.close()
     }
 }
 
 class RecorderPreferencesViewController: NSViewController {
-    /*
-    override func loadView() {
-        self.view = NSView()
-        let label = NSTextField(labelWithString: "Audio Preferences")
-        label.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label)
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
-    }
-    */
+
 }
