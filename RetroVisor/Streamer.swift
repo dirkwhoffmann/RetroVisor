@@ -25,24 +25,24 @@ extension TrackingWindowDelegate {
 
 /* This class uses ScreenCaptureKit to record screen content and feed it into the post-processor.
  *
- * The recorder operates in two modes, controlled by the `responsive` flag:
+ * The streamer operates in two modes, controlled by the `responsive` flag:
  *
  *   responsive = true:
  *
- *   In this mode, the recorder captures the entire screen but renders only a portion
+ *   In this mode, the streamer captures the entire screen but renders only a portion
  *   of the texture. This approach is more resource-intensive but allows for smooth,
  *   real-time updates during window drag and resize operations. Recommended for modern systems.
  *
  *   responsive = false:
  *
- *   The recorder captures only a portion of the screen and always renders the full texture.
+ *   The streamer captures only a portion of the screen and always renders the full texture.
  *   This mode is more efficient, as ScreenCaptureKit streams only the required area.
  *   However, moving or resizing the effect window requires restarting the stream,
  *   resulting in less fluid animations compared to responsive mode.
  */
 
 @MainActor
-class ScreenRecorder: NSObject, SCStreamDelegate
+class Streamer: NSObject, SCStreamDelegate
 {
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
 
@@ -70,13 +70,13 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
     var isRecording: Bool { recordingRect != nil }
 
-    // The recorder delegate
+    // The streamer delegate
     var delegate: ScreenRecorderDelegate?
 
     // The source rectangle covered by the effect window
     var sourceRect: CGRect?
 
-    // The source rectangle of the screen recorder
+    // The source rectangle of the screen streamer
     var captureRect: CGRect?
 
     // The displayed texture cutout
@@ -152,7 +152,7 @@ class ScreenRecorder: NSObject, SCStreamDelegate
 
     func launch() async
     {
-        print("Launching the screen recorder...")
+        print("Launching the screen streamer...")
 
         do {
 

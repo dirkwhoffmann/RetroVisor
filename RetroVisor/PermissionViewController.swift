@@ -32,7 +32,7 @@ class PermissionViewController: NSViewController  {
         Task {
             while true {
 
-                canLaunch = await ScreenRecorder.canRecord
+                canLaunch = await Streamer.canRecord
 
                 if canLaunch {
 

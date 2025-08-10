@@ -101,7 +101,7 @@ class MetalView: MTKView, MTKViewDelegate {
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
     // var trackingWindow: TrackingWindow!
     var windowController: WindowController? { return trackingWindow.windowController as? WindowController }
-    var recorder: ScreenRecorder? { return windowController?.recorder }
+    var recorder: Streamer? { return windowController?.streamer }
 
     // var mtkView: MTKView!
     // var device: MTLDevice!
@@ -337,7 +337,7 @@ class MetalView: MTKView, MTKViewDelegate {
         guard var outTexture = self.outTexture else { return }
         // guard let trackingWindow = self.trackingWindow else { return }
 
-        windowController?.recorder.updateRects()
+        windowController?.streamer.updateRects()
 
         // Progress the animation parameters
         intensity.move()

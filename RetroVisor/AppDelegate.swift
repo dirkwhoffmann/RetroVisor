@@ -15,15 +15,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
 
     var appDelegate: AppDelegate { NSApp.delegate as! AppDelegate }
-    
+
     // Customizable shader parameters
     var crtUniforms = CrtUniforms.defaults
 
     var windowController: WindowController? {
         return NSApplication.shared.windows.first?.windowController as? WindowController
     }
-    var recorder: ScreenRecorder? {
-        return windowController?.recorder
+    var recorder: Streamer? {
+        return windowController?.streamer
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -41,7 +41,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         Task {
 
-            if await ScreenRecorder.canRecord {
+            if await Streamer.canRecord {
 
                 showEffectWindow()
 

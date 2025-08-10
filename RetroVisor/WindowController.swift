@@ -16,8 +16,9 @@ class WindowController: NSWindowController  {
     var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
     var metalView : MetalView? { return viewController?.metalView }
 
-    // The screen recorder
-    var recorder = ScreenRecorder()
+    // Video source and sink
+    var streamer = Streamer()
+    var recorder = Recorder()
 
     // Indicates if the window is passive (click-through state)
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }
@@ -38,14 +39,14 @@ class WindowController: NSWindowController  {
         window.makeKeyAndOrderFront(nil)
         unfreeze()
 
-        // Setup the recorder
-        recorder.delegate = self
-        recorder.window = trackingWindow
+        // Setup the streamer
+        streamer.delegate = self
+        streamer.window = trackingWindow
 
 
         Task {
-            if await ScreenRecorder.canRecord {
-                await recorder.launch()
+            if await Streamer.canRecord {
+                await streamer.launch()
             } else {
                 showPermissionAlert()
             }
@@ -102,8 +103,8 @@ extension WindowController: TrackingWindowDelegate {
         metalView!.intensity.steps = 15
         metalView!.updateTextures(rect: window.frame)
 
-        recorder.updateRects()
-        recorder.relaunchIfNeeded()
+        streamer.updateRects()
+        streamer.relaunchIfNeeded()
     }
 
     func windowDidStartDrag(_ window: TrackingWindow) {
@@ -117,14 +118,14 @@ extension WindowController: TrackingWindowDelegate {
         metalView!.intensity.target = 0.0
         metalView!.intensity.steps = 25
 
-        recorder.updateRects()
-        recorder.relaunchIfNeeded()
+        streamer.updateRects()
+        streamer.relaunchIfNeeded()
 
         /*
         print("window: \(window.frame)")
-        print("sourceRect: \(recorder.sourceRect ?? .null)")
-        print("captureRect: \(recorder.captureRect ?? .null)")
-        print("textureRect: \(recorder.textureRect ?? .null)")
+        print("sourceRect: \(streamer.sourceRect ?? .null)")
+        print("captureRect: \(streamer.captureRect ?? .null)")
+        print("textureRect: \(streamer.textureRect ?? .null)")
         */
     }
 
@@ -135,7 +136,7 @@ extension WindowController: TrackingWindowDelegate {
 
     func windowDidChangeScreen(_ window: TrackingWindow) {
 
-        recorder.relaunch()
+        streamer.relaunch()
     }
 }
 
@@ -165,7 +166,7 @@ extension WindowController: ScreenRecorderDelegate {
                     if let vc = self?.contentViewController as? ViewController {
 
                         let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
-                        self?.recorder.currentTime = pts
+                        self?.streamer.currentTime = pts
                         vc.metalView.update(with: pixelBuffer)
                     }
                 }
@@ -174,7 +175,7 @@ extension WindowController: ScreenRecorderDelegate {
         case .audio:
 
             // print("Got audio")
-            recorder.appendAudio(buffer: buffer)
+            streamer.appendAudio(buffer: buffer)
             break
 
         default:
