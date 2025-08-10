@@ -2,6 +2,18 @@ import Cocoa
 
 class PreferencesSplitViewController: NSSplitViewController {
 
+    let main = NSStoryboard(name: "Main", bundle: nil)
+
+    private lazy var generalVC: GeneralPreferencesViewController = {
+        return main.instantiateController(withIdentifier: "GeneralPreferencesViewController") as! GeneralPreferencesViewController
+    }()
+    private lazy var shaderVC: ShaderPreferencesViewController = {
+        return main.instantiateController(withIdentifier: "ShaderPreferencesViewController") as! ShaderPreferencesViewController
+    }()
+    private lazy var recorderVC: RecorderPreferencesViewController = {
+        return main.instantiateController(withIdentifier: "RecorderPreferencesViewController") as! RecorderPreferencesViewController
+    }()
+
     private var sidebarVC: SidebarViewController? {
         return splitViewItems.first?.viewController as? SidebarViewController
     }
@@ -19,11 +31,11 @@ class PreferencesSplitViewController: NSSplitViewController {
 
         switch item.identifier.rawValue {
         case "general":
-            newVC = GeneralPreferencesViewController()
+            newVC = generalVC // GeneralPreferencesViewController()
         case "shader":
-            newVC = ShaderPreferencesViewController()
+            newVC = shaderVC //ShaderPreferencesViewController()
         case "recorder":
-            newVC = RecorderPreferencesViewController()
+            newVC = recorderVC // RecorderPreferencesViewController()
         default:
             newVC = NSViewController()
         }

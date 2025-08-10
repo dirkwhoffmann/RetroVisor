@@ -1,6 +1,7 @@
 import Cocoa
 
 class GeneralPreferencesViewController: NSViewController {
+    /*
     override func loadView() {
         self.view = NSView()
         let label = NSTextField(labelWithString: "General Preferences")
@@ -11,9 +12,11 @@ class GeneralPreferencesViewController: NSViewController {
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
+    */
 }
 
 class ShaderPreferencesViewController: NSViewController {
+    /*
     override func loadView() {
         self.view = NSView()
         let label = NSTextField(labelWithString: "Shader Preferences")
@@ -24,9 +27,11 @@ class ShaderPreferencesViewController: NSViewController {
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
+    */
 }
 
 class RecorderPreferencesViewController: NSViewController {
+    /*
     override func loadView() {
         self.view = NSView()
         let label = NSTextField(labelWithString: "Audio Preferences")
@@ -37,4 +42,5 @@ class RecorderPreferencesViewController: NSViewController {
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
+    */
 }

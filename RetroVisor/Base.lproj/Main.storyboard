@@ -727,7 +727,7 @@
                 </windowController>
                 <customObject id="WCi-LH-SnA" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="796" y="83"/>
+            <point key="canvasLocation" x="845" y="85"/>
         </scene>
         <!--Permission View Controller-->
         <scene sceneID="xof-Lp-nQQ">
@@ -841,7 +841,7 @@ DQ
                 </viewController>
                 <customObject id="l6Y-2W-Cym" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="834" y="690.5"/>
+            <point key="canvasLocation" x="1514" y="76"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -887,7 +887,7 @@ DQ
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="900"/>
+            <point key="canvasLocation" x="75" y="863"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="Uwc-Dm-x2C">
@@ -1035,20 +1035,115 @@ DQ
             </objects>
             <point key="canvasLocation" x="1109" y="1176"/>
         </scene>
-        <!--View Controller-->
+        <!--General Preferences View Controller-->
         <scene sceneID="7gx-ne-qK3">
             <objects>
-                <viewController id="bLc-tn-zPG" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="GeneralPreferencesViewController" id="bLc-tn-zPG" customClass="GeneralPreferencesViewController" customModule="RetroVisor" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="qlu-rt-FPQ">
-                        <rect key="frame" x="0.0" y="0.0" width="302" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="640" height="480"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ARo-Ov-wzI">
+                                <rect key="frame" x="18" y="444" width="96" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Capture Mode" id="G8G-XF-rlQ">
+                                    <font key="font" metaFont="systemBold"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="U9W-bJ-ziL">
+                                <rect key="frame" x="35" y="312" width="465" height="91"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" selectable="YES" id="84j-UM-4rt">
+                                    <font key="font" metaFont="system"/>
+                                    <string key="title">In this mode, the recorder captures the entire screen but renders only a portion of the texture. This approach is more resource-intensive but allows for smooth, real-time updates during window drag and resize operations. Recommended for modern systems.</string>
+                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ubG-TF-fhL">
+                                <rect key="frame" x="18" y="411" width="107" height="18"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="radio" title="Entire Screen" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="JCn-pW-FUY">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9cM-bf-Hr2">
+                                <rect key="frame" x="35" y="213" width="453" height="91"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" selectable="YES" id="UrG-2z-H0A">
+                                    <font key="font" metaFont="system"/>
+                                    <string key="title">The recorder captures only a portion of the screen and always renders the full texture. This mode is more efficient, as ScreenCaptureKit streams only the required area. However, moving or resizing the effect window requires restarting the stream, resulting in less fluid animations compared to responsive mode.</string>
+                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aUm-m9-1HM">
+                                <rect key="frame" x="18" y="311" width="110" height="18"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="radio" title="Partial Screen" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="5pS-yB-knB">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="ENG-5d-7AJ"/>
                         <viewLayoutGuide key="layoutMargins" id="9N2-ZV-ehK"/>
                     </view>
                 </viewController>
                 <customObject id="iM7-m7-n28" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1157" y="1513"/>
+            <point key="canvasLocation" x="1264" y="1697"/>
+        </scene>
+        <!--Shader Preferences View Controller-->
+        <scene sceneID="uL2-0h-5vn">
+            <objects>
+                <viewController storyboardIdentifier="ShaderPreferencesViewController" id="lT8-2t-dOu" customClass="ShaderPreferencesViewController" customModule="RetroVisor" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="cOi-t8-8Fp">
+                        <rect key="frame" x="0.0" y="0.0" width="640" height="480"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vRR-Yb-Fcr">
+                                <rect key="frame" x="190" y="313" width="48" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Shader" id="ek7-bv-wsi">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                    </view>
+                </viewController>
+                <customObject id="fJ4-4r-r8a" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1924" y="1697"/>
+        </scene>
+        <!--Recorder Preferences View Controller-->
+        <scene sceneID="cKG-mY-Ha0">
+            <objects>
+                <viewController storyboardIdentifier="RecorderPreferencesViewController" id="rai-Kw-7eh" customClass="RecorderPreferencesViewController" customModule="RetroVisor" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="VcJ-Rr-62f">
+                        <rect key="frame" x="0.0" y="0.0" width="640" height="480"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vOT-tY-bbQ">
+                                <rect key="frame" x="171" y="374" width="60" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Recorder" id="gcd-e2-LDK">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                    </view>
+                </viewController>
+                <customObject id="wES-pW-2mT" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2982" y="1697"/>
         </scene>
     </scenes>
     <resources>
