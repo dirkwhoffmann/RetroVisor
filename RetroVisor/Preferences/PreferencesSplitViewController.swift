@@ -7,8 +7,9 @@ class PreferencesSplitViewController: NSSplitViewController {
     }
 
     override func viewDidLoad() {
-        super.viewDidLoad()
 
+        print("\(splitViewItems)")
+        super.viewDidLoad()
         sidebarVC?.selectionHandler = { [weak self] item in
             self?.showContent(for: item)
         }
@@ -40,7 +41,13 @@ class PreferencesSplitViewController: NSSplitViewController {
          */
 
         // Replace right pane
-        splitViewItems[1].viewController = newVC
+        print("Replace right pane")
+        // Remove the old content pane
+        removeSplitViewItem(splitViewItems[1])
+
+        // Create a new split view item for the new content
+        let newItem = NSSplitViewItem(viewController: newVC)
+        addSplitViewItem(newItem)
 
     }
 }

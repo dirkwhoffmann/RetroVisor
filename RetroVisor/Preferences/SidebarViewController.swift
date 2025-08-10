@@ -1,8 +1,9 @@
 import Cocoa
 
 struct SidebarItem {
+
     let title: String
-    let iconName: String // SF Symbol
+    let iconName: String
     let identifier: NSUserInterfaceItemIdentifier
 }
 
@@ -19,10 +20,15 @@ class SidebarViewController: NSViewController, NSOutlineViewDataSource, NSOutlin
     var selectionHandler: ((SidebarItem) -> Void)?
 
     override func viewDidLoad() {
+
+        print("SidebarViewController; viewDidLoad")
         super.viewDidLoad()
         outlineView.dataSource = self
         outlineView.delegate = self
-        outlineView.selectionHighlightStyle = .sourceList
+        outlineView.usesAutomaticRowHeights = false
+        outlineView.rowHeight = 48
+        outlineView.rowSizeStyle = .custom
+        // outlineView.selectionHighlightStyle = .sourceList
         outlineView.reloadData()
 
         // Select first item by default
@@ -42,14 +48,17 @@ class SidebarViewController: NSViewController, NSOutlineViewDataSource, NSOutlin
     }
 
     func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
+
         guard let sidebarItem = item as? SidebarItem else { return nil }
         let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("SidebarCell"), owner: self) as? NSTableCellView
+        print("\(cell)")
         cell?.textField?.stringValue = sidebarItem.title
         cell?.imageView?.image = NSImage(systemSymbolName: sidebarItem.iconName, accessibilityDescription: nil)
         return cell
     }
 
     func outlineViewSelectionDidChange(_ notification: Notification) {
+
         let selectedIndex = outlineView.selectedRow
         if selectedIndex >= 0 {
             selectionHandler?(items[selectedIndex])

@@ -11,9 +11,11 @@ import Cocoa
 
 class PreferencesWindowController: NSWindowController {
 
+    /*
     static let shared = PreferencesWindowController()
 
     private init() {
+
         let storyboard = NSStoryboard(name: "Main", bundle: nil)
         let splitVC = storyboard.instantiateController(withIdentifier: "PreferencesSplitViewController") as! PreferencesSplitViewController
         let window = NSWindow(contentViewController: splitVC)
@@ -22,9 +24,10 @@ class PreferencesWindowController: NSWindowController {
         window.setContentSize(NSSize(width: 800, height: 500))
         super.init(window: window)
     }
+    */
 
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
     }
 
     func show() {

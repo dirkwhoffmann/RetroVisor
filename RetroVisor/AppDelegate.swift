@@ -90,7 +90,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func showPreferencesWindow(_ sender: Any?) {
-        PreferencesWindowController.shared.show()
+
+        let storyboard = NSStoryboard(name: "Main", bundle: nil)
+        if let wc = storyboard.instantiateController(withIdentifier: "PreferencesWindowController") as? NSWindowController {
+            wc.showWindow(self)
+            wc.window?.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 
 }

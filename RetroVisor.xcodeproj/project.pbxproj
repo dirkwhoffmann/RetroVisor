@@ -16,7 +16,6 @@
 		503FCC212E48688600EF49DA /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC202E48687D00EF49DA /* SidebarViewController.swift */; };
 		503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC222E4868B200EF49DA /* PreferencesSplitViewController.swift */; };
 		503FCC252E4868E100EF49DA /* PreferencesViewControllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC242E4868D400EF49DA /* PreferencesViewControllers.swift */; };
-		503FCC272E486C5900EF49DA /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 503FCC262E486C5900EF49DA /* Preferences.storyboard */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* WindowController.swift */; };
@@ -44,7 +43,6 @@
 		503FCC202E48687D00EF49DA /* SidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewController.swift; sourceTree = "<group>"; };
 		503FCC222E4868B200EF49DA /* PreferencesSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSplitViewController.swift; sourceTree = "<group>"; };
 		503FCC242E4868D400EF49DA /* PreferencesViewControllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesViewControllers.swift; sourceTree = "<group>"; };
-		503FCC262E486C5900EF49DA /* Preferences.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Preferences.storyboard; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -87,9 +85,9 @@
 		503FCC1F2E48670B00EF49DA /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
+				503FCC1D2E4866FE00EF49DA /* PreferencesWindowController.swift */,
 				503FCC222E4868B200EF49DA /* PreferencesSplitViewController.swift */,
 				503FCC202E48687D00EF49DA /* SidebarViewController.swift */,
-				503FCC1D2E4866FE00EF49DA /* PreferencesWindowController.swift */,
 				503FCC242E4868D400EF49DA /* PreferencesViewControllers.swift */,
 			);
 			path = Preferences;
@@ -133,7 +131,6 @@
 				50BA96452E3C80D6006BA8DF /* Assets.xcassets */,
 				50BA96602E3F6AB9006BA8DF /* Resources */,
 				50BA96692E409381006BA8DF /* SettingsWindow.xib */,
-				503FCC262E486C5900EF49DA /* Preferences.storyboard */,
 			);
 			path = RetroVisor;
 			sourceTree = "<group>";
@@ -221,7 +218,6 @@
 				50BA965F2E3F6AA1006BA8DF /* Credits.rtf in Resources */,
 				50BA966A2E409381006BA8DF /* SettingsWindow.xib in Resources */,
 				50BA96562E3C80D6006BA8DF /* Main.storyboard in Resources */,
-				503FCC272E486C5900EF49DA /* Preferences.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
