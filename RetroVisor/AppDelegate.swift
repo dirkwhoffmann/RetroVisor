@@ -12,11 +12,16 @@ import Cocoa
 @main @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    var statusItem: NSStatusItem!
-
-    var streamer: Streamer? = Streamer()
-
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
+
+    // Gateway to ScreenCaptureKit
+    var streamer = Streamer()
+
+    // Gateway to AVAssetWriter
+    var recorder = Recorder()
+
+    // Menu bar status item
+    var statusItem : NSStatusItem?
 
     // Customizable shader parameters
     var crtUniforms = CrtUniforms.defaults
@@ -24,8 +29,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var windowController: WindowController? {
         return NSApplication.shared.windows.first?.windowController as? WindowController
     }
-    // var streamer: Streamer? { return windowController?.streamer }
-    var recorder: Recorder? { return windowController?.recorder }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
 

@@ -18,8 +18,8 @@ class WindowController: NSWindowController  {
     var metalView : MetalView? { return viewController?.metalView }
 
     // Video source and sink
-    var recorder = Recorder()
-    var streamer: Streamer { return app.streamer! }
+    var recorder: Recorder { return app.recorder }
+    var streamer: Streamer { return app.streamer }
 
     // Indicates if the window is passive (click-through state)
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }

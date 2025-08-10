@@ -40,7 +40,7 @@ extension AppDelegate : NSMenuItemValidation {
 
     func updateStatusBarMenuIcon(recording: Bool) {
 
-        if let button = statusItem.button {
+        if let button = statusItem?.button {
             button.image = NSImage(named: recording ? "RecordingTemplate" : "RetroVisorTemplate")!
         }
     }
@@ -87,7 +87,7 @@ extension AppDelegate : NSMenuItemValidation {
         menu.addItem(NSMenuItem.separator())
         menu.addItem(quit)
 
-        statusItem.menu = menu
+        statusItem?.menu = menu
     }
 
     func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
@@ -105,7 +105,7 @@ extension AppDelegate : NSMenuItemValidation {
 
         case #selector(AppDelegate.recorderAction(_:)):
 
-            if recorder?.isRecording == true {
+            if recorder.isRecording == true {
                 menuItem.title = "Stop Recording"
             } else {
                 menuItem.title = "Start Recording"
@@ -127,12 +127,11 @@ extension AppDelegate : NSMenuItemValidation {
 
     @objc func restartScreenRecorder(_ sender: Any?) {
 
-        streamer?.relaunch()
+        streamer.relaunch()
     }
 
     @objc func recorderAction(_ sender: Any?) {
 
-        guard let recorder = recorder else { return }
         guard let texture = windowController?.metalView?.outTexture else { return }
 
         if recorder.isRecording {
