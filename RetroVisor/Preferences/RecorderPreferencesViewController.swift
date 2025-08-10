@@ -9,16 +9,6 @@
 
 import Cocoa
 
-class PreferencesWindowController: NSWindowController {
+class RecorderPreferencesViewController: NSViewController {
 
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-
-    func show() {
-        
-        self.showWindow(nil)
-        self.window?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-    }
 }

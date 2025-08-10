@@ -1,3 +1,12 @@
+// -----------------------------------------------------------------------------
+// This file is part of RetroVisor
+//
+// Copyright (C) Dirk W. Hoffmann. www.dirkwhoffmann.de
+// Licensed under the GNU General Public License v3
+//
+// See https://www.gnu.org for license information
+// -----------------------------------------------------------------------------
+
 import Cocoa
 
 class PreferencesSplitViewController: NSSplitViewController {
@@ -42,13 +51,13 @@ class PreferencesSplitViewController: NSSplitViewController {
 
         /*
          // Replace content with animation
-             if let window = self.view.window {
-                 let targetSize = newVC.view.fittingSize
-                 var frame = window.frameRect(forContentRect: NSRect(origin: .zero, size: targetSize))
-                 frame.origin = window.frame.origin
-                 frame.origin.y += window.frame.height - frame.height
-                 window.setFrame(frame, display: true, animate: true)
-             }
+         if let window = self.view.window {
+         let targetSize = newVC.view.fittingSize
+         var frame = window.frameRect(forContentRect: NSRect(origin: .zero, size: targetSize))
+         frame.origin = window.frame.origin
+         frame.origin.y += window.frame.height - frame.height
+         window.setFrame(frame, display: true, animate: true)
+         }
          */
 
         // Replace right pane
@@ -59,6 +68,5 @@ class PreferencesSplitViewController: NSSplitViewController {
         // Create a new split view item for the new content
         let newItem = NSSplitViewItem(viewController: newVC)
         addSplitViewItem(newItem)
-
     }
 }
