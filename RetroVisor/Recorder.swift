@@ -63,6 +63,40 @@ struct RecorderSettings {
         }
     }
 
+    enum VideoResolution: Int, CaseIterable {
+
+        case custom = 0
+        case hd = 1
+        case fhd = 2
+        case uhd = 3
+
+        var size: NSSize {
+            switch self {
+            case .custom: return .zero
+            case .hd:     return NSSize(width: 1280, height: 720)
+            case .fhd:    return NSSize(width: 1920, height: 1080)
+            case .uhd:    return NSSize(width: 3840, height: 2160)
+            }
+        }
+
+        static func from(size: NSSize) -> VideoResolution {
+            return Self.allCases.first(where: { $0.size == size }) ?? .custom
+        }
+    }
+
+    enum AudioFormat: Int {
+
+        case mpeg4AAC = 1
+        case linearPCM = 2
+
+        var audioFormatID: AudioFormatID? {
+            switch self {
+            case .mpeg4AAC:  return kAudioFormatMPEG4AAC
+            case .linearPCM: return kAudioFormatLinearPCM
+            }
+        }
+    }
+
     var videoType: VideoType
     var codec: VideoCodec
     var width: Int
@@ -70,14 +104,14 @@ struct RecorderSettings {
     var quality: CGFloat  // 0.0 = lowest, 1.0 = highest
     var pixelAspectRatioH: Int
     var pixelAspectRatioV: Int
-    var frameRate: Int
-    var bitRate: Int? // nil = default for codec
+    var frameRate: Int?
+    var bitRate: Int? 
 
     var includeAudio: Bool
-    var audioFormatID: AudioFormatID
+    var audioFormat: AudioFormat?
     var audioChannels: Int
-    var audioSampleRate: Double
-    var audioBitRate: Int
+    var audioSampleRate: Int?
+    var audioBitRate: Int?
 
     enum Preset {
 
@@ -101,7 +135,7 @@ struct RecorderSettings {
                     frameRate: 60,
                     bitRate: 8_000_000,
                     includeAudio: true,
-                    audioFormatID: kAudioFormatMPEG4AAC,
+                    audioFormat: .mpeg4AAC,
                     audioChannels: 2,
                     audioSampleRate: 44100,
                     audioBitRate: 192_000
@@ -118,7 +152,7 @@ struct RecorderSettings {
                     frameRate: 60,
                     bitRate: 35_000_000,
                     includeAudio: true,
-                    audioFormatID: kAudioFormatMPEG4AAC,
+                    audioFormat: .mpeg4AAC,
                     audioChannels: 2,
                     audioSampleRate: 48000,
                     audioBitRate: 256_000
@@ -135,7 +169,7 @@ struct RecorderSettings {
                     frameRate: 60,
                     bitRate: nil,
                     includeAudio: true,
-                    audioFormatID: kAudioFormatLinearPCM,
+                    audioFormat: .linearPCM,
                     audioChannels: 2,
                     audioSampleRate: 48000,
                     audioBitRate: 0
@@ -152,7 +186,7 @@ struct RecorderSettings {
                     frameRate: 30,
                     bitRate: 2_000_000,
                     includeAudio: true,
-                    audioFormatID: kAudioFormatMPEG4AAC,
+                    audioFormat: .mpeg4AAC,
                     audioChannels: 2,
                     audioSampleRate: 44100,
                     audioBitRate: 128_000
@@ -186,14 +220,23 @@ struct RecorderSettings {
     }
 
     func makeAudioSettings() -> [String: Any]? {
+
         guard includeAudio else { return nil }
 
-        return [
-            AVFormatIDKey: audioFormatID,
-            AVNumberOfChannelsKey: audioChannels,
-            AVSampleRateKey: audioSampleRate,
-            AVEncoderBitRateKey: audioBitRate
+        var audioSettings: [String: Any] = [
+            AVNumberOfChannelsKey: audioChannels
         ]
+        if let audioFormat = audioFormat {
+            audioSettings[AVFormatIDKey] = audioFormat.audioFormatID
+        }
+        if let bitRate = audioBitRate {
+            audioSettings[AVEncoderBitRateKey] = bitRate
+        }
+        if let audioSampleRate = audioSampleRate {
+            audioSettings[AVSampleRateKey] = audioSampleRate
+        }
+
+        return audioSettings
     }
 }
 
