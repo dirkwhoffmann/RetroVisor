@@ -9,6 +9,12 @@
 
 import ScreenCaptureKit
 
+protocol RecorderDelegate {
+
+    func recorderDidStart()
+    func recorderDidStop()
+}
+
 @MainActor
 class Recorder {
 
@@ -21,11 +27,16 @@ class Recorder {
     private var pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
     private var startTime: CMTime?
     var currentTime: CMTime?
-    var recordingRect: NSRect? {
-        didSet { app.updateStatusBarMenuIcon(recording: isRecording) }
+    private(set) var recordingRect: NSRect? {
+        didSet {
+             app.updateStatusBarMenuIcon(recording: isRecording) // MOVE TO DELEGATE
+        }
     }
 
     var isRecording: Bool { recordingRect != nil }
+
+    // Event receiver
+    var delegate: RecorderDelegate?
 
     func startIfNeeded(firstTimestamp: CMTime) {
 
@@ -40,6 +51,7 @@ class Recorder {
     func startRecording(width: Int, height: Int) {
 
         if isRecording { return }
+
         recordingRect = NSRect(x: 0, y: 0, width: width, height: height)
 
         let fileManager = FileManager.default
@@ -106,9 +118,13 @@ class Recorder {
         } else {
             print("Cannot add audio input")
         }
+
+        delegate?.recorderDidStart()
     }
 
     func stopRecording(completion: @escaping () -> Void) {
+
+        if !isRecording { return }
 
         videoInput?.markAsFinished()
         assetWriter?.finishWriting {
@@ -117,6 +133,7 @@ class Recorder {
         }
 
         recordingRect = nil
+        delegate?.recorderDidStop()
     }
 
     // Appends a video frame

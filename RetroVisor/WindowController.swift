@@ -16,6 +16,7 @@ class WindowController: NSWindowController  {
     var viewController : ViewController? { return self.contentViewController as? ViewController }
     var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
     var metalView : MetalView? { return viewController?.metalView }
+    var overlay: Overlay!
 
     // Video source and sink
     var recorder: Recorder { return app.recorder }
@@ -54,6 +55,8 @@ class WindowController: NSWindowController  {
         window.trackingDelegate = self
         window.makeKeyAndOrderFront(nil)
         unfreeze()
+
+        overlay = Overlay(over: window.contentView!)
 
         // Setup the streamer
         streamer.delegate = self
@@ -98,7 +101,7 @@ class WindowController: NSWindowController  {
 
         window.ignoresMouseEvents = false
         window.styleMask = [.titled, .closable, .resizable, .miniaturizable,
-            .nonactivatingPanel, .fullSizeContentView]
+                            .nonactivatingPanel, .fullSizeContentView]
         window.contentView?.layer?.borderColor = NSColor.systemBlue.cgColor
         window.contentView?.layer?.borderWidth = 2
         window.contentView?.layer?.cornerRadius = 10
@@ -156,16 +159,16 @@ extension WindowController: TrackingWindowDelegate {
     }
 }
 
-extension WindowController: ScreenRecorderDelegate {
+extension WindowController: StreamerDelegate {
+
 
     func textureRectDidChange(rect: CGRect?) {
 
         metalView?.updateVertexBuffers(rect)
     }
 
-    func recorderDidStart() {
+    func captureRectDidChange(rect: CGRect?) {
 
-        print("recorderDidRestart")
     }
 
     func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
@@ -198,3 +201,17 @@ extension WindowController: ScreenRecorderDelegate {
         }
     }
 }
+
+extension WindowController: RecorderDelegate {
+
+    func recorderDidStart() {
+
+        print("recorderDidStart")
+    }
+
+    func recorderDidStop() {
+
+        print("recorderDidStop")
+    }
+}
+

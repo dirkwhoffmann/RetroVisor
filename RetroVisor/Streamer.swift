@@ -9,19 +9,19 @@
 
 import ScreenCaptureKit
 
-protocol ScreenRecorderDelegate : SCStreamOutput {
+protocol StreamerDelegate : SCStreamOutput {
 
     func textureRectDidChange(rect: CGRect?)
     func captureRectDidChange(rect: CGRect?)
-    func recorderDidStart()
 }
 
-extension TrackingWindowDelegate {
+/*
+extension StreamerDelegate {
 
     func textureRectDidChange(rect: CGRect?) {}
     func captureRectDidChange(rect: CGRect?) {}
-    func recorderDidStart() {}
 }
+*/
 
 /* This class uses ScreenCaptureKit to record screen content and feed it into the post-processor.
  *
@@ -57,8 +57,8 @@ class Streamer: NSObject, SCStreamDelegate
     let videoQueue = DispatchQueue(label: "de.dirkwhoffmann.VideoQueue")
     let audioQueue = DispatchQueue(label: "de.dirkwhoffmann.AudioQueue")
 
-    // The streamer delegate
-    var delegate: ScreenRecorderDelegate?
+    // Event receiver
+    var delegate: StreamerDelegate?
 
     // The source rectangle covered by the effect window
     var sourceRect: CGRect?
