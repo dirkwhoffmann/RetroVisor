@@ -14,29 +14,29 @@ class GeneralPreferencesViewController: NSViewController {
     @IBOutlet weak var fullCaptureButton: NSButton!
     @IBOutlet weak var areaCaptureButton: NSButton!
 
+    var app: AppDelegate { NSApp.delegate as! AppDelegate }
+    var streamer: Streamer? { app.streamer }
+
     override func viewDidLoad() {
 
         refresh()
     }
 
-    var app: AppDelegate { NSApp.delegate as! AppDelegate }
-    var recorder: Streamer? { app.streamer }
-
     func refresh() {
 
-        fullCaptureButton.state = recorder?.captureMode == .entire ? .on : .off
-        areaCaptureButton.state = recorder?.captureMode == .cutout ? .on : .off
+        fullCaptureButton.state = streamer?.captureMode == .entire ? .on : .off
+        areaCaptureButton.state = streamer?.captureMode == .cutout ? .on : .off
     }
 
     @IBAction func fullCaptureButton(_ sender: NSButton) {
 
-        recorder?.captureMode = sender.state == .on ? .entire : .cutout
+        streamer?.captureMode = sender.state == .on ? .entire : .cutout
         refresh()
     }
 
     @IBAction func areaCaptureButton(_ sender: NSButton) {
 
-        recorder?.captureMode = sender.state == .on ? .cutout : .entire
+        streamer?.captureMode = sender.state == .on ? .cutout : .entire
         refresh()
     }
 }

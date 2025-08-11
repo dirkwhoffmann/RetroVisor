@@ -19,10 +19,10 @@ protocol RecorderDelegate {
 
 struct RecorderSettings {
 
-    enum VideoType {
+    enum VideoType: Int {
 
-        case mov
-        case mp4
+        case mov = 0
+        case mp4 = 1
 
         var avFileType: AVFileType {
             switch self {
@@ -46,12 +46,12 @@ struct RecorderSettings {
         }
     }
 
-    enum VideoCodec {
+    enum VideoCodec: Int {
 
-        case h264
-        case hevc
-        case proRes422
-        case proRes4444
+        case h264 = 0
+        case hevc = 1
+        case proRes422 = 2
+        case proRes4444 = 3
 
         var avCodec: AVVideoCodecType {
             switch self {
