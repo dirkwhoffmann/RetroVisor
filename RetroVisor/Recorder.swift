@@ -26,12 +26,8 @@ class Recorder {
     private var audioInput: AVAssetWriterInput?
     private var pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
     private var startTime: CMTime?
+    private(set) var recordingRect: NSRect?
     var currentTime: CMTime?
-    private(set) var recordingRect: NSRect? {
-        didSet {
-             app.updateStatusBarMenuIcon(recording: isRecording) // MOVE TO DELEGATE
-        }
-    }
 
     var isRecording: Bool { recordingRect != nil }
 
@@ -50,16 +46,21 @@ class Recorder {
 
     func startRecording(width: Int, height: Int) {
 
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let file = docs.appendingPathComponent("output.mov")
+
+        startRecording(to: file, width: width, height: height)
+    }
+
+    func startRecording(to url: URL, width: Int, height: Int) {
+
         if isRecording { return }
 
         recordingRect = NSRect(x: 0, y: 0, width: width, height: height)
 
         let fileManager = FileManager.default
 
-        // Setup AVAssetWriter
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let url = docs.appendingPathComponent("output.mov")
-        print("Recording to \(url)")
+        // Remove the file if it already exists
         if fileManager.fileExists(atPath: url.path) {
             try? fileManager.removeItem(at: url)
         }

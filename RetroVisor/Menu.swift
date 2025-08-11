@@ -8,6 +8,7 @@
 // -----------------------------------------------------------------------------
 
 import Cocoa
+import UniformTypeIdentifiers
 
 @MainActor
 extension WindowController: NSMenuItemValidation {
@@ -40,8 +41,9 @@ extension AppDelegate : NSMenuItemValidation {
 
     func updateStatusBarMenuIcon(recording: Bool) {
 
+        // Right now, we use the same icon regardless of the recording state
         if let button = statusItem?.button {
-            button.image = NSImage(named: recording ? "RecordingTemplate" : "RetroVisorTemplate")!
+            button.image = NSImage(named: "RetroVisorTemplate")!
         }
     }
 
@@ -68,7 +70,7 @@ extension AppDelegate : NSMenuItemValidation {
         freeze.target = self
 
         let record = NSMenuItem(
-            title: "Stop recording",
+            title: "Start Recording",
             action: #selector(recorderAction(_:)),
             keyEquivalent: ""
         )
@@ -160,10 +162,28 @@ extension AppDelegate : NSMenuItemValidation {
         guard let texture = windowController?.metalView?.outTexture else { return }
 
         if recorder.isRecording {
+
             recorder.stopRecording { }
+
         } else {
-            recorder.startRecording(width: texture.width, height: texture.height)
+
+            let panel = NSSavePanel()
+            panel.title = "Save Recording"
+            panel.allowedContentTypes = [UTType.quickTimeMovie, UTType.mpeg4Movie]
+            panel.nameFieldStringValue = "Recording.mov" // default filename
+
+            if panel.runModal() == .OK {
+                if let url = panel.url {
+                    self.recorder.startRecording(to: url, width: texture.width, height: texture.height)
+                }
+            }
+            /*
+            panel.begin { response in
+                if response == .OK, let url = panel.url {
+                    self.recorder.startRecording(to: url, width: texture.width, height: texture.height)
+                }
+            }
+             */
         }
     }
-
 }
