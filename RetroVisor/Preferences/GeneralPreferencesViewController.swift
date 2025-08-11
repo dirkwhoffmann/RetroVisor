@@ -24,19 +24,19 @@ class GeneralPreferencesViewController: NSViewController {
 
     func refresh() {
 
-        fullCaptureButton.state = recorder?.responsive == true ? .on : .off
-        areaCaptureButton.state = recorder?.responsive == false ? .on : .off
+        fullCaptureButton.state = recorder?.captureMode == .entire ? .on : .off
+        areaCaptureButton.state = recorder?.captureMode == .cutout ? .on : .off
     }
 
     @IBAction func fullCaptureButton(_ sender: NSButton) {
 
-        recorder?.responsive = sender.state == .on
+        recorder?.captureMode = sender.state == .on ? .entire : .cutout
         refresh()
     }
 
     @IBAction func areaCaptureButton(_ sender: NSButton) {
 
-        recorder?.responsive = sender.state == .off
+        recorder?.captureMode = sender.state == .on ? .cutout : .entire
         refresh()
     }
 }

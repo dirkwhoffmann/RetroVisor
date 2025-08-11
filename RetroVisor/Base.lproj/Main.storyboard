@@ -1063,8 +1063,8 @@ DQ
                                             <rect key="frame" x="0.0" y="238" width="580" height="168"/>
                                             <subviews>
                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aUm-m9-1HM">
-                                                    <rect key="frame" x="-2" y="151" width="107" height="18"/>
-                                                    <buttonCell key="cell" type="radio" title="Entire Screen" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="5pS-yB-knB">
+                                                    <rect key="frame" x="-2" y="151" width="212" height="18"/>
+                                                    <buttonCell key="cell" type="radio" title="Entire Screen (Recommended)" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="5pS-yB-knB">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
                                                     </buttonCell>
