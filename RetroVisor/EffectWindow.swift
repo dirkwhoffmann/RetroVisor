@@ -1,0 +1,49 @@
+// -----------------------------------------------------------------------------
+// This file is part of RetroVisor
+//
+// Copyright (C) Dirk W. Hoffmann. www.dirkwhoffmann.de
+// Licensed under the GNU General Public License v3
+//
+// See https://www.gnu.org for license information
+// -----------------------------------------------------------------------------
+
+import AppKit
+
+class EffectWindow: TrackingWindow {
+
+    private var overlayView: NSView?
+
+    func showOverlay(image: NSImage?, height: CGFloat = 18, margin: CGFloat = 5) {
+
+        guard let container = contentView else { return }
+
+        if image != nil {
+
+            // Show overlow
+            if overlayView != nil { return }
+
+            let imageView = NSImageView(image: image!)
+            imageView.imageScaling = .scaleProportionallyUpOrDown
+            imageView.translatesAutoresizingMaskIntoConstraints = false
+
+            container.addSubview(imageView, positioned: .above, relativeTo: nil)
+
+            NSLayoutConstraint.activate([
+                imageView.topAnchor.constraint(equalTo: container.topAnchor, constant: margin),
+                imageView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -margin),
+                imageView.heightAnchor.constraint(equalToConstant: height),
+                imageView.widthAnchor.constraint(equalTo: imageView.heightAnchor, multiplier: image!.size.width / image!.size.height)
+            ])
+
+            overlayView = imageView
+
+        } else {
+
+            // Hide overlay
+            if overlayView == nil { return }
+
+            overlayView?.removeFromSuperview()
+            overlayView = nil
+        }
+    }
+}

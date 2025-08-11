@@ -14,9 +14,9 @@ class WindowController: NSWindowController  {
 
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var viewController : ViewController? { return self.contentViewController as? ViewController }
-    var trackingWindow : TrackingWindow? { return window as? TrackingWindow }
+    var effectWindow : EffectWindow? { return window as? EffectWindow }
     var metalView : MetalView? { return viewController?.metalView }
-    var overlay: Overlay!
+    // var overlay: Overlay!
 
     // Video source and sink
     var recorder: Recorder { return app.recorder }
@@ -45,7 +45,7 @@ class WindowController: NSWindowController  {
         print("WindowController.windowDidLoad")
         super.windowDidLoad()
 
-        let window = self.window as! TrackingWindow
+        let window = self.window as! EffectWindow
 
         // Setup the window
         window.hasShadow = true
@@ -56,12 +56,9 @@ class WindowController: NSWindowController  {
         window.makeKeyAndOrderFront(nil)
         unfreeze()
 
-        overlay = Overlay(over: window.contentView!)
-
         // Setup the streamer
         streamer.delegate = self
-        streamer.window = trackingWindow
-
+        streamer.window = effectWindow
 
         Task {
             if await Streamer.canRecord {
@@ -70,6 +67,9 @@ class WindowController: NSWindowController  {
                 showPermissionAlert()
             }
         }
+
+        // Setup the recorder
+        recorder.delegate = self
     }
 
     func showPermissionAlert() {
@@ -207,11 +207,13 @@ extension WindowController: RecorderDelegate {
     func recorderDidStart() {
 
         print("recorderDidStart")
+        effectWindow?.showOverlay(image: NSImage(named: "Recording"))
     }
 
     func recorderDidStop() {
 
         print("recorderDidStop")
+        effectWindow?.showOverlay(image: nil)
     }
 }
 

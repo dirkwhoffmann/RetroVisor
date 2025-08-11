@@ -19,7 +19,7 @@
 		503FCC292E48F2D200EF49DA /* ShaderPreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC282E48F2C600EF49DA /* ShaderPreferencesViewController.swift */; };
 		503FCC2B2E48F2E500EF49DA /* RecorderPreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC2A2E48F2D800EF49DA /* RecorderPreferencesViewController.swift */; };
 		503FCC2D2E48F5A300EF49DA /* Recorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC2C2E48F59F00EF49DA /* Recorder.swift */; };
-		503FCC2F2E49310600EF49DA /* Overlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC2E2E49310300EF49DA /* Overlay.swift */; };
+		503FCC312E49BBE800EF49DA /* EffectWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC302E49BBE200EF49DA /* EffectWindow.swift */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* WindowController.swift */; };
@@ -48,7 +48,7 @@
 		503FCC282E48F2C600EF49DA /* ShaderPreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderPreferencesViewController.swift; sourceTree = "<group>"; };
 		503FCC2A2E48F2D800EF49DA /* RecorderPreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecorderPreferencesViewController.swift; sourceTree = "<group>"; };
 		503FCC2C2E48F59F00EF49DA /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
-		503FCC2E2E49310300EF49DA /* Overlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Overlay.swift; sourceTree = "<group>"; };
+		503FCC302E49BBE200EF49DA /* EffectWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectWindow.swift; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -82,6 +82,7 @@
 			children = (
 				50079E702E438139005BC5FD /* Extensions.swift */,
 				50BA965A2E3D4861006BA8DF /* Animated.swift */,
+				50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -123,13 +124,12 @@
 				503FCC1F2E48670B00EF49DA /* Preferences */,
 				50BA96442E3C80D6006BA8DF /* AppDelegate.swift */,
 				50079E6D2E4331F2005BC5FD /* Menu.swift */,
-				50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */,
+				503FCC302E49BBE200EF49DA /* EffectWindow.swift */,
 				50BA964A2E3C80D6006BA8DF /* WindowController.swift */,
 				50292D932E471A2C0084CFE3 /* PermissionWindowController.swift */,
 				50292D952E471AA40084CFE3 /* PermissionViewController.swift */,
 				50BA96492E3C80D6006BA8DF /* ViewController.swift */,
 				50292D8F2E4685D80084CFE3 /* MetalView.swift */,
-				503FCC2E2E49310300EF49DA /* Overlay.swift */,
 				50BA964C2E3C80D6006BA8DF /* Streamer.swift */,
 				503FCC2C2E48F59F00EF49DA /* Recorder.swift */,
 				50BA96672E3FF19B006BA8DF /* Shaders */,
@@ -241,7 +241,6 @@
 				50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */,
 				50292D942E471A330084CFE3 /* PermissionWindowController.swift in Sources */,
 				503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */,
-				503FCC2F2E49310600EF49DA /* Overlay.swift in Sources */,
 				50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */,
 				50BA96642E3FF0B3006BA8DF /* crt-easymode.metal in Sources */,
 				503FCC212E48688600EF49DA /* SidebarViewController.swift in Sources */,
@@ -251,6 +250,7 @@
 				503FCC292E48F2D200EF49DA /* ShaderPreferencesViewController.swift in Sources */,
 				50079E712E43813C005BC5FD /* Extensions.swift in Sources */,
 				50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */,
+				503FCC312E49BBE800EF49DA /* EffectWindow.swift in Sources */,
 				50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */,
 				503FCC252E4868E100EF49DA /* GeneralPreferencesViewController.swift in Sources */,
 				503FCC1E2E48670300EF49DA /* PreferencesWindowController.swift in Sources */,
