@@ -1075,14 +1075,14 @@ DQ
                                             <menuItem title="Match Display" tag="1" id="fgi-Ge-nOn">
                                                 <modifierMask key="keyEquivalentModifierMask"/>
                                             </menuItem>
-                                            <menuItem title="Custom" tag="1" id="ild-jO-GMH">
+                                            <menuItem title="Custom" tag="2" id="ild-jO-GMH">
                                                 <modifierMask key="keyEquivalentModifierMask"/>
                                             </menuItem>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
                                 <connections>
-                                    <action selector="videoFrameRateAction:" target="rai-Kw-7eh" id="3uS-Eh-RFI"/>
+                                    <action selector="fpsModeAction:" target="bLc-tn-zPG" id="h1k-lR-vm4"/>
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tjc-ZW-F9a">
@@ -1130,7 +1130,7 @@ DQ
                                     </menu>
                                 </popUpButtonCell>
                                 <connections>
-                                    <action selector="videoFrameRateAction:" target="rai-Kw-7eh" id="kKj-TY-5nc"/>
+                                    <action selector="captureModeAction:" target="bLc-tn-zPG" id="4Gz-8l-Phf"/>
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cuJ-Lm-zJ9">
@@ -1143,7 +1143,7 @@ DQ
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                                 <connections>
-                                    <action selector="videoFrameRateValueAction:" target="rai-Kw-7eh" id="ua6-oG-vzK"/>
+                                    <action selector="fpsValueAction:" target="bLc-tn-zPG" id="95h-fR-gM4"/>
                                 </connections>
                             </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qhm-QH-PqZ">
@@ -1179,7 +1179,10 @@ DQ
                             <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="25x-gG-MS1">
                                 <rect key="frame" x="119" y="265" width="192" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <sliderCell key="cell" controlSize="small" state="on" alignment="left" minValue="1" maxValue="5" doubleValue="3" tickMarkPosition="above" numberOfTickMarks="5" sliderType="linear" id="MXi-CO-Lgp"/>
+                                <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" minValue="2" maxValue="6" doubleValue="4" tickMarkPosition="above" numberOfTickMarks="5" allowsTickMarkValuesOnly="YES" sliderType="linear" id="MXi-CO-Lgp" customClass="TrackingSliderCell" customModule="RetroVisor" customModuleProvider="target"/>
+                                <connections>
+                                    <action selector="queueSliderAction:" target="bLc-tn-zPG" id="7Ut-HX-HWV"/>
+                                </connections>
                             </slider>
                             <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KJh-xv-BOH">
                                 <rect key="frame" x="362" y="0.0" width="278" height="480"/>
@@ -1334,7 +1337,7 @@ DQ
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="jBk-ni-7oc">
-                                    <rect key="frame" x="1" y="383" width="598" height="16"/>
+                                    <rect key="frame" x="1" y="345" width="598" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="kWK-il-xu1">
@@ -1389,7 +1392,7 @@ Gw
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="nRe-V5-fv0" id="Las-yg-GfP">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="menu"/>
+                                    <font key="font" metaFont="message"/>
                                     <menu key="menu" id="iFS-P0-Kr5">
                                         <items>
                                             <menuItem title="None" state="on" id="nRe-V5-fv0"/>
@@ -1464,12 +1467,12 @@ Gw
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ODO-SV-pvG">
                                 <rect key="frame" x="135" y="382" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="Quicktime" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="nIj-dO-qOW" id="adL-x1-DGf">
+                                <popUpButtonCell key="cell" type="push" title="Quicktime" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="nIj-dO-qOW" id="adL-x1-DGf">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
                                     <menu key="menu" id="jjW-M5-O44">
                                         <items>
-                                            <menuItem title="Quicktime" id="nIj-dO-qOW"/>
+                                            <menuItem title="Quicktime" state="on" id="nIj-dO-qOW"/>
                                             <menuItem title="MP4" tag="1" id="B6v-Sj-5sZ"/>
                                         </items>
                                     </menu>
@@ -1490,12 +1493,12 @@ Gw
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QtS-vp-LHu">
                                 <rect key="frame" x="135" y="352" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="H.264" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Eke-Np-w7Y" id="CT9-rq-RH6">
+                                <popUpButtonCell key="cell" type="push" title="H.264" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Eke-Np-w7Y" id="CT9-rq-RH6">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
                                     <menu key="menu" id="FzY-sA-s5z">
                                         <items>
-                                            <menuItem title="H.264" id="Eke-Np-w7Y"/>
+                                            <menuItem title="H.264" state="on" id="Eke-Np-w7Y"/>
                                             <menuItem title="HEVC" tag="1" id="jYa-Jc-1V9"/>
                                             <menuItem title="ProRes 422" tag="2" id="QUN-3W-BkW"/>
                                             <menuItem title="ProRes 4444" tag="3" id="3Xo-dZ-2Yj"/>
@@ -1518,12 +1521,12 @@ Gw
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="48Q-fa-UHy">
                                 <rect key="frame" x="134" y="263" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="qEq-Ot-kRJ" id="ru8-Yv-wKb">
+                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="qEq-Ot-kRJ" id="ru8-Yv-wKb">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
                                     <menu key="menu" id="1cD-mN-iUD">
                                         <items>
-                                            <menuItem title="Automatic" id="qEq-Ot-kRJ"/>
+                                            <menuItem title="Automatic" state="on" id="qEq-Ot-kRJ"/>
                                             <menuItem title="Custom" tag="1" id="9J7-QL-Kzp"/>
                                         </items>
                                     </menu>
@@ -1561,12 +1564,12 @@ Gw
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cnr-2X-Rc7">
                                 <rect key="frame" x="135" y="322" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="aaz-YT-3et" id="k0b-A6-oVl">
+                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="aaz-YT-3et" id="k0b-A6-oVl">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
                                     <menu key="menu" id="6vq-7G-EQB">
                                         <items>
-                                            <menuItem title="Automatic" id="aaz-YT-3et">
+                                            <menuItem title="Automatic" state="on" id="aaz-YT-3et">
                                                 <modifierMask key="keyEquivalentModifierMask"/>
                                             </menuItem>
                                             <menuItem title="Custom" tag="1" id="vza-Xx-0q1">
@@ -1600,12 +1603,12 @@ Gw
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tud-0Z-Kxk">
                                 <rect key="frame" x="135" y="293" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="0Bc-tX-aUR" id="8hD-g9-6RY">
+                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="0Bc-tX-aUR" id="8hD-g9-6RY">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
                                     <menu key="menu" id="Onp-2O-Bht">
                                         <items>
-                                            <menuItem title="Automatic" id="0Bc-tX-aUR"/>
+                                            <menuItem title="Automatic" state="on" id="0Bc-tX-aUR"/>
                                             <menuItem title="Custom" tag="1" id="gwB-rm-Jj1"/>
                                         </items>
                                     </menu>
@@ -1626,12 +1629,12 @@ Gw
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DC5-Yg-YZ6">
                                 <rect key="frame" x="135" y="123" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="NYB-By-5mn" id="ZcI-b4-gJb">
+                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="NYB-By-5mn" id="ZcI-b4-gJb">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
                                     <menu key="menu" id="zMr-W3-HrS">
                                         <items>
-                                            <menuItem title="Automatic" id="NYB-By-5mn"/>
+                                            <menuItem title="Automatic" state="on" id="NYB-By-5mn"/>
                                             <menuItem title="Custom" tag="1" id="bGK-T3-2Q2"/>
                                         </items>
                                     </menu>
@@ -1652,12 +1655,12 @@ Gw
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tow-dR-adp">
                                 <rect key="frame" x="135" y="153" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="No Audio" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="hT3-Ld-xwy" id="zZs-Bp-CFQ">
+                                <popUpButtonCell key="cell" type="push" title="No Audio" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="hT3-Ld-xwy" id="zZs-Bp-CFQ">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
                                     <menu key="menu" id="MwF-69-QV5">
                                         <items>
-                                            <menuItem title="No Audio" id="hT3-Ld-xwy"/>
+                                            <menuItem title="No Audio" state="on" id="hT3-Ld-xwy"/>
                                             <menuItem title="MPEG4 AAC" tag="1" id="qZg-FN-ydq"/>
                                             <menuItem title="Linear PCM" tag="2" id="PEx-bm-evv"/>
                                         </items>
@@ -1670,13 +1673,13 @@ Gw
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="faO-wW-dfX">
                                 <rect key="frame" x="134" y="93" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="0PA-SK-Fvb" id="5QR-uv-ep2">
+                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="0PA-SK-Fvb" id="5QR-uv-ep2">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
                                     <menu key="menu" id="fdI-kC-HF4">
                                         <items>
-                                            <menuItem title="Automatic" id="0PA-SK-Fvb"/>
-                                            <menuItem title="Custom" state="on" tag="1" id="5JJ-as-17t"/>
+                                            <menuItem title="Automatic" state="on" id="0PA-SK-Fvb"/>
+                                            <menuItem title="Custom" tag="1" id="5JJ-as-17t"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
@@ -1798,7 +1801,7 @@ Gw
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Select Profile..." bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" tag="-1" imageScaling="proportionallyDown" inset="2" pullsDown="YES" id="u9c-St-3rZ">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="menu"/>
+                                    <font key="font" metaFont="message"/>
                                     <menu key="menu" id="O3D-aR-fVS">
                                         <items>
                                             <menuItem title="Select Profile..." tag="-1" hidden="YES" id="ZpA-IG-37b"/>

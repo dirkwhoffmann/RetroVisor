@@ -21,6 +21,7 @@
 		503FCC2D2E48F5A300EF49DA /* Recorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC2C2E48F59F00EF49DA /* Recorder.swift */; };
 		503FCC312E49BBE800EF49DA /* EffectWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC302E49BBE200EF49DA /* EffectWindow.swift */; };
 		503FCC332E4B016400EF49DA /* Shadowed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC322E4B016000EF49DA /* Shadowed.swift */; };
+		503FCC352E4B85BD00EF49DA /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC342E4B85B900EF49DA /* Settings.swift */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* WindowController.swift */; };
@@ -51,6 +52,7 @@
 		503FCC2C2E48F59F00EF49DA /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
 		503FCC302E49BBE200EF49DA /* EffectWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectWindow.swift; sourceTree = "<group>"; };
 		503FCC322E4B016000EF49DA /* Shadowed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadowed.swift; sourceTree = "<group>"; };
+		503FCC342E4B85B900EF49DA /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -93,6 +95,7 @@
 		503FCC1F2E48670B00EF49DA /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
+				503FCC342E4B85B900EF49DA /* Settings.swift */,
 				503FCC1D2E4866FE00EF49DA /* PreferencesWindowController.swift */,
 				503FCC222E4868B200EF49DA /* PreferencesSplitViewController.swift */,
 				503FCC202E48687D00EF49DA /* SidebarViewController.swift */,
@@ -245,6 +248,7 @@
 				50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */,
 				50292D942E471A330084CFE3 /* PermissionWindowController.swift in Sources */,
 				503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */,
+				503FCC352E4B85BD00EF49DA /* Settings.swift in Sources */,
 				50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */,
 				50BA96642E3FF0B3006BA8DF /* crt-easymode.metal in Sources */,
 				503FCC212E48688600EF49DA /* SidebarViewController.swift in Sources */,

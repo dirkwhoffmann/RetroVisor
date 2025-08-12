@@ -54,9 +54,6 @@ class RecorderPreferencesViewController: NSViewController {
     func refreshVideo() {
 
         guard let settings = recorder?.settings else { return }
-        print("")
-        print("Settings: \(settings)")
-        print("")
 
         if !videoTypeButton.selectItem(withTag: settings.videoType.rawValue) {
             fatalError()

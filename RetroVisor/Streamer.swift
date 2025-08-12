@@ -12,29 +12,6 @@ import ScreenCaptureKit
 /* This class uses ScreenCaptureKit to record screen content and feed it into
  * the post-processor.
  */
-
-enum CaptureMode {
-
-    /* The streamer can operate in two different capture modes: */
-
-    case entire
-
-    /* The streamer captures the entire screen but renders only a portion of the
-     * texture. This approach is more resource-intensive but allows for smooth,
-     * real-time updates during window drag and resize operations. Recommended
-     * for modern systems.
-     */
-
-    case cutout
-
-    /* The streamer captures only a portion of the screen and always renders the
-     * full texture. This mode is more efficient, as ScreenCaptureKit streams
-     * only the required area. However, moving or resizing the effect window
-     * requires restarting the stream, resulting in less fluid animations
-     * compared to responsive mode.
-     */
-}
-
 protocol StreamerDelegate : SCStreamOutput {
 
     func textureRectDidChange(rect: CGRect?)
@@ -46,10 +23,15 @@ class Streamer: NSObject, SCStreamDelegate
 {
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
 
+    // Recorder settings
+    var settings = StreamerSettings.Preset.systemDefault.settings
+
     // The currently set capture mode
-    var captureMode: CaptureMode = .entire {
+    /*
+    var captureMode: StreamerSettings.CaptureMode = .entire {
         didSet { if captureMode != oldValue { relaunch() } }
     }
+    */
 
     // ScreenCaptureKit entities
     var stream: SCStream?
@@ -99,7 +81,7 @@ class Streamer: NSObject, SCStreamDelegate
                                width: newSourceRect.width,
                                height: newSourceRect.height)
 
-        if captureMode == .entire {
+        if settings.captureMode == .entire {
 
             // Grab the entire screen and draw a portion of the texture
             newCaptureRect = nil
@@ -186,14 +168,16 @@ class Streamer: NSObject, SCStreamDelegate
 
             // Configure video capture
             let rect = captureRect ?? display!.frame
-            if (captureMode == .cutout) { config.sourceRect = rect }
+            if (settings.captureMode == .cutout) { config.sourceRect = rect }
             config.showsCursor = false
             config.width = Int(rect.width) * NSScreen.scaleFactor
             config.height = Int(rect.height) * NSScreen.scaleFactor
             config.pixelFormat = kCVPixelFormatType_32BGRA
             config.colorSpaceName = CGColorSpace.sRGB
-            config.minimumFrameInterval = CMTime(value: 1, timescale: 50)
-            config.queueDepth = 5
+            config.minimumFrameInterval = CMTime(value: 1, timescale: 60)
+            config.queueDepth = settings.queueDepth
+
+            print("depth: \(config.queueDepth)")
 
             // Create the stream
             stream = SCStream(filter: filter!, configuration: config, delegate: self)
