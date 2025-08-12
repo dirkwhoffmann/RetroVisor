@@ -40,28 +40,17 @@ struct StreamerSettings {
     enum FpsMode: Int {
 
         case automatic = 0
-        case fullThrottle = 1
-        case custom = 2
-
-        var help: String {
-
-            switch self {
-            case .automatic: return
-                "Help text for automatic mode."
-
-            case .fullThrottle: return
-                "Help text for full throttle."
-
-            case .custom: return
-                "Help text for custom FPS."
-            }
-        }
+        case custom = 1
     }
 
     var fpsMode: FpsMode
     var fps: Int
     var queueDepth: Int
     var captureMode: CaptureMode
+
+    var frameInterval: CMTime? {
+        fpsMode == .automatic ? nil : CMTime(value: 1, timescale: CMTimeScale(fps))
+    }
 
     enum Preset {
 

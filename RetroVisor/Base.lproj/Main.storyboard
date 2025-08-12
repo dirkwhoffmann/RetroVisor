@@ -1072,10 +1072,7 @@ DQ
                                             <menuItem title="Automatic" state="on" id="E8Y-ba-Nmq">
                                                 <modifierMask key="keyEquivalentModifierMask"/>
                                             </menuItem>
-                                            <menuItem title="Match Display" tag="1" id="fgi-Ge-nOn">
-                                                <modifierMask key="keyEquivalentModifierMask"/>
-                                            </menuItem>
-                                            <menuItem title="Custom" tag="2" id="ild-jO-GMH">
+                                            <menuItem title="Custom" tag="1" id="ild-jO-GMH">
                                                 <modifierMask key="keyEquivalentModifierMask"/>
                                             </menuItem>
                                         </items>
@@ -1086,7 +1083,7 @@ DQ
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tjc-ZW-F9a">
-                                <rect key="frame" x="18" y="267" width="97" height="16"/>
+                                <rect key="frame" x="18" y="274" width="97" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title=" Queue Length:" id="ekK-wG-gDy">
                                     <font key="font" metaFont="system"/>
@@ -1095,7 +1092,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jrZ-ij-izD">
-                                <rect key="frame" x="322" y="269" width="58" height="16"/>
+                                <rect key="frame" x="322" y="276" width="58" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="n frames" id="AZL-H5-uMJ">
                                     <font key="font" metaFont="system"/>
@@ -1104,7 +1101,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="a8V-ZE-Im6">
-                                <rect key="frame" x="21" y="140" width="94" height="16"/>
+                                <rect key="frame" x="21" y="137" width="94" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Capture Mode:" id="XNF-ba-fWs">
                                     <font key="font" metaFont="system"/>
@@ -1113,7 +1110,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="G3r-ho-dv7">
-                                <rect key="frame" x="118" y="134" width="195" height="25"/>
+                                <rect key="frame" x="118" y="131" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Entire Screen" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Kfr-mz-7iY" id="7EL-nE-3Qg">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -1147,7 +1144,7 @@ DQ
                                 </connections>
                             </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qhm-QH-PqZ">
-                                <rect key="frame" x="119" y="181" width="378" height="80"/>
+                                <rect key="frame" x="119" y="188" width="345" height="80"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" selectable="YES" id="qzV-Pe-lZb">
                                     <font key="font" metaFont="system"/>
@@ -1157,7 +1154,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="drG-uG-YNF">
-                                <rect key="frame" x="119" y="50" width="345" height="80"/>
+                                <rect key="frame" x="119" y="47" width="345" height="80"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" selectable="YES" id="oNW-Q1-DHC">
                                     <font key="font" metaFont="system"/>
@@ -1167,19 +1164,19 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oGG-ja-lKE">
-                                <rect key="frame" x="119" y="301" width="378" height="80"/>
+                                <rect key="frame" x="119" y="317" width="345" height="64"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" selectable="YES" id="AqX-N2-zO7">
                                     <font key="font" metaFont="system"/>
-                                    <string key="title">Sets the minimal number of frames per second the app aims to capture. The actual frame rate may be lower depending on system performance. In Automatic mode, the system dynamically adjusts the frame rate for optimal balance between smoothness and load.</string>
+                                    <string key="title">Sets the number of frames per second the app aims to capture. The actual frame rate may be lower depending on system performance. In automatic mode, the system uses the maximum supported frame rate.</string>
                                     <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
                             <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="25x-gG-MS1">
-                                <rect key="frame" x="119" y="265" width="192" height="20"/>
+                                <rect key="frame" x="119" y="272" width="192" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" minValue="2" maxValue="6" doubleValue="4" tickMarkPosition="above" numberOfTickMarks="5" allowsTickMarkValuesOnly="YES" sliderType="linear" id="MXi-CO-Lgp" customClass="TrackingSliderCell" customModule="RetroVisor" customModuleProvider="target"/>
+                                <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" minValue="3" maxValue="8" doubleValue="3" tickMarkPosition="above" numberOfTickMarks="6" allowsTickMarkValuesOnly="YES" sliderType="linear" id="MXi-CO-Lgp" customClass="TrackingSliderCell" customModule="RetroVisor" customModuleProvider="target"/>
                                 <connections>
                                     <action selector="queueSliderAction:" target="bLc-tn-zPG" id="7Ut-HX-HWV"/>
                                 </connections>

@@ -174,10 +174,8 @@ class Streamer: NSObject, SCStreamDelegate
             config.height = Int(rect.height) * NSScreen.scaleFactor
             config.pixelFormat = kCVPixelFormatType_32BGRA
             config.colorSpaceName = CGColorSpace.sRGB
-            config.minimumFrameInterval = CMTime(value: 1, timescale: 60)
             config.queueDepth = settings.queueDepth
-
-            print("depth: \(config.queueDepth)")
+            if let interval = settings.frameInterval { config.minimumFrameInterval = interval }
 
             // Create the stream
             stream = SCStream(filter: filter!, configuration: config, delegate: self)

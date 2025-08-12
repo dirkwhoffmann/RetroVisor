@@ -48,7 +48,7 @@ class GeneralPreferencesViewController: NSViewController {
 
         cell.onDragEnd = { [weak self] in
 
-            // This function is fired when the user stops operating the slider
+            // Fired when the user stops operating the slider
             guard let self = self else { return }
             print("Drag ended")
             if queueSlider.integerValue != streamer?.settings.queueDepth {
@@ -65,16 +65,21 @@ class GeneralPreferencesViewController: NSViewController {
 
         guard let settings = streamer?.settings else { return }
 
+        // Frame rate
         if !fpsButton.selectItem(withTag: settings.fpsMode.rawValue) {
             fatalError()
         }
         fpsField.integerValue = settings.fps
-        fpsHelp.stringValue = settings.fpsMode.help
+        fpsField.isHidden = settings.fpsMode == .automatic
+
+        // Queue depth
         queueSlider.integerValue = settings.queueDepth
         queueLabel.stringValue = "\(queueSlider.intValue) frames"
         if !captureModeButton.selectItem(withTag: settings.captureMode.rawValue) {
             fatalError()
         }
+
+        // Capture mode
         captureModeHelp.stringValue = settings.captureMode.help
     }
 
@@ -91,22 +96,17 @@ class GeneralPreferencesViewController: NSViewController {
 
     @IBAction func fpsValueAction(_ sender: NSTextField) {
 
-        streamer?.settings.fps = sender.integerValue
+        if streamer?.settings.fps != sender.integerValue {
+
+            streamer?.settings.fps = sender.integerValue
+            streamer?.relaunch()
+        }
         refresh()
     }
 
     @IBAction func queueSliderAction(_ sender: NSSlider) {
 
         queueLabel.stringValue = "\(queueSlider.intValue) frames"
-        /*
-        if sender.integerValue != streamer?.settings.queueDepth {
-
-            print("")
-            streamer?.settings.queueDepth = sender.integerValue
-            streamer?.relaunch()
-        }
-        refresh()
-        */
     }
 
     @IBAction func captureModeAction(_ sender: NSPopUpButton) {
