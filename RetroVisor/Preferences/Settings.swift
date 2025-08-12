@@ -21,18 +21,12 @@ struct StreamerSettings {
         var help: String {
 
             switch self {
+
             case .entire: return
-                "The streamer captures the entire screen but renders only a portion of the " +
-                "texture. This approach is more resource-intensive but allows for smooth " +
-                "real-time updates during window drag and resize operations. Recommended " +
-                "for modern systems."
+                "The streamer captures the entire screen but renders only a portion of the texture. This approach is more resource-intensive but allows for smooth real-time updates during window drag and resize operations. Recommended for modern systems."
 
             case .cutout: return
-                "The streamer captures only a portion of the screen and always renders the" +
-                "full texture. This mode is more efficient, as ScreenCaptureKit streams " +
-                "only the required area. However, moving or resizing the effect window " +
-                "requires restarting the stream, resulting in less fluid animations " +
-                "compared to responsive mode."
+                "The streamer captures only a portion of the screen and always renders the full texture. This mode is more efficient, as ScreenCaptureKit streams only the required area. However, moving or resizing the effect window requires restarting the stream, resulting in less fluid animations compared to responsive mode."
             }
         }
     }
@@ -165,8 +159,7 @@ struct RecorderSettings {
     var videoType: VideoType
     var codec: VideoCodec
     var size: Shadowed<NSSize>
-    var quality: Shadowed<CGFloat>  // 0.0 = lowest, 1.0 = highest
-    var frameRate: Shadowed<Int>
+    var quality: Shadowed<CGFloat>
     var bitRate: Shadowed<Int>
 
     var audioFormat: AudioFormat
@@ -192,7 +185,6 @@ struct RecorderSettings {
                     codec: .h264,
                     size: Shadowed(.zero, shadowed: true),
                     quality: Shadowed(0.9, shadowed: true),
-                    frameRate: Shadowed(60, shadowed: true),
                     bitRate: Shadowed(6_000_000, shadowed: true),
                     audioFormat: .mpeg4AAC,
                     audioChannels: 2,
@@ -205,7 +197,6 @@ struct RecorderSettings {
                     codec: .h264,
                     size: Shadowed(NSSize(width: 1920, height: 1080)),
                     quality: Shadowed(0.9),
-                    frameRate: Shadowed(60),
                     bitRate: Shadowed(8_000_000),
                     audioFormat: .mpeg4AAC,
                     audioChannels: 2,
@@ -218,7 +209,6 @@ struct RecorderSettings {
                     codec: .h264,
                     size: Shadowed(NSSize(width: 3840, height: 2160)),
                     quality: Shadowed( 0.95),
-                    frameRate: Shadowed(60),
                     bitRate: Shadowed(35_000_000),
                     audioFormat: .mpeg4AAC,
                     audioChannels: 2,
@@ -231,7 +221,6 @@ struct RecorderSettings {
                     codec: .proRes422,
                     size: Shadowed(NSSize(width: 1920, height: 1080)),
                     quality: Shadowed(1.0),
-                    frameRate: Shadowed(60),
                     bitRate: Shadowed(35_000_000),
                     audioFormat: .linearPCM,
                     audioChannels: 2,
@@ -244,7 +233,6 @@ struct RecorderSettings {
                     codec: .h264,
                     size: Shadowed(NSSize(width: 1280, height: 720)),
                     quality: Shadowed(0.7),
-                    frameRate: Shadowed(30),
                     bitRate: Shadowed(2_000_000),
                     audioFormat: .mpeg4AAC,
                     audioChannels: 2,

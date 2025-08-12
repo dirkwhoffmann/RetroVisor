@@ -19,8 +19,6 @@ class RecorderPreferencesViewController: NSViewController {
     // Video settings
     @IBOutlet weak var videoTypeButton: NSPopUpButton!
     @IBOutlet weak var videoCodecButton: NSPopUpButton!
-    @IBOutlet weak var videoFrameRateButton: NSPopUpButton!
-    @IBOutlet weak var videoFrameRateField: NSTextField!
     @IBOutlet weak var videoResultionButton: NSPopUpButton!
     @IBOutlet weak var videoWidthField: NSTextField!
     @IBOutlet weak var videoHeightField: NSTextField!
@@ -61,9 +59,6 @@ class RecorderPreferencesViewController: NSViewController {
         if !videoCodecButton.selectItem(withTag: settings.codec.rawValue) {
             fatalError()
         }
-        if !videoFrameRateButton.selectItem(withTag: settings.frameRate.shadowed ? 0 : 1) {
-            fatalError()
-        }
         if !videoResultionButton.selectItem(withTag: settings.size.shadowed ? 0 : 1) {
             fatalError()
         }
@@ -73,9 +68,6 @@ class RecorderPreferencesViewController: NSViewController {
         if !videoQualityButton.selectItem(withTag: settings.quality.shadowed ? 0 : 1) {
             fatalError()
         }
-
-        videoFrameRateField.integerValue = Int(settings.frameRate.rawValue)
-        videoFrameRateField.isHidden = settings.frameRate.shadowed
 
         videoWidthField.integerValue = Int(settings.size.rawValue.width)
         videoWidthField.isHidden = settings.size.shadowed
@@ -136,18 +128,6 @@ class RecorderPreferencesViewController: NSViewController {
 
         let codec = RecorderSettings.VideoCodec(rawValue: sender.selectedTag())!
         recorder?.settings.codec = codec
-        refresh()
-    }
-
-    @IBAction func videoFrameRateAction(_ sender: NSPopUpButton) {
-
-        recorder?.settings.frameRate.shadowed = sender.selectedTag() == 0
-        refresh()
-    }
-
-    @IBAction func videoFrameRateValueAction(_ sender: NSTextField) {
-
-        recorder?.settings.frameRate.rawValue = sender.integerValue
         refresh()
     }
 
