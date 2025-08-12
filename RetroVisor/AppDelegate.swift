@@ -76,8 +76,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         print("No permissions")
         let sb = NSStoryboard(name: "Main", bundle: nil)
         if let wc = sb.instantiateController(withIdentifier: "PermissionWindow") as? NSWindowController {
-            wc.window?.setContentSize(NSSize(width: 800, height: 600))
-            wc.window?.center()
             wc.showWindow(self)
         }
     }
