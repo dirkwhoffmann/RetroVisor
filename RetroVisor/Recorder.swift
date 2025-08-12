@@ -203,21 +203,22 @@ struct RecorderSettings {
 
     func makeVideoSettings() -> [String: Any] {
 
+        var compressionProps: [String: Any] = [:]
+
+        if let quality = quality.value {
+            compressionProps[AVVideoQualityKey] = quality
+        }
+        if let bitRate = bitRate.value {
+            compressionProps[AVVideoAverageBitRateKey] = bitRate
+        }
         var settings: [String: Any] = [
             AVVideoCodecKey: codec.avCodec,
-            AVVideoWidthKey: Int(size.value?.width ?? 0),
-            AVVideoHeightKey: Int(size.value?.height ?? 0),
-            AVVideoCompressionPropertiesKey: [
-                AVVideoQualityKey: quality
-            ]
+            AVVideoCompressionPropertiesKey: compressionProps
         ]
-
-        if let bitRate = bitRate.value {
-            var compressionProps = settings[AVVideoCompressionPropertiesKey] as! [String: Any]
-            compressionProps[AVVideoAverageBitRateKey] = bitRate
-            settings[AVVideoCompressionPropertiesKey] = compressionProps
+        if let resolution = size.value {
+            settings[AVVideoWidthKey] = resolution.width
+            settings[AVVideoHeightKey] = resolution.height
         }
-
         return settings
     }
 
@@ -246,7 +247,10 @@ class Recorder {
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
 
     // Recorder settings
-    var settings = RecorderSettings.Preset.youtube1080p.settings
+    var settings = RecorderSettings.Preset.systemDefault.settings
+
+    // The current recording state
+    var isRecording: Bool { startTime != nil }
 
     // AVWriter
     private var assetWriter: AVAssetWriter?
@@ -257,20 +261,22 @@ class Recorder {
     private(set) var recordingRect: NSRect?
     var currentTime: CMTime?
 
-    var isRecording: Bool { recordingRect != nil }
-
     // Event receiver
     var delegate: RecorderDelegate?
 
+    /*
     func startIfNeeded(firstTimestamp: CMTime) {
 
-        if startTime == nil {
+        print("startIfNeeded \(assetWriter!.status)")
+        if assetWriter?.status != .writing {
+//         if startTime == nil {
 
-            startTime = firstTimestamp
+            // startTime = firstTimestamp
             assetWriter!.startWriting()
             assetWriter!.startSession(atSourceTime: firstTimestamp)
         }
     }
+     */
 
     func startRecording(width: Int, height: Int) {
 
@@ -294,14 +300,23 @@ class Recorder {
         }
 
         do {
-            assetWriter = try AVAssetWriter(outputURL: url, fileType: .mov)
+            assetWriter = try AVAssetWriter(outputURL: url,
+                                            fileType: settings.videoType.avFileType)
         } catch {
             print("Can't start recording: \(error)")
             return
         }
 
-        let videoSettings = settings.makeVideoSettings()
+        // Create settings
+        var videoSettings = settings.makeVideoSettings()
         let audioSettings = settings.makeAudioSettings()
+
+        // Add resolution parameters if not yet set
+        if videoSettings[AVVideoWidthKey] == nil { videoSettings[AVVideoWidthKey] = width }
+        if videoSettings[AVVideoHeightKey] == nil { videoSettings[AVVideoHeightKey] = height }
+
+        print("VideoSettings:")
+        print("\(videoSettings)")
 
         videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
         videoInput!.expectsMediaDataInRealTime = true
@@ -310,6 +325,11 @@ class Recorder {
             fatalError("Can't add input to asset writer")
         }
         assetWriter!.add(videoInput!)
+
+        if let audioSettings = audioSettings {
+            print("AudioSettings:")
+            print("\(audioSettings)")
+        }
 
         audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioSettings)
         audioInput!.expectsMediaDataInRealTime = true
@@ -320,6 +340,7 @@ class Recorder {
             print("Cannot add audio input")
         }
 
+        print("Creating pixel buffer adaptor")
         pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(
             assetWriterInput: videoInput!,
             sourcePixelBufferAttributes: [
@@ -330,10 +351,15 @@ class Recorder {
             ]
         )
 
+        startTime = CMTime()
+
+        print("Informing the delegate")
         delegate?.recorderDidStart()
     }
 
     func stopRecording(completion: @escaping () -> Void) {
+
+        print("stopRecording")
 
         if !isRecording { return }
 
@@ -344,6 +370,8 @@ class Recorder {
         }
 
         recordingRect = nil
+        startTime = nil
+
         delegate?.recorderDidStop()
     }
 
@@ -351,18 +379,22 @@ class Recorder {
     func appendVideo(texture: MTLTexture) {
 
         if !isRecording { return }
-        guard let time = currentTime else { return }
+        guard let timestamp = currentTime else { return }
+        guard let assetWriter = assetWriter else { return }
 
         let texW = CGFloat(texture.width)
         let texH = CGFloat(texture.height)
 
-        // Stop recording, if the texture size did change
+        // Stop recording if the texture size did change
         if recordingRect!.width != texW || recordingRect!.height != texH {
             stopRecording { }
         }
 
-        // print("Recording frame")
-        startIfNeeded(firstTimestamp: time)
+        // Start the writer if this is the first frame
+        if assetWriter.status != .writing {
+            assetWriter.startWriting()
+            assetWriter.startSession(atSourceTime: timestamp)
+        }
 
         guard videoInput!.isReadyForMoreMediaData else { return }
 
@@ -379,7 +411,7 @@ class Recorder {
                          mipmapLevel: 0)
         CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 
-        pixelBufferAdaptor!.append(pixelBuffer, withPresentationTime: time)
+        pixelBufferAdaptor!.append(pixelBuffer, withPresentationTime: timestamp)
     }
 
     func appendAudio(buffer: CMSampleBuffer) {

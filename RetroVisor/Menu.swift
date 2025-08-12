@@ -167,10 +167,11 @@ extension AppDelegate : NSMenuItemValidation {
 
         } else {
 
+            // let type = recorder.settings.videoType.utType
             let panel = NSSavePanel()
             panel.title = "Save Recording"
-            panel.allowedContentTypes = [UTType.quickTimeMovie, UTType.mpeg4Movie]
-            panel.nameFieldStringValue = "Recording.mov" // default filename
+            panel.allowedContentTypes = [recorder.settings.videoType.utType]
+            panel.nameFieldStringValue = "Recording"
 
             if panel.runModal() == .OK {
                 if let url = panel.url {

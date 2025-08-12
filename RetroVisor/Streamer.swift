@@ -141,7 +141,7 @@ class Streamer: NSObject, SCStreamDelegate
 
     func launch() async
     {
-        print("Launching the screen streamer...")
+        print("Launching streamer...")
 
         do {
 
