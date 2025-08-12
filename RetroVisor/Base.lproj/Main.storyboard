@@ -1378,7 +1378,7 @@ Gw
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d8U-Rd-KkQ">
-                                <rect key="frame" x="25" y="166" width="99" height="16"/>
+                                <rect key="frame" x="25" y="188" width="99" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Audio Settings" id="k1g-PK-TIY">
                                     <font key="font" metaFont="systemBold"/>
@@ -1439,7 +1439,7 @@ Gw
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jzJ-Ad-pfb">
-                                <rect key="frame" x="37" y="245" width="95" height="16"/>
+                                <rect key="frame" x="37" y="271" width="95" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Bit Rate:" id="CKg-ih-E96">
                                     <font key="font" metaFont="system"/>
@@ -1447,17 +1447,8 @@ Gw
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tk6-wy-rpP">
-                                <rect key="frame" x="228" y="215" width="37" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="Bit" id="E4h-5j-n87">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="48Q-fa-UHy">
-                                <rect key="frame" x="134" y="237" width="195" height="25"/>
+                                <rect key="frame" x="134" y="263" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="qEq-Ot-kRJ" id="ru8-Yv-wKb">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -1471,6 +1462,23 @@ Gw
                                 </popUpButtonCell>
                                 <connections>
                                     <action selector="videoBitRateAction:" target="rai-Kw-7eh" id="Hih-LY-i0P"/>
+                                </connections>
+                            </popUpButton>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="u6z-fF-wYm">
+                                <rect key="frame" x="135" y="233" width="195" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="aRL-ZQ-5he" id="sqQ-PA-f1u">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="message"/>
+                                    <menu key="menu" id="Zf7-np-8Gl">
+                                        <items>
+                                            <menuItem title="Automatic" state="on" id="aRL-ZQ-5he"/>
+                                            <menuItem title="Custom" tag="1" id="T2l-LX-aoc"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="videoQualityAction:" target="rai-Kw-7eh" id="lle-Cm-5cj"/>
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="H6I-4f-WBH">
@@ -1493,10 +1501,7 @@ Gw
                                             <menuItem title="Automatic" id="aaz-YT-3et">
                                                 <modifierMask key="keyEquivalentModifierMask"/>
                                             </menuItem>
-                                            <menuItem title="50 Hz" tag="50" id="vza-Xx-0q1">
-                                                <modifierMask key="keyEquivalentModifierMask"/>
-                                            </menuItem>
-                                            <menuItem title="60 Hz" tag="60" id="uYD-aO-3c9">
+                                            <menuItem title="Custom" tag="1" id="vza-Xx-0q1">
                                                 <modifierMask key="keyEquivalentModifierMask"/>
                                             </menuItem>
                                         </items>
@@ -1507,7 +1512,7 @@ Gw
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WWU-FE-0Bc">
-                                <rect key="frame" x="61" y="300" width="72" height="16"/>
+                                <rect key="frame" x="61" y="299" width="72" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Resolution:" id="6pp-DL-cfg">
                                     <font key="font" metaFont="system"/>
@@ -1516,7 +1521,7 @@ Gw
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FAi-fP-wfv">
-                                <rect key="frame" x="213" y="273" width="11" height="16"/>
+                                <rect key="frame" x="431" y="301" width="11" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="x" id="YjO-SC-nNU">
                                     <font key="font" metaFont="system"/>
@@ -1525,17 +1530,15 @@ Gw
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tud-0Z-Kxk">
-                                <rect key="frame" x="135" y="294" width="195" height="25"/>
+                                <rect key="frame" x="135" y="293" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="Custom" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="0Bc-tX-aUR" id="8hD-g9-6RY">
+                                <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="0Bc-tX-aUR" id="8hD-g9-6RY">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
                                     <menu key="menu" id="Onp-2O-Bht">
                                         <items>
-                                            <menuItem title="Custom" id="0Bc-tX-aUR"/>
-                                            <menuItem title="HD" tag="1" id="SaI-t4-bQ6"/>
-                                            <menuItem title="Full HD" tag="2" id="juA-hp-23n"/>
-                                            <menuItem title="Ultra HD" tag="3" id="7no-4A-Ecb"/>
+                                            <menuItem title="Automatic" id="0Bc-tX-aUR"/>
+                                            <menuItem title="Custom" tag="1" id="gwB-rm-Jj1"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
@@ -1544,7 +1547,7 @@ Gw
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yxo-aU-EV7">
-                                <rect key="frame" x="37" y="107" width="95" height="16"/>
+                                <rect key="frame" x="37" y="129" width="95" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Sample Rate:" id="MiN-4c-lMr">
                                     <font key="font" metaFont="system"/>
@@ -1553,7 +1556,7 @@ Gw
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DC5-Yg-YZ6">
-                                <rect key="frame" x="135" y="101" width="195" height="25"/>
+                                <rect key="frame" x="135" y="123" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="NYB-By-5mn" id="ZcI-b4-gJb">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -1561,8 +1564,7 @@ Gw
                                     <menu key="menu" id="zMr-W3-HrS">
                                         <items>
                                             <menuItem title="Automatic" id="NYB-By-5mn"/>
-                                            <menuItem title="44100 Hz" tag="44100" id="bGK-T3-2Q2"/>
-                                            <menuItem title="48000 Hz" tag="48000" id="QJn-7f-0DI"/>
+                                            <menuItem title="Custom" tag="1" id="bGK-T3-2Q2"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
@@ -1571,7 +1573,7 @@ Gw
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Rg9-7R-jfV">
-                                <rect key="frame" x="37" y="137" width="95" height="16"/>
+                                <rect key="frame" x="37" y="159" width="95" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Audio Format:" id="xv5-mH-z0n">
                                     <font key="font" metaFont="system"/>
@@ -1580,16 +1582,16 @@ Gw
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tow-dR-adp">
-                                <rect key="frame" x="135" y="131" width="195" height="25"/>
+                                <rect key="frame" x="135" y="153" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="No Audio" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" tag="-1" imageScaling="proportionallyDown" inset="2" selectedItem="hT3-Ld-xwy" id="zZs-Bp-CFQ">
+                                <popUpButtonCell key="cell" type="push" title="No Audio" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="hT3-Ld-xwy" id="zZs-Bp-CFQ">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
                                     <menu key="menu" id="MwF-69-QV5">
                                         <items>
-                                            <menuItem title="No Audio" tag="-1" id="hT3-Ld-xwy"/>
-                                            <menuItem title="MPEG4 AAC" id="qZg-FN-ydq"/>
-                                            <menuItem title="Linear PCM" tag="1" id="PEx-bm-evv"/>
+                                            <menuItem title="No Audio" id="hT3-Ld-xwy"/>
+                                            <menuItem title="MPEG4 AAC" tag="1" id="qZg-FN-ydq"/>
+                                            <menuItem title="Linear PCM" tag="2" id="PEx-bm-evv"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
@@ -1598,7 +1600,7 @@ Gw
                                 </connections>
                             </popUpButton>
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="faO-wW-dfX">
-                                <rect key="frame" x="134" y="71" width="195" height="25"/>
+                                <rect key="frame" x="134" y="93" width="195" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="0PA-SK-Fvb" id="5QR-uv-ep2">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -1614,32 +1616,8 @@ Gw
                                     <action selector="audioBitRateAction:" target="rai-Kw-7eh" id="QL7-zl-rzX"/>
                                 </connections>
                             </popUpButton>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="B6J-7x-FMS">
-                                <rect key="frame" x="138" y="269" width="69" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="C8J-ZT-bxU">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                                <connections>
-                                    <action selector="videoWidthAction:" target="rai-Kw-7eh" id="GED-Wk-7iu"/>
-                                </connections>
-                            </textField>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PIq-xL-TEJ">
-                                <rect key="frame" x="230" y="269" width="72" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="7or-eW-ras">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                                <connections>
-                                    <action selector="videoHeightAction:" target="rai-Kw-7eh" id="dT1-oc-4G2"/>
-                                </connections>
-                            </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Jiu-Ry-zeY">
-                                <rect key="frame" x="37" y="79" width="95" height="16"/>
+                                <rect key="frame" x="37" y="101" width="95" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Bit Rate:" id="elv-Lk-0SP">
                                     <font key="font" metaFont="system"/>
@@ -1647,54 +1625,129 @@ Gw
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YSC-47-5fW">
-                                <rect key="frame" x="137" y="212" width="85" height="21"/>
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PDN-21-Uya">
+                                <rect key="frame" x="343" y="297" width="82" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="OFz-1p-WLf">
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="rYb-es-99T">
+                                    <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" formatWidth="-1" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="aQn-lL-seT"/>
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                                 <connections>
-                                    <action selector="videoBpsAction:" target="rai-Kw-7eh" id="NAc-H2-SVD"/>
+                                    <action selector="videoWidthAction:" target="rai-Kw-7eh" id="gya-28-Gv1"/>
                                 </connections>
                             </textField>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lai-NN-vXA">
-                                <rect key="frame" x="137" y="46" width="85" height="21"/>
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oVt-2A-eM3">
+                                <rect key="frame" x="448" y="297" width="82" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="79r-Km-B9D">
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="ZNx-2M-ZeF">
+                                    <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" formatWidth="-1" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="eLr-aj-7xS"/>
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                                 <connections>
-                                    <action selector="audioBpsAction:" target="rai-Kw-7eh" id="NJq-Md-Yb5"/>
+                                    <action selector="videoHeightAction:" target="rai-Kw-7eh" id="iDy-eH-ty7"/>
                                 </connections>
                             </textField>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="amT-kt-vWh">
-                                <rect key="frame" x="228" y="49" width="37" height="16"/>
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="so2-tJ-UQx">
+                                <rect key="frame" x="343" y="266" width="82" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="Bit" id="PaO-hG-N18">
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="O1H-4H-Aty">
+                                    <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" formatWidth="-1" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="JZ1-WQ-Ucp"/>
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                                <connections>
+                                    <action selector="videoBitrateValueAction:" target="rai-Kw-7eh" id="Bo7-6d-AQe"/>
+                                </connections>
+                            </textField>
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WDI-eA-8mP">
+                                <rect key="frame" x="343" y="328" width="82" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="6,000,000" drawsBackground="YES" id="Cm8-at-qWG">
+                                    <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" formatWidth="-1" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="LA2-mG-tBv"/>
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                                <connections>
+                                    <action selector="videoFrameRateValueAction:" target="rai-Kw-7eh" id="BTH-lV-Taf"/>
+                                </connections>
+                            </textField>
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="29a-Yq-k1Z">
+                                <rect key="frame" x="343" y="96" width="82" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="VqG-J1-keQ">
+                                    <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" formatWidth="-1" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="Kvs-cT-O8C"/>
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                                <connections>
+                                    <action selector="audioBitRateValueAction:" target="rai-Kw-7eh" id="upq-mm-DHN"/>
+                                </connections>
+                            </textField>
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="74C-xX-Y0Y">
+                                <rect key="frame" x="343" y="127" width="82" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="Hba-5U-Tfn">
+                                    <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" formatWidth="-1" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="DhM-Hl-xpT"/>
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                                <connections>
+                                    <action selector="audioSampleRateValueAction:" target="rai-Kw-7eh" id="Tf0-SG-rNc"/>
+                                </connections>
+                            </textField>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="smE-pa-ola">
+                                <rect key="frame" x="37" y="240" width="95" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Quality:" id="9qm-5c-xms">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="S4X-ab-RL9">
+                                <rect key="frame" x="343" y="236" width="41" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="fZe-ot-wiz">
+                                    <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" formatWidth="-1" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="zLo-l0-UAB"/>
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                                <connections>
+                                    <action selector="videoQualityValueAction:" target="rai-Kw-7eh" id="khy-JM-Yfq"/>
+                                </connections>
+                            </textField>
                         </subviews>
                     </view>
                     <connections>
                         <outlet property="audioBitRateButton" destination="faO-wW-dfX" id="Gre-DJ-Z0S"/>
-                        <outlet property="audioBitRateField" destination="lai-NN-vXA" id="x2X-ww-Z6E"/>
+                        <outlet property="audioBitRateField" destination="29a-Yq-k1Z" id="3Vb-zI-b2o"/>
+                        <outlet property="audioBitRateLabel" destination="Jiu-Ry-zeY" id="mQg-4X-LRx"/>
                         <outlet property="audioFormatButton" destination="Tow-dR-adp" id="Kim-hE-IUW"/>
+                        <outlet property="audioFormatLabel" destination="Rg9-7R-jfV" id="cOU-7N-uEN"/>
                         <outlet property="audioSampleRateButton" destination="DC5-Yg-YZ6" id="Wzi-tz-I9h"/>
+                        <outlet property="audioSampleRateField" destination="74C-xX-Y0Y" id="H59-Nm-lWS"/>
+                        <outlet property="audioSampleRateLabel" destination="yxo-aU-EV7" id="aAc-GZ-Yl9"/>
                         <outlet property="videoBitRateButton" destination="48Q-fa-UHy" id="Hri-Zf-pnT"/>
-                        <outlet property="videoBitRateField" destination="YSC-47-5fW" id="IIx-qN-LIg"/>
+                        <outlet property="videoBitRateField" destination="so2-tJ-UQx" id="t73-uJ-AzK"/>
                         <outlet property="videoCodecButton" destination="QtS-vp-LHu" id="OJc-G5-8TK"/>
                         <outlet property="videoFrameRateButton" destination="cnr-2X-Rc7" id="TH7-kN-ZbQ"/>
-                        <outlet property="videoHeightField" destination="PIq-xL-TEJ" id="kRb-o0-uBK"/>
+                        <outlet property="videoFrameRateField" destination="WDI-eA-8mP" id="D1B-CY-YSY"/>
+                        <outlet property="videoHeightField" destination="oVt-2A-eM3" id="npx-1d-nTd"/>
+                        <outlet property="videoQualityButton" destination="u6z-fF-wYm" id="d6g-a4-fsF"/>
+                        <outlet property="videoQualityField" destination="S4X-ab-RL9" id="XQi-10-8j1"/>
                         <outlet property="videoResultionButton" destination="Tud-0Z-Kxk" id="zEu-0q-lNt"/>
+                        <outlet property="videoSizeLabel" destination="FAi-fP-wfv" id="YA0-4i-8Au"/>
                         <outlet property="videoTypeButton" destination="ODO-SV-pvG" id="UEC-4a-2Gl"/>
-                        <outlet property="videoWidthField" destination="B6J-7x-FMS" id="Zuc-fV-EDA"/>
+                        <outlet property="videoWidthField" destination="PDN-21-Uya" id="eds-pY-ww1"/>
                     </connections>
                 </viewController>
                 <customObject id="wES-pW-2mT" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

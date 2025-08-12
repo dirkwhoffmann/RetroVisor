@@ -79,6 +79,15 @@ struct RecorderSettings {
             }
         }
 
+        var description: String {
+            switch self {
+            case .custom: return "Custom"
+            case .hd:     return "HD"
+            case .fhd:    return "Full HD"
+            case .uhd:    return "Ultra HD"
+            }
+        }
+
         static func from(size: NSSize) -> VideoResolution {
             return Self.allCases.first(where: { $0.size == size }) ?? .custom
         }
@@ -86,11 +95,13 @@ struct RecorderSettings {
 
     enum AudioFormat: Int {
 
+        case none = 0
         case mpeg4AAC = 1
         case linearPCM = 2
 
         var audioFormatID: AudioFormatID? {
             switch self {
+            case .none:      return nil
             case .mpeg4AAC:  return kAudioFormatMPEG4AAC
             case .linearPCM: return kAudioFormatLinearPCM
             }
@@ -99,19 +110,15 @@ struct RecorderSettings {
 
     var videoType: VideoType
     var codec: VideoCodec
-    var width: Int
-    var height: Int
-    var quality: CGFloat  // 0.0 = lowest, 1.0 = highest
-    var pixelAspectRatioH: Int
-    var pixelAspectRatioV: Int
-    var frameRate: Int?
-    var bitRate: Int? 
+    var size: Shadowed<NSSize>
+    var quality: Shadowed<CGFloat>  // 0.0 = lowest, 1.0 = highest
+    var frameRate: Shadowed<Int>
+    var bitRate: Shadowed<Int>
 
-    var includeAudio: Bool
-    var audioFormat: AudioFormat?
+    var audioFormat: AudioFormat
     var audioChannels: Int
-    var audioSampleRate: Int?
-    var audioBitRate: Int?
+    var audioSampleRate: Shadowed<Int>
+    var audioBitRate: Shadowed<Int>
 
     enum Preset {
 
@@ -127,69 +134,53 @@ struct RecorderSettings {
                 return RecorderSettings(
                     videoType: .mp4,
                     codec: .h264,
-                    width: 1920,
-                    height: 1080,
-                    quality: 0.9,
-                    pixelAspectRatioH: 1,
-                    pixelAspectRatioV: 1,
-                    frameRate: 60,
-                    bitRate: 8_000_000,
-                    includeAudio: true,
+                    size: Shadowed(NSSize(width: 1920, height: 1080)),
+                    quality: Shadowed(0.9),
+                    frameRate: Shadowed(60),
+                    bitRate: Shadowed(8_000_000),
                     audioFormat: .mpeg4AAC,
                     audioChannels: 2,
-                    audioSampleRate: 44100,
-                    audioBitRate: 192_000
+                    audioSampleRate: Shadowed(44100),
+                    audioBitRate: Shadowed(192_000)
                 )
             case .youtube4k:
                 return RecorderSettings(
                     videoType: .mp4,
                     codec: .h264,
-                    width: 3840,
-                    height: 2160,
-                    quality: 0.95,
-                    pixelAspectRatioH: 1,
-                    pixelAspectRatioV: 1,
-                    frameRate: 60,
-                    bitRate: 35_000_000,
-                    includeAudio: true,
+                    size: Shadowed(NSSize(width: 3840, height: 2160)),
+                    quality: Shadowed( 0.95),
+                    frameRate: Shadowed(60),
+                    bitRate: Shadowed(35_000_000),
                     audioFormat: .mpeg4AAC,
                     audioChannels: 2,
-                    audioSampleRate: 48000,
-                    audioBitRate: 256_000
+                    audioSampleRate: Shadowed(48000),
+                    audioBitRate: Shadowed(256_000)
                 )
             case .proResHQ:
                 return RecorderSettings(
                     videoType: .mov,
                     codec: .proRes422,
-                    width: 1920,
-                    height: 1080,
-                    quality: 1.0,
-                    pixelAspectRatioH: 1,
-                    pixelAspectRatioV: 1,
-                    frameRate: 60,
-                    bitRate: nil,
-                    includeAudio: true,
+                    size: Shadowed(NSSize(width: 1920, height: 1080)),
+                    quality: Shadowed(1.0),
+                    frameRate: Shadowed(60),
+                    bitRate: Shadowed(35_000_000),
                     audioFormat: .linearPCM,
                     audioChannels: 2,
-                    audioSampleRate: 48000,
-                    audioBitRate: 0
+                    audioSampleRate: Shadowed(48000),
+                    audioBitRate: Shadowed(256_000)
                 )
             case .smallFile:
                 return RecorderSettings(
                     videoType: .mp4,
                     codec: .h264,
-                    width: 1280,
-                    height: 720,
-                    quality: 0.7,
-                    pixelAspectRatioH: 1,
-                    pixelAspectRatioV: 1,
-                    frameRate: 30,
-                    bitRate: 2_000_000,
-                    includeAudio: true,
+                    size: Shadowed(NSSize(width: 1280, height: 720)),
+                    quality: Shadowed(0.7),
+                    frameRate: Shadowed(30),
+                    bitRate: Shadowed(2_000_000),
                     audioFormat: .mpeg4AAC,
                     audioChannels: 2,
-                    audioSampleRate: 44100,
-                    audioBitRate: 128_000
+                    audioSampleRate: Shadowed(44100),
+                    audioBitRate: Shadowed(128_000)
                 )
             }
         }
@@ -199,18 +190,14 @@ struct RecorderSettings {
 
         var settings: [String: Any] = [
             AVVideoCodecKey: codec.avCodec,
-            AVVideoWidthKey: width,
-            AVVideoHeightKey: height,
+            AVVideoWidthKey: Int(size.value?.width ?? 0),
+            AVVideoHeightKey: Int(size.value?.height ?? 0),
             AVVideoCompressionPropertiesKey: [
                 AVVideoQualityKey: quality
-            ],
-            AVVideoPixelAspectRatioKey: [
-                AVVideoPixelAspectRatioHorizontalSpacingKey: pixelAspectRatioH,
-                AVVideoPixelAspectRatioVerticalSpacingKey: pixelAspectRatioV
             ]
         ]
 
-        if let bitRate = bitRate {
+        if let bitRate = bitRate.value {
             var compressionProps = settings[AVVideoCompressionPropertiesKey] as! [String: Any]
             compressionProps[AVVideoAverageBitRateKey] = bitRate
             settings[AVVideoCompressionPropertiesKey] = compressionProps
@@ -221,18 +208,16 @@ struct RecorderSettings {
 
     func makeAudioSettings() -> [String: Any]? {
 
-        guard includeAudio else { return nil }
+        if audioFormat == .none { return nil }
 
         var audioSettings: [String: Any] = [
-            AVNumberOfChannelsKey: audioChannels
+            AVNumberOfChannelsKey: audioChannels,
+            AVFormatIDKey: audioFormat.audioFormatID!
         ]
-        if let audioFormat = audioFormat {
-            audioSettings[AVFormatIDKey] = audioFormat.audioFormatID
-        }
-        if let bitRate = audioBitRate {
+        if let bitRate = audioBitRate.value {
             audioSettings[AVEncoderBitRateKey] = bitRate
         }
-        if let audioSampleRate = audioSampleRate {
+        if let audioSampleRate = audioSampleRate.value {
             audioSettings[AVSampleRateKey] = audioSampleRate
         }
 

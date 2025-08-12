@@ -20,6 +20,7 @@
 		503FCC2B2E48F2E500EF49DA /* RecorderPreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC2A2E48F2D800EF49DA /* RecorderPreferencesViewController.swift */; };
 		503FCC2D2E48F5A300EF49DA /* Recorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC2C2E48F59F00EF49DA /* Recorder.swift */; };
 		503FCC312E49BBE800EF49DA /* EffectWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC302E49BBE200EF49DA /* EffectWindow.swift */; };
+		503FCC332E4B016400EF49DA /* Shadowed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC322E4B016000EF49DA /* Shadowed.swift */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* WindowController.swift */; };
@@ -49,6 +50,7 @@
 		503FCC2A2E48F2D800EF49DA /* RecorderPreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecorderPreferencesViewController.swift; sourceTree = "<group>"; };
 		503FCC2C2E48F59F00EF49DA /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
 		503FCC302E49BBE200EF49DA /* EffectWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectWindow.swift; sourceTree = "<group>"; };
+		503FCC322E4B016000EF49DA /* Shadowed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadowed.swift; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -82,6 +84,7 @@
 			children = (
 				50079E702E438139005BC5FD /* Extensions.swift */,
 				50BA965A2E3D4861006BA8DF /* Animated.swift */,
+				503FCC322E4B016000EF49DA /* Shadowed.swift */,
 				50BA96582E3C80F2006BA8DF /* TrackingWindow.swift */,
 			);
 			path = Utilities;
@@ -233,6 +236,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				503FCC332E4B016400EF49DA /* Shadowed.swift in Sources */,
 				50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */,
 				503FCC2B2E48F2E500EF49DA /* RecorderPreferencesViewController.swift in Sources */,
 				50292D962E471AAA0084CFE3 /* PermissionViewController.swift in Sources */,

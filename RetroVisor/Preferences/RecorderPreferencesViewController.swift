@@ -12,21 +12,31 @@ import Cocoa
 class RecorderPreferencesViewController: NSViewController {
 
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
+    var streamer: Streamer? { app.streamer }
     var recorder: Recorder? { app.recorder }
+    var metalView: MetalView? { app.windowController?.metalView }
 
     // Video settings
     @IBOutlet weak var videoTypeButton: NSPopUpButton!
     @IBOutlet weak var videoCodecButton: NSPopUpButton!
     @IBOutlet weak var videoFrameRateButton: NSPopUpButton!
+    @IBOutlet weak var videoFrameRateField: NSTextField!
     @IBOutlet weak var videoResultionButton: NSPopUpButton!
     @IBOutlet weak var videoWidthField: NSTextField!
     @IBOutlet weak var videoHeightField: NSTextField!
+    @IBOutlet weak var videoSizeLabel: NSTextField!
     @IBOutlet weak var videoBitRateButton: NSPopUpButton!
     @IBOutlet weak var videoBitRateField: NSTextField!
+    @IBOutlet weak var videoQualityButton: NSPopUpButton!
+    @IBOutlet weak var videoQualityField: NSTextField!
 
     // Audio settings
     @IBOutlet weak var audioFormatButton: NSPopUpButton!
+    @IBOutlet weak var audioFormatLabel: NSTextField!
+    @IBOutlet weak var audioSampleRateLabel: NSTextField!
     @IBOutlet weak var audioSampleRateButton: NSPopUpButton!
+    @IBOutlet weak var audioSampleRateField: NSTextField!
+    @IBOutlet weak var audioBitRateLabel: NSTextField!
     @IBOutlet weak var audioBitRateButton: NSPopUpButton!
     @IBOutlet weak var audioBitRateField: NSTextField!
 
@@ -37,7 +47,16 @@ class RecorderPreferencesViewController: NSViewController {
 
     func refresh() {
 
+        refreshVideo()
+        refreshAudio()
+    }
+
+    func refreshVideo() {
+
         guard let settings = recorder?.settings else { return }
+        print("")
+        print("Settings: \(settings)")
+        print("")
 
         if !videoTypeButton.selectItem(withTag: settings.videoType.rawValue) {
             fatalError()
@@ -45,32 +64,68 @@ class RecorderPreferencesViewController: NSViewController {
         if !videoCodecButton.selectItem(withTag: settings.codec.rawValue) {
             fatalError()
         }
-        if !videoFrameRateButton.selectItem(withTag: settings.frameRate ?? 0) {
+        if !videoFrameRateButton.selectItem(withTag: settings.frameRate.shadowed ? 0 : 1) {
             fatalError()
         }
-        let size = NSSize(width: settings.width, height: settings.height)
-        let resolution = RecorderSettings.VideoResolution.from(size: size)
-        if !videoResultionButton.selectItem(withTag: resolution.rawValue) {
+        if !videoResultionButton.selectItem(withTag: settings.size.shadowed ? 0 : 1) {
             fatalError()
         }
-        videoWidthField.integerValue = settings.width
-        videoHeightField.integerValue = settings.height
-        if !videoFrameRateButton.selectItem(withTag: settings.frameRate ?? 0) {
+        if !videoBitRateButton.selectItem(withTag: settings.bitRate.shadowed ? 0 : 1) {
             fatalError()
         }
-        videoBitRateButton.selectItem(withTag: settings.bitRate == nil ? 0 : 1)
-        videoBitRateField.integerValue = settings.bitRate ?? 0
-        videoBitRateField.isHidden = settings.bitRate == nil
+        if !videoQualityButton.selectItem(withTag: settings.quality.shadowed ? 0 : 1) {
+            fatalError()
+        }
 
-        if !audioFormatButton.selectItem(withTag: settings.audioFormat?.rawValue ?? -1) {
+        videoFrameRateField.integerValue = Int(settings.frameRate.rawValue)
+        videoFrameRateField.isHidden = settings.frameRate.shadowed
+
+        videoWidthField.integerValue = Int(settings.size.rawValue.width)
+        videoWidthField.isHidden = settings.size.shadowed
+        videoSizeLabel.isHidden = settings.size.shadowed
+
+        videoHeightField.integerValue = Int(settings.size.rawValue.height)
+        videoHeightField.isHidden = settings.size.shadowed
+
+        videoBitRateField.integerValue = Int(settings.bitRate.rawValue)
+        videoBitRateField.isHidden = settings.bitRate.shadowed
+
+        videoQualityField.integerValue = Int(settings.quality.rawValue)
+        videoQualityField.isHidden = settings.quality.shadowed
+
+        if let size = settings.size.value {
+            let resolution = RecorderSettings.VideoResolution.from(size: size)
+            videoResultionButton.item(at: 1)?.title = resolution.description
+        } else {
+            videoResultionButton.item(at: 1)?.title = "Custom"
+        }
+    }
+
+    func refreshAudio() {
+
+        guard let settings = recorder?.settings else { return }
+
+        let noAudio = settings.audioFormat == .none
+
+        if !audioFormatButton.selectItem(withTag: settings.audioFormat.rawValue) {
             fatalError()
         }
-        if !audioSampleRateButton.selectItem(withTag: settings.audioSampleRate ?? 0) {
+        if !audioSampleRateButton.selectItem(withTag: settings.audioSampleRate.shadowed ? 0 : 1) {
             fatalError()
         }
-        audioBitRateButton.selectItem(withTag: settings.audioBitRate == nil ? 0 : 1)
-        audioBitRateField.integerValue = settings.audioBitRate ?? 0
-        audioBitRateField.isHidden = settings.audioBitRate == nil
+        if !audioBitRateButton.selectItem(withTag: settings.audioBitRate.shadowed ? 0 : 1) {
+            fatalError()
+        }
+
+        audioSampleRateLabel.isHidden = noAudio
+        audioSampleRateButton.isHidden = noAudio
+        audioSampleRateField.integerValue = Int(settings.audioSampleRate.rawValue)
+        audioSampleRateField.isHidden = settings.audioSampleRate.shadowed || noAudio
+
+        audioBitRateLabel.isHidden = noAudio
+        audioBitRateButton.isHidden = noAudio
+        audioBitRateField.integerValue = Int(settings.audioBitRate.rawValue)
+        audioBitRateField.isHidden = settings.audioBitRate.shadowed || noAudio
     }
 
     @IBAction func videoTypeAction(_ sender: NSPopUpButton) {
@@ -89,50 +144,55 @@ class RecorderPreferencesViewController: NSViewController {
 
     @IBAction func videoFrameRateAction(_ sender: NSPopUpButton) {
 
-        let tag = sender.selectedTag()
-        recorder?.settings.frameRate = tag == 0 ? nil : tag
+        recorder?.settings.frameRate.shadowed = sender.selectedTag() == 0
+        refresh()
+    }
+
+    @IBAction func videoFrameRateValueAction(_ sender: NSTextField) {
+
+        recorder?.settings.frameRate.rawValue = sender.integerValue
         refresh()
     }
 
     @IBAction func videoResolutionAction(_ sender: NSPopUpButton) {
 
-        let resolution = RecorderSettings.VideoResolution(rawValue: sender.selectedTag())!
-
-        switch resolution {
-        case .custom:
-            recorder?.settings.width = videoWidthField.integerValue
-            recorder?.settings.width = videoHeightField.integerValue
-        case .hd, .fhd, .uhd:
-            recorder?.settings.width = Int(resolution.size.width)
-            recorder?.settings.height = Int(resolution.size.height)
-        }
+        recorder?.settings.size.shadowed = sender.selectedTag() == 0
         refresh()
     }
 
     @IBAction func videoWidthAction(_ sender: NSTextField) {
 
-        recorder?.settings.width = sender.integerValue
+        recorder?.settings.size.rawValue.width = CGFloat(sender.integerValue)
         refresh()
     }
 
     @IBAction func videoHeightAction(_ sender: NSTextField) {
 
-        recorder?.settings.height = sender.integerValue
+        recorder?.settings.size.rawValue.height = CGFloat(sender.integerValue)
         refresh()
     }
 
     @IBAction func videoBitRateAction(_ sender: NSPopUpButton) {
 
-        switch sender.selectedTag() {
-        case 0: recorder?.settings.bitRate = nil
-        default: recorder?.settings.bitRate = videoBitRateField.integerValue
-        }
+        recorder?.settings.bitRate.shadowed = sender.selectedTag() == 0
         refresh()
     }
 
-    @IBAction func videoBpsAction(_ sender: NSTextField) {
+    @IBAction func videoBitrateValueAction(_ sender: NSTextField) {
 
-        recorder?.settings.bitRate = sender.integerValue
+        recorder?.settings.bitRate.rawValue = sender.integerValue
+        refresh()
+    }
+
+    @IBAction func videoQualityAction(_ sender: NSPopUpButton) {
+
+        recorder?.settings.quality.shadowed = sender.selectedTag() == 0
+        refresh()
+    }
+
+    @IBAction func videoQualityValueAction(_ sender: NSTextField) {
+
+        recorder?.settings.quality.rawValue = CGFloat(sender.floatValue)
         refresh()
     }
 
@@ -145,23 +205,27 @@ class RecorderPreferencesViewController: NSViewController {
 
     @IBAction func audioSampleRateAction(_ sender: NSPopUpButton) {
 
-        let tag = sender.selectedTag()
-        recorder?.settings.frameRate = tag == 0 ? nil : tag
+        recorder?.settings.audioSampleRate.shadowed = sender.selectedTag() == 0
         refresh()
     }
 
+    @IBAction func audioSampleRateValueAction(_ sender: NSTextField) {
+
+        print("audioBitRateValueAction \(sender.integerValue)")
+
+        recorder?.settings.audioSampleRate.rawValue = sender.integerValue
+        refresh()
+    }
     @IBAction func audioBitRateAction(_ sender: NSPopUpButton) {
 
-        switch sender.selectedTag() {
-        case 0: recorder?.settings.audioBitRate = nil
-        default: recorder?.settings.audioBitRate = audioBitRateField.integerValue
-        }
+        recorder?.settings.audioBitRate.shadowed = sender.selectedTag() == 0
         refresh()
     }
 
-    @IBAction func audioBpsAction(_ sender: NSTextField) {
+    @IBAction func audioBitRateValueAction(_ sender: NSTextField) {
 
-        recorder?.settings.bitRate = sender.integerValue
+        print("audioBitRateValueAction \(sender.integerValue)")
+        recorder?.settings.audioBitRate.rawValue = sender.integerValue
         refresh()
     }
 }
