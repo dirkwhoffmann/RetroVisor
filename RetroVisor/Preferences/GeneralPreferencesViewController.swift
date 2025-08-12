@@ -11,11 +11,17 @@ import Cocoa
 
 class GeneralPreferencesViewController: NSViewController {
 
-    @IBOutlet weak var fullCaptureButton: NSButton!
-    @IBOutlet weak var areaCaptureButton: NSButton!
-
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var streamer: Streamer? { app.streamer }
+
+    @IBOutlet weak var fpsButton: NSPopUpButton!
+    @IBOutlet weak var fpsField: NSTextField!
+    @IBOutlet weak var fpsHelp: NSTextField!
+    @IBOutlet weak var queueSlider: NSSlider!
+    @IBOutlet weak var queueHelp: NSTextField!
+    @IBOutlet weak var queueLabel: NSTextField!
+    @IBOutlet weak var captureModeButton: NSPopUpButton!
+    @IBOutlet weak var captureModeHelp: NSTextField!
 
     override func viewDidLoad() {
 
@@ -24,8 +30,7 @@ class GeneralPreferencesViewController: NSViewController {
 
     func refresh() {
 
-        fullCaptureButton.state = streamer?.captureMode == .entire ? .on : .off
-        areaCaptureButton.state = streamer?.captureMode == .cutout ? .on : .off
+        queueLabel.stringValue = "\(queueSlider.intValue) frames"
     }
 
     @IBAction func fullCaptureButton(_ sender: NSButton) {
