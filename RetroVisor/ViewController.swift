@@ -15,5 +15,6 @@ import MetalPerformanceShaders
 class ViewController: NSViewController {
 
     @IBOutlet weak var metalView: MetalView!
+
     var trackingWindow: TrackingWindow? { view.window as? TrackingWindow }
 }

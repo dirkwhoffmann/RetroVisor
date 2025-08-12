@@ -11,16 +11,27 @@ import AppKit
 
 class EffectWindow: TrackingWindow {
 
-    private var overlayView: NSView?
+    let recordingOn = NSImage(named: "recordingOn")!
+    let recordingOff = NSImage(named: "recordingOff")!
+
+    private var overlayView: NSImageView?
+
+    func updateOverlay(recording: Bool) {
+
+        showOverlay(image: recording ? recordingOn : nil)
+    }
 
     func showOverlay(image: NSImage?, height: CGFloat = 18, margin: CGFloat = 5) {
 
+        if overlayView?.image === image { return }
         guard let container = contentView else { return }
 
-        if image != nil {
+        // Remove old overlay
+        overlayView?.removeFromSuperview()
+        overlayView = nil
 
-            // Show overlow
-            if overlayView != nil { return }
+        // Add new overlay
+        if image != nil {
 
             let imageView = NSImageView(image: image!)
             imageView.imageScaling = .scaleProportionallyUpOrDown
@@ -36,14 +47,6 @@ class EffectWindow: TrackingWindow {
             ])
 
             overlayView = imageView
-
-        } else {
-
-            // Hide overlay
-            if overlayView == nil { return }
-
-            overlayView?.removeFromSuperview()
-            overlayView = nil
         }
     }
 }

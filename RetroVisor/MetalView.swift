@@ -310,11 +310,15 @@ class MetalView: MTKView, MTKViewDelegate {
                                                                0,
                                                                &cvTextureOut)
 
-        // Trigger the view to redraw
         if result == kCVReturnSuccess && cvTextureOut != nil {
 
             inTexture = CVMetalTextureGetTexture(cvTextureOut!)
+
+            // Trigger the view to redraw
             setNeedsDisplay(bounds)
+
+            // Pass the rendered texture to the recorder
+            // TODO: DO THIS IN METAL VIEW ONCE THE TEXTURE HAS BEEN CREATED
             if outTexture != nil { recorder?.appendVideo(texture: outTexture!) }
         }
     }

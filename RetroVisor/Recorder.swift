@@ -139,6 +139,10 @@ class Recorder {
     // Appends a video frame
     func appendVideo(texture: MTLTexture) {
 
+        let status = assetWriter?.status
+
+        app.windowController?.effectWindow?.updateOverlay(recording: status == .writing)
+
         if !isRecording { return }
         guard let timestamp = currentTime else { return }
         guard let assetWriter = assetWriter else { return }
@@ -152,7 +156,7 @@ class Recorder {
         }
 
         // Start the writer if this is the first frame
-        if assetWriter.status != .writing {
+        if status != .writing {
             assetWriter.startWriting()
             assetWriter.startSession(atSourceTime: timestamp)
         }

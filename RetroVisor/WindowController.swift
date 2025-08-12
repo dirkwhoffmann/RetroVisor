@@ -206,13 +206,13 @@ extension WindowController: RecorderDelegate {
 
     func recorderDidStart() {
 
-        effectWindow?.showOverlay(image: NSImage(named: "Recording"))
+        // effectWindow?.showOverlay(image: NSImage(named: "Recording"))
         app.updateStatusBarMenuIcon(recording: true)
     }
 
     func recorderDidStop() {
 
-        effectWindow?.showOverlay(image: nil)
+        // effectWindow?.showOverlay(image: nil)
         app.updateStatusBarMenuIcon(recording: false)
     }
 }
