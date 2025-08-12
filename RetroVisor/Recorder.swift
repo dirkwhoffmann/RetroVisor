@@ -122,6 +122,7 @@ struct RecorderSettings {
 
     enum Preset {
 
+        case systemDefault
         case youtube1080p
         case youtube4k
         case proResHQ
@@ -130,6 +131,20 @@ struct RecorderSettings {
         var settings: RecorderSettings {
 
             switch self {
+
+            case .systemDefault:
+                return RecorderSettings(
+                    videoType: .mov,
+                    codec: .h264,
+                    size: Shadowed(.zero, shadowed: true),
+                    quality: Shadowed(0.9, shadowed: true),
+                    frameRate: Shadowed(60, shadowed: true),
+                    bitRate: Shadowed(6_000_000, shadowed: true),
+                    audioFormat: .mpeg4AAC,
+                    audioChannels: 2,
+                    audioSampleRate: Shadowed(44_100),
+                    audioBitRate: Shadowed(128_000)
+                )
             case .youtube1080p:
                 return RecorderSettings(
                     videoType: .mp4,

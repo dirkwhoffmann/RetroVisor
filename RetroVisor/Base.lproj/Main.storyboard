@@ -1431,6 +1431,8 @@ Gw
                                         <items>
                                             <menuItem title="H.264" id="Eke-Np-w7Y"/>
                                             <menuItem title="HEVC" tag="1" id="jYa-Jc-1V9"/>
+                                            <menuItem title="ProRes 422" tag="2" id="QUN-3W-BkW"/>
+                                            <menuItem title="ProRes 4444" tag="3" id="3Xo-dZ-2Yj"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
@@ -1664,6 +1666,19 @@ Gw
                                     <action selector="videoBitrateValueAction:" target="rai-Kw-7eh" id="Bo7-6d-AQe"/>
                                 </connections>
                             </textField>
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="S4X-ab-RL9">
+                                <rect key="frame" x="343" y="236" width="41" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="fZe-ot-wiz">
+                                    <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" formatWidth="-1" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="zLo-l0-UAB"/>
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                                <connections>
+                                    <action selector="videoQualityValueAction:" target="rai-Kw-7eh" id="khy-JM-Yfq"/>
+                                </connections>
+                            </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WDI-eA-8mP">
                                 <rect key="frame" x="343" y="328" width="82" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -1712,19 +1727,27 @@ Gw
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="S4X-ab-RL9">
-                                <rect key="frame" x="343" y="236" width="41" height="21"/>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nKZ-A7-0d8">
+                                <rect key="frame" x="17" y="16" width="140" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="fZe-ot-wiz">
-                                    <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" formatWidth="-1" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="zLo-l0-UAB"/>
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
+                                <popUpButtonCell key="cell" type="push" title="Select Profile..." bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" tag="-1" imageScaling="proportionallyDown" inset="2" pullsDown="YES" id="u9c-St-3rZ">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="O3D-aR-fVS">
+                                        <items>
+                                            <menuItem title="Select Profile..." tag="-1" hidden="YES" id="ZpA-IG-37b"/>
+                                            <menuItem title="Default" id="WVO-Be-htv"/>
+                                            <menuItem title="YouTube 1080p" tag="1" id="tuI-HT-zER"/>
+                                            <menuItem title="YouTube 4K" tag="2" id="KIj-tj-SmF"/>
+                                            <menuItem title="Apple ProRes HQ" tag="3" id="2CR-Pn-2s7"/>
+                                            <menuItem title="Small File" tag="4" id="sCw-4g-yGG"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
                                 <connections>
-                                    <action selector="videoQualityValueAction:" target="rai-Kw-7eh" id="khy-JM-Yfq"/>
+                                    <action selector="profileAction:" target="rai-Kw-7eh" id="IzQ-2j-gec"/>
                                 </connections>
-                            </textField>
+                            </popUpButton>
                         </subviews>
                     </view>
                     <connections>

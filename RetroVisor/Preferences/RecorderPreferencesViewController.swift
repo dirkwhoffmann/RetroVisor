@@ -211,8 +211,6 @@ class RecorderPreferencesViewController: NSViewController {
 
     @IBAction func audioSampleRateValueAction(_ sender: NSTextField) {
 
-        print("audioBitRateValueAction \(sender.integerValue)")
-
         recorder?.settings.audioSampleRate.rawValue = sender.integerValue
         refresh()
     }
@@ -224,8 +222,20 @@ class RecorderPreferencesViewController: NSViewController {
 
     @IBAction func audioBitRateValueAction(_ sender: NSTextField) {
 
-        print("audioBitRateValueAction \(sender.integerValue)")
         recorder?.settings.audioBitRate.rawValue = sender.integerValue
+        refresh()
+    }
+
+    @IBAction func profileAction(_ sender: NSPopUpButton) {
+
+        switch (sender.selectedTag()) {
+        case 0: recorder?.settings = RecorderSettings.Preset.systemDefault.settings
+        case 1: recorder?.settings = RecorderSettings.Preset.youtube1080p.settings
+        case 2: recorder?.settings = RecorderSettings.Preset.youtube4k.settings
+        case 3: recorder?.settings = RecorderSettings.Preset.proResHQ.settings
+        case 4: recorder?.settings = RecorderSettings.Preset.smallFile.settings
+        default: break
+        }
         refresh()
     }
 }
