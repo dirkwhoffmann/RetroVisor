@@ -76,13 +76,6 @@ extension AppDelegate : NSMenuItemValidation {
         )
         record.target = self
 
-        let restart = NSMenuItem(
-            title: "Restart Stream Capturer",
-            action: #selector(restartScreenRecorder(_:)),
-            keyEquivalent: ""
-        )
-        restart.target = self
-
         let quit = NSMenuItem(
             title: "Quit \(Bundle.main.appName)",
             action: #selector(NSApplication.terminate(_:)),
@@ -93,8 +86,6 @@ extension AppDelegate : NSMenuItemValidation {
         menu.addItem(background)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(record)
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(restart)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(quit)
 
@@ -152,11 +143,6 @@ extension AppDelegate : NSMenuItemValidation {
         }
     }
 
-    @objc func restartScreenRecorder(_ sender: Any?) {
-
-        streamer.relaunch()
-    }
-
     @objc func recorderAction(_ sender: Any?) {
 
         guard let texture = windowController?.metalView?.outTexture else { return }
@@ -178,13 +164,6 @@ extension AppDelegate : NSMenuItemValidation {
                     self.recorder.startRecording(to: url, width: texture.width, height: texture.height)
                 }
             }
-            /*
-            panel.begin { response in
-                if response == .OK, let url = panel.url {
-                    self.recorder.startRecording(to: url, width: texture.width, height: texture.height)
-                }
-            }
-             */
         }
     }
 }

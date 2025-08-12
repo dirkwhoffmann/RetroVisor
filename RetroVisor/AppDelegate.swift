@@ -86,6 +86,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let storyboard = NSStoryboard(name: "Main", bundle: nil)
         if let wc = storyboard.instantiateController(withIdentifier: "PreferencesWindowController") as? NSWindowController {
+
+            wc.window?.level = .floating
             wc.showWindow(self)
             wc.window?.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
