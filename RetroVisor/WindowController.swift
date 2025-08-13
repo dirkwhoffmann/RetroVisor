@@ -139,13 +139,6 @@ extension WindowController: TrackingWindowDelegate {
 
         streamer.updateRects()
         streamer.relaunchIfNeeded()
-
-        /*
-        print("window: \(window.frame)")
-        print("sourceRect: \(streamer.sourceRect ?? .null)")
-        print("captureRect: \(streamer.captureRect ?? .null)")
-        print("textureRect: \(streamer.textureRect ?? .null)")
-        */
     }
 
     func windowWasDoubleClicked(_ window: TrackingWindow) {

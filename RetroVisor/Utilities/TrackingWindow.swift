@@ -101,6 +101,9 @@ class TrackingWindow: NSWindow {
     // Indicates if a resize operation is ongoing
     private(set) var isResizing: Bool = false
 
+    // Remembers the mouse button state
+    private(set) var leftMouseDown: Bool = false
+
     // Window position at the beginning of a drag or resize event
     private(set) var initialWindowOrigin: NSPoint?
 
@@ -148,6 +151,8 @@ class TrackingWindow: NSWindow {
 
         case .leftMouseDown:
 
+            leftMouseDown = true
+
             if event.clickCount == 2 {
 
                 if debug { print("windowWasDoubleClicked(\(self))") }
@@ -163,6 +168,8 @@ class TrackingWindow: NSWindow {
             }
 
         case .leftMouseDragged:
+
+            if !leftMouseDown { break }
 
             if !isDragging {
 
@@ -192,6 +199,8 @@ class TrackingWindow: NSWindow {
             }
 
         case .leftMouseUp:
+
+            leftMouseDown = false
 
             if isDragging {
 
