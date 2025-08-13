@@ -86,7 +86,7 @@ class RecorderPreferencesViewController: NSViewController {
         videoBitRateField.integerValue = Int(settings.bitRate.rawValue)
         videoBitRateField.isHidden = settings.bitRate.shadowed
 
-        videoQualityField.integerValue = Int(settings.quality.rawValue)
+        videoQualityField.floatValue = Float(settings.quality.rawValue)
         videoQualityField.isHidden = settings.quality.shadowed
 
         if let size = settings.size.value {
