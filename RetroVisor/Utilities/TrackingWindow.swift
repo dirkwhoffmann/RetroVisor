@@ -59,7 +59,7 @@ extension TrackingWindowDelegate {
     func windowDidChangeScreen(_ window: TrackingWindow) {}
 }
 
-class TrackingWindow: NSWindow {
+class TrackingWindow: NSWindow, Loggable {
 
     // The window delegate
     var trackingDelegate: TrackingWindowDelegate?
@@ -68,7 +68,7 @@ class TrackingWindow: NSWindow {
     var dragAnywhere: Bool = true
 
     // Enables debug output to the console
-    var debug: Bool = false
+    var logging: Bool = false
 
     // The live-tracked window position (updated more frequently than `frame`)
     private var trackedFrame: NSRect = .zero
@@ -155,7 +155,7 @@ class TrackingWindow: NSWindow {
 
             if event.clickCount == 2 {
 
-                if debug { print("windowWasDoubleClicked(\(self))") }
+               log("windowWasDoubleClicked(\(self))")
                 trackingDelegate?.windowWasDoubleClicked(self)
 
             } else {
@@ -174,7 +174,7 @@ class TrackingWindow: NSWindow {
             if !isDragging {
 
                 isDragging = true
-                if debug { print("windowDidStartDrag(\(self))") }
+                log("windowDidStartDrag(\(self))")
                 trackingDelegate?.windowDidStartDrag(self)
             }
 
@@ -193,7 +193,7 @@ class TrackingWindow: NSWindow {
                 if newOrigin != trackedFrame.origin {
 
                     trackedFrame = NSRect(origin: newOrigin, size: self.frame.size)
-                    if debug { print("windowDidDrag(\(self), frame: \(liveFrame))") }
+                    log("windowDidDrag(\(self), frame: \(liveFrame))")
                     trackingDelegate?.windowDidDrag(self, frame: liveFrame)
                 }
             }
@@ -205,8 +205,7 @@ class TrackingWindow: NSWindow {
             if isDragging {
 
                 isDragging = false
-                // clearLocations()
-                if debug { print("windowDidStopDrag(\(self))") }
+                log("windowDidStopDrag(\(self))")
                 trackingDelegate?.windowDidStopDrag(self)
             }
 
@@ -223,7 +222,7 @@ class TrackingWindow: NSWindow {
         if !isResizing {
 
             isResizing = true
-            if debug { print("windowDidStartResize(\(self))") }
+            log("windowDidStartResize(\(self))")
             trackingDelegate?.windowDidStartResize(self)
         }
 
@@ -234,7 +233,7 @@ class TrackingWindow: NSWindow {
             if let self = self {
 
                 self.isResizing = false
-                if debug { print("windowDidStopResize(\(self))") }
+                log("windowDidStopResize(\(self))")
                 trackingDelegate?.windowDidStopResize(self)
             }
         }
@@ -252,39 +251,21 @@ extension TrackingWindow : NSWindowDelegate {
     func windowDidResize(_ notification: Notification) {
 
         trackedFrame = frame
-        if debug { print("windowDidResize(\(self))") }
+        log("windowDidResize(\(self))")
         trackingDelegate?.windowDidResize(self, frame: trackedFrame)
     }
 
     func windowDidMove(_ notification: Notification) {
 
         trackedFrame = frame
-        if debug { print("windowDidMove(\(self))") }
+        log("windowDidMove(\(self))")
         trackingDelegate?.windowDidMove(self, frame: trackedFrame)
     }
 
     func windowDidChangeScreen(_ notification: Notification) {
 
         trackedFrame = frame
-        if debug { print("windowDidChangeScreen(\(self))") }
+        log("windowDidChangeScreen(\(self))")
         trackingDelegate?.windowDidChangeScreen(self)
     }
 }
-
-/*
-extension NSView {
-
-    func inScreenCoords(frame: NSRect) -> CGRect {
-
-        let windowFrame = frame
-        let screenFrame = view.window?.screen?.frame ?? .zero
-
-        return CGRect(
-            x: windowFrame.origin.x,
-            y: screenFrame.height - windowFrame.origin.y - windowFrame.height,
-            width: windowFrame.width,
-            height: windowFrame.height
-        )
-    }
-}
-*/

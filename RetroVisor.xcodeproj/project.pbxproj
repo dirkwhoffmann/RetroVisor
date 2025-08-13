@@ -35,6 +35,7 @@
 		50BA96642E3FF0B3006BA8DF /* crt-easymode.metal in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96632E3FF0B3006BA8DF /* crt-easymode.metal */; };
 		50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96652E3FF176006BA8DF /* ShaderTypes.metal */; };
 		50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */; };
+		50DE5B842E4CDB08002C07EC /* Loggable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DE5B832E4CDB02002C07EC /* Loggable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +69,7 @@
 		50BA96632E3FF0B3006BA8DF /* crt-easymode.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = "crt-easymode.metal"; sourceTree = "<group>"; };
 		50BA96652E3FF176006BA8DF /* ShaderTypes.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ShaderTypes.metal; sourceTree = "<group>"; };
 		50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderSettingCell.swift; sourceTree = "<group>"; };
+		50DE5B832E4CDB02002C07EC /* Loggable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Loggable.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +86,7 @@
 		50079E6F2E433206005BC5FD /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				50DE5B832E4CDB02002C07EC /* Loggable.swift */,
 				50079E702E438139005BC5FD /* Extensions.swift */,
 				50BA965A2E3D4861006BA8DF /* Animated.swift */,
 				503FCC322E4B016000EF49DA /* Shadowed.swift */,
@@ -245,6 +248,7 @@
 				50292D962E471AAA0084CFE3 /* PermissionViewController.swift in Sources */,
 				503FCC2D2E48F5A300EF49DA /* Recorder.swift in Sources */,
 				50BA96592E3C80F5006BA8DF /* TrackingWindow.swift in Sources */,
+				50DE5B842E4CDB08002C07EC /* Loggable.swift in Sources */,
 				50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */,
 				50292D942E471A330084CFE3 /* PermissionWindowController.swift in Sources */,
 				503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */,
