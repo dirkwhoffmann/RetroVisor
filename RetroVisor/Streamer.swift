@@ -16,6 +16,7 @@ protocol StreamerDelegate : SCStreamOutput {
 
     func textureRectDidChange(rect: CGRect?)
     func captureRectDidChange(rect: CGRect?)
+    func streamDidStop(error: Error?)
 }
 
 @MainActor
@@ -210,6 +211,10 @@ class Streamer: NSObject, SCStreamDelegate
 
     func record(buffer: CVPixelBuffer) {
 
+    }
 
+    nonisolated func stream(_ stream: SCStream, didStopWithError error: Error) {
+
+        Task { @MainActor in delegate?.streamDidStop(error: error) }
     }
 }

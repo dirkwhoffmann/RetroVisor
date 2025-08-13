@@ -304,9 +304,6 @@
                                         </menuItem>
                                         <menuItem title="Run Effect Window in Background" id="zh6-Ra-91Z">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="backgroundAction:" target="Ady-hI-5gd" id="CNl-PX-qpz"/>
-                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="hB3-LF-h0Y"/>
                                         <menuItem title="Reset Zoom" keyEquivalent="0" id="AcI-D1-wWT">
@@ -478,9 +475,9 @@
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fpH-gu-bpu">
-                                                        <rect key="frame" x="10" y="3" width="64" height="70"/>
+                                                        <rect key="frame" x="10" y="2.5" width="64" height="72"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="video.circle" catalog="system" id="Cy2-g5-DNW"/>
+                                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="NSTouchBarCommunicationVideoTemplate" id="Cy2-g5-DNW"/>
                                                     </imageView>
                                                 </subviews>
                                             </view>
@@ -1486,9 +1483,9 @@ Gw
     <resources>
         <image name="NSAdvanced" width="32" height="32"/>
         <image name="NSColorPanel" width="32" height="32"/>
+        <image name="NSTouchBarCommunicationVideoTemplate" width="24" height="17"/>
         <image name="lens" width="476" height="768"/>
         <image name="movieBg" width="678" height="895"/>
         <image name="stop" width="928" height="509"/>
-        <image name="video.circle" catalog="system" width="15" height="15"/>
     </resources>
 </document>

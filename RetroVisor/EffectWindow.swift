@@ -49,4 +49,68 @@ class EffectWindow: TrackingWindow {
             overlayView = imageView
         }
     }
+
+    func showPauseOverlay() {
+
+        guard let contentView = contentView else { return }
+
+        let overlay = PauseOverlayView(frame: contentView.bounds)
+        overlay.autoresizingMask = [.width, .height]
+        overlay.resumeHandler = { 
+            app.streamer.relaunch()
+            print("resume...")
+        }
+
+        contentView.addSubview(overlay)
+    }
 }
+
+class PauseOverlayView: NSView {
+
+    var resumeHandler: (() -> Void)?
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        setup()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setup()
+    }
+
+    private func setup() {
+
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.black.withAlphaComponent(0.5).cgColor
+
+        let minSide = min(bounds.width, bounds.height)
+           let symbolSize = minSide / 2  // half the window size
+
+        // Create pause symbol using SF Symbols
+        let imageView = NSImageView()
+        if let pauseImage = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: nil) {
+            imageView.image = pauseImage
+            imageView.symbolConfiguration = .init(pointSize: symbolSize, weight: .regular)
+            imageView.contentTintColor = .white.withAlphaComponent(0.6)
+        }
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(imageView)
+
+        // Center the pause symbol
+        NSLayoutConstraint.activate([
+            imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: centerYAnchor)
+        ])
+
+        // Make entire overlay clickable
+        let clickGesture = NSClickGestureRecognizer(target: self, action: #selector(handleClick))
+        addGestureRecognizer(clickGesture)
+    }
+
+    @objc private func handleClick() {
+        removeFromSuperview()
+        resumeHandler?()
+    }
+}
+

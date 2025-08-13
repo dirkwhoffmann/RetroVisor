@@ -164,6 +164,11 @@ extension WindowController: StreamerDelegate {
 
     }
 
+    func streamDidStop(error: Error?) {
+
+        effectWindow?.showPauseOverlay()
+    }
+
     func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
         switch type {
