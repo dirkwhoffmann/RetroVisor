@@ -11,28 +11,6 @@ import Cocoa
 import UniformTypeIdentifiers
 
 @MainActor
-extension WindowController: NSMenuItemValidation {
-
-    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-
-        switch menuItem.action {
-
-        case #selector(WindowController.freezeAction(_:)):
-            menuItem.title = isFrozen ? "Unfreeze" : "Freeze"
-            return true
-
-        default:
-            return true
-        }
-    }
-
-    @IBAction func freezeAction(_ sender: Any!) {
-
-        isFrozen ? unfreeze() : freeze()
-    }
-}
-
-@MainActor
 extension AppDelegate : NSMenuItemValidation {
 
     //
@@ -94,6 +72,7 @@ extension AppDelegate : NSMenuItemValidation {
 
     func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
 
+        // print("validateMenuItem \(menuItem)")
         switch menuItem.action {
 
         case #selector(AppDelegate.freezeAction(_:)):
@@ -129,21 +108,21 @@ extension AppDelegate : NSMenuItemValidation {
         }
     }
 
-    @objc func freezeAction(_ sender: Any?) {
+    @IBAction func freezeAction(_ sender: NSMenuItem) {
 
         if let controller = windowController {
             controller.isFrozen ? controller.unfreeze() : controller.freeze()
         }
     }
 
-    @objc func backgroundAction(_ sender: Any?) {
+    @IBAction func backgroundAction(_ sender: NSMenuItem) {
 
         if let controller = windowController {
             controller.invisible.toggle()
         }
     }
 
-    @objc func recorderAction(_ sender: Any?) {
+    @IBAction func recorderAction(_ sender: NSMenuItem) {
 
         guard let texture = windowController?.metalView?.outTexture else { return }
 
