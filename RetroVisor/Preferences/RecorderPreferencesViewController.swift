@@ -20,25 +20,32 @@ class RecorderPreferencesViewController: NSViewController {
     @IBOutlet weak var videoTypeButton: NSPopUpButton!
     @IBOutlet weak var videoCodecButton: NSPopUpButton!
     @IBOutlet weak var videoResultionButton: NSPopUpButton!
-    @IBOutlet weak var videoWidthField: NSTextField!
-    @IBOutlet weak var videoHeightField: NSTextField!
+    @IBOutlet weak var videoWidthField: RangeField!
+    @IBOutlet weak var videoHeightField: RangeField!
     @IBOutlet weak var videoSizeLabel: NSTextField!
     @IBOutlet weak var videoBitRateButton: NSPopUpButton!
-    @IBOutlet weak var videoBitRateField: NSTextField!
+    @IBOutlet weak var videoBitRateField: RangeField!
     @IBOutlet weak var videoQualityButton: NSPopUpButton!
-    @IBOutlet weak var videoQualityField: NSTextField!
+    @IBOutlet weak var videoQualityField: RangeField!
 
     // Audio settings
     @IBOutlet weak var audioFormatButton: NSPopUpButton!
     @IBOutlet weak var audioFormatLabel: NSTextField!
     @IBOutlet weak var audioSampleRateLabel: NSTextField!
     @IBOutlet weak var audioSampleRateButton: NSPopUpButton!
-    @IBOutlet weak var audioSampleRateField: NSTextField!
+    @IBOutlet weak var audioSampleRateField: RangeField!
     @IBOutlet weak var audioBitRateLabel: NSTextField!
     @IBOutlet weak var audioBitRateButton: NSPopUpButton!
-    @IBOutlet weak var audioBitRateField: NSTextField!
+    @IBOutlet weak var audioBitRateField: RangeField!
 
     override func viewDidLoad() {
+
+        videoWidthField.setRange(160...3840)
+        videoHeightField.setRange(120...2160)
+        videoBitRateField.setRange(500_000...68_000_000)
+        videoQualityField.setRange(0.0...1.0)
+        audioSampleRateField.setRange(8_000...96_000)
+        audioBitRateField.setRange(32_000...320_000)
 
         refresh()
     }

@@ -282,3 +282,52 @@ struct RecorderSettings {
         return audioSettings
     }
 }
+
+final class RangeField: NSTextField {
+
+    var minValue: Double?
+    var maxValue: Double?
+
+    func setRange<T: BinaryInteger>(_ range: ClosedRange<T>) {
+        setFormatter(min: Double(range.lowerBound), max: Double(range.upperBound), allowsFloats: false)
+    }
+
+    func setRange<T: BinaryFloatingPoint>(_ range: ClosedRange<T>) {
+        setFormatter(min: Double(range.lowerBound), max: Double(range.upperBound), allowsFloats: true)
+    }
+
+    func setRange<T: BinaryFloatingPoint>(min: T, max: T) {
+        setFormatter(min: Double(min), max: Double(max), allowsFloats: true)
+    }
+
+    private func setFormatter(min: Double, max: Double, allowsFloats: Bool) {
+
+        self.minValue = min
+        self.maxValue = max
+
+        let formatter = (self.formatter as? NumberFormatter) ?? {
+            let nf = NumberFormatter()
+            self.formatter = nf
+            return nf
+        }()
+
+        formatter.allowsFloats = allowsFloats
+        formatter.isLenient = true
+    }
+
+    override func textDidEndEditing(_ notification: Notification) {
+
+        super.textDidEndEditing(notification)
+
+        let number = doubleValue
+
+        // Clamp to range
+        if let minValue = minValue, number < minValue {
+            self.doubleValue = minValue
+        }
+        if let maxValue = maxValue, number > maxValue {
+            self.doubleValue = maxValue
+        }
+    }
+}
+

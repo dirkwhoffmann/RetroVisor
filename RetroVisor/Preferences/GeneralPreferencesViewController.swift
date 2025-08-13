@@ -42,23 +42,23 @@ class GeneralPreferencesViewController: NSViewController {
 
     override func viewDidLoad() {
 
-        refresh()
+        if let cell = queueSlider.cell as? TrackingSliderCell {
 
-        let cell = queueSlider.cell as! TrackingSliderCell
+            cell.onDragEnd = { [weak self] in
 
-        cell.onDragEnd = { [weak self] in
+                // Fired when the user stops operating the slider
+                guard let self = self else { return }
+                print("Drag ended")
+                if queueSlider.integerValue != streamer?.settings.queueDepth {
 
-            // Fired when the user stops operating the slider
-            guard let self = self else { return }
-            print("Drag ended")
-            if queueSlider.integerValue != streamer?.settings.queueDepth {
-
-                print("Chaning queue depth to \(queueSlider.integerValue)")
-                streamer?.settings.queueDepth = queueSlider.integerValue
-                streamer?.relaunch()
+                    print("Chaning queue depth to \(queueSlider.integerValue)")
+                    streamer?.settings.queueDepth = queueSlider.integerValue
+                    streamer?.relaunch()
+                }
             }
-            refresh()
         }
+
+        refresh()
     }
 
     func refresh() {

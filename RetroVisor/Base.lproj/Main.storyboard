@@ -1513,7 +1513,7 @@ Gw
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oVt-2A-eM3">
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oVt-2A-eM3" customClass="RangeField" customModule="RetroVisor" customModuleProvider="target">
                                 <rect key="frame" x="448" y="250" width="82" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="ZNx-2M-ZeF">
@@ -1526,7 +1526,7 @@ Gw
                                     <action selector="videoHeightAction:" target="rai-Kw-7eh" id="iDy-eH-ty7"/>
                                 </connections>
                             </textField>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="29a-Yq-k1Z">
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="29a-Yq-k1Z" customClass="RangeField" customModule="RetroVisor" customModuleProvider="target">
                                 <rect key="frame" x="343" y="48" width="82" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="VqG-J1-keQ">
@@ -1539,7 +1539,7 @@ Gw
                                     <action selector="audioBitRateValueAction:" target="rai-Kw-7eh" id="upq-mm-DHN"/>
                                 </connections>
                             </textField>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="74C-xX-Y0Y">
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="74C-xX-Y0Y" customClass="RangeField" customModule="RetroVisor" customModuleProvider="target">
                                 <rect key="frame" x="343" y="79" width="82" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="Hba-5U-Tfn">
@@ -1705,7 +1705,7 @@ Gw
                                     <action selector="videoResolutionAction:" target="rai-Kw-7eh" id="0cW-jv-iNm"/>
                                 </connections>
                             </popUpButton>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PDN-21-Uya">
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PDN-21-Uya" customClass="RangeField" customModule="RetroVisor" customModuleProvider="target">
                                 <rect key="frame" x="343" y="250" width="82" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="rYb-es-99T">
@@ -1718,7 +1718,7 @@ Gw
                                     <action selector="videoWidthAction:" target="rai-Kw-7eh" id="gya-28-Gv1"/>
                                 </connections>
                             </textField>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="so2-tJ-UQx">
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="so2-tJ-UQx" customClass="RangeField" customModule="RetroVisor" customModuleProvider="target">
                                 <rect key="frame" x="343" y="219" width="82" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="O1H-4H-Aty">
@@ -1731,7 +1731,7 @@ Gw
                                     <action selector="videoBitrateValueAction:" target="rai-Kw-7eh" id="Bo7-6d-AQe"/>
                                 </connections>
                             </textField>
-                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="S4X-ab-RL9">
+                            <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="S4X-ab-RL9" customClass="RangeField" customModule="RetroVisor" customModuleProvider="target">
                                 <rect key="frame" x="343" y="189" width="41" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="fZe-ot-wiz">
