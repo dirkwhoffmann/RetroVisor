@@ -50,11 +50,11 @@ class EffectWindow: TrackingWindow {
         }
     }
 
-    func showPauseOverlay() {
+    func showPauseOverlay(image: NSImage?) {
 
         guard let contentView = contentView else { return }
 
-        let overlay = PauseOverlayView(frame: contentView.bounds) {
+        let overlay = PauseOverlayView(frame: contentView.bounds, image: image) {
             app.streamer.relaunch()
         }
 
@@ -66,10 +66,11 @@ class PauseOverlayView: NSView {
 
     var resumeHandler: (() -> Void)?
 
-    init(frame: NSRect, resumeHandler: @escaping () -> Void) {
+    init(frame: NSRect, image: NSImage?, resumeHandler: @escaping () -> Void) {
+
         self.resumeHandler = resumeHandler
         super.init(frame: frame)
-        setup()
+        setup(image: image)
     }
 
     required init?(coder: NSCoder) {
@@ -86,7 +87,7 @@ class PauseOverlayView: NSView {
         setup()
     }
      */
-    private func setup() {
+    private func setup(image: NSImage?) {
 
         wantsLayer = true
         layer?.backgroundColor = NSColor.black.withAlphaComponent(0.5).cgColor
@@ -96,7 +97,7 @@ class PauseOverlayView: NSView {
 
         // Create pause symbol using SF Symbols
         let imageView = NSImageView()
-        if let pauseImage = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: nil) {
+        if let pauseImage = image {
             imageView.image = pauseImage
             imageView.symbolConfiguration = .init(pointSize: symbolSize, weight: .regular)
             imageView.contentTintColor = .white.withAlphaComponent(0.6)

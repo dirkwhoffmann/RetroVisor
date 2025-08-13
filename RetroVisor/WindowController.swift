@@ -166,7 +166,8 @@ extension WindowController: StreamerDelegate {
 
     func streamDidStop(error: Error?) {
 
-        effectWindow?.showPauseOverlay()
+        let image = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: nil)
+        effectWindow?.showPauseOverlay(image: image)
     }
 
     func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
