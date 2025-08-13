@@ -54,11 +54,8 @@ class EffectWindow: TrackingWindow {
 
         guard let contentView = contentView else { return }
 
-        let overlay = PauseOverlayView(frame: contentView.bounds)
-        overlay.autoresizingMask = [.width, .height]
-        overlay.resumeHandler = { 
+        let overlay = PauseOverlayView(frame: contentView.bounds) {
             app.streamer.relaunch()
-            print("resume...")
         }
 
         contentView.addSubview(overlay)
@@ -69,6 +66,16 @@ class PauseOverlayView: NSView {
 
     var resumeHandler: (() -> Void)?
 
+    init(frame: NSRect, resumeHandler: @escaping () -> Void) {
+        self.resumeHandler = resumeHandler
+        super.init(frame: frame)
+        setup()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    /*
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         setup()
@@ -78,14 +85,14 @@ class PauseOverlayView: NSView {
         super.init(coder: coder)
         setup()
     }
-
+     */
     private func setup() {
 
         wantsLayer = true
         layer?.backgroundColor = NSColor.black.withAlphaComponent(0.5).cgColor
 
         let minSide = min(bounds.width, bounds.height)
-           let symbolSize = minSide / 2  // half the window size
+        let symbolSize = minSide / 2  // half the window size
 
         // Create pause symbol using SF Symbols
         let imageView = NSImageView()
@@ -102,6 +109,7 @@ class PauseOverlayView: NSView {
             imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
             imageView.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
+        autoresizingMask = [.width, .height]
 
         // Make entire overlay clickable
         let clickGesture = NSClickGestureRecognizer(target: self, action: #selector(handleClick))
