@@ -166,4 +166,25 @@ extension AppDelegate : NSMenuItemValidation {
             }
         }
     }
+
+    @IBAction func resetZoom(_ sender: NSMenuItem) {
+
+        if let controller = windowController {
+            controller.metalView?.zoom = 1.0
+        }
+    }
+
+    @IBAction func zoomIn(_ sender: NSMenuItem) {
+
+        if let controller = windowController {
+            controller.metalView?.zoom += 0.5
+        }
+    }
+
+    @IBAction func zoomOut(_ sender: NSMenuItem) {
+
+        if let controller = windowController {
+            controller.metalView?.zoom -= 0.5
+        }
+    }
 }

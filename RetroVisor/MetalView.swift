@@ -424,14 +424,4 @@ class MetalView: MTKView, MTKViewDelegate {
 
         zoom += Float(recognizer.magnification) * 0.1
     }
-
-    @IBAction func zoomInAction(_ sender: NSMenuItem) {
-
-        zoom += 0.5
-    }
-
-    @IBAction func zoomOutAction(_ sender: NSMenuItem) {
-
-        zoom -= 0.5
-    }
 }

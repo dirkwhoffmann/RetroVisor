@@ -609,14 +609,21 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="View" id="HyV-fh-RgO">
                                     <items>
-                                        <menuItem title="Zoom In" keyEquivalent="+" id="AcI-D1-wWT">
+                                        <menuItem title="Reset Zoom" keyEquivalent="0" id="AcI-D1-wWT">
                                             <connections>
-                                                <action selector="zoomInAction:" target="Ady-hI-5gd" id="zW0-da-MoB"/>
+                                                <action selector="resetZoom:" target="Ady-hI-5gd" id="mZT-Nl-F8T"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Zoom In" keyEquivalent="+" id="xGb-Eg-ZdQ">
+                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="zoomIn:" target="Ady-hI-5gd" id="qHj-0a-8As"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Zoom Out" keyEquivalent="-" id="mg3-Rj-Bt1">
+                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
-                                                <action selector="zoomOutAction:" target="Ady-hI-5gd" id="lcB-wd-mNJ"/>
+                                                <action selector="zoomOut:" target="Ady-hI-5gd" id="Nsl-Yd-NYI"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Show Toolbar" hidden="YES" keyEquivalent="t" id="snW-S8-Cw5">
@@ -698,7 +705,11 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="RetroVisor" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="RetroVisor" customModuleProvider="target">
+                    <connections>
+                        <outlet property="zoomInMenu" destination="xGb-Eg-ZdQ" id="SOG-ok-klM"/>
+                    </connections>
+                </customObject>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
