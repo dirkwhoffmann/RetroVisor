@@ -66,31 +66,17 @@ class PauseOverlayView: NSView {
 
     var resumeHandler: (() -> Void)?
 
-    init(frame: NSRect, image: NSImage?, resumeHandler: @escaping () -> Void) {
-
-        self.resumeHandler = resumeHandler
-        super.init(frame: frame)
-        setup(image: image)
-    }
-
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    /*
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
-        setup()
-    }
 
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setup()
-    }
-     */
-    private func setup(image: NSImage?) {
+    init(frame: NSRect, image: NSImage?, resumeHandler: @escaping () -> Void) {
+
+        super.init(frame: frame)
 
         wantsLayer = true
         layer?.backgroundColor = NSColor.black.withAlphaComponent(0.5).cgColor
+        self.resumeHandler = resumeHandler
 
         let minSide = min(bounds.width, bounds.height)
         let symbolSize = minSide / 2  // half the window size
@@ -100,7 +86,7 @@ class PauseOverlayView: NSView {
         if let pauseImage = image {
             imageView.image = pauseImage
             imageView.symbolConfiguration = .init(pointSize: symbolSize, weight: .regular)
-            imageView.contentTintColor = .white.withAlphaComponent(0.6)
+            imageView.contentTintColor = .white.withAlphaComponent(0.35)
         }
         imageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(imageView)
