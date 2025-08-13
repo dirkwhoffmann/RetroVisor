@@ -188,8 +188,8 @@ struct RecorderSettings {
                     bitRate: Shadowed(6_000_000, shadowed: true),
                     audioFormat: .mpeg4AAC,
                     audioChannels: 2,
-                    audioSampleRate: Shadowed(44_100),
-                    audioBitRate: Shadowed(128_000)
+                    audioSampleRate: Shadowed(44_100, shadowed: true),
+                    audioBitRate: Shadowed(128_000, shadowed: true)
                 )
             case .youtube1080p:
                 return RecorderSettings(
@@ -270,7 +270,8 @@ struct RecorderSettings {
 
         var audioSettings: [String: Any] = [
             AVNumberOfChannelsKey: audioChannels,
-            AVFormatIDKey: audioFormat.audioFormatID!
+            AVFormatIDKey: audioFormat.audioFormatID!,
+            AVSampleRateKey: 44100
         ]
         if let bitRate = audioBitRate.value {
             audioSettings[AVEncoderBitRateKey] = bitRate
