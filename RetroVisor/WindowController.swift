@@ -16,7 +16,6 @@ class WindowController: NSWindowController  {
     var viewController : ViewController? { return self.contentViewController as? ViewController }
     var effectWindow : EffectWindow? { return window as? EffectWindow }
     var metalView : MetalView? { return viewController?.metalView }
-    // var overlay: Overlay!
 
     // Video source and sink
     var recorder: Recorder { return app.recorder }
@@ -167,7 +166,7 @@ extension WindowController: StreamerDelegate {
     func streamDidStop(error: Error?) {
 
         let image = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: nil)
-        effectWindow?.showPauseOverlay(image: image)
+        effectWindow?.showPauseOverlay()
     }
 
     func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
@@ -205,13 +204,11 @@ extension WindowController: RecorderDelegate {
 
     func recorderDidStart() {
 
-        // effectWindow?.showOverlay(image: NSImage(named: "Recording"))
         app.updateStatusBarMenuIcon(recording: true)
     }
 
     func recorderDidStop() {
 
-        // effectWindow?.showOverlay(image: nil)
         app.updateStatusBarMenuIcon(recording: false)
     }
 }

@@ -14,7 +14,8 @@ class EffectWindow: TrackingWindow {
     let recordingOn = NSImage(named: "recordingOn")!
     let recordingOff = NSImage(named: "recordingOff")!
 
-    private var overlayView: NSImageView?
+    private var overlayView: NSImageView? // Rec button
+    private var pauseOverlay: Overlay?
 
     func updateOverlay(recording: Bool) {
 
@@ -50,62 +51,15 @@ class EffectWindow: TrackingWindow {
         }
     }
 
-    func showPauseOverlay(image: NSImage?) {
-
-        guard let contentView = contentView else { return }
-
-        let overlay = PauseOverlayView(frame: contentView.bounds, image: image) {
-            app.streamer.relaunch()
+    func showPauseOverlay() {
+            pauseOverlay = Overlay(window: self, iconName: "pause.circle") { [weak self] in
+                self?.pauseOverlay?.removeOverlay()
+                app.streamer.relaunch()
+            }
         }
 
-        contentView.addSubview(overlay)
-    }
-}
-
-class PauseOverlayView: NSView {
-
-    var resumeHandler: (() -> Void)?
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    init(frame: NSRect, image: NSImage?, resumeHandler: @escaping () -> Void) {
-
-        super.init(frame: frame)
-
-        wantsLayer = true
-        layer?.backgroundColor = NSColor.black.withAlphaComponent(0.5).cgColor
-        self.resumeHandler = resumeHandler
-
-        let minSide = min(bounds.width, bounds.height)
-        let symbolSize = minSide / 2  // half the window size
-
-        // Create pause symbol using SF Symbols
-        let imageView = NSImageView()
-        if let pauseImage = image {
-            imageView.image = pauseImage
-            imageView.symbolConfiguration = .init(pointSize: symbolSize, weight: .regular)
-            imageView.contentTintColor = .white.withAlphaComponent(0.35)
+        func hidePauseOverlay() {
+            pauseOverlay?.removeOverlay()
+            pauseOverlay = nil
         }
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(imageView)
-
-        // Center the pause symbol
-        NSLayoutConstraint.activate([
-            imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            imageView.centerYAnchor.constraint(equalTo: centerYAnchor)
-        ])
-        autoresizingMask = [.width, .height]
-
-        // Make entire overlay clickable
-        let clickGesture = NSClickGestureRecognizer(target: self, action: #selector(handleClick))
-        addGestureRecognizer(clickGesture)
-    }
-
-    @objc private func handleClick() {
-        removeFromSuperview()
-        resumeHandler?()
-    }
 }
-
