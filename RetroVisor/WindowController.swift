@@ -41,7 +41,6 @@ class WindowController: NSWindowController  {
 
     override func windowDidLoad() {
 
-        print("WindowController.windowDidLoad")
         super.windowDidLoad()
 
         let window = self.window as! EffectWindow

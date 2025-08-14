@@ -18,18 +18,26 @@ enum LogLevel: String {
 
 protocol Loggable {
 
-    var logging: Bool { get set }
-    // var isLoggingEnabled: Bool { get }
-
-    func log(_ message: String, level: LogLevel)
+    var logging: Bool { get }
+    func log(_ message: String, _ level: LogLevel)
 }
 
 extension Loggable {
 
-    func log(_ message: String, level: LogLevel = .info) {
+    var timestamp: String { ISO8601DateFormatter().string(from: Date()) }
 
-        guard logging else { return }
-        let timestamp = ISO8601DateFormatter().string(from: Date())
-        print("[\(timestamp)] [\(level.rawValue)] \(message)")
+    func log(_ message: String, _ level: LogLevel = .info) {
+
+        switch level {
+
+        case .info:
+
+            guard logging else { return }
+            print("[\(timestamp)] \(message)")
+
+        case .warning, .error:
+
+            print("\(level.rawValue): \(message)")
+        }
     }
 }

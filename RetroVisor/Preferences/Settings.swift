@@ -243,7 +243,7 @@ struct RecorderSettings {
         }
     }
 
-    func makeVideoSettings() -> [String: Any] {
+    func makeVideoSettings() -> [String: Any]? {
 
         var compressionProps: [String: Any] = [:]
 
@@ -271,7 +271,6 @@ struct RecorderSettings {
         var audioSettings: [String: Any] = [
             AVNumberOfChannelsKey: audioChannels,
             AVFormatIDKey: audioFormat.audioFormatID!,
-            AVSampleRateKey: 44100
         ]
         if let bitRate = audioBitRate.value {
             audioSettings[AVEncoderBitRateKey] = bitRate

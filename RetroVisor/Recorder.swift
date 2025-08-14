@@ -17,9 +17,12 @@ protocol RecorderDelegate {
 }
 
 @MainActor
-class Recorder {
+class Recorder: Loggable {
 
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
+
+    // Enables debug output to the console
+    let logging: Bool = false
 
     // Recorder settings
     var settings = RecorderSettings.Preset.systemDefault.settings
@@ -51,6 +54,8 @@ class Recorder {
 
         if isRecording { return }
 
+        log("Starting the recorder...")
+
         recordingRect = NSRect(x: 0, y: 0, width: width, height: height)
 
         let fileManager = FileManager.default
@@ -64,44 +69,39 @@ class Recorder {
             assetWriter = try AVAssetWriter(outputURL: url,
                                             fileType: settings.videoType.avFileType)
         } catch {
-            print("Can't start recording: \(error)")
+            log("Can't start recording: \(error)", .error)
             return
         }
 
         // Create settings
         var videoSettings = settings.makeVideoSettings()
-        let audioSettings = settings.makeAudioSettings()
+        var audioSettings = settings.makeAudioSettings()
 
-        // Add resolution parameters if not yet set
-        if videoSettings[AVVideoWidthKey] == nil { videoSettings[AVVideoWidthKey] = width }
-        if videoSettings[AVVideoHeightKey] == nil { videoSettings[AVVideoHeightKey] = height }
+        // Add required parameters if not yet provided
+        if videoSettings?[AVVideoWidthKey] == nil { videoSettings?[AVVideoWidthKey] = width }
+        if audioSettings?[AVVideoHeightKey] == nil { videoSettings?[AVVideoHeightKey] = height }
+        if audioSettings?[AVSampleRateKey] == nil { audioSettings?[AVSampleRateKey] = 44100 }
 
-        print("VideoSettings:")
-        print("\(videoSettings)")
+        log("Video settings:\n\(videoSettings?.prettify ?? "nil")")
+        log("Audio settings:\n\(audioSettings?.prettify ?? "nil")")
 
+        // Setup video input
         videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
         videoInput!.expectsMediaDataInRealTime = true
-
         guard assetWriter!.canAdd(videoInput!) else {
-            fatalError("Can't add input to asset writer")
+            fatalError("Can't add video input to asset writer")
         }
         assetWriter!.add(videoInput!)
 
-        if let audioSettings = audioSettings {
-            print("AudioSettings:")
-            print("\(audioSettings)")
-        }
-
+        // Setup audio input
         audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioSettings)
         audioInput!.expectsMediaDataInRealTime = true
-
-        if assetWriter!.canAdd(audioInput!) {
-            assetWriter!.add(audioInput!)
-        } else {
-            print("Cannot add audio input")
+        guard assetWriter!.canAdd(audioInput!) else {
+            fatalError("Can't add audio input to asset writer")
         }
+        assetWriter!.add(audioInput!)
 
-        print("Creating pixel buffer adaptor")
+        // Create pixel buffer adaptor
         pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(
             assetWriterInput: videoInput!,
             sourcePixelBufferAttributes: [
@@ -113,22 +113,17 @@ class Recorder {
         )
 
         startTime = CMTime()
-
-        print("Informing the delegate")
         delegate?.recorderDidStart()
     }
 
     func stopRecording(completion: @escaping () -> Void) {
 
-        print("stopRecording")
-
         if !isRecording { return }
 
+        log("Stopping the recorder...")
+
         videoInput?.markAsFinished()
-        assetWriter?.finishWriting {
-            print("Recording finished")
-            completion()
-        }
+        assetWriter?.finishWriting { completion() }
 
         recordingRect = nil
         startTime = nil

@@ -20,21 +20,17 @@ protocol StreamerDelegate : SCStreamOutput {
 }
 
 @MainActor
-class Streamer: NSObject, SCStreamDelegate
+class Streamer: NSObject, Loggable, SCStreamDelegate
 {
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
 
     // Recorder settings
     var settings = StreamerSettings.Preset.systemDefault.settings
 
-    // The currently set capture mode
-    /*
-    var captureMode: StreamerSettings.CaptureMode = .entire {
-        didSet { if captureMode != oldValue { relaunch() } }
-    }
-    */
+    // Enables debug output to the console
+    let logging: Bool = false
 
-    // ScreenCaptureKit entities
+    // ScreenCaptureKit
     var stream: SCStream?
     var display: SCDisplay?
     var filter: SCContentFilter?
@@ -124,7 +120,7 @@ class Streamer: NSObject, SCStreamDelegate
 
     func launch() async
     {
-        print("Launching streamer...")
+        log("Launching streamer...")
 
         do {
 
@@ -136,14 +132,14 @@ class Streamer: NSObject, SCStreamDelegate
             // Match the NSWindow's screen to a SCDisplay
             guard let screen = window?.screen,
                   let displayID = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID else {
-                print("Could not acquire the display ID")
+                log("Could not acquire the display ID", .warning)
                 return
             }
 
             // Get the SCDisplay with a matching display ID
             display = content.displays.first(where: { $0.displayID == displayID })
             if display == nil {
-                print("Could not find a matching display ID")
+                log("Could not find a matching display ID", .warning)
                 return
             }
 
@@ -189,12 +185,11 @@ class Streamer: NSObject, SCStreamDelegate
 
             needsRestart = false
 
-            print("Lauch completed")
-            
-        } catch {
-            print("Error: \(error)")
-        }
+            log("Lauch completed")
 
+        } catch {
+            log("\(error)", .error)
+        }
     }
 
     func relaunch()

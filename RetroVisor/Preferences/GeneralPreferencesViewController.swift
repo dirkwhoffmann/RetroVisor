@@ -48,10 +48,8 @@ class GeneralPreferencesViewController: NSViewController {
 
                 // Fired when the user stops operating the slider
                 guard let self = self else { return }
-                print("Drag ended")
                 if queueSlider.integerValue != streamer?.settings.queueDepth {
 
-                    print("Chaning queue depth to \(queueSlider.integerValue)")
                     streamer?.settings.queueDepth = queueSlider.integerValue
                     streamer?.relaunch()
                 }

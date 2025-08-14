@@ -21,7 +21,6 @@ class SidebarViewController: NSViewController, NSTableViewDataSource, NSTableVie
 
     override func viewDidLoad() {
 
-        print("SidebarViewController; viewDidLoad")
         super.viewDidLoad()
         tableView.dataSource = self
         tableView.delegate = self

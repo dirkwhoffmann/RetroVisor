@@ -75,7 +75,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func showPermissionWindow() {
 
-        print("No permissions")
         let sb = NSStoryboard(name: "Main", bundle: nil)
         if let wc = sb.instantiateController(withIdentifier: "PermissionWindow") as? NSWindowController {
             wc.showWindow(self)

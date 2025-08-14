@@ -72,7 +72,6 @@ extension AppDelegate : NSMenuItemValidation {
 
     func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
 
-        // print("validateMenuItem \(menuItem)")
         switch menuItem.action {
 
         case #selector(AppDelegate.freezeAction(_:)):

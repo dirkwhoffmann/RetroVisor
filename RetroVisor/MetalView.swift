@@ -100,9 +100,12 @@ struct CrtUniforms {
     )
 }
 
-class MetalView: MTKView, MTKViewDelegate {
+class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     @IBOutlet weak var viewController: ViewController!
+
+    // Enables debug output to the console
+    let logging: Bool = false
 
     var trackingWindow: TrackingWindow { window! as! TrackingWindow }
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
@@ -142,7 +145,7 @@ class MetalView: MTKView, MTKViewDelegate {
 
         super.init(coder: coder)
 
-        print("MetalView init")
+        log("MetalView init")
 
         device = MTLCreateSystemDefaultDevice()
         guard let device = device else { return }
@@ -223,7 +226,7 @@ class MetalView: MTKView, MTKViewDelegate {
         let magnifyRecognizer = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnify(_:)))
         addGestureRecognizer(magnifyRecognizer)
 
-        print("MetalView initialized")
+        log("MetalView initialized")
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -417,7 +420,6 @@ class MetalView: MTKView, MTKViewDelegate {
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
 
-        // print("mtkView drawableSizeWillChange")
     }
 
     @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {
