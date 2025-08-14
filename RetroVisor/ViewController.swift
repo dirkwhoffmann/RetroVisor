@@ -11,7 +11,6 @@ import Cocoa
 import MetalKit
 import MetalPerformanceShaders
 
-
 class ViewController: NSViewController {
 
     @IBOutlet weak var metalView: MetalView!

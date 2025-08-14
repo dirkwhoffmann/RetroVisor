@@ -10,11 +10,11 @@
 import Cocoa
 import ScreenCaptureKit
 
-class WindowController: NSWindowController, Loggable  {
+class WindowController: NSWindowController, Loggable {
 
-    var viewController : ViewController? { return self.contentViewController as? ViewController }
-    var effectWindow : EffectWindow? { return window as? EffectWindow }
-    var metalView : MetalView? { return viewController?.metalView }
+    var viewController: ViewController? { return self.contentViewController as? ViewController }
+    var effectWindow: EffectWindow? { return window as? EffectWindow }
+    var metalView: MetalView? { return viewController?.metalView }
 
     // Enables debug output to the console
     let logging: Bool = false
@@ -152,7 +152,6 @@ extension WindowController: TrackingWindowDelegate {
 
 extension WindowController: StreamerDelegate {
 
-
     func textureRectDidChange(rect: CGRect?) {
 
         metalView?.updateVertexBuffers(rect)
@@ -181,11 +180,11 @@ extension WindowController: StreamerDelegate {
 
             DispatchQueue.main.async { [weak self] in
 
-                if let vc = self?.contentViewController as? ViewController {
+                if let controller = self?.contentViewController as? ViewController {
 
                     let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
                     self?.recorder.timestamp = pts
-                    vc.metalView.update(with: pixelBuffer)
+                    controller.metalView.update(with: pixelBuffer)
                 }
             }
 
@@ -214,4 +213,3 @@ extension WindowController: RecorderDelegate {
         app.updateStatusBarMenuIcon(recording: false)
     }
 }
-

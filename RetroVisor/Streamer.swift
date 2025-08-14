@@ -12,7 +12,7 @@ import ScreenCaptureKit
 /* This class uses ScreenCaptureKit to record screen content and feed it into
  * the post-processor.
  */
-protocol StreamerDelegate: SCStreamOutput {
+protocol StreamerDelegate: AnyObject, SCStreamOutput {
 
     func textureRectDidChange(rect: CGRect?)
     func captureRectDidChange(rect: CGRect?)
@@ -97,7 +97,7 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
             delegate?.textureRectDidChange(rect: newTextureRect)
         }
 
-        if (captureRect != newCaptureRect) {
+        if captureRect != newCaptureRect {
 
             captureRect = newCaptureRect
             delegate?.captureRectDidChange(rect: newCaptureRect)
@@ -116,8 +116,8 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
         }
     }
 
-    func launch() async
-    {
+    func launch() async {
+
         log("Launching streamer...")
 
         do {
@@ -145,11 +145,11 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
             updateRects()
 
             // Create a content filter with the main window excluded
-            let excludedApps = content.applications.filter {
-                app in Bundle.main.bundleIdentifier == app.bundleIdentifier
+            let excludedApps = content.applications.filter { app in
+                Bundle.main.bundleIdentifier == app.bundleIdentifier
             }
-            let mainWindow = content.windows.filter {
-                win in window!.windowNumber == win.windowID
+            let mainWindow = content.windows.filter { win in
+                window!.windowNumber == win.windowID
             }
             filter = SCContentFilter(display: display!,
                                      excludingApplications: mainWindow.isEmpty ? excludedApps : [],
@@ -163,7 +163,7 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
 
             // Configure video capture
             let rect = captureRect ?? display!.frame
-            if (settings.captureMode == .cutout) { config.sourceRect = rect }
+            if settings.captureMode == .cutout { config.sourceRect = rect }
             config.showsCursor = false
             config.width = Int(rect.width) * NSScreen.scaleFactor
             config.height = Int(rect.height) * NSScreen.scaleFactor
@@ -190,13 +190,13 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
         }
     }
 
-    func relaunch()
-    {
+    func relaunch() {
+
         Task { await launch() }
     }
 
-    func relaunchIfNeeded()
-    {
+    func relaunchIfNeeded() {
+
         if needsRestart { relaunch() }
     }
 

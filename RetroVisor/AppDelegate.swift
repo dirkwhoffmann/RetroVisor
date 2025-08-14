@@ -21,7 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var recorder = Recorder()
 
     // Menu bar status item
-    var statusItem : NSStatusItem?
+    var statusItem: NSStatusItem?
 
     // Customizable shader parameters
     var crtUniforms = CrtUniforms.defaults
