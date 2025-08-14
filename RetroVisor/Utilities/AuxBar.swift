@@ -4,9 +4,13 @@ import Cocoa
 struct AuxBarItem {
 
     let image: NSImage          // The icon to display
-    let size: CGSize            // Button width and height
+    let height: CGFloat         // Button height
     let padding: CGFloat = 0.0  // Padding inside button
     let action: () -> Void      // Click handler
+
+    var size: CGSize {
+        CGSize(width: (image.size.width / image.size.height) * height, height: height)
+    }
 }
 
 class AuxBarViewController: NSTitlebarAccessoryViewController {
@@ -94,11 +98,8 @@ class AuxBarViewController: NSTitlebarAccessoryViewController {
     @objc private func buttonClicked(_ sender: NSButton) {
 
         if sender.tag >= 0 && sender.tag < items.count {
-
             items[sender.tag].action()
-
         } else {
-
             print("No icon found for tag \(sender.tag)")
         }
     }

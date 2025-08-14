@@ -11,17 +11,41 @@ import AppKit
 
 class EffectWindow: TrackingWindow {
 
-    private let recordingOn = NSImage(named: "recordingOn")!
-    private let recordingOff = NSImage(named: "recordingOff")!
+    // private let recordingOn = NSImage(named: "recordingOn")!
+    // private let recordingOff = NSImage(named: "recordingOff")!
 
-    private var overlayView: NSImageView? // Rec button
     private var pauseOverlay: Overlay?
 
-    func updateOverlay(recording: Bool) {
+    var onAir: Bool = false {
 
-        showOverlay(image: recording ? recordingOn : nil)
+        didSet {
+            if (onAir != oldValue) {
+
+                print("onAir = \(onAir)")
+
+                let icons = [
+                    AuxBarItem(
+                        image: NSImage(named: "Recording")!,
+                        height: 20
+                    ) {
+                        print("Rec clicked")
+                    }
+                ]
+
+                removeAccessory(ofType: AuxBarViewController.self)
+                let auxBar = AuxBarViewController(icons: onAir ? icons : [])
+                addTitlebarAccessoryViewController(auxBar)
+            }
+        }
     }
 
+    func updateRecordingIcon(recording: Bool) {
+
+        onAir = recording
+        // showOverlay(image: recording ? recordingOn : nil)
+    }
+
+    /*
     func showOverlay(image: NSImage?, height: CGFloat = 18, margin: CGFloat = 5) {
 
         if overlayView?.image === image { return }
@@ -50,6 +74,7 @@ class EffectWindow: TrackingWindow {
             overlayView = imageView
         }
     }
+    */
 
     func showPauseOverlay(image: NSImage, clickHandler: (() -> Void)? = nil) {
 

@@ -136,7 +136,8 @@ class Recorder: Loggable {
 
         let status = assetWriter?.status
 
-        app.windowController?.effectWindow?.updateOverlay(recording: status == .writing)
+        app.windowController?.effectWindow?.onAir = status == .writing
+        // app.windowController?.effectWindow?.updateRecordingIcon(recording: status == .writing)
 
         if !isRecording { return }
         guard let timestamp = currentTime else { return }

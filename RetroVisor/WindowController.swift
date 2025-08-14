@@ -82,34 +82,32 @@ class WindowController: NSWindowController  {
         // Setup the recorder
         recorder.delegate = self
 
-        let recImg = NSImage(named: "Recording")!
-
         // Experimental
         let icons = [
             /*
             AuxBarItem(
                 image: NSImage(systemSymbolName: "lock.fill", accessibilityDescription: nil)!,
-                size: CGSize(width: 20, height: 12),
+                height: 12,
             ) {
                 print("Lock clicked")
             },
             AuxBarItem(
                 image: NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)!,
-                size: CGSize(width: 24, height: 12),
+                height: 12,
             ) {
                 print("Star clicked")
             },
             */
             AuxBarItem(
                 image: NSImage(named: "Recording")!,
-                size: CGSize(width: (recImg.size.width / recImg.size.height) * 20, height: 20),
+                height: 20
             ) {
                 print("Rec clicked")
             }
         ]
 
-        let accessory = AuxBarViewController(icons: icons)
-        window.addTitlebarAccessoryViewController(accessory)
+        // let accessory = AuxBarViewController(icons: icons)
+        // window.addTitlebarAccessoryViewController(accessory)
     }
 
     @objc func lockClicked() {

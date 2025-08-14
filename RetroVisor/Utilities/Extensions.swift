@@ -14,6 +14,16 @@ extension NSScreen {
     static var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }
 }
 
+extension NSWindow {
+
+    func removeAccessory<T: NSTitlebarAccessoryViewController>(ofType type: T.Type) {
+        
+        if let index = titlebarAccessoryViewControllers.firstIndex(where: { $0 is T }) {
+            removeTitlebarAccessoryViewController(at: index)
+        }
+    }
+}
+
 extension Dictionary where Key == String {
 
     var prettify: String {
