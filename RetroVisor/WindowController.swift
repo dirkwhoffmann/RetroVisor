@@ -90,9 +90,8 @@ class WindowController: NSWindowController, Loggable  {
 
         window.ignoresMouseEvents = true
         window.styleMask = [.titled, .nonactivatingPanel, .fullSizeContentView]
-        window.contentView?.layer?.borderColor = NSColor.systemGray.cgColor
         window.contentView?.layer?.borderWidth = 0
-        window.contentView?.layer?.cornerRadius = 10
+        window.contentView?.layer?.cornerRadius = 0
     }
 
     func unfreeze() {

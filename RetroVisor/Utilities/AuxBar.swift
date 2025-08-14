@@ -1,7 +1,7 @@
 import Cocoa
 
 
-struct AuxBarItem {
+struct IconBarItem {
 
     let image: NSImage          // The icon to display
     let height: CGFloat         // Button height
@@ -19,9 +19,9 @@ class AuxBarViewController: NSTitlebarAccessoryViewController {
     var buttonBg: CGColor { debug ? NSColor.yellow.cgColor : NSColor.clear.cgColor }
     var contentBg: CGColor { debug ? NSColor.red.cgColor : NSColor.clear.cgColor }
 
-    var items: [AuxBarItem] = []
+    var items: [IconBarItem] = []
 
-    init(icons: [AuxBarItem], spacing: CGFloat = 6) {
+    init(icons: [IconBarItem], spacing: CGFloat = 6) {
 
         super.init(nibName: nil, bundle: nil)
 

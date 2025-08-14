@@ -23,7 +23,7 @@ class EffectWindow: TrackingWindow {
                 print("onAir = \(onAir)")
 
                 let icons = [
-                    AuxBarItem(
+                    IconBarItem(
                         image: NSImage(named: "Recording")!,
                         height: 20
                     ) {
