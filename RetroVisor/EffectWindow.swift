@@ -18,7 +18,7 @@ class EffectWindow: TrackingWindow {
     var onAir: Bool = false {
 
         didSet {
-            if (onAir != oldValue) {
+            if onAir != oldValue {
 
                 print("onAir = \(onAir)")
 

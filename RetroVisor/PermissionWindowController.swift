@@ -9,7 +9,7 @@
 
 import Cocoa
 
-class PermissionWindowController: NSWindowController  {
+class PermissionWindowController: NSWindowController {
 
     override func windowDidLoad() {
 

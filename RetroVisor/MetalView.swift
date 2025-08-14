@@ -108,7 +108,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     let logging: Bool = false
 
     var trackingWindow: TrackingWindow { window! as! TrackingWindow }
-    var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var windowController: WindowController? { return trackingWindow.windowController as? WindowController }
     var recorder: Recorder? { return windowController?.recorder }
 
@@ -123,11 +122,11 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var uniforms = Uniforms.init(time: 0.0,
                                  zoom: 1.0,
                                  intensity: 0.0,
-                                 resolution: [0,0],
-                                 window: [0,0],
-                                 center: [0,0],
-                                 mouse: [0,0],
-                                 texRect: [0,0,0,0])
+                                 resolution: [0, 0],
+                                 window: [0, 0],
+                                 center: [0, 0],
+                                 mouse: [0, 0],
+                                 texRect: [0, 0, 0, 0])
 
     var textureCache: CVMetalTextureCache!
     var inTexture: MTLTexture?
@@ -221,12 +220,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         } catch {
             fatalError("Failed to create pipeline state: \(error)")
         }
-
-        // Enable the magnification gesture
-        let magnifyRecognizer = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnify(_:)))
-        addGestureRecognizer(magnifyRecognizer)
-
-        log("MetalView initialized")
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -247,14 +240,14 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         let ty1 = Float(rect.minY)
         let ty2 = Float(rect.maxY)
 
-        uniforms.texRect = [tx1, ty1, tx2, ty2];
+        uniforms.texRect = [tx1, ty1, tx2, ty2]
 
         // Quad rendered in the main stage (CRT effect)
         let vertices1: [Vertex] = [
             Vertex(pos: [-1,  1, 0, 1], tex: [tx1, ty1]),
             Vertex(pos: [-1, -1, 0, 1], tex: [tx1, ty2]),
             Vertex(pos: [ 1,  1, 0, 1], tex: [tx2, ty1]),
-            Vertex(pos: [ 1, -1, 0, 1], tex: [tx2, ty2]),
+            Vertex(pos: [ 1, -1, 0, 1], tex: [tx2, ty2])
         ]
 
         // Quad rendered in the post-processing stage (drag and resize animation)
@@ -262,7 +255,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
             Vertex(pos: [-1,  1, 0, 1], tex: [0, 0]),
             Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
             Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
-            Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1]),
+            Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1])
         ]
 
         vertexBuffer1 = device!.makeBuffer(bytes: vertices1,
@@ -282,14 +275,14 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     func updateTextures(width: Int, height: Int) {
 
-        let w = NSScreen.scaleFactor * width
-        let h = NSScreen.scaleFactor * height
+        let width = NSScreen.scaleFactor * width
+        let height = NSScreen.scaleFactor * height
 
-        if outTexture?.width != w || outTexture?.height != h {
+        if outTexture?.width != width || outTexture?.height != height {
 
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
-                                                                      width: w,
-                                                                      height: h,
+                                                                      width: width,
+                                                                      height: height,
                                                                       mipmapped: false)
             descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
             outTexture = device!.makeTexture(descriptor: descriptor)
@@ -383,7 +376,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Second pass: In-texture blurring
         //
 
-        if (uniforms.intensity > 0) {
+        if uniforms.intensity > 0 {
 
             let radius = Int(9.0 * uniforms.intensity) | 1
             let blur = MPSImageBox(device: device!, kernelWidth: radius, kernelHeight: radius)

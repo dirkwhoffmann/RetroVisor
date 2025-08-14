@@ -12,7 +12,7 @@ import ScreenCaptureKit
 /* This class uses ScreenCaptureKit to record screen content and feed it into
  * the post-processor.
  */
-protocol StreamerDelegate : SCStreamOutput {
+protocol StreamerDelegate: SCStreamOutput {
 
     func textureRectDidChange(rect: CGRect?)
     func captureRectDidChange(rect: CGRect?)
@@ -20,9 +20,7 @@ protocol StreamerDelegate : SCStreamOutput {
 }
 
 @MainActor
-class Streamer: NSObject, Loggable, SCStreamDelegate
-{
-    var app: AppDelegate { NSApp.delegate as! AppDelegate }
+class Streamer: NSObject, Loggable, SCStreamDelegate {
 
     // Recorder settings
     var settings = StreamerSettings.Preset.systemDefault.settings

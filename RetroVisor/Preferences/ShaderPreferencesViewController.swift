@@ -174,7 +174,6 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     @IBOutlet weak var tableView: NSTableView!
     @IBOutlet weak var shaderSelector: NSPopUpButton!
 
-    var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var oldSettings: CrtUniforms!
 
     override func viewDidLoad() {

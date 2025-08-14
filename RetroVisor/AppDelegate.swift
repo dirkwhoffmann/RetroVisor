@@ -14,8 +14,6 @@ var app: AppDelegate { NSApp.delegate as! AppDelegate }
 @main @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    var app: AppDelegate { NSApp.delegate as! AppDelegate }
-
     // Gateway to ScreenCaptureKit
     var streamer = Streamer()
 

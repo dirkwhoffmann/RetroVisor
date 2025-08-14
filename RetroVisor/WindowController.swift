@@ -12,7 +12,6 @@ import ScreenCaptureKit
 
 class WindowController: NSWindowController, Loggable  {
 
-    var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var viewController : ViewController? { return self.contentViewController as? ViewController }
     var effectWindow : EffectWindow? { return window as? EffectWindow }
     var metalView : MetalView? { return viewController?.metalView }
@@ -167,7 +166,7 @@ extension WindowController: StreamerDelegate {
 
         if let image = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: nil) {
             effectWindow?.showPauseOverlay(image: image) {
-                self.app.streamer.relaunch()
+                app.streamer.relaunch()
             }
         }
     }

@@ -28,7 +28,6 @@ class TrackingSliderCell: NSSliderCell {
 
 class GeneralPreferencesViewController: NSViewController {
 
-    var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var streamer: Streamer? { app.streamer }
 
     @IBOutlet weak var fpsButton: NSPopUpButton!

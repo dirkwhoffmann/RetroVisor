@@ -11,7 +11,7 @@ import Cocoa
 import UniformTypeIdentifiers
 
 @MainActor
-extension AppDelegate : NSMenuItemValidation {
+extension AppDelegate: NSMenuItemValidation {
 
     //
     // Status Bar Menu
@@ -101,7 +101,6 @@ extension AppDelegate : NSMenuItemValidation {
             }
             return true
 
-
         default:
             return true
         }
@@ -110,7 +109,11 @@ extension AppDelegate : NSMenuItemValidation {
     @IBAction func freezeAction(_ sender: NSMenuItem) {
 
         if let controller = windowController {
-            controller.isFrozen ? controller.unfreeze() : controller.freeze()
+            if controller.isFrozen {
+                controller.unfreeze()
+            } else {
+                controller.freeze()
+            }
         }
     }
 

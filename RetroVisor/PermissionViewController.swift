@@ -9,7 +9,7 @@
 
 import Cocoa
 
-class PermissionViewController: NSViewController  {
+class PermissionViewController: NSViewController {
 
     @IBOutlet weak var permissionIcon: NSImageView!
     @IBOutlet weak var titleText: NSTextField!

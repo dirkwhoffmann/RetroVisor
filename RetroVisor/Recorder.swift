@@ -10,7 +10,7 @@
 import AVFoundation
 import ScreenCaptureKit
 
-protocol RecorderDelegate {
+protocol RecorderDelegate: AnyObject {
 
     func recorderDidStart()
     func recorderDidStop()
@@ -18,8 +18,6 @@ protocol RecorderDelegate {
 
 @MainActor
 class Recorder: Loggable {
-
-    var app: AppDelegate { NSApp.delegate as! AppDelegate }
 
     // Event receiver
     var delegate: RecorderDelegate?
@@ -168,9 +166,9 @@ class Recorder: Loggable {
 
         guard videoInput!.isReadyForMoreMediaData else { return }
 
-        var pb: CVPixelBuffer?
-        CVPixelBufferPoolCreatePixelBuffer(nil, pixelBufferAdaptor!.pixelBufferPool!, &pb)
-        guard let pixelBuffer = pb else { return }
+        var pixelBuffer: CVPixelBuffer?
+        CVPixelBufferPoolCreatePixelBuffer(nil, pixelBufferAdaptor!.pixelBufferPool!, &pixelBuffer)
+        guard let pixelBuffer = pixelBuffer else { return }
 
         // Copy Metal texture into CVPixelBuffer
         CVPixelBufferLockBaseAddress(pixelBuffer, [])

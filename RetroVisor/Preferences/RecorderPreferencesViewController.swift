@@ -11,7 +11,6 @@ import Cocoa
 
 class RecorderPreferencesViewController: NSViewController {
 
-    var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var streamer: Streamer? { app.streamer }
     var recorder: Recorder? { app.recorder }
     var metalView: MetalView? { app.windowController?.metalView }
