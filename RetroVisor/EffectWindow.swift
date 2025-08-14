@@ -11,8 +11,8 @@ import AppKit
 
 class EffectWindow: TrackingWindow {
 
-    let recordingOn = NSImage(named: "recordingOn")!
-    let recordingOff = NSImage(named: "recordingOff")!
+    private let recordingOn = NSImage(named: "recordingOn")!
+    private let recordingOff = NSImage(named: "recordingOff")!
 
     private var overlayView: NSImageView? // Rec button
     private var pauseOverlay: Overlay?
@@ -51,15 +51,10 @@ class EffectWindow: TrackingWindow {
         }
     }
 
-    func showPauseOverlay() {
-            pauseOverlay = Overlay(window: self, iconName: "pause.circle") { [weak self] in
-                self?.pauseOverlay?.removeOverlay()
-                app.streamer.relaunch()
-            }
-        }
+    func showPauseOverlay(image: NSImage, clickHandler: (() -> Void)? = nil) {
 
-        func hidePauseOverlay() {
-            pauseOverlay?.removeOverlay()
-            pauseOverlay = nil
+        pauseOverlay = Overlay(window: self, image: image) {
+            clickHandler?()
         }
+    }
 }
