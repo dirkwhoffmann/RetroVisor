@@ -37,6 +37,7 @@
 		50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */; };
 		50DE5B842E4CDB08002C07EC /* Loggable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DE5B832E4CDB02002C07EC /* Loggable.swift */; };
 		50DE5B862E4DA04B002C07EC /* Overlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DE5B852E4DA045002C07EC /* Overlay.swift */; };
+		50DE5B882E4E0666002C07EC /* AuxBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DE5B872E4E065D002C07EC /* AuxBar.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -72,6 +73,7 @@
 		50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderSettingCell.swift; sourceTree = "<group>"; };
 		50DE5B832E4CDB02002C07EC /* Loggable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Loggable.swift; sourceTree = "<group>"; };
 		50DE5B852E4DA045002C07EC /* Overlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Overlay.swift; sourceTree = "<group>"; };
+		50DE5B872E4E065D002C07EC /* AuxBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuxBar.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +90,7 @@
 		50079E6F2E433206005BC5FD /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				50DE5B872E4E065D002C07EC /* AuxBar.swift */,
 				50DE5B852E4DA045002C07EC /* Overlay.swift */,
 				50DE5B832E4CDB02002C07EC /* Loggable.swift */,
 				50079E702E438139005BC5FD /* Extensions.swift */,
@@ -271,6 +274,7 @@
 				503FCC252E4868E100EF49DA /* GeneralPreferencesViewController.swift in Sources */,
 				503FCC1E2E48670300EF49DA /* PreferencesWindowController.swift in Sources */,
 				50BA96532E3C80D6006BA8DF /* Streamer.swift in Sources */,
+				50DE5B882E4E0666002C07EC /* AuxBar.swift in Sources */,
 				50BA96542E3C80D6006BA8DF /* Shaders.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

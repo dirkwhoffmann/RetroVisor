@@ -10,12 +10,25 @@
 import Cocoa
 import ScreenCaptureKit
 
+class ColoredButton: NSButton {
+    var fillColor: NSColor = .systemBlue
+
+    override func draw(_ dirtyRect: NSRect) {
+        fillColor.setFill()
+        let path = NSBezierPath(roundedRect: bounds, xRadius: 4, yRadius: 4)
+        path.fill()
+        super.draw(dirtyRect)
+    }
+}
+
 class WindowController: NSWindowController  {
 
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var viewController : ViewController? { return self.contentViewController as? ViewController }
     var effectWindow : EffectWindow? { return window as? EffectWindow }
     var metalView : MetalView? { return viewController?.metalView }
+
+    var accessory: AuxBarViewController?
 
     // Video source and sink
     var recorder: Recorder { return app.recorder }
@@ -68,6 +81,46 @@ class WindowController: NSWindowController  {
 
         // Setup the recorder
         recorder.delegate = self
+
+        let recImg = NSImage(named: "Recording")!
+
+        // Experimental
+        let icons = [
+            AuxBarItem(
+                tag: 0,
+                image: NSImage(systemSymbolName: "lock.fill", accessibilityDescription: nil)!,
+                size: CGSize(width: 20, height: 12),
+                padding: 2,
+                bgColor: NSColor.blue
+            ) {
+                print("Lock clicked")
+            },
+            AuxBarItem(
+                tag: 1,
+                image: NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)!,
+                size: CGSize(width: 24, height: 12),
+                padding: 4,
+                bgColor: NSColor.green
+            ) {
+                print("Star clicked")
+            },
+            AuxBarItem(
+                tag: 2,
+                image: NSImage(named: "Recording")!,
+                size: CGSize(width: (recImg.size.width / recImg.size.height) * 20, height: 20),
+                padding: 2,
+                bgColor: NSColor.yellow
+            ) {
+                print("Rec clicked")
+            }
+        ]
+
+        let accessory = AuxBarViewController(icons: icons)
+        window.addTitlebarAccessoryViewController(accessory)
+    }
+
+    @objc func lockClicked() {
+        print("Lock button clicked")
     }
 
     func showPermissionAlert() {
