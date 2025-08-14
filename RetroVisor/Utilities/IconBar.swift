@@ -1,9 +1,17 @@
 import Cocoa
 
+/* The IconBar class provides a view controller that can be added as an accessory
+ * view to the title bar. It can host multiple clickable icons, each defined by an
+ * image, its height, and an optional padding value. An optional click handler can
+ * be assigned to trigger an action when the icon is clicked.
+ *
+ * The IconBar is used by the effect window to display the record icon
+ * that appears while recording is in progress.
+ */
 
-struct IconBarItem {
+struct BarIcon {
 
-    let image: NSImage          // The icon to display
+    let image: NSImage          // Button image
     let height: CGFloat         // Button height
     let padding: CGFloat = 0.0  // Padding inside button
     let action: () -> Void      // Click handler
@@ -13,15 +21,15 @@ struct IconBarItem {
     }
 }
 
-class AuxBarViewController: NSTitlebarAccessoryViewController {
+class IconBarViewController: NSTitlebarAccessoryViewController {
 
     let debug = false
     var buttonBg: CGColor { debug ? NSColor.yellow.cgColor : NSColor.clear.cgColor }
     var contentBg: CGColor { debug ? NSColor.red.cgColor : NSColor.clear.cgColor }
 
-    var items: [IconBarItem] = []
+    var items: [BarIcon] = []
 
-    init(icons: [IconBarItem], spacing: CGFloat = 6) {
+    init(icons: [BarIcon], spacing: CGFloat = 6) {
 
         super.init(nibName: nil, bundle: nil)
 
@@ -93,14 +101,12 @@ class AuxBarViewController: NSTitlebarAccessoryViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Button Action
-
     @objc private func buttonClicked(_ sender: NSButton) {
 
         if sender.tag >= 0 && sender.tag < items.count {
             items[sender.tag].action()
         } else {
-            print("No icon found for tag \(sender.tag)")
+            fatalError("No icon found for tag \(sender.tag)")
         }
     }
 }

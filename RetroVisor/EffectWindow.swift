@@ -23,7 +23,7 @@ class EffectWindow: TrackingWindow {
                 print("onAir = \(onAir)")
 
                 let icons = [
-                    IconBarItem(
+                    BarIcon(
                         image: NSImage(named: "Recording")!,
                         height: 20
                     ) {
@@ -31,9 +31,9 @@ class EffectWindow: TrackingWindow {
                     }
                 ]
 
-                removeAccessory(ofType: AuxBarViewController.self)
-                let auxBar = AuxBarViewController(icons: onAir ? icons : [])
-                addTitlebarAccessoryViewController(auxBar)
+                removeAccessory(ofType: IconBarViewController.self)
+                let iconBar = IconBarViewController(icons: onAir ? icons : [])
+                addTitlebarAccessoryViewController(iconBar)
             }
         }
     }

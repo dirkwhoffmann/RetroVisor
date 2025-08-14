@@ -64,8 +64,8 @@ class Streamer: NSObject, Loggable, SCStreamDelegate
         )
     }
 
-    func updateRects()
-    {
+    func updateRects() {
+
         guard let window = self.window else { return }
 
         var newSourceRect = window.screenCoordinates
@@ -199,13 +199,7 @@ class Streamer: NSObject, Loggable, SCStreamDelegate
 
     func relaunchIfNeeded()
     {
-        if (needsRestart) { relaunch() }
-    }
-
-    var frame = 0
-
-    func record(buffer: CVPixelBuffer) {
-
+        if needsRestart { relaunch() }
     }
 
     nonisolated func stream(_ stream: SCStream, didStopWithError error: Error) {

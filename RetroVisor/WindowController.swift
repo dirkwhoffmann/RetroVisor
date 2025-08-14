@@ -21,7 +21,7 @@ class WindowController: NSWindowController, Loggable  {
     let logging: Bool = false
 
     // Icon bar containing the recorder icon
-    var accessory: AuxBarViewController?
+    var accessory: IconBarViewController?
 
     // Video source and sink
     var recorder: Recorder { return app.recorder }

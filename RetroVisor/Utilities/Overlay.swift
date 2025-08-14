@@ -9,6 +9,10 @@
 
 import AppKit
 
+/* The Overlay class allows the client to superimpose a window with a large,
+ * clickable icon. It is used to display the large pause icon shown when the
+ * capture stream ends or is terminated.
+ */
 final class Overlay {
 
     private weak var window: NSWindow?
