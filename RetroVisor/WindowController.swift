@@ -86,30 +86,23 @@ class WindowController: NSWindowController  {
 
         // Experimental
         let icons = [
+            /*
             AuxBarItem(
-                tag: 0,
                 image: NSImage(systemSymbolName: "lock.fill", accessibilityDescription: nil)!,
                 size: CGSize(width: 20, height: 12),
-                padding: 2,
-                bgColor: NSColor.blue
             ) {
                 print("Lock clicked")
             },
             AuxBarItem(
-                tag: 1,
                 image: NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)!,
                 size: CGSize(width: 24, height: 12),
-                padding: 4,
-                bgColor: NSColor.green
             ) {
                 print("Star clicked")
             },
+            */
             AuxBarItem(
-                tag: 2,
                 image: NSImage(named: "Recording")!,
                 size: CGSize(width: (recImg.size.width / recImg.size.height) * 20, height: 20),
-                padding: 2,
-                bgColor: NSColor.yellow
             ) {
                 print("Rec clicked")
             }

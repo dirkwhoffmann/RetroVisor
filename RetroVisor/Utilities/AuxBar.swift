@@ -3,12 +3,10 @@ import Cocoa
 
 struct AuxBarItem {
 
-    let tag: Int
-    let image: NSImage
-    let size: CGSize         // width & height of the button
-    let padding: CGFloat     // padding inside button
-    let bgColor: NSColor    
-    let action: () -> Void   // click handler
+    let image: NSImage          // The icon to display
+    let size: CGSize            // Button width and height
+    let padding: CGFloat = 0.0  // Padding inside button
+    let action: () -> Void      // Click handler
 }
 
 class AuxBarViewController: NSTitlebarAccessoryViewController {
@@ -37,11 +35,11 @@ class AuxBarViewController: NSTitlebarAccessoryViewController {
 
         var prev: NSButton? = nil
 
-        for icon in icons {
+        for (index, icon) in icons.enumerated() {
 
             // Create a button
             let button = NSButton()
-            button.tag = icon.tag
+            button.tag = index
             button.imagePosition = .imageOnly
             button.isBordered = false
             button.wantsLayer = true
@@ -95,11 +93,12 @@ class AuxBarViewController: NSTitlebarAccessoryViewController {
 
     @objc private func buttonClicked(_ sender: NSButton) {
 
-        if let icon = items.first(where: { $0.tag == sender.tag }) {
+        if sender.tag >= 0 && sender.tag < items.count {
 
-            // Call the action stored in the struct
-            icon.action()
+            items[sender.tag].action()
+
         } else {
+
             print("No icon found for tag \(sender.tag)")
         }
     }
