@@ -21,6 +21,9 @@ class Recorder: Loggable {
 
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
 
+    // Event receiver
+    var delegate: RecorderDelegate?
+
     // Enables debug output to the console
     let logging: Bool = false
 
@@ -28,19 +31,25 @@ class Recorder: Loggable {
     var settings = RecorderSettings.Preset.systemDefault.settings
 
     // The current recording state
-    var isRecording: Bool { startTime != nil }
+    var isRecording: Bool { countdown == 0 }
+
+    // Time when the recorder started
+    // private var startTime: CMTime?
+
+    // The recorded screen cutout
+    private(set) var recordingRect: NSRect?
+
+    // Time stamp of the currently recorded frame
+    var timestamp: CMTime?
+
+    // Frame counter to skip initial frames after recording starts
+    var countdown: Int?
 
     // AVWriter
     private var assetWriter: AVAssetWriter?
     private var videoInput: AVAssetWriterInput?
     private var audioInput: AVAssetWriterInput?
     private var pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
-    private var startTime: CMTime?
-    private(set) var recordingRect: NSRect?
-    var currentTime: CMTime?
-
-    // Event receiver
-    var delegate: RecorderDelegate?
 
     func startRecording(width: Int, height: Int) {
 
@@ -112,7 +121,7 @@ class Recorder: Loggable {
             ]
         )
 
-        startTime = CMTime()
+        countdown = 8
         delegate?.recorderDidStart()
     }
 
@@ -126,7 +135,7 @@ class Recorder: Loggable {
         assetWriter?.finishWriting { completion() }
 
         recordingRect = nil
-        startTime = nil
+        countdown = nil
 
         delegate?.recorderDidStop()
     }
@@ -135,12 +144,12 @@ class Recorder: Loggable {
     func appendVideo(texture: MTLTexture) {
 
         let status = assetWriter?.status
-
         app.windowController?.effectWindow?.onAir = status == .writing
-        // app.windowController?.effectWindow?.updateRecordingIcon(recording: status == .writing)
 
+        if (countdown ?? 0) > 0 { countdown! -= 1 }
         if !isRecording { return }
-        guard let timestamp = currentTime else { return }
+
+        guard let timestamp = timestamp else { return }
         guard let assetWriter = assetWriter else { return }
 
         let texW = CGFloat(texture.width)

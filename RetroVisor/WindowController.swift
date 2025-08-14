@@ -10,24 +10,17 @@
 import Cocoa
 import ScreenCaptureKit
 
-class ColoredButton: NSButton {
-    var fillColor: NSColor = .systemBlue
-
-    override func draw(_ dirtyRect: NSRect) {
-        fillColor.setFill()
-        let path = NSBezierPath(roundedRect: bounds, xRadius: 4, yRadius: 4)
-        path.fill()
-        super.draw(dirtyRect)
-    }
-}
-
-class WindowController: NSWindowController  {
+class WindowController: NSWindowController, Loggable  {
 
     var app: AppDelegate { NSApp.delegate as! AppDelegate }
     var viewController : ViewController? { return self.contentViewController as? ViewController }
     var effectWindow : EffectWindow? { return window as? EffectWindow }
     var metalView : MetalView? { return viewController?.metalView }
 
+    // Enables debug output to the console
+    let logging: Bool = false
+
+    // Icon bar containing the recorder icon
     var accessory: AuxBarViewController?
 
     // Video source and sink
@@ -37,6 +30,7 @@ class WindowController: NSWindowController  {
     // Indicates if the window is passive (click-through state)
     var isFrozen: Bool { return window?.ignoresMouseEvents ?? false }
 
+    // Indicates if the window is invisible (but still active)
     var invisible: Bool = false {
         didSet {
             if invisible {
@@ -71,47 +65,11 @@ class WindowController: NSWindowController  {
         streamer.delegate = self
         streamer.window = effectWindow
 
-        Task {
-            if await Streamer.canRecord {
-                await streamer.launch()
-            } else {
-                showPermissionAlert()
-            }
-        }
-
         // Setup the recorder
         recorder.delegate = self
 
-        // Experimental
-        let icons = [
-            /*
-            AuxBarItem(
-                image: NSImage(systemSymbolName: "lock.fill", accessibilityDescription: nil)!,
-                height: 12,
-            ) {
-                print("Lock clicked")
-            },
-            AuxBarItem(
-                image: NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)!,
-                height: 12,
-            ) {
-                print("Star clicked")
-            },
-            */
-            AuxBarItem(
-                image: NSImage(named: "Recording")!,
-                height: 20
-            ) {
-                print("Rec clicked")
-            }
-        ]
-
-        // let accessory = AuxBarViewController(icons: icons)
-        // window.addTitlebarAccessoryViewController(accessory)
-    }
-
-    @objc func lockClicked() {
-        print("Lock button clicked")
+        // Launch the streamer
+        Task { await streamer.launch() }
     }
 
     func showPermissionAlert() {
@@ -228,7 +186,7 @@ extension WindowController: StreamerDelegate {
                 if let vc = self?.contentViewController as? ViewController {
 
                     let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
-                    self?.recorder.currentTime = pts
+                    self?.recorder.timestamp = pts
                     vc.metalView.update(with: pixelBuffer)
                 }
             }
