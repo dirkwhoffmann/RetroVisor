@@ -11,11 +11,10 @@ import AppKit
 
 class EffectWindow: TrackingWindow {
 
-    // private let recordingOn = NSImage(named: "recordingOn")!
-    // private let recordingOff = NSImage(named: "recordingOff")!
-
+    // When the stream terminates, a large pause icon is drawn
     private var pauseOverlay: Overlay?
 
+    // Set to true to display a REC icon in the upper right corner
     var onAir: Bool = false {
 
         didSet {
@@ -38,43 +37,6 @@ class EffectWindow: TrackingWindow {
             }
         }
     }
-
-    func updateRecordingIcon(recording: Bool) {
-
-        onAir = recording
-        // showOverlay(image: recording ? recordingOn : nil)
-    }
-
-    /*
-    func showOverlay(image: NSImage?, height: CGFloat = 18, margin: CGFloat = 5) {
-
-        if overlayView?.image === image { return }
-        guard let container = contentView else { return }
-
-        // Remove old overlay
-        overlayView?.removeFromSuperview()
-        overlayView = nil
-
-        // Add new overlay
-        if image != nil {
-
-            let imageView = NSImageView(image: image!)
-            imageView.imageScaling = .scaleProportionallyUpOrDown
-            imageView.translatesAutoresizingMaskIntoConstraints = false
-
-            container.addSubview(imageView, positioned: .above, relativeTo: nil)
-
-            NSLayoutConstraint.activate([
-                imageView.topAnchor.constraint(equalTo: container.topAnchor, constant: margin),
-                imageView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -margin),
-                imageView.heightAnchor.constraint(equalToConstant: height),
-                imageView.widthAnchor.constraint(equalTo: imageView.heightAnchor, multiplier: image!.size.width / image!.size.height)
-            ])
-
-            overlayView = imageView
-        }
-    }
-    */
 
     func showPauseOverlay(image: NSImage, clickHandler: (() -> Void)? = nil) {
 
