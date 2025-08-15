@@ -116,6 +116,18 @@
 			path = Preferences;
 			sourceTree = "<group>";
 		};
+		5069364B2E4EFB1F0037984F /* Windows */ = {
+			isa = PBXGroup;
+			children = (
+				503FCC302E49BBE200EF49DA /* EffectWindow.swift */,
+				50BA964A2E3C80D6006BA8DF /* WindowController.swift */,
+				50292D932E471A2C0084CFE3 /* PermissionWindowController.swift */,
+				50292D952E471AA40084CFE3 /* PermissionViewController.swift */,
+				50BA96492E3C80D6006BA8DF /* ViewController.swift */,
+			);
+			path = Windows;
+			sourceTree = "<group>";
+		};
 		509C8DD52E38F99E004BE11C = {
 			isa = PBXGroup;
 			children = (
@@ -137,17 +149,13 @@
 			children = (
 				50079E6F2E433206005BC5FD /* Utilities */,
 				503FCC1F2E48670B00EF49DA /* Preferences */,
+				5069364B2E4EFB1F0037984F /* Windows */,
 				50BA96442E3C80D6006BA8DF /* AppDelegate.swift */,
 				50079E6D2E4331F2005BC5FD /* Menu.swift */,
-				503FCC302E49BBE200EF49DA /* EffectWindow.swift */,
-				50BA964A2E3C80D6006BA8DF /* WindowController.swift */,
-				50292D932E471A2C0084CFE3 /* PermissionWindowController.swift */,
-				50292D952E471AA40084CFE3 /* PermissionViewController.swift */,
-				50BA96492E3C80D6006BA8DF /* ViewController.swift */,
 				50292D8F2E4685D80084CFE3 /* MetalView.swift */,
 				50BA964C2E3C80D6006BA8DF /* Streamer.swift */,
 				503FCC2C2E48F59F00EF49DA /* Recorder.swift */,
-				50BA96672E3FF19B006BA8DF /* Shaders */,
+				50BA96672E3FF19B006BA8DF /* GPU */,
 				50BA96482E3C80D6006BA8DF /* Main.storyboard */,
 				50BA964B2E3C80D6006BA8DF /* RetroVisor.entitlements */,
 				50BA96452E3C80D6006BA8DF /* Assets.xcassets */,
@@ -164,14 +172,14 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		50BA96672E3FF19B006BA8DF /* Shaders */ = {
+		50BA96672E3FF19B006BA8DF /* GPU */ = {
 			isa = PBXGroup;
 			children = (
 				50BA96652E3FF176006BA8DF /* ShaderTypes.metal */,
 				50BA964D2E3C80D6006BA8DF /* Shaders.metal */,
 				50BA96632E3FF0B3006BA8DF /* crt-easymode.metal */,
 			);
-			path = Shaders;
+			path = GPU;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
