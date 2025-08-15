@@ -9,19 +9,6 @@
 
 import Cocoa
 
-struct ShaderSetting {
-
-    let name: String
-    let key: String
-    let range: ClosedRange<Double>?
-    let step: Float
-    let help: String?
-
-    var formatString: String {
-        return step < 0.1 ? "%.2f" : step < 1.0 ? "%.1f" : "%.0f"
-    }
-}
-
 var shaderSettings: [ShaderSetting] = [
 
     ShaderSetting(
@@ -174,11 +161,12 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     @IBOutlet weak var tableView: NSTableView!
     @IBOutlet weak var shaderSelector: NSPopUpButton!
 
-    var oldSettings: CrtUniforms!
+    var shader: Shader { return app.currentShader }
+    // var oldSettings: CrtUniforms!
 
     override func viewDidLoad() {
 
-        oldSettings = app.crtUniforms
+        // oldSettings = app.crtUniforms
 
         tableView.delegate = self
         tableView.dataSource = self
@@ -188,12 +176,15 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
 
     func refresh() {
 
-        shaderSelector.selectItem(withTag: Int(app.crtUniforms.ENABLE))
+        shaderSelector.selectItem(withTag: 0) // Int(app.crtUniforms.ENABLE))
         tableView.reloadData()
     }
 
     func get(key: String) -> Float {
 
+        return shader.get(key: key)
+
+        /*
         switch key {
         case "ENABLE": return Float(app.crtUniforms.ENABLE)
         case "BRIGHT_BOOST": return app.crtUniforms.BRIGHT_BOOST
@@ -219,10 +210,13 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
             NSSound.beep()
             return 0
         }
+        */
     }
 
     func set(key: String, value: Float) {
 
+        shader.set(key: key, value: value)
+        /*
         switch key {
         case "ENABLE": app.crtUniforms.ENABLE = Int32(value)
         case "BRIGHT_BOOST": app.crtUniforms.BRIGHT_BOOST = value
@@ -247,11 +241,13 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
         default:
             NSSound.beep()
         }
+        */
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int {
 
-        return app.crtUniforms.ENABLE == 0 ? 0 : shaderSettings.count
+        return shader.settings.count
+        // return app.crtUniforms.ENABLE == 0 ? 0 : shaderSettings.count
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
@@ -264,19 +260,19 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
 
     @IBAction func shaderSelectAction(_ sender: NSPopUpButton) {
 
-        app.crtUniforms.ENABLE = Int32(sender.selectedTag())
+        // app.crtUniforms.ENABLE = Int32(sender.selectedTag())
         refresh()
     }
 
     @IBAction func defaultsAction(_ sender: NSButton) {
 
-        app.crtUniforms.self = CrtUniforms.defaults
+        // app.crtUniforms.self = CrtUniforms.defaults
         refresh()
     }
 
     @IBAction func cancelAction(_ sender: NSButton) {
 
-        app.crtUniforms.self = oldSettings
+        // app.crtUniforms.self = oldSettings
         view.window?.close()
     }
 

@@ -54,52 +54,6 @@ struct Uniforms {
     var texRect: SIMD4<Float>
 }
 
-struct CrtUniforms {
-
-    var ENABLE: Int32
-    var BRIGHT_BOOST: Float
-    var DILATION: Float
-    var GAMMA_INPUT: Float
-    var GAMMA_OUTPUT: Float
-    var MASK_SIZE: Float
-    var MASK_STAGGER: Float
-    var MASK_STRENGTH: Float
-    var MASK_DOT_WIDTH: Float
-    var MASK_DOT_HEIGHT: Float
-    var SCANLINE_BEAM_WIDTH_MAX: Float
-    var SCANLINE_BEAM_WIDTH_MIN: Float
-    var SCANLINE_BRIGHT_MAX: Float
-    var SCANLINE_BRIGHT_MIN: Float
-    var SCANLINE_CUTOFF: Float
-    var SCANLINE_STRENGTH: Float
-    var SHARPNESS_H: Float
-    var SHARPNESS_V: Float
-    var ENABLE_LANCZOS: Int32
-
-    static let defaults = CrtUniforms(
-
-        ENABLE: 1,
-        BRIGHT_BOOST: 1.2,
-        DILATION: 1.0,
-        GAMMA_INPUT: 2.0,
-        GAMMA_OUTPUT: 1.8,
-        MASK_SIZE: 1.0,
-        MASK_STAGGER: 0.0,
-        MASK_STRENGTH: 0.3,
-        MASK_DOT_WIDTH: 1.0,
-        MASK_DOT_HEIGHT: 1.0,
-        SCANLINE_BEAM_WIDTH_MAX: 1.5,
-        SCANLINE_BEAM_WIDTH_MIN: 1.5,
-        SCANLINE_BRIGHT_MAX: 0.65,
-        SCANLINE_BRIGHT_MIN: 0.35,
-        SCANLINE_CUTOFF: 1000.0,
-        SCANLINE_STRENGTH: 1.0,
-        SHARPNESS_H: 0.5,
-        SHARPNESS_V: 1.0,
-        ENABLE_LANCZOS: 1
-    )
-}
-
 class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     @IBOutlet weak var viewController: ViewController!
@@ -119,6 +73,9 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var nearestSampler: MTLSamplerState!
     var linearSampler: MTLSamplerState!
 
+    // The effect shader
+    // let crtEasy: CRTEasyShader = CRTEasyShader()
+
     var uniforms = Uniforms.init(time: 0.0,
                                  zoom: 1.0,
                                  intensity: 0.0,
@@ -135,7 +92,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var time: Float = 0.0
     var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
 
-    // var frame = 0
     var animate: Bool = false
 
     var intensity = Animated<Float>(0.0)
@@ -220,6 +176,9 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         } catch {
             fatalError("Failed to create pipeline state: \(error)")
         }
+
+        // Setup the effect shader
+        app.currentShader.setup(device: device)
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -265,7 +224,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         vertexBuffer2 = device!.makeBuffer(bytes: vertices2,
                                            length: vertices2.count * MemoryLayout<Vertex>.stride,
                                            options: [])
-
     }
 
     func updateTextures(rect: NSRect) {
@@ -357,16 +315,19 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass1) {
 
-            encoder.setRenderPipelineState(pipelineState1)
+            // encoder.setRenderPipelineState(pipelineState1)
             encoder.setVertexBuffer(vertexBuffer1, offset: 0, index: 0)
             encoder.setFragmentTexture(inTexture, index: 0)
             encoder.setFragmentSamplerState(linearSampler, index: 0)
             encoder.setFragmentBytes(&uniforms,
                                      length: MemoryLayout<Uniforms>.stride,
                                      index: 0)
+            /*
             encoder.setFragmentBytes(&app.crtUniforms,
                                      length: MemoryLayout<CrtUniforms>.stride,
                                      index: 1)
+            */
+            app.currentShader.apply(to: encoder)
 
             encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
             encoder.endEncoding()
