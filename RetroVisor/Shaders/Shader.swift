@@ -88,7 +88,8 @@ class Shader {
         print("Retiring \(name)")
     }
 
-    func apply(commandBuffer: MTLCommandBuffer, in inTexture: MTLTexture, out: MTLTexture) {
+    func apply(commandBuffer: MTLCommandBuffer,
+               in inTexture: MTLTexture, out outTexture: MTLTexture) {
 
         var vertexBuffer1: MTLBuffer! { app.windowController?.metalView?.vertexBuffer1! }
         var vertexBuffer2: MTLBuffer! { app.windowController?.metalView?.vertexBuffer2! }
@@ -99,7 +100,7 @@ class Shader {
         renderPass1.colorAttachments[0].loadAction = .clear
         renderPass1.colorAttachments[0].storeAction = .store
         renderPass1.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
-        renderPass1.colorAttachments[0].texture = out
+        renderPass1.colorAttachments[0].texture = outTexture
 
         if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass1) {
 

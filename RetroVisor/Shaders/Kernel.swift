@@ -23,15 +23,15 @@ class Kernel {
     // The rectangle the compute kernel is applied to
     var cutout = (256, 256)
 
-    convenience init?(name: String, device: MTLDevice, library: MTLLibrary, cutout: (Int, Int)) {
+    convenience init?(name: String, cutout: (Int, Int)) {
 
         self.init()
 
-        self.device = device
+        self.device = ShaderLibrary.device
         self.cutout = cutout
 
         // Lookup kernel function in library
-        guard let function = library.makeFunction(name: name) else {
+        guard let function = ShaderLibrary.library.makeFunction(name: name) else {
             print("Cannot find kernel function '\(name)' in library.")
             return nil
         }
@@ -61,7 +61,8 @@ class Kernel {
             encoder.setTexture(source, index: 0)
             encoder.setTexture(target, index: 1)
 
-            apply(encoder: encoder, options: options, length: length)
+            apply(encoder: encoder, width: target.width, height: target.height,
+                  options: options, length: length)
         }
     }
 
@@ -73,11 +74,13 @@ class Kernel {
             for (index, texture) in textures.enumerated() {
                 encoder.setTexture(texture, index: index)
             }
-            apply(encoder: encoder, options: options, length: length)
+            apply(encoder: encoder, width: textures.last!.width, height: textures.last!.height,
+                  options: options, length: length)
         }
     }
 
     private func apply(encoder: MTLComputeCommandEncoder,
+                       width: Int, height: Int,
                        options: UnsafeRawPointer?, length: Int) {
 
         // Bind pipeline
@@ -86,6 +89,21 @@ class Kernel {
         // Pass in shader options
         if let opt = options { encoder.setBytes(opt, length: length, index: 0) }
 
+        // Choose a fixed, GPU-friendly group size
+        let threadsPerThreadgroup = MTLSize(width: 16, height: 16, depth: 1)
+
+        // Compute how many groups are needed (rounding up to cover all pixels)
+        let threadgroupsPerGrid = MTLSize(
+            width: (width  + threadsPerThreadgroup.width  - 1) / threadsPerThreadgroup.width,
+            height: (height + threadsPerThreadgroup.height - 1) / threadsPerThreadgroup.height,
+            depth: 1
+        )
+
+        // Dispatch
+        encoder.dispatchThreadgroups(threadgroupsPerGrid,
+                                     threadsPerThreadgroup: threadsPerThreadgroup)
+
+        /*
         // Determine thread group size and number of groups
         let groupW = kernel.threadExecutionWidth
         let groupH = kernel.maxTotalThreadsPerThreadgroup / groupW
@@ -98,6 +116,7 @@ class Kernel {
         // Finally, we're ready to dispatch
         encoder.dispatchThreadgroups(threadgroupCount,
                                      threadsPerThreadgroup: threadsPerGroup)
+        */
         encoder.endEncoding()
     }
 }
@@ -108,8 +127,7 @@ class Kernel {
 
 class BypassFilter: Kernel {
 
-    convenience init?(device: MTLDevice, library: MTLLibrary, cutout: (Int, Int)) {
-        self.init(name: "bypass",
-                  device: device, library: library, cutout: cutout)
+    convenience init?(cutout: (Int, Int)) {
+        self.init(name: "bypass", cutout: cutout)
     }
 }

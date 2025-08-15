@@ -7,6 +7,8 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
+import MetalKit
+
 /* `ShaderLibrary` is the central hub for all available GPU shaders.
  * It maintains an ordered list of `Shader` instances that can be queried by
  * index. It is responsible for providing the currently selected shader to the
@@ -24,6 +26,20 @@
 @MainActor
 final class ShaderLibrary {
 
+    static let device: MTLDevice = {
+            guard let device = MTLCreateSystemDefaultDevice() else {
+                fatalError("Metal device not available")
+            }
+            return device
+        }()
+
+    static let library: MTLLibrary = {
+            guard let lib = device.makeDefaultLibrary() else {
+                fatalError("Could not load default Metal library")
+            }
+            return lib
+        }()
+    
     static let shared = ShaderLibrary()
     private(set) var shaders: [Shader] = []
 

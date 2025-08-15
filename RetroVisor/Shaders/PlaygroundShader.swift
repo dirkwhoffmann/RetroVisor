@@ -11,10 +11,12 @@ import MetalKit
 
 // This shader is my personal playground for developing self-made CRT effects.
 
-final class SecretShader: Shader {
+final class PlaygroundShader: Shader {
 
     var pipelineState2: MTLRenderPipelineState!
 
+    var passthrough: Kernel!
+    
     override init() {
 
         super.init()
@@ -49,6 +51,17 @@ final class SecretShader: Shader {
         } catch {
             fatalError("Failed to create pipeline state: \(error)")
         }
+
+        passthrough = BypassFilter(cutout: (256, 256))
+    }
+
+    override func apply(commandBuffer: MTLCommandBuffer,
+                        in inTexture: MTLTexture, out outTexture: MTLTexture) {
+
+            passthrough.apply(commandBuffer: commandBuffer,
+                              source: inTexture, target: outTexture,
+                              options: &app.windowController!.metalView!.uniforms,
+                              length: MemoryLayout<Uniforms>.stride)
     }
 
     override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {
