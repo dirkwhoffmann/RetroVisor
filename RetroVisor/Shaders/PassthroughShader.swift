@@ -27,7 +27,7 @@ final class PassthroughShader: Shader {
     override func activate() {
 
         super.activate(fragmentShader: "fragment_bypass")
-        passthrough = BypassFilter(cutout: (256, 256))
+        passthrough = BypassFilter(sampler: ShaderLibrary.linear)
     }
 
     override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {

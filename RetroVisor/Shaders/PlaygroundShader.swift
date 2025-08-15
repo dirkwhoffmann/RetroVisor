@@ -52,7 +52,7 @@ final class PlaygroundShader: Shader {
             fatalError("Failed to create pipeline state: \(error)")
         }
 
-        passthrough = BypassFilter(cutout: (256, 256))
+        passthrough = BypassFilter(sampler: ShaderLibrary.linear)
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,

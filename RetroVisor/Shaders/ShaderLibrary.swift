@@ -26,6 +26,8 @@ import MetalKit
 @MainActor
 final class ShaderLibrary {
 
+    static let shared = ShaderLibrary()
+
     static let device: MTLDevice = {
             guard let device = MTLCreateSystemDefaultDevice() else {
                 fatalError("Metal device not available")
@@ -39,8 +41,24 @@ final class ShaderLibrary {
             }
             return lib
         }()
-    
-    static let shared = ShaderLibrary()
+
+    static var linear: MTLSamplerState = {
+         let desc = MTLSamplerDescriptor()
+         desc.minFilter = .linear
+         desc.magFilter = .linear
+         desc.mipFilter = .notMipmapped
+         return device.makeSamplerState(descriptor: desc)!
+     }()
+
+     static var nearest: MTLSamplerState = {
+         let desc = MTLSamplerDescriptor()
+         desc.minFilter = .nearest
+         desc.magFilter = .nearest
+         desc.mipFilter = .notMipmapped
+         return device.makeSamplerState(descriptor: desc)!
+     }()
+
+    // The shader library
     private(set) var shaders: [Shader] = []
 
     var currentShader: Shader {

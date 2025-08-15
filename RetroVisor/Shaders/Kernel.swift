@@ -17,18 +17,14 @@ import MetalKit
 @MainActor
 class Kernel {
 
-    var device: MTLDevice!
     var kernel: MTLComputePipelineState!
+    var sampler: MTLSamplerState?
 
-    // The rectangle the compute kernel is applied to
-    var cutout = (256, 256)
-
-    convenience init?(name: String, cutout: (Int, Int)) {
+    convenience init?(name: String, sampler: MTLSamplerState? = nil) {
 
         self.init()
 
-        self.device = ShaderLibrary.device
-        self.cutout = cutout
+        self.sampler = sampler
 
         // Lookup kernel function in library
         guard let function = ShaderLibrary.library.makeFunction(name: name) else {
@@ -38,7 +34,7 @@ class Kernel {
 
         // Create kernel
         do {
-            try kernel = device.makeComputePipelineState(function: function)
+            try kernel = ShaderLibrary.device.makeComputePipelineState(function: function)
         } catch {
             print("Cannot create compute kernel '\(name)'.")
             let alert = NSAlert()
@@ -83,8 +79,10 @@ class Kernel {
                        width: Int, height: Int,
                        options: UnsafeRawPointer?, length: Int) {
 
+        // Select sampler
+        encoder.setSamplerState(sampler ?? ShaderLibrary.linear, index: 0)
+
         // Bind pipeline
-        encoder.setSamplerState(app.windowController!.metalView!.linearSampler, index: 0)
         encoder.setComputePipelineState(kernel)
 
         // Pass in shader options
@@ -103,21 +101,6 @@ class Kernel {
         // Dispatch
         encoder.dispatchThreadgroups(threadgroupsPerGrid,
                                      threadsPerThreadgroup: threadsPerThreadgroup)
-
-        /*
-        // Determine thread group size and number of groups
-        let groupW = kernel.threadExecutionWidth
-        let groupH = kernel.maxTotalThreadsPerThreadgroup / groupW
-        let threadsPerGroup = MTLSizeMake(groupW, groupH, 1)
-
-        let countW = (cutout.0) / groupW + 1
-        let countH = (cutout.1) / groupH + 1
-        let threadgroupCount = MTLSizeMake(countW, countH, 1)
-
-        // Finally, we're ready to dispatch
-        encoder.dispatchThreadgroups(threadgroupCount,
-                                     threadsPerThreadgroup: threadsPerGroup)
-        */
         encoder.endEncoding()
     }
 }
@@ -128,7 +111,8 @@ class Kernel {
 
 class BypassFilter: Kernel {
 
-    convenience init?(cutout: (Int, Int)) {
-        self.init(name: "bypass", cutout: cutout)
+    convenience init?(sampler: MTLSamplerState) {
+
+        self.init(name: "bypass", sampler: sampler)
     }
 }
