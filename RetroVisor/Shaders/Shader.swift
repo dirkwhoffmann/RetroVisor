@@ -22,8 +22,11 @@ struct ShaderSetting {
     }
 }
 
+@MainActor
 class Shader {
 
+    static var device: MTLDevice { MTLCreateSystemDefaultDevice()! }
+    
     var name: String = ""
     var settings: [ShaderSetting] = []
 
@@ -62,9 +65,9 @@ class Shader {
         vertexDescriptor.attributes[1].bufferIndex = 0
 
         // Load shaders from the default library
-        let defaultLibrary = device.makeDefaultLibrary()!
-        let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
-        let fragmentFunc = defaultLibrary.makeFunction(name: fragmentShader)!
+        let library = device.makeDefaultLibrary()!
+        let vertexFunc = library.makeFunction(name: "vertex_main")!
+        let fragmentFunc = library.makeFunction(name: fragmentShader)!
 
         // Create the pipeline state
         let descriptor = MTLRenderPipelineDescriptor()

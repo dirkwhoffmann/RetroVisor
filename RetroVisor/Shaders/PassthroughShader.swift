@@ -9,11 +9,15 @@
 
 import MetalKit
 
+@MainActor
 final class PassthroughShader: Shader {
+
+    var passthrough: Kernel!
 
     override init() {
 
         super.init()
+
         name = "Passthrough"
     }
 
@@ -23,6 +27,8 @@ final class PassthroughShader: Shader {
     override func activate() {
 
         super.activate(fragmentShader: "fragment_bypass")
+        let library = Shader.device.makeDefaultLibrary()!
+        passthrough = BypassFilter(device: Shader.device, library: library, cutout: (256, 256))
     }
 
     override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {

@@ -20,6 +20,8 @@
  *     guaranteed fallback. It is returned whenever a requested shader is
  *     unavailable or an effect should be disabled.
  */
+
+@MainActor
 final class ShaderLibrary {
 
     static let shared = ShaderLibrary()
