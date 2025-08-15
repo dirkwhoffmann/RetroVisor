@@ -7,6 +7,19 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
+/* `ShaderLibrary` is the central hub for all available GPU shaders.
+ * It maintains an ordered list of `Shader` instances that can be queried by
+ * index. It is responsible for providing the currently selected shader to the
+ * rendering pipeline and serves as a registry for all shaders the application
+ * supports.
+ *
+ *   - The `shared` singleton instance is the primary global access point
+ *     for retrieving, adding, and managing shaders.
+ *
+ *   - The `passthroughShader` is always stored in the library and acts as a
+ *     guaranteed fallback. It is returned whenever a requested shader is
+ *     unavailable or an effect should be disabled.
+ */
 final class ShaderLibrary {
 
     static let shared = ShaderLibrary()
@@ -14,11 +27,8 @@ final class ShaderLibrary {
 
     var currentShader: Shader {
         didSet {
-            print("Setting current shader")
             if currentShader !== oldValue {
-                print("Retiring \(oldValue.id ?? -1)")
                 oldValue.retire()
-                print("Activating \(currentShader.id ?? -1)")
                 currentShader.activate()
             }
         }
@@ -28,7 +38,6 @@ final class ShaderLibrary {
 
     private init() {
 
-        // Add the passthrough shader as a fallback
         shaders.append(PassthroughShader())
         currentShader = shaders[0]
     }
@@ -38,25 +47,19 @@ final class ShaderLibrary {
         shaders.append(shader)
     }
 
-    /*
-    func shader(for id: String) -> Shader? {
-        return shaders.first { $0.id == id }
-    }
-    */
-
     func shader(at index: Int) -> Shader? {
+
         guard index >= 0 && index < shaders.count else { return nil }
         return shaders[index]
     }
 
     func selectShader(at index: Int) {
+
         currentShader = shader(at: index) ?? shaders[0]
     }
 }
 
 extension Shader {
 
-    var id: Int? {
-        ShaderLibrary.shared.shaders.firstIndex { $0 === self }
-    }
+    var id: Int? { ShaderLibrary.shared.shaders.firstIndex { $0 === self } }
 }

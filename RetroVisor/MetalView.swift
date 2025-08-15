@@ -66,7 +66,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var recorder: Recorder? { return windowController?.recorder }
 
     var commandQueue: MTLCommandQueue!
-    var pipelineState1: MTLRenderPipelineState!
+    // var pipelineState1: MTLRenderPipelineState!
     var pipelineState2: MTLRenderPipelineState!
     var vertexBuffer1: MTLBuffer!
     var vertexBuffer2: MTLBuffer!
@@ -123,8 +123,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Load shaders from the default library
         let defaultLibrary = device.makeDefaultLibrary()!
         let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
-        let bypassFunc = defaultLibrary.makeFunction(name: "fragment_bypass")!
-        let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_crt_easymode")!
         let rippleFunc = defaultLibrary.makeFunction(name: "fragment_ripple")!
 
         // Create texture samplers
@@ -149,19 +147,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
         vertexDescriptor.attributes[1].bufferIndex = 0
 
-        // Setup the pipelin descriptor for the bypass shader (no CRT effect)
-        let pipelineDescriptor0 = MTLRenderPipelineDescriptor()
-        pipelineDescriptor0.vertexFunction = vertexFunc
-        pipelineDescriptor0.fragmentFunction = bypassFunc
-        pipelineDescriptor0.colorAttachments[0].pixelFormat = colorPixelFormat
-        pipelineDescriptor0.vertexDescriptor = vertexDescriptor
-
-        let pipelineDescriptor1 = MTLRenderPipelineDescriptor()
-        pipelineDescriptor1.vertexFunction = vertexFunc
-        pipelineDescriptor1.fragmentFunction = fragmentFunc
-        pipelineDescriptor1.colorAttachments[0].pixelFormat = colorPixelFormat
-        pipelineDescriptor1.vertexDescriptor = vertexDescriptor
-
         // Setup the pipelin descriptor for the post-processing phase
         let pipelineDescriptor2 = MTLRenderPipelineDescriptor()
         pipelineDescriptor2.vertexFunction = vertexFunc
@@ -171,7 +156,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         // Create the pipeline states
         do {
-            pipelineState1 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor1)
+            // pipelineState1 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor1)
             pipelineState2 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor2)
         } catch {
             fatalError("Failed to create pipeline state: \(error)")
@@ -315,18 +300,14 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass1) {
 
-            // encoder.setRenderPipelineState(pipelineState1)
             encoder.setVertexBuffer(vertexBuffer1, offset: 0, index: 0)
             encoder.setFragmentTexture(inTexture, index: 0)
             encoder.setFragmentSamplerState(linearSampler, index: 0)
             encoder.setFragmentBytes(&uniforms,
                                      length: MemoryLayout<Uniforms>.stride,
                                      index: 0)
-            /*
-            encoder.setFragmentBytes(&app.crtUniforms,
-                                     length: MemoryLayout<CrtUniforms>.stride,
-                                     index: 1)
-            */
+
+            // Pass the encoder to the currently selected shader
             ShaderLibrary.shared.currentShader.apply(to: encoder)
 
             encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
