@@ -14,7 +14,6 @@ final class PassthroughShader: Shader {
     override init() {
 
         super.init()
-        
         name = "Passthrough"
     }
 
