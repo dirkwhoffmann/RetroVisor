@@ -244,7 +244,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     func draw(in view: MTKView) {
 
         guard let inTexture = self.inTexture else { return }
-        guard var midTexture = self.midTexture else { return }
+        guard let midTexture = self.midTexture else { return }
         guard var outTexture = self.outTexture else { return }
 
         windowController?.streamer.updateRects()
@@ -272,6 +272,9 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // CRT shader (first pass)
         //
 
+        ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer, in: inTexture, out: midTexture)
+
+        /*
         renderPass1.colorAttachments[0].texture = midTexture
         if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass1) {
 
@@ -287,11 +290,13 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
             encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
             encoder.endEncoding()
         }
+        */
 
         //
         // CRT shader (optional second pass)
         //
 
+        /*
         if ShaderLibrary.shared.currentShader.passes > 1 {
 
             renderPass2.colorAttachments[0].texture = outTexture
@@ -314,6 +319,9 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
             outTexture = midTexture
         }
+        */
+
+        outTexture = midTexture
 
         //
         // Third pass: In-texture blurring
