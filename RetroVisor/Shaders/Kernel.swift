@@ -84,6 +84,7 @@ class Kernel {
                        options: UnsafeRawPointer?, length: Int) {
 
         // Bind pipeline
+        encoder.setSamplerState(app.windowController!.metalView!.linearSampler, index: 0)
         encoder.setComputePipelineState(kernel)
 
         // Pass in shader options

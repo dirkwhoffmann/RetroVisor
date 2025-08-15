@@ -16,25 +16,21 @@ using namespace metal;
 // Passthrogh kernel
 //
 
-kernel void bypass(texture2d<half, access::read>  inTexture  [[ texture(0) ]],
-                   texture2d<half, access::write> outTexture [[ texture(1) ]],
-                   constant Uniforms              &uniforms  [[ buffer(0) ]],
-                   uint2                          gid        [[ thread_position_in_grid ]])
+kernel void bypass(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
+                   texture2d<half, access::write>  outTexture [[ texture(1) ]],
+                   constant Uniforms               &uniforms  [[ buffer(0) ]],
+                   sampler                         s          [[ sampler(0) ]],
+                   uint2                           gid        [[ thread_position_in_grid ]])
 {
-    // Bounds check (in case the dispatch grid is larger than the texture)
-    if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) return;
+    // Normalize gid to 0..1 in output texture
+    float2 uvOut = float2(gid) / float2(outTexture.get_width(), outTexture.get_height());
 
-    // 1. gid -> normalized coords (0..1) in output texture space
-    float2 uv = float2(gid) / float2(outTexture.get_width(), outTexture.get_height());
+    // Remap to texRect in input texture
+    float2 uvIn = uniforms.texRect.xy + uvOut * (uniforms.texRect.zw - uniforms.texRect.xy);
 
-    // 2. Remap to input texture normalized space using texRect
-    uv = uniforms.texRect.xy + uv * (uniforms.texRect.zw - uniforms.texRect.xy);
+    // Sample input texture using normalized coords
+    half4 result = inTexture.sample(s, uvIn);
 
-    // 3. Convert normalized coords to input texture pixel coords
-    uint2 inCoords = uint2(uv * float2(inTexture.get_width(), inTexture.get_height()));
-
-    // 4. Read from input and write to output
-    half4 result = inTexture.read(inCoords);
-
+    // Write to output
     outTexture.write(result, gid);
 }
