@@ -28,6 +28,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
 // Fragment shaders
 //
 
+/*
 fragment float4 fragment_bypass(VertexOut in [[stage_in]],
                                 texture2d<float> tex [[texture(0)]],
                                 constant Uniforms& uniforms [[buffer(0)]],
@@ -37,6 +38,7 @@ fragment float4 fragment_bypass(VertexOut in [[stage_in]],
     float2 uv = in.texCoord / uniforms.zoom + shift;
     return tex.sample(sam, uv);
 }
+*/
 
 fragment float4 fragment_ripple(VertexOut in [[stage_in]],
                                 texture2d<float> tex [[texture(0)]],

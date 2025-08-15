@@ -141,6 +141,10 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         // Setup the effect shader
         waterRippleShader.activate()
+
+        // Enable the magnification gesture
+        let magnifyRecognizer = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnify(_:)))
+        addGestureRecognizer(magnifyRecognizer)
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {

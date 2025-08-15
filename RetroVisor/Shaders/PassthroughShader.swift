@@ -26,19 +26,15 @@ final class PassthroughShader: Shader {
 
     override func activate() {
 
-        super.activate(fragmentShader: "fragment_bypass")
         passthrough = BypassFilter(sampler: ShaderLibrary.linear)
     }
 
-    override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {
+    override func apply(commandBuffer: MTLCommandBuffer,
+                        in inTexture: MTLTexture, out outTexture: MTLTexture) {
 
-        switch pass {
-
-        case 1:
-            encoder.setRenderPipelineState(pipelineState)
-
-        default:
-            break
-        }
+        passthrough.apply(commandBuffer: commandBuffer,
+                          source: inTexture, target: outTexture,
+                          options: &app.windowController!.metalView!.uniforms,
+                          length: MemoryLayout<Uniforms>.stride)
     }
 }

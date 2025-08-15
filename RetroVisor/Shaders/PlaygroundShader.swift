@@ -11,6 +11,7 @@ import MetalKit
 
 // This shader is my personal playground for developing self-made CRT effects.
 
+@MainActor
 final class PlaygroundShader: Shader {
 
     var passthrough: Kernel!
