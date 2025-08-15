@@ -270,35 +270,9 @@ final class CRTEasyShader: Shader {
 
     override func activate() {
 
-        print("Activating CRT shader")
-        let device = MTLCreateSystemDefaultDevice()
-        setup(device: device!)
-    }
+        super.activate()
 
-    override func retire() {
-
-        print("Retiring CRT shader")
-    }
-
-    override func setup(device: MTLDevice) {
-
-        // Setup a vertex descriptor
-        let vertexDescriptor = MTLVertexDescriptor()
-
-        // Single interleaved buffer
-        vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex>.stride
-        vertexDescriptor.layouts[0].stepRate = 1
-        vertexDescriptor.layouts[0].stepFunction = MTLVertexStepFunction.perVertex
-
-        // Positions
-        vertexDescriptor.attributes[0].format = .float4
-        vertexDescriptor.attributes[0].offset = 0
-        vertexDescriptor.attributes[0].bufferIndex = 0
-
-        // Texture coordinates
-        vertexDescriptor.attributes[1].format = .float2
-        vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
-        vertexDescriptor.attributes[1].bufferIndex = 0
+        let device = MTLCreateSystemDefaultDevice()!
 
         // Load shaders from the default library
         let defaultLibrary = device.makeDefaultLibrary()!
