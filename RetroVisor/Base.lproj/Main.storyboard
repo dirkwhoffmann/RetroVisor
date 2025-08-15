@@ -1057,7 +1057,7 @@ Gw
                                         <items>
                                             <menuItem title="None" state="on" id="nRe-V5-fv0"/>
                                             <menuItem title="CRT" tag="1" id="2Rt-Hl-jdI"/>
-                                            <menuItem title="Unknown" tag="3" id="QF1-PN-6U7"/>
+                                            <menuItem title="Unknown" tag="2" id="QF1-PN-6U7"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>

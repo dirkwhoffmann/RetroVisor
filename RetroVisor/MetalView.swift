@@ -66,14 +66,14 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var recorder: Recorder? { return windowController?.recorder }
 
     var commandQueue: MTLCommandQueue!
-    // var pipelineState1: MTLRenderPipelineState!
-    var pipelineState2: MTLRenderPipelineState!
     var vertexBuffer1: MTLBuffer!
     var vertexBuffer2: MTLBuffer!
     var nearestSampler: MTLSamplerState!
     var linearSampler: MTLSamplerState!
 
-    // The effect shader
+    // The water ripple shader (used for animation effects)
+    let waterRippleShader = WaterRippleShader()
+
     // let crtEasy: CRTEasyShader = CRTEasyShader()
 
     var uniforms = Uniforms.init(time: 0.0,
@@ -100,8 +100,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         super.init(coder: coder)
 
-        log("MetalView init")
-
         device = MTLCreateSystemDefaultDevice()
         guard let device = device else { return }
 
@@ -120,50 +118,12 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Setup the vertex buffers
         updateVertexBuffers(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
 
-        // Load shaders from the default library
-        let defaultLibrary = device.makeDefaultLibrary()!
-        let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
-        let rippleFunc = defaultLibrary.makeFunction(name: "fragment_ripple")!
-
         // Create texture samplers
         nearestSampler = makeSamplerState(minFilter: .nearest, magFilter: .nearest)
         linearSampler  = makeSamplerState(minFilter: .linear,  magFilter: .linear)
 
-        // Setup a vertex descriptor
-        let vertexDescriptor = MTLVertexDescriptor()
-
-        // Single interleaved buffer
-        vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex>.stride
-        vertexDescriptor.layouts[0].stepRate = 1
-        vertexDescriptor.layouts[0].stepFunction = MTLVertexStepFunction.perVertex
-
-        // Positions
-        vertexDescriptor.attributes[0].format = .float4
-        vertexDescriptor.attributes[0].offset = 0
-        vertexDescriptor.attributes[0].bufferIndex = 0
-
-        // Texture coordinates
-        vertexDescriptor.attributes[1].format = .float2
-        vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
-        vertexDescriptor.attributes[1].bufferIndex = 0
-
-        // Setup the pipelin descriptor for the post-processing phase
-        let pipelineDescriptor2 = MTLRenderPipelineDescriptor()
-        pipelineDescriptor2.vertexFunction = vertexFunc
-        pipelineDescriptor2.fragmentFunction = rippleFunc
-        pipelineDescriptor2.colorAttachments[0].pixelFormat = colorPixelFormat
-        pipelineDescriptor2.vertexDescriptor = vertexDescriptor
-
-        // Create the pipeline states
-        do {
-            // pipelineState1 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor1)
-            pipelineState2 = try device.makeRenderPipelineState(descriptor: pipelineDescriptor2)
-        } catch {
-            fatalError("Failed to create pipeline state: \(error)")
-        }
-
         // Setup the effect shader
-        // app.currentShader.setup(device: device)
+        waterRippleShader.activate()
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -335,7 +295,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass2) {
 
-            encoder.setRenderPipelineState(pipelineState2)
+            // encoder.setRenderPipelineState(pipelineState2)
             encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
             encoder.setFragmentTexture(outTexture, index: 0)
             encoder.setFragmentSamplerState(intensity.current > 0 ? linearSampler : nearestSampler, index: 0)
@@ -344,6 +304,8 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
             encoder.setFragmentBytes(&uniforms,
                                      length: MemoryLayout<Uniforms>.stride,
                                      index: 0)
+
+            waterRippleShader.apply(to: encoder)
 
             encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
             encoder.endEncoding()

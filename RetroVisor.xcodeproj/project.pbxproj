@@ -26,6 +26,7 @@
 		506936502E4EFF160037984F /* CrtEasyShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */; };
 		506936522E4F0E590037984F /* ShaderLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936512E4F0E540037984F /* ShaderLibrary.swift */; };
 		506936542E4F2FE40037984F /* PassthroughShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936532E4F2FDB0037984F /* PassthroughShader.swift */; };
+		506936562E4F45F30037984F /* WaterRippleShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936552E4F45EB0037984F /* WaterRippleShader.swift */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* WindowController.swift */; };
@@ -64,6 +65,7 @@
 		5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrtEasyShader.swift; sourceTree = "<group>"; };
 		506936512E4F0E540037984F /* ShaderLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderLibrary.swift; sourceTree = "<group>"; };
 		506936532E4F2FDB0037984F /* PassthroughShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassthroughShader.swift; sourceTree = "<group>"; };
+		506936552E4F45EB0037984F /* WaterRippleShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterRippleShader.swift; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 				5069364C2E4EFD2B0037984F /* Shader.swift */,
 				506936532E4F2FDB0037984F /* PassthroughShader.swift */,
 				5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */,
+				506936552E4F45EB0037984F /* WaterRippleShader.swift */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -298,6 +301,7 @@
 				50292D902E4685E10084CFE3 /* MetalView.swift in Sources */,
 				503FCC292E48F2D200EF49DA /* ShaderPreferencesViewController.swift in Sources */,
 				50079E712E43813C005BC5FD /* Extensions.swift in Sources */,
+				506936562E4F45F30037984F /* WaterRippleShader.swift in Sources */,
 				506936542E4F2FE40037984F /* PassthroughShader.swift in Sources */,
 				506936522E4F0E590037984F /* ShaderLibrary.swift in Sources */,
 				50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */,
