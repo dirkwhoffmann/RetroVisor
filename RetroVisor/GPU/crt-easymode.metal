@@ -85,11 +85,6 @@ inline float4 crt_easymode(float2 texture_size,
     float curve_x;
     float3 col, col2;
 
-    if (!u.ENABLE) {
-
-        return float4(tex.sample(sam, tex_co).rgb, 1.0);
-    }
-
     if (u.ENABLE_LANCZOS) {
 
         curve_x = curve_distance(dist.x, u.SHARPNESS_H * u.SHARPNESS_H);

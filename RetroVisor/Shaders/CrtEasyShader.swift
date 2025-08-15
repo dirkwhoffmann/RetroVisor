@@ -11,7 +11,6 @@ import MetalKit
 
 struct CrtUniforms {
 
-    var ENABLE: Int32
     var BRIGHT_BOOST: Float
     var DILATION: Float
     var GAMMA_INPUT: Float
@@ -33,7 +32,6 @@ struct CrtUniforms {
 
     static let defaults = CrtUniforms(
 
-        ENABLE: 1,
         BRIGHT_BOOST: 1.2,
         DILATION: 1.0,
         GAMMA_INPUT: 2.0,
@@ -217,7 +215,6 @@ final class CRTEasyShader: Shader {
     override func get(key: String) -> Float {
 
         switch key {
-        case "ENABLE": return Float(crtUniforms.ENABLE)
         case "BRIGHT_BOOST": return crtUniforms.BRIGHT_BOOST
         case "DILATION": return crtUniforms.DILATION
         case "GAMMA_INPUT": return crtUniforms.GAMMA_INPUT
@@ -247,7 +244,6 @@ final class CRTEasyShader: Shader {
 
         print("set(\(key) \(value))")
         switch key {
-        case "ENABLE": crtUniforms.ENABLE = Int32(value)
         case "BRIGHT_BOOST": crtUniforms.BRIGHT_BOOST = value
         case "DILATION": crtUniforms.DILATION = value
         case "GAMMA_INPUT": crtUniforms.GAMMA_INPUT = value
