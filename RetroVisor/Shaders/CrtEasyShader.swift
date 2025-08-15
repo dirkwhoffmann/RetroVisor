@@ -210,7 +210,6 @@ final class CRTEasyShader: Shader {
     }
 
     var crtUniforms: CrtUniforms = .defaults
-    var pipelineState: MTLRenderPipelineState!
 
     override func get(key: String) -> Float {
 
@@ -270,27 +269,7 @@ final class CRTEasyShader: Shader {
 
     override func activate() {
 
-        super.activate()
-
-        let device = MTLCreateSystemDefaultDevice()!
-
-        // Load shaders from the default library
-        let defaultLibrary = device.makeDefaultLibrary()!
-        let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
-        let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_crt_easymode")!
-
-        // Create the pipeline state
-        let pipelineDescriptor = MTLRenderPipelineDescriptor()
-        pipelineDescriptor.vertexFunction = vertexFunc
-        pipelineDescriptor.fragmentFunction = fragmentFunc
-        pipelineDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
-        pipelineDescriptor.vertexDescriptor = vertexDescriptor
-
-        do {
-            pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
-        } catch {
-            fatalError("Failed to create pipeline state: \(error)")
-        }
+        super.activate(fragmentShader: "fragment_crt_easymode")
     }
 
     override func apply(to encoder: MTLRenderCommandEncoder) {
