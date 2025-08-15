@@ -47,7 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
 
         ShaderLibrary.shared.register(CRTEasyShader())
-        ShaderLibrary.shared.register(WaterRippleShader())
+        ShaderLibrary.shared.register(SecretShader())
         ShaderLibrary.shared.selectShader(at: 1)
 
         Task {

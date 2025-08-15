@@ -27,6 +27,8 @@
 		506936522E4F0E590037984F /* ShaderLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936512E4F0E540037984F /* ShaderLibrary.swift */; };
 		506936542E4F2FE40037984F /* PassthroughShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936532E4F2FDB0037984F /* PassthroughShader.swift */; };
 		506936562E4F45F30037984F /* WaterRippleShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936552E4F45EB0037984F /* WaterRippleShader.swift */; };
+		506936582E4F49340037984F /* SecretShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936572E4F49220037984F /* SecretShader.swift */; };
+		5069365A2E4F49CA0037984F /* secret.metal in Sources */ = {isa = PBXBuildFile; fileRef = 506936592E4F49C40037984F /* secret.metal */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* WindowController.swift */; };
@@ -66,6 +68,8 @@
 		506936512E4F0E540037984F /* ShaderLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderLibrary.swift; sourceTree = "<group>"; };
 		506936532E4F2FDB0037984F /* PassthroughShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassthroughShader.swift; sourceTree = "<group>"; };
 		506936552E4F45EB0037984F /* WaterRippleShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterRippleShader.swift; sourceTree = "<group>"; };
+		506936572E4F49220037984F /* SecretShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretShader.swift; sourceTree = "<group>"; };
+		506936592E4F49C40037984F /* secret.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = secret.metal; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -145,6 +149,7 @@
 				5069364C2E4EFD2B0037984F /* Shader.swift */,
 				506936532E4F2FDB0037984F /* PassthroughShader.swift */,
 				5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */,
+				506936572E4F49220037984F /* SecretShader.swift */,
 				506936552E4F45EB0037984F /* WaterRippleShader.swift */,
 			);
 			path = Shaders;
@@ -201,6 +206,7 @@
 				50BA96652E3FF176006BA8DF /* ShaderTypes.metal */,
 				50BA964D2E3C80D6006BA8DF /* Shaders.metal */,
 				50BA96632E3FF0B3006BA8DF /* crt-easymode.metal */,
+				506936592E4F49C40037984F /* secret.metal */,
 			);
 			path = GPU;
 			sourceTree = "<group>";
@@ -291,6 +297,7 @@
 				50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */,
 				50292D942E471A330084CFE3 /* PermissionWindowController.swift in Sources */,
 				503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */,
+				506936582E4F49340037984F /* SecretShader.swift in Sources */,
 				5069364D2E4EFD2D0037984F /* Shader.swift in Sources */,
 				503FCC352E4B85BD00EF49DA /* Settings.swift in Sources */,
 				50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */,
@@ -299,6 +306,7 @@
 				50079E6E2E4331F5005BC5FD /* Menu.swift in Sources */,
 				50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */,
 				50292D902E4685E10084CFE3 /* MetalView.swift in Sources */,
+				5069365A2E4F49CA0037984F /* secret.metal in Sources */,
 				503FCC292E48F2D200EF49DA /* ShaderPreferencesViewController.swift in Sources */,
 				50079E712E43813C005BC5FD /* Extensions.swift in Sources */,
 				506936562E4F45F30037984F /* WaterRippleShader.swift in Sources */,

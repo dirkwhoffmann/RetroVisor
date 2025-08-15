@@ -1048,7 +1048,7 @@ Gw
                                 </connections>
                             </button>
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KdT-3W-BYW">
-                                <rect key="frame" x="466" y="436" width="158" height="25"/>
+                                <rect key="frame" x="437" y="436" width="187" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="nRe-V5-fv0" id="Las-yg-GfP">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -1057,7 +1057,7 @@ Gw
                                         <items>
                                             <menuItem title="None" state="on" id="nRe-V5-fv0"/>
                                             <menuItem title="CRT" tag="1" id="2Rt-Hl-jdI"/>
-                                            <menuItem title="Unknown" tag="2" id="QF1-PN-6U7"/>
+                                            <menuItem title="Trust Me, Don't Click" tag="2" id="QF1-PN-6U7"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
@@ -1066,7 +1066,7 @@ Gw
                                 </connections>
                             </popUpButton>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5ME-ag-kSs">
-                                <rect key="frame" x="412" y="442" width="51" height="16"/>
+                                <rect key="frame" x="386" y="442" width="51" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Shader:" id="Br7-XG-G5g">
                                     <font key="font" metaFont="system"/>
