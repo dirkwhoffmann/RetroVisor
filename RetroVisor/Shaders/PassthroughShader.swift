@@ -25,8 +25,15 @@ final class PassthroughShader: Shader {
         super.activate(fragmentShader: "fragment_bypass")
     }
 
-    override func apply(to encoder: MTLRenderCommandEncoder) {
+    override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {
 
-        encoder.setRenderPipelineState(pipelineState)
+        switch pass {
+
+        case 1:
+            encoder.setRenderPipelineState(pipelineState)
+
+        default:
+            break
+        }
     }
 }

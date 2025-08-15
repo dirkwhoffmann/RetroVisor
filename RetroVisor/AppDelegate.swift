@@ -23,12 +23,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Menu bar status item
     var statusItem: NSStatusItem?
 
-    // The currently selected shader
-    // var currentShader: Shader!
-
-    // Customizable shader parameters (DEPRECATED)
-    // var crtUniforms = CrtUniforms.defaults
-
     var windowController: WindowController? {
         return NSApplication.shared.windows.first?.windowController as? WindowController
     }
@@ -48,7 +42,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         ShaderLibrary.shared.register(CRTEasyShader())
         ShaderLibrary.shared.register(SecretShader())
-        ShaderLibrary.shared.selectShader(at: 1)
+        ShaderLibrary.shared.selectShader(at: 2)
 
         Task {
 

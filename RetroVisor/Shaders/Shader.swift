@@ -30,6 +30,8 @@ class Shader {
     var vertexDescriptor: MTLVertexDescriptor!
     var pipelineState: MTLRenderPipelineState!
 
+    var passes: Int { return 1 }
+
     func activate() {
 
         fatalError("To be implemented by a subclass")
@@ -85,5 +87,5 @@ class Shader {
 
     func get(key: String) -> Float { return 0 }
     func set(key: String, value: Float) {}
-    func apply(to encoder: MTLRenderCommandEncoder) {}
+    func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) { }
 }

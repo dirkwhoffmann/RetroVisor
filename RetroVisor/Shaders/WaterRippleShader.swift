@@ -26,8 +26,15 @@ final class WaterRippleShader: Shader {
         super.activate(fragmentShader: "fragment_ripple")
     }
 
-    override func apply(to encoder: MTLRenderCommandEncoder) {
+    override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {
 
-        encoder.setRenderPipelineState(pipelineState)
+        switch pass {
+
+        case 1:
+            encoder.setRenderPipelineState(pipelineState)
+
+        default:
+            break
+        }
     }
 }

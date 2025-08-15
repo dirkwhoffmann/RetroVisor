@@ -70,6 +70,9 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var vertexBuffer2: MTLBuffer!
     var nearestSampler: MTLSamplerState!
     var linearSampler: MTLSamplerState!
+    var renderPass1: MTLRenderPassDescriptor!
+    var renderPass2: MTLRenderPassDescriptor!
+    var renderPass3: MTLRenderPassDescriptor!
 
     // The water ripple shader (used for animation effects)
     let waterRippleShader = WaterRippleShader()
@@ -86,8 +89,10 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                  texRect: [0, 0, 0, 0])
 
     var textureCache: CVMetalTextureCache!
-    var inTexture: MTLTexture?
-    var outTexture: MTLTexture?
+
+    var inTexture: MTLTexture?  // Input texture from the screen capturer
+    var midTexture: MTLTexture? // Output of the first effect render stage
+    var outTexture: MTLTexture? // Output of the second effect render stage
 
     var time: Float = 0.0
     var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
@@ -121,6 +126,18 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Create texture samplers
         nearestSampler = makeSamplerState(minFilter: .nearest, magFilter: .nearest)
         linearSampler  = makeSamplerState(minFilter: .linear,  magFilter: .linear)
+
+        // Create the render pass descriptor for pass 1
+        renderPass1 = MTLRenderPassDescriptor()
+        renderPass1.colorAttachments[0].loadAction = .clear
+        renderPass1.colorAttachments[0].storeAction = .store
+        renderPass1.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
+
+        // Create the render pass descriptor for pass 2
+        renderPass2 = MTLRenderPassDescriptor()
+        renderPass2.colorAttachments[0].loadAction = .clear
+        renderPass2.colorAttachments[0].storeAction = .store
+        renderPass2.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
 
         // Setup the effect shader
         waterRippleShader.activate()
@@ -188,6 +205,8 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                                                       height: height,
                                                                       mipmapped: false)
             descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
+
+            midTexture = device!.makeTexture(descriptor: descriptor)
             outTexture = device!.makeTexture(descriptor: descriptor)
         }
     }
@@ -225,6 +244,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     func draw(in view: MTKView) {
 
         guard let inTexture = self.inTexture else { return }
+        guard var midTexture = self.midTexture else { return }
         guard var outTexture = self.outTexture else { return }
 
         windowController?.streamer.updateRects()
@@ -249,15 +269,10 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         guard let commandBuffer = commandQueue.makeCommandBuffer() else { return }
 
         //
-        // First pass: CRT effect
+        // CRT shader (first pass)
         //
 
-        let renderPass1 = MTLRenderPassDescriptor()
-        renderPass1.colorAttachments[0].texture = outTexture
-        renderPass1.colorAttachments[0].loadAction = .clear
-        renderPass1.colorAttachments[0].storeAction = .store
-        renderPass1.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
-
+        renderPass1.colorAttachments[0].texture = midTexture
         if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass1) {
 
             encoder.setVertexBuffer(vertexBuffer1, offset: 0, index: 0)
@@ -267,15 +282,41 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                      length: MemoryLayout<Uniforms>.stride,
                                      index: 0)
 
-            // Pass the encoder to the currently selected shader
-            ShaderLibrary.shared.currentShader.apply(to: encoder)
+            ShaderLibrary.shared.currentShader.apply(to: encoder, pass: 1)
 
             encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
             encoder.endEncoding()
         }
 
         //
-        // Second pass: In-texture blurring
+        // CRT shader (optional second pass)
+        //
+
+        if ShaderLibrary.shared.currentShader.passes > 1 {
+
+            renderPass2.colorAttachments[0].texture = outTexture
+            if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass2) {
+
+                encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
+                encoder.setFragmentTexture(midTexture, index: 0)
+                encoder.setFragmentSamplerState(linearSampler, index: 0)
+                encoder.setFragmentBytes(&uniforms,
+                                         length: MemoryLayout<Uniforms>.stride,
+                                         index: 0)
+
+                ShaderLibrary.shared.currentShader.apply(to: encoder, pass: 2)
+
+                encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+                encoder.endEncoding()
+            }
+
+        } else {
+
+            outTexture = midTexture
+        }
+
+        //
+        // Third pass: In-texture blurring
         //
 
         if uniforms.intensity > 0 {
@@ -290,10 +331,10 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Third pass: Water-ripple effect
         //
 
-        guard let renderPass2 = view.currentRenderPassDescriptor else { return }
-        renderPass2.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
+        guard let renderPass3 = view.currentRenderPassDescriptor else { return }
+        renderPass3.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
 
-        if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass2) {
+        if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass3) {
 
             // encoder.setRenderPipelineState(pipelineState2)
             encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)

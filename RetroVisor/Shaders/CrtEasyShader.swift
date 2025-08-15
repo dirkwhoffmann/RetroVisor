@@ -272,11 +272,17 @@ final class CRTEasyShader: Shader {
         super.activate(fragmentShader: "fragment_crt_easymode")
     }
 
-    override func apply(to encoder: MTLRenderCommandEncoder) {
+    override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {
 
-        encoder.setRenderPipelineState(pipelineState)
-        encoder.setFragmentBytes(&crtUniforms,
-                                 length: MemoryLayout<CrtUniforms>.stride,
-                                 index: 1)
+        switch pass {
+
+        case 1:
+            encoder.setRenderPipelineState(pipelineState)
+            encoder.setFragmentBytes(&crtUniforms,
+                                     length: MemoryLayout<CrtUniforms>.stride,
+                                     index: 1)
+        default:
+            break
+        }
     }
 }
