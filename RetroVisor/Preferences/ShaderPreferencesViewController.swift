@@ -161,8 +161,7 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     @IBOutlet weak var tableView: NSTableView!
     @IBOutlet weak var shaderSelector: NSPopUpButton!
 
-    var shader: Shader { return app.currentShader }
-    // var oldSettings: CrtUniforms!
+    var shader: Shader { return ShaderLibrary.shared.currentShader }
 
     override func viewDidLoad() {
 
@@ -176,78 +175,25 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
 
     func refresh() {
 
-        shaderSelector.selectItem(withTag: 0) // Int(app.crtUniforms.ENABLE))
+        shaderSelector.selectItem(withTag: shader.id ?? 0) // Int(app.crtUniforms.ENABLE))
         tableView.reloadData()
     }
 
+    // DEPRECATED
     func get(key: String) -> Float {
 
         return shader.get(key: key)
-
-        /*
-        switch key {
-        case "ENABLE": return Float(app.crtUniforms.ENABLE)
-        case "BRIGHT_BOOST": return app.crtUniforms.BRIGHT_BOOST
-        case "DILATION": return app.crtUniforms.DILATION
-        case "GAMMA_INPUT": return app.crtUniforms.GAMMA_INPUT
-        case "GAMMA_OUTPUT": return app.crtUniforms.GAMMA_OUTPUT
-        case "MASK_SIZE": return app.crtUniforms.MASK_SIZE
-        case "MASK_STAGGER": return app.crtUniforms.MASK_STAGGER
-        case "MASK_STRENGTH": return app.crtUniforms.MASK_STRENGTH
-        case "MASK_DOT_WIDTH": return app.crtUniforms.MASK_DOT_WIDTH
-        case "MASK_DOT_HEIGHT": return app.crtUniforms.MASK_DOT_HEIGHT
-        case "SCANLINE_BEAM_WIDTH_MAX": return app.crtUniforms.SCANLINE_BEAM_WIDTH_MAX
-        case "SCANLINE_BEAM_WIDTH_MIN": return app.crtUniforms.SCANLINE_BEAM_WIDTH_MIN
-        case "SCANLINE_BRIGHT_MAX": return app.crtUniforms.SCANLINE_BRIGHT_MAX
-        case "SCANLINE_BRIGHT_MIN": return app.crtUniforms.SCANLINE_BRIGHT_MIN
-        case "SCANLINE_CUTOFF": return app.crtUniforms.SCANLINE_CUTOFF
-        case "SCANLINE_STRENGTH": return app.crtUniforms.SCANLINE_STRENGTH
-        case "SHARPNESS_H": return app.crtUniforms.SHARPNESS_H
-        case "SHARPNESS_V": return app.crtUniforms.SHARPNESS_V
-        case "ENABLE_LANCZOS": return Float(app.crtUniforms.ENABLE_LANCZOS)
-
-        default:
-            NSSound.beep()
-            return 0
-        }
-        */
     }
 
+    // DEPRECATED
     func set(key: String, value: Float) {
 
         shader.set(key: key, value: value)
-        /*
-        switch key {
-        case "ENABLE": app.crtUniforms.ENABLE = Int32(value)
-        case "BRIGHT_BOOST": app.crtUniforms.BRIGHT_BOOST = value
-        case "DILATION": app.crtUniforms.DILATION = value
-        case "GAMMA_INPUT": app.crtUniforms.GAMMA_INPUT = value
-        case "GAMMA_OUTPUT": app.crtUniforms.GAMMA_OUTPUT = value
-        case "MASK_SIZE": app.crtUniforms.MASK_SIZE = value
-        case "MASK_STAGGER": app.crtUniforms.MASK_STAGGER = value
-        case "MASK_STRENGTH": app.crtUniforms.MASK_STRENGTH = value
-        case "MASK_DOT_WIDTH": app.crtUniforms.MASK_DOT_WIDTH = value
-        case "MASK_DOT_HEIGHT": app.crtUniforms.MASK_DOT_HEIGHT = value
-        case "SCANLINE_BEAM_WIDTH_MAX": app.crtUniforms.SCANLINE_BEAM_WIDTH_MAX = value
-        case "SCANLINE_BEAM_WIDTH_MIN": app.crtUniforms.SCANLINE_BEAM_WIDTH_MIN = value
-        case "SCANLINE_BRIGHT_MAX": app.crtUniforms.SCANLINE_BRIGHT_MAX = value
-        case "SCANLINE_BRIGHT_MIN": app.crtUniforms.SCANLINE_BRIGHT_MIN = value
-        case "SCANLINE_CUTOFF": app.crtUniforms.SCANLINE_CUTOFF = value
-        case "SCANLINE_STRENGTH": app.crtUniforms.SCANLINE_STRENGTH = value
-        case "SHARPNESS_H": app.crtUniforms.SHARPNESS_H = value
-        case "SHARPNESS_V": app.crtUniforms.SHARPNESS_V = value
-        case "ENABLE_LANCZOS": app.crtUniforms.ENABLE_LANCZOS = Int32(value)
-
-        default:
-            NSSound.beep()
-        }
-        */
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int {
 
         return shader.settings.count
-        // return app.crtUniforms.ENABLE == 0 ? 0 : shaderSettings.count
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
@@ -259,6 +205,10 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     }
 
     @IBAction func shaderSelectAction(_ sender: NSPopUpButton) {
+
+        print("shaderSelectAction \(sender.selectedTag())")
+
+        ShaderLibrary.shared.selectShader(at: sender.selectedTag())
 
         // app.crtUniforms.ENABLE = Int32(sender.selectedTag())
         refresh()

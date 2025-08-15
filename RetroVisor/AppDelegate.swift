@@ -24,7 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
 
     // The currently selected shader
-    var currentShader: Shader!
+    // var currentShader: Shader!
 
     // Customizable shader parameters (DEPRECATED)
     // var crtUniforms = CrtUniforms.defaults
@@ -47,7 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
 
         ShaderLibrary.shared.register(CRTEasyShader())
-        currentShader = ShaderLibrary.shared.shader(for: "crteasy")!
+        ShaderLibrary.shared.selectShader(at: 1)
 
         Task {
 

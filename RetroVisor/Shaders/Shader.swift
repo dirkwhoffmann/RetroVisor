@@ -22,14 +22,18 @@ struct ShaderSetting {
     }
 }
 
-protocol Shader {
+class Shader {
 
-    var id: String { get }
-    var name: String { get }
-    var settings: [ShaderSetting] { get }
+    // var id: Int = 0
+    var name: String = ""
+    var settings: [ShaderSetting] = []
 
-    func setup(device: MTLDevice)
-    func get(key: String) -> Float
-    func set(key: String, value: Float)
-    func apply(to encoder: MTLRenderCommandEncoder)
+    func setup(device: MTLDevice) {}
+
+    func activate() {}
+    func retire() {}
+
+    func get(key: String) -> Float { return 0 }
+    func set(key: String, value: Float) {}
+    func apply(to encoder: MTLRenderCommandEncoder) {}
 }

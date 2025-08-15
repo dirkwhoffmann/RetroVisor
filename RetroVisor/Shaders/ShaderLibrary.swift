@@ -10,19 +10,53 @@
 final class ShaderLibrary {
 
     static let shared = ShaderLibrary()
-    private var shaders: [String: Shader] = [:]
+    private(set) var shaders: [Shader] = []
 
-    private init() {}
+    var currentShader: Shader {
+        didSet {
+            print("Setting current shader")
+            if currentShader !== oldValue {
+                print("Retiring \(oldValue.id ?? -1)")
+                oldValue.retire()
+                print("Activating \(currentShader.id ?? -1)")
+                currentShader.activate()
+            }
+        }
+    }
+
+    var count: Int { shaders.count }
+
+    private init() {
+
+        // Add the passthrough shader as a fallback
+        shaders.append(PassthroughShader())
+        currentShader = shaders[0]
+    }
 
     func register(_ shader: Shader) {
-        shaders[shader.id] = shader
+
+        shaders.append(shader)
     }
 
+    /*
     func shader(for id: String) -> Shader? {
-        shaders[id]
+        return shaders.first { $0.id == id }
+    }
+    */
+
+    func shader(at index: Int) -> Shader? {
+        guard index >= 0 && index < shaders.count else { return nil }
+        return shaders[index]
     }
 
-    var allShaders: [Shader] {
-        Array(shaders.values)
+    func selectShader(at index: Int) {
+        currentShader = shader(at: index) ?? shaders[0]
+    }
+}
+
+extension Shader {
+
+    var id: Int? {
+        ShaderLibrary.shared.shaders.firstIndex { $0 === self }
     }
 }

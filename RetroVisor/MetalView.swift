@@ -178,7 +178,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         }
 
         // Setup the effect shader
-        app.currentShader.setup(device: device)
+        // app.currentShader.setup(device: device)
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -327,7 +327,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                      length: MemoryLayout<CrtUniforms>.stride,
                                      index: 1)
             */
-            app.currentShader.apply(to: encoder)
+            ShaderLibrary.shared.currentShader.apply(to: encoder)
 
             encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
             encoder.endEncoding()

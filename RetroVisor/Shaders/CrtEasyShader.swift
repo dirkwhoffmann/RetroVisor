@@ -57,160 +57,164 @@ struct CrtUniforms {
 
 final class CRTEasyShader: Shader {
 
-    let id = "crteasy"
-    let name = "CRT Retro"
+    override init() {
 
-    var settings: [ShaderSetting] = [
+        super.init()
 
-        ShaderSetting(
-            name: "Brightness Boost",
-            key: "BRIGHT_BOOST",
-            range: 0.0...2.0,
-            step: 0.01,
-            help: nil
-        ),
+        name = "crteasy"
 
-        ShaderSetting(
-            name: "Horizontal Sharpness",
-            key: "SHARPNESS_H",
-            range: 0.0...1.0,
-            step: 0.05,
-            help: nil
-        ),
+        settings = [
 
-        ShaderSetting(
-            name: "Vertical Sharpness",
-            key: "SHARPNESS_V",
-            range: 0.0...1.0,
-            step: 0.05,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Brightness Boost",
+                key: "BRIGHT_BOOST",
+                range: 0.0...2.0,
+                step: 0.01,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Dilation",
-            key: "DILATION",
-            range: 0.0...1.0,
-            step: 0.05,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Horizontal Sharpness",
+                key: "SHARPNESS_H",
+                range: 0.0...1.0,
+                step: 0.05,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Gamma Input",
-            key: "GAMMA_INPUT",
-            range: 0.1...5.0,
-            step: 0.1,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Vertical Sharpness",
+                key: "SHARPNESS_V",
+                range: 0.0...1.0,
+                step: 0.05,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Gamma Output",
-            key: "GAMMA_OUTPUT",
-            range: 0.1...5.0,
-            step: 0.1,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Dilation",
+                key: "DILATION",
+                range: 0.0...1.0,
+                step: 0.05,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Dot Mask Strength",
-            key: "MASK_STRENGTH",
-            range: 0.0...1.0,
-            step: 0.01,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Gamma Input",
+                key: "GAMMA_INPUT",
+                range: 0.1...5.0,
+                step: 0.1,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Dot Mask Width",
-            key: "MASK_DOT_WIDTH",
-            range: 1.0...100.0,
-            step: 1.0,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Gamma Output",
+                key: "GAMMA_OUTPUT",
+                range: 0.1...5.0,
+                step: 0.1,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Dot Mask Height",
-            key: "MASK_DOT_HEIGHT",
-            range: 1.0...100.0,
-            step: 1.0,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Dot Mask Strength",
+                key: "MASK_STRENGTH",
+                range: 0.0...1.0,
+                step: 0.01,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Dot Mask Stagger",
-            key: "MASK_STAGGER",
-            range: 0.0...100.0,
-            step: 1.0,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Dot Mask Width",
+                key: "MASK_DOT_WIDTH",
+                range: 1.0...100.0,
+                step: 1.0,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Dot Mask Size",
-            key: "MASK_SIZE",
-            range: 1.0...100.0,
-            step: 1.0,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Dot Mask Height",
+                key: "MASK_DOT_HEIGHT",
+                range: 1.0...100.0,
+                step: 1.0,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Scanline Strength",
-            key: "SCANLINE_STRENGTH",
-            range: 0.0...1.0,
-            step: 0.05,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Dot Mask Stagger",
+                key: "MASK_STAGGER",
+                range: 0.0...100.0,
+                step: 1.0,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Scanline Minimum Beam Width",
-            key: "SCANLINE_BEAM_WIDTH_MIN",
-            range: 0.5...5.0,
-            step: 0.5,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Dot Mask Size",
+                key: "MASK_SIZE",
+                range: 1.0...100.0,
+                step: 1.0,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Scanline Maximum Beam Width",
-            key: "SCANLINE_BEAM_WIDTH_MAX",
-            range: 0.5...5.0,
-            step: 0.5,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Scanline Strength",
+                key: "SCANLINE_STRENGTH",
+                range: 0.0...1.0,
+                step: 0.05,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Scanline Minimum Brightness",
-            key: "SCANLINE_BRIGHT_MIN",
-            range: 0.0...1.0,
-            step: 0.05,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Scanline Minimum Beam Width",
+                key: "SCANLINE_BEAM_WIDTH_MIN",
+                range: 0.5...5.0,
+                step: 0.5,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Scanline Maximum Brightness",
-            key: "SCANLINE_BRIGHT_MAX",
-            range: 0.0...1.0,
-            step: 0.05,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Scanline Maximum Beam Width",
+                key: "SCANLINE_BEAM_WIDTH_MAX",
+                range: 0.5...5.0,
+                step: 0.5,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Scanline Cutoff",
-            key: "SCANLINE_CUTOFF",
-            range: 1.0...1000.0,
-            step: 1.0,
-            help: nil
-        ),
+            ShaderSetting(
+                name: "Scanline Minimum Brightness",
+                key: "SCANLINE_BRIGHT_MIN",
+                range: 0.0...1.0,
+                step: 0.05,
+                help: nil
+            ),
 
-        ShaderSetting(
-            name: "Lanczos Filter",
-            key: "ENABLE_LANCZOS",
-            range: nil,
-            step: 1.0,
-            help: nil
-        ),
-    ]
+            ShaderSetting(
+                name: "Scanline Maximum Brightness",
+                key: "SCANLINE_BRIGHT_MAX",
+                range: 0.0...1.0,
+                step: 0.05,
+                help: nil
+            ),
+
+            ShaderSetting(
+                name: "Scanline Cutoff",
+                key: "SCANLINE_CUTOFF",
+                range: 1.0...1000.0,
+                step: 1.0,
+                help: nil
+            ),
+
+            ShaderSetting(
+                name: "Lanczos Filter",
+                key: "ENABLE_LANCZOS",
+                range: nil,
+                step: 1.0,
+                help: nil
+            ),
+        ]
+    }
 
     var crtUniforms: CrtUniforms = .defaults
     var pipelineState: MTLRenderPipelineState!
 
-    func get(key: String) -> Float {
+    override func get(key: String) -> Float {
 
         switch key {
         case "ENABLE": return Float(crtUniforms.ENABLE)
@@ -239,7 +243,7 @@ final class CRTEasyShader: Shader {
         }
     }
 
-    func set(key: String, value: Float) {
+    override func set(key: String, value: Float) {
 
         print("set(\(key) \(value))")
         switch key {
@@ -268,7 +272,19 @@ final class CRTEasyShader: Shader {
         }
     }
 
-    func setup(device: MTLDevice) {
+    override func activate() {
+
+        print("Activating CRT shader")
+        let device = MTLCreateSystemDefaultDevice()
+        setup(device: device!)
+    }
+
+    override func retire() {
+
+        print("Retiring CRT shader")
+    }
+
+    override func setup(device: MTLDevice) {
 
         // Setup a vertex descriptor
         let vertexDescriptor = MTLVertexDescriptor()
@@ -307,14 +323,11 @@ final class CRTEasyShader: Shader {
         }
     }
 
-
-    func apply(to encoder: MTLRenderCommandEncoder) {
+    override func apply(to encoder: MTLRenderCommandEncoder) {
 
         encoder.setRenderPipelineState(pipelineState)
         encoder.setFragmentBytes(&crtUniforms,
                                  length: MemoryLayout<CrtUniforms>.stride,
                                  index: 1)
     }
-
-
 }
