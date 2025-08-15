@@ -13,15 +13,13 @@ import MetalKit
 
 final class PlaygroundShader: Shader {
 
-    var pipelineState2: MTLRenderPipelineState!
-
     var passthrough: Kernel!
-    
+
     override init() {
 
         super.init()
 
-        name = "Secret"
+        name = "Playground"
     }
 
     override func get(key: String) -> Float { return 0 }
@@ -31,51 +29,15 @@ final class PlaygroundShader: Shader {
 
     override func activate() {
 
-        super.activate(fragmentShader: "fragment_secret")
-
-        // Create a second pipeline state
-        let device = MTLCreateSystemDefaultDevice()!
-        let defaultLibrary = device.makeDefaultLibrary()!
-        let vertexFunc = defaultLibrary.makeFunction(name: "vertex_main")!
-        let fragmentFunc = defaultLibrary.makeFunction(name: "fragment_secret2")!
-
-        // Create the pipeline state
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.vertexFunction = vertexFunc
-        descriptor.fragmentFunction = fragmentFunc
-        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
-        descriptor.vertexDescriptor = vertexDescriptor
-
-        do {
-            pipelineState2 = try device.makeRenderPipelineState(descriptor: descriptor)
-        } catch {
-            fatalError("Failed to create pipeline state: \(error)")
-        }
-
         passthrough = BypassFilter(sampler: ShaderLibrary.linear)
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,
                         in inTexture: MTLTexture, out outTexture: MTLTexture) {
 
-            passthrough.apply(commandBuffer: commandBuffer,
-                              source: inTexture, target: outTexture,
-                              options: &app.windowController!.metalView!.uniforms,
-                              length: MemoryLayout<Uniforms>.stride)
-    }
-
-    override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {
-
-        switch pass {
-
-        case 1:
-            encoder.setRenderPipelineState(pipelineState)
-
-        case 2:
-            encoder.setRenderPipelineState(pipelineState2)
-
-        default:
-            break
-        }
+        passthrough.apply(commandBuffer: commandBuffer,
+                          source: inTexture, target: outTexture,
+                          options: &app.windowController!.metalView!.uniforms,
+                          length: MemoryLayout<Uniforms>.stride)
     }
 }
