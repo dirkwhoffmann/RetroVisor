@@ -16,20 +16,14 @@ final class PlaygroundShader: Shader {
 
     var passthrough: Kernel!
 
-    override init() {
-
-        super.init()
-
-        name = "Playground"
-    }
+    init() { super.init(name: "Playground") }
 
     override func get(key: String) -> Float { return 0 }
     override func set(key: String, value: Float) { }
 
-    override var passes: Int { return 2 }
-
     override func activate() {
 
+        super.activate()
         passthrough = BypassFilter(sampler: ShaderLibrary.linear)
     }
 

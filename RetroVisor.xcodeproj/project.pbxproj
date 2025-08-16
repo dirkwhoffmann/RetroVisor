@@ -26,7 +26,6 @@
 		506936502E4EFF160037984F /* CrtEasyShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */; };
 		506936522E4F0E590037984F /* ShaderLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936512E4F0E540037984F /* ShaderLibrary.swift */; };
 		506936542E4F2FE40037984F /* PassthroughShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936532E4F2FDB0037984F /* PassthroughShader.swift */; };
-		506936562E4F45F30037984F /* WaterRippleShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936552E4F45EB0037984F /* WaterRippleShader.swift */; };
 		506936582E4F49340037984F /* PlaygroundShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936572E4F49220037984F /* PlaygroundShader.swift */; };
 		5069365A2E4F49CA0037984F /* Playground.metal in Sources */ = {isa = PBXBuildFile; fileRef = 506936592E4F49C40037984F /* Playground.metal */; };
 		5069365C2E4F76280037984F /* Kernel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069365B2E4F76250037984F /* Kernel.swift */; };
@@ -70,7 +69,6 @@
 		5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrtEasyShader.swift; sourceTree = "<group>"; };
 		506936512E4F0E540037984F /* ShaderLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderLibrary.swift; sourceTree = "<group>"; };
 		506936532E4F2FDB0037984F /* PassthroughShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassthroughShader.swift; sourceTree = "<group>"; };
-		506936552E4F45EB0037984F /* WaterRippleShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterRippleShader.swift; sourceTree = "<group>"; };
 		506936572E4F49220037984F /* PlaygroundShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaygroundShader.swift; sourceTree = "<group>"; };
 		506936592E4F49C40037984F /* Playground.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Playground.metal; sourceTree = "<group>"; };
 		5069365B2E4F76250037984F /* Kernel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kernel.swift; sourceTree = "<group>"; };
@@ -151,13 +149,11 @@
 		5069364E2E4EFD360037984F /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
-				5069365B2E4F76250037984F /* Kernel.swift */,
 				506936512E4F0E540037984F /* ShaderLibrary.swift */,
 				5069364C2E4EFD2B0037984F /* Shader.swift */,
 				506936532E4F2FDB0037984F /* PassthroughShader.swift */,
 				5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */,
 				506936572E4F49220037984F /* PlaygroundShader.swift */,
-				506936552E4F45EB0037984F /* WaterRippleShader.swift */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -210,6 +206,7 @@
 		50BA96672E3FF19B006BA8DF /* GPU */ = {
 			isa = PBXGroup;
 			children = (
+				5069365B2E4F76250037984F /* Kernel.swift */,
 				50BA96652E3FF176006BA8DF /* ShaderTypes.metal */,
 				50BA964D2E3C80D6006BA8DF /* Shaders.metal */,
 				5069365D2E4F770A0037984F /* Passthrough.metal */,
@@ -320,7 +317,6 @@
 				5069365E2E4F771F0037984F /* Passthrough.metal in Sources */,
 				50079E712E43813C005BC5FD /* Extensions.swift in Sources */,
 				5069365C2E4F76280037984F /* Kernel.swift in Sources */,
-				506936562E4F45F30037984F /* WaterRippleShader.swift in Sources */,
 				506936542E4F2FE40037984F /* PassthroughShader.swift in Sources */,
 				506936522E4F0E590037984F /* ShaderLibrary.swift in Sources */,
 				50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */,

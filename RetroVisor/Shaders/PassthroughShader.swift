@@ -14,11 +14,9 @@ final class PassthroughShader: Shader {
 
     var passthrough: Kernel!
 
-    override init() {
+    init() {
 
-        super.init()
-
-        name = "Passthrough"
+        super.init(name: "Passthrough")
     }
 
     override func get(key: String) -> Float { return 0 }
@@ -26,6 +24,7 @@ final class PassthroughShader: Shader {
 
     override func activate() {
 
+        super.activate()
         passthrough = BypassFilter(sampler: ShaderLibrary.linear)
     }
 

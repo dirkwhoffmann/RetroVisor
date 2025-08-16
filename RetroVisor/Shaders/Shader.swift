@@ -23,73 +23,27 @@ struct ShaderSetting {
 }
 
 @MainActor
-class Shader {
+class Shader : Loggable {
 
     static var device: MTLDevice { MTLCreateSystemDefaultDevice()! }
-    
+
+    // Enables debug output to the console
+    let logging: Bool = false
+
     var name: String = ""
     var settings: [ShaderSetting] = []
 
-    /*
-    var vertexDescriptor: MTLVertexDescriptor!
-    var pipelineState: MTLRenderPipelineState!
-     */
+    init(name: String) {
 
-    var passes: Int { return 1 }
-
-    func activate() {
-
-        fatalError("To be implemented by a subclass")
+        self.name = name
     }
 
-    func activate(fragmentShader: String) {
-
-        // let device = MTLCreateSystemDefaultDevice()!
-
-        print("Activating \(name)")
-
-        /*
-        // Setup a vertex descriptor
-        vertexDescriptor = MTLVertexDescriptor()
-
-        // Single interleaved buffer
-        vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex>.stride
-        vertexDescriptor.layouts[0].stepRate = 1
-        vertexDescriptor.layouts[0].stepFunction = MTLVertexStepFunction.perVertex
-
-        // Positions
-        vertexDescriptor.attributes[0].format = .float4
-        vertexDescriptor.attributes[0].offset = 0
-        vertexDescriptor.attributes[0].bufferIndex = 0
-
-        // Texture coordinates
-        vertexDescriptor.attributes[1].format = .float2
-        vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
-        vertexDescriptor.attributes[1].bufferIndex = 0
-
-        // Load shaders from the default library
-        let library = device.makeDefaultLibrary()!
-        let vertexFunc = library.makeFunction(name: "vertex_main")!
-        let fragmentFunc = library.makeFunction(name: fragmentShader)!
-
-        // Create the pipeline state
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.vertexFunction = vertexFunc
-        descriptor.fragmentFunction = fragmentFunc
-        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
-        descriptor.vertexDescriptor = vertexDescriptor
-
-        do {
-            pipelineState = try device.makeRenderPipelineState(descriptor: descriptor)
-        } catch {
-            fatalError("Failed to create pipeline state: \(error)")
-        }
-         */
+    func activate() {
+        log("Activating \(name)")
     }
 
     func retire() {
-
-        print("Retiring \(name)")
+        log("Retiring \(name)")
     }
 
     func apply(commandBuffer: MTLCommandBuffer,

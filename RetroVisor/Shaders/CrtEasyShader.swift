@@ -58,11 +58,9 @@ final class CRTEasyShader: Shader {
     var kernel: Kernel!
     var crtUniforms: CrtUniforms = .defaults
 
-    override init() {
+    init() {
 
-        super.init()
-
-        name = "crteasy"
+        super.init(name: "crteasy")
 
         settings = [
 
@@ -270,7 +268,7 @@ final class CRTEasyShader: Shader {
 
     override func activate() {
 
-        super.activate(fragmentShader: "fragment_crt_easymode")
+        super.activate()
         kernel = CrtEasyKernel(sampler: ShaderLibrary.linear)
     }
 
