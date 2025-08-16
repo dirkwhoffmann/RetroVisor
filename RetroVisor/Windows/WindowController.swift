@@ -154,7 +154,7 @@ extension WindowController: StreamerDelegate {
 
     func textureRectDidChange(rect: CGRect?) {
 
-        metalView?.updateVertexBuffers(rect)
+        metalView?.textureRectDidChange(rect)
     }
 
     func captureRectDidChange(rect: CGRect?) {

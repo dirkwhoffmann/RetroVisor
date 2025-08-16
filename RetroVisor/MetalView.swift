@@ -23,10 +23,11 @@ import MetalPerformanceShaders
  *          Applies a Gaussian-like blur during window animations (i.e., move or
  *          resize) to produce a smoother visual experience.
  *
- * Stage 3: Post-Processing (Ripple Effect)
+ * Stage 3: Rendering
  *
- *          Adds a water ripple effect during window drag and resize operations,
- *          enhancing visual feedback with a dynamic distortion.
+ *          Zooms the texture (if requested) and draws the final quad.
+ *          Additonally, a water ripple effect during window drag and resize
+ *          operations, enhancing visual feedback with a dynamic distortion.
  */
 
 enum ShaderType {
@@ -58,7 +59,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     @IBOutlet weak var viewController: ViewController!
 
-    // Enables debug output to the console
     let logging: Bool = false
 
     var trackingWindow: TrackingWindow { window! as! TrackingWindow }
@@ -67,16 +67,8 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     var commandQueue: MTLCommandQueue!
     var pipelineState: MTLRenderPipelineState!
-    // var vertexBuffer1: MTLBuffer!
-    var vertexBuffer2: MTLBuffer!
-    var renderPass1: MTLRenderPassDescriptor!
-    var renderPass2: MTLRenderPassDescriptor!
-    var renderPass3: MTLRenderPassDescriptor!
-
-    // The water ripple shader (used for animation effects)
-    let waterRippleShader = WaterRippleShader()
-
-    // let crtEasy: CRTEasyShader = CRTEasyShader()
+    var vertexBuffer: MTLBuffer!
+    var renderPass: MTLRenderPassDescriptor!
 
     var uniforms = Uniforms.init(time: 0.0,
                                  zoom: 1.0,
@@ -85,7 +77,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                  window: [0, 0],
                                  center: [0, 0],
                                  mouse: [0, 0],
-                                 texRect: [0, 0, 0, 0])
+                                 texRect: [0.0, 0.0, 1.0, 1.0])
 
     var textureCache: CVMetalTextureCache!
 
@@ -96,9 +88,8 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var time: Float = 0.0
     var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
 
-    var animate: Bool = false
-
     var intensity = Animated<Float>(0.0)
+    var animates: Bool { intensity.current > 0 }
 
     required init(coder: NSCoder) {
 
@@ -128,7 +119,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         CVMetalTextureCacheCreate(nil, nil, device, nil, &textureCache)
 
         // Setup the vertex buffers
-        updateVertexBuffers(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
+        // textureRectDidChange(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
 
         // Load shaders from the default library
         let vertexFunc = ShaderLibrary.library.makeFunction(name: "vertex_main")!
@@ -150,20 +141,16 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
         vertexDescriptor.attributes[1].bufferIndex = 0
 
-        // Create the render pass descriptor for pass 1
-        renderPass1 = MTLRenderPassDescriptor()
-        renderPass1.colorAttachments[0].loadAction = .clear
-        renderPass1.colorAttachments[0].storeAction = .store
-        renderPass1.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
-
-        // Create the render pass descriptor for pass 2
-        renderPass2 = MTLRenderPassDescriptor()
-        renderPass2.colorAttachments[0].loadAction = .clear
-        renderPass2.colorAttachments[0].storeAction = .store
-        renderPass2.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
-
-        // Setup the effect shader
-        waterRippleShader.activate()
+        // Setup the vertex buffer (full quad)
+        let vertices: [Vertex] = [
+            Vertex(pos: [-1,  1, 0, 1], tex: [0, 0]),
+            Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
+            Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
+            Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1])
+        ]
+        vertexBuffer = device.makeBuffer(bytes: vertices,
+                                         length: vertices.count * MemoryLayout<Vertex>.stride,
+                                         options: [])
 
         // Setup the pipelin descriptor for the post-processing phase
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
@@ -180,52 +167,15 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         }
     }
 
-    func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
+    func textureRectDidChange(_ rect: CGRect?) {
 
-        let descriptor = MTLSamplerDescriptor()
-        descriptor.minFilter = minFilter
-        descriptor.magFilter = magFilter
-        descriptor.mipFilter = .notMipmapped
-        return device!.makeSamplerState(descriptor: descriptor)!
-    }
+        if let rect = rect {
 
-    func updateVertexBuffers(_ rect: CGRect?) {
-
-        guard let rect = rect else { return }
-
-        let tx1 = Float(rect.minX)
-        let tx2 = Float(rect.maxX)
-        let ty1 = Float(rect.minY)
-        let ty2 = Float(rect.maxY)
-
-        uniforms.texRect = [tx1, ty1, tx2, ty2]
-
-        // Quad rendered in the main stage (CRT effect)
-        /*
-        let vertices1: [Vertex] = [
-            Vertex(pos: [-1,  1, 0, 1], tex: [tx1, ty1]),
-            Vertex(pos: [-1, -1, 0, 1], tex: [tx1, ty2]),
-            Vertex(pos: [ 1,  1, 0, 1], tex: [tx2, ty1]),
-            Vertex(pos: [ 1, -1, 0, 1], tex: [tx2, ty2])
-        ]
-        */
-
-        // Quad rendered in the post-processing stage (drag and resize animation)
-        let vertices2: [Vertex] = [
-            Vertex(pos: [-1,  1, 0, 1], tex: [0, 0]),
-            Vertex(pos: [-1, -1, 0, 1], tex: [0, 1]),
-            Vertex(pos: [ 1,  1, 0, 1], tex: [1, 0]),
-            Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1])
-        ]
-
-        /*
-        vertexBuffer1 = device!.makeBuffer(bytes: vertices1,
-                                           length: vertices1.count * MemoryLayout<Vertex>.stride,
-                                           options: [])
-        */
-        vertexBuffer2 = device!.makeBuffer(bytes: vertices2,
-                                           length: vertices2.count * MemoryLayout<Vertex>.stride,
-                                           options: [])
+            uniforms.texRect = [ Float(rect.minX),
+                                 Float(rect.minY),
+                                 Float(rect.maxX),
+                                 Float(rect.maxY) ]
+        }
     }
 
     func updateTextures(rect: NSRect) {
@@ -290,7 +240,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         // Advance the animation parameters
         intensity.move()
-        let animates = intensity.current > 0
         time += 0.01
 
         // Get the location of the latest mouse down event
@@ -339,7 +288,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
             let sampler = animates ? ShaderLibrary.linear : ShaderLibrary.nearest
 
             encoder.setRenderPipelineState(pipelineState)
-            encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
+            encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
             encoder.setFragmentTexture(outTexture, index: 0)
             encoder.setFragmentSamplerState(sampler, index: 0)
             encoder.setFragmentBytes(&uniforms,
