@@ -23,22 +23,9 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
     return out;
 }
 
-
 //
 // Fragment shaders
 //
-
-/*
-fragment float4 fragment_bypass(VertexOut in [[stage_in]],
-                                texture2d<float> tex [[texture(0)]],
-                                constant Uniforms& uniforms [[buffer(0)]],
-                                sampler sam [[sampler(0)]]) {
-
-    float2 shift = float2(0.5 - 0.5 / uniforms.zoom, 0.5 - 0.5 / uniforms.zoom);
-    float2 uv = in.texCoord / uniforms.zoom + shift;
-    return tex.sample(sam, uv);
-}
-*/
 
 fragment float4 fragment_ripple(VertexOut in [[stage_in]],
                                 texture2d<float> tex [[texture(0)]],

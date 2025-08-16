@@ -47,18 +47,18 @@ inline float curve_distance(float x, float sharp) {
 
 inline float4x4 get_color_matrix(texture2d<float> tex, sampler sam, float2 co, float2 dx, float DILATION) {
     return float4x4(
-        dilate(tex.sample(sam, co - dx), DILATION),
-        dilate(tex.sample(sam, co), DILATION),
-        dilate(tex.sample(sam, co + dx), DILATION),
-        dilate(tex.sample(sam, co + 2.0 * dx), DILATION)
-    );
+                    dilate(tex.sample(sam, co - dx), DILATION),
+                    dilate(tex.sample(sam, co), DILATION),
+                    dilate(tex.sample(sam, co + dx), DILATION),
+                    dilate(tex.sample(sam, co + 2.0 * dx), DILATION)
+                    );
 }
 
 inline float3 filter_lanczos(float4 coeffs, float4x4 color_matrix) {
     float4 col = coeffs.x * color_matrix[0] +
-                 coeffs.y * color_matrix[1] +
-                 coeffs.z * color_matrix[2] +
-                 coeffs.w * color_matrix[3];
+    coeffs.y * color_matrix[1] +
+    coeffs.z * color_matrix[2] +
+    coeffs.w * color_matrix[3];
 
     float4 sample_min = min(color_matrix[1], color_matrix[2]);
     float4 sample_max = max(color_matrix[1], color_matrix[2]);
@@ -120,16 +120,16 @@ inline float4 crt_easymode(float2 texture_size,
                             u.SCANLINE_BEAM_WIDTH_MAX);
 
     /*
-    float scan_weight = 1.0 - pow(cos(coords.y * 2.0 * M_PI * texture_size.y) * 0.5 + 0.5,
-                                  scan_beam) * u.SCANLINE_STRENGTH;
+     float scan_weight = 1.0 - pow(cos(coords.y * 2.0 * M_PI * texture_size.y) * 0.5 + 0.5,
+     scan_beam) * u.SCANLINE_STRENGTH;
      */
     float scan_weight = 1.0 - pow(cos(tex_norm.y * 0.5 * M_PI * output_size.y) * 0.5 + 0.5,
                                   scan_beam) * u.SCANLINE_STRENGTH;
 
     float mask = 1.0 - u.MASK_STRENGTH;
     /*
-    float2 mod_fac = floor(coords * output_size * texture_size / (video_size *
-                          float2(u.MASK_SIZE, u.MASK_DOT_HEIGHT * u.MASK_SIZE)));
+     float2 mod_fac = floor(coords * output_size * texture_size / (video_size *
+     float2(u.MASK_SIZE, u.MASK_DOT_HEIGHT * u.MASK_SIZE)));
      */
     float2 mod_fac = floor(tex_norm * output_size / float2(u.MASK_SIZE, u.MASK_DOT_HEIGHT * u.MASK_SIZE));
     int dot_no = int(fmod((mod_fac.x + fmod(mod_fac.y, 2.0) * u.MASK_STAGGER) / u.MASK_DOT_WIDTH, 3.0));
@@ -154,6 +154,7 @@ inline float4 crt_easymode(float2 texture_size,
     return float4(col * u.BRIGHT_BOOST, 1.0);
 }
 
+// Fragment shader variant
 fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
                                       texture2d<float> tex [[texture(0)]],
                                       constant Uniforms& uniforms [[buffer(0)]],
@@ -179,3 +180,41 @@ fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
                         crtUniforms);
 }
 
+// Compute kernel variant
+kernel void crtEasy(texture2d<float, access::sample> inTexture  [[ texture(0) ]],
+                    texture2d<float, access::write>   outTexture [[ texture(1) ]],
+                    constant Uniforms                 &uniforms  [[ buffer(0) ]],
+                    constant CrtUniforms              &crtUniforms  [[ buffer(1) ]],
+                    sampler                           sam        [[ sampler(0) ]],
+                    uint2                             gid        [[ thread_position_in_grid ]])
+{
+    // (Optional) bounds check if you over-dispatch:
+    // if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) return;
+
+    float2 texture_size = uniforms.resolution;
+    float2 video_size   = uniforms.window;
+    float2 output_size  = uniforms.window;
+
+    // 1) Compute-space -> normalized output UV at pixel center
+    float2 outSize = float2(outTexture.get_width(), outTexture.get_height());
+    float2 uvOut   = (float2(gid) + 0.5) / outSize;
+
+    // 2) Map into texRect (normalized 0..1 on input texture)
+    float2 texOrigin = uniforms.texRect.xy;
+    float2 texSize   = uniforms.texRect.zw - uniforms.texRect.xy;
+    float2 texCoord  = texOrigin + uvOut * texSize;
+
+    // 3) The same "normuv" as used in the fragment path
+    float2 normuv = (texCoord - texOrigin) / texSize;
+
+    float4 result = crt_easymode(texture_size,
+                                 video_size,
+                                 output_size,
+                                 normuv,       // same as fragment's normuv
+                                 texCoord,     // same as fragment's in.texCoord
+                                 inTexture,
+                                 sam,
+                                 crtUniforms);
+
+    outTexture.write(result, gid);
+}

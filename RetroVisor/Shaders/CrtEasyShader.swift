@@ -55,6 +55,8 @@ struct CrtUniforms {
 
 final class CRTEasyShader: Shader {
 
+    var kernel: Kernel!
+
     override init() {
 
         super.init()
@@ -270,8 +272,22 @@ final class CRTEasyShader: Shader {
     override func activate() {
 
         super.activate(fragmentShader: "fragment_crt_easymode")
+        kernel = CrtEasyKernel(sampler: ShaderLibrary.linear)
     }
 
+
+    override func apply(commandBuffer: MTLCommandBuffer,
+                        in inTexture: MTLTexture, out outTexture: MTLTexture) {
+
+        kernel.apply(commandBuffer: commandBuffer,
+                     source: inTexture, target: outTexture,
+                     options: &app.windowController!.metalView!.uniforms,
+                     length: MemoryLayout<Uniforms>.stride,
+                     options2: &crtUniforms,
+                     length2: MemoryLayout<CrtUniforms>.stride)
+    }
+
+    /*
     override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {
 
         switch pass {
@@ -285,4 +301,5 @@ final class CRTEasyShader: Shader {
             break
         }
     }
+    */
 }
