@@ -67,10 +67,8 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     var commandQueue: MTLCommandQueue!
     var pipelineState: MTLRenderPipelineState!
-    var vertexBuffer1: MTLBuffer!
+    // var vertexBuffer1: MTLBuffer!
     var vertexBuffer2: MTLBuffer!
-    //var nearestSampler: MTLSamplerState!
-    // var linearSampler: MTLSamplerState!
     var renderPass1: MTLRenderPassDescriptor!
     var renderPass2: MTLRenderPassDescriptor!
     var renderPass3: MTLRenderPassDescriptor!
@@ -203,12 +201,14 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         uniforms.texRect = [tx1, ty1, tx2, ty2]
 
         // Quad rendered in the main stage (CRT effect)
+        /*
         let vertices1: [Vertex] = [
             Vertex(pos: [-1,  1, 0, 1], tex: [tx1, ty1]),
             Vertex(pos: [-1, -1, 0, 1], tex: [tx1, ty2]),
             Vertex(pos: [ 1,  1, 0, 1], tex: [tx2, ty1]),
             Vertex(pos: [ 1, -1, 0, 1], tex: [tx2, ty2])
         ]
+        */
 
         // Quad rendered in the post-processing stage (drag and resize animation)
         let vertices2: [Vertex] = [
@@ -218,10 +218,11 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
             Vertex(pos: [ 1, -1, 0, 1], tex: [1, 1])
         ]
 
+        /*
         vertexBuffer1 = device!.makeBuffer(bytes: vertices1,
                                            length: vertices1.count * MemoryLayout<Vertex>.stride,
                                            options: [])
-
+        */
         vertexBuffer2 = device!.makeBuffer(bytes: vertices2,
                                            length: vertices2.count * MemoryLayout<Vertex>.stride,
                                            options: [])
@@ -283,13 +284,13 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     func draw(in view: MTKView) {
 
         guard let inTexture = self.inTexture else { return }
-        guard let midTexture = self.midTexture else { return }
         guard var outTexture = self.outTexture else { return }
 
         windowController?.streamer.updateRects()
 
         // Advance the animation parameters
         intensity.move()
+        let animates = intensity.current > 0
         time += 0.01
 
         // Get the location of the latest mouse down event
@@ -308,65 +309,17 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         guard let commandBuffer = commandQueue.makeCommandBuffer() else { return }
 
         //
-        // CRT shader (first pass)
+        // Stage 1: Apply the effect shader
         //
 
-        ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer, in: inTexture, out: midTexture)
-
-        /*
-        renderPass1.colorAttachments[0].texture = midTexture
-        if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass1) {
-
-            encoder.setVertexBuffer(vertexBuffer1, offset: 0, index: 0)
-            encoder.setFragmentTexture(inTexture, index: 0)
-            encoder.setFragmentSamplerState(linearSampler, index: 0)
-            encoder.setFragmentBytes(&uniforms,
-                                     length: MemoryLayout<Uniforms>.stride,
-                                     index: 0)
-
-            ShaderLibrary.shared.currentShader.apply(to: encoder, pass: 1)
-
-            encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-            encoder.endEncoding()
-        }
-        */
+        ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer,
+                                                 in: inTexture, out: outTexture)
 
         //
-        // CRT shader (optional second pass)
+        // Stage 2: (Optional) in-texture blurring
         //
 
-        /*
-        if ShaderLibrary.shared.currentShader.passes > 1 {
-
-            renderPass2.colorAttachments[0].texture = outTexture
-            if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass2) {
-
-                encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
-                encoder.setFragmentTexture(midTexture, index: 0)
-                encoder.setFragmentSamplerState(linearSampler, index: 0)
-                encoder.setFragmentBytes(&uniforms,
-                                         length: MemoryLayout<Uniforms>.stride,
-                                         index: 0)
-
-                ShaderLibrary.shared.currentShader.apply(to: encoder, pass: 2)
-
-                encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-                encoder.endEncoding()
-            }
-
-        } else {
-
-            outTexture = midTexture
-        }
-        */
-
-        outTexture = midTexture
-
-        //
-        // Third pass: In-texture blurring
-        //
-
-        if uniforms.intensity > 0 {
+        if animates {
 
             let radius = Int(9.0 * uniforms.intensity) | 1
             let blur = MPSImageBox(device: device!, kernelWidth: radius, kernelHeight: radius)
@@ -375,7 +328,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         }
 
         //
-        // Final phase: Render to the screen
+        // Stage 3: Render a full quad on the screen
         //
 
         guard let renderPass3 = view.currentRenderPassDescriptor else { return }
@@ -383,24 +336,15 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass3) {
 
-            let animates = intensity.current > 0
+            let sampler = animates ? ShaderLibrary.linear : ShaderLibrary.nearest
 
             encoder.setRenderPipelineState(pipelineState)
             encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
             encoder.setFragmentTexture(outTexture, index: 0)
-            if animates {
-                encoder.setFragmentSamplerState(ShaderLibrary.linear, index: 0)
-            } else {
-                encoder.setFragmentSamplerState(ShaderLibrary.nearest, index: 0)
-            }
-
-            // Pass uniforms: time and center
+            encoder.setFragmentSamplerState(sampler, index: 0)
             encoder.setFragmentBytes(&uniforms,
                                      length: MemoryLayout<Uniforms>.stride,
                                      index: 0)
-
-            // waterRippleShader.apply(to: encoder)
-
             encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
             encoder.endEncoding()
         }
