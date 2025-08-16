@@ -42,7 +42,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         ShaderLibrary.shared.register(CRTEasyShader())
         ShaderLibrary.shared.register(PlaygroundShader())
-        ShaderLibrary.shared.selectShader(at: 1)
+        ShaderLibrary.shared.selectShader(at: 2)
 
         Task {
 

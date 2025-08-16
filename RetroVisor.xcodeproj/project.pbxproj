@@ -30,7 +30,6 @@
 		5069365A2E4F49CA0037984F /* Playground.metal in Sources */ = {isa = PBXBuildFile; fileRef = 506936592E4F49C40037984F /* Playground.metal */; };
 		5069365C2E4F76280037984F /* Kernel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069365B2E4F76250037984F /* Kernel.swift */; };
 		5069365E2E4F771F0037984F /* Passthrough.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5069365D2E4F770A0037984F /* Passthrough.metal */; };
-		506936602E505A8C0037984F /* WaterRipple.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5069365F2E505A830037984F /* WaterRipple.metal */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
 		50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA964A2E3C80D6006BA8DF /* WindowController.swift */; };
@@ -73,7 +72,6 @@
 		506936592E4F49C40037984F /* Playground.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Playground.metal; sourceTree = "<group>"; };
 		5069365B2E4F76250037984F /* Kernel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kernel.swift; sourceTree = "<group>"; };
 		5069365D2E4F770A0037984F /* Passthrough.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Passthrough.metal; sourceTree = "<group>"; };
-		5069365F2E505A830037984F /* WaterRipple.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = WaterRipple.metal; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50BA96452E3C80D6006BA8DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -211,7 +209,6 @@
 				50BA964D2E3C80D6006BA8DF /* Shaders.metal */,
 				5069365D2E4F770A0037984F /* Passthrough.metal */,
 				50BA96632E3FF0B3006BA8DF /* CrtEasy.metal */,
-				5069365F2E505A830037984F /* WaterRipple.metal */,
 				506936592E4F49C40037984F /* Playground.metal */,
 			);
 			path = GPU;
@@ -321,7 +318,6 @@
 				506936522E4F0E590037984F /* ShaderLibrary.swift in Sources */,
 				50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */,
 				503FCC312E49BBE800EF49DA /* EffectWindow.swift in Sources */,
-				506936602E505A8C0037984F /* WaterRipple.metal in Sources */,
 				50BA96522E3C80D6006BA8DF /* WindowController.swift in Sources */,
 				503FCC252E4868E100EF49DA /* GeneralPreferencesViewController.swift in Sources */,
 				503FCC1E2E48670300EF49DA /* PreferencesWindowController.swift in Sources */,

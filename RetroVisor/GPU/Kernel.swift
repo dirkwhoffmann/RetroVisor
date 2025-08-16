@@ -134,3 +134,25 @@ class CrtEasyKernel: Kernel {
         self.init(name: "crtEasy", sampler: sampler)
     }
 }
+
+
+//
+// My personal playground. Nothing to see here. Move on.
+//
+
+class PlaygroundKernel1: Kernel {
+
+    convenience init?(sampler: MTLSamplerState) {
+
+        self.init(name: "playground1", sampler: sampler)
+    }
+}
+
+class PlaygroundKernel2: Kernel {
+
+    convenience init?(sampler: MTLSamplerState) {
+
+        self.init(name: "playground2", sampler: sampler)
+    }
+}
+

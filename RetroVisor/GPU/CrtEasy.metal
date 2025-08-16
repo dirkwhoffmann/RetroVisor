@@ -181,7 +181,7 @@ fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
 }
 
 // Compute kernel variant
-kernel void crtEasy(texture2d<float, access::sample> inTexture  [[ texture(0) ]],
+kernel void crtEasy(texture2d<float, access::sample> inTexture   [[ texture(0) ]],
                     texture2d<float, access::write>   outTexture [[ texture(1) ]],
                     constant Uniforms                 &uniforms  [[ buffer(0) ]],
                     constant CrtUniforms              &crtUniforms  [[ buffer(1) ]],
