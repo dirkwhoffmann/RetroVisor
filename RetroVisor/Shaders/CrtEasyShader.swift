@@ -56,6 +56,7 @@ struct CrtUniforms {
 final class CRTEasyShader: Shader {
 
     var kernel: Kernel!
+    var crtUniforms: CrtUniforms = .defaults
 
     override init() {
 
@@ -211,8 +212,6 @@ final class CRTEasyShader: Shader {
         ]
     }
 
-    var crtUniforms: CrtUniforms = .defaults
-
     override func get(key: String) -> Float {
 
         switch key {
@@ -275,7 +274,6 @@ final class CRTEasyShader: Shader {
         kernel = CrtEasyKernel(sampler: ShaderLibrary.linear)
     }
 
-
     override func apply(commandBuffer: MTLCommandBuffer,
                         in inTexture: MTLTexture, out outTexture: MTLTexture) {
 
@@ -286,20 +284,4 @@ final class CRTEasyShader: Shader {
                      options2: &crtUniforms,
                      length2: MemoryLayout<CrtUniforms>.stride)
     }
-
-    /*
-    override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {
-
-        switch pass {
-
-        case 1:
-            encoder.setRenderPipelineState(pipelineState)
-            encoder.setFragmentBytes(&crtUniforms,
-                                     length: MemoryLayout<CrtUniforms>.stride,
-                                     index: 1)
-        default:
-            break
-        }
-    }
-    */
 }

@@ -26,6 +26,17 @@ final class WaterRippleShader: Shader {
         super.activate(fragmentShader: "fragment_ripple")
     }
 
+    override func apply(commandBuffer: MTLCommandBuffer,
+                        in inTexture: MTLTexture, out outTexture: MTLTexture) {
+
+        /*
+        passthrough.apply(commandBuffer: commandBuffer,
+                          source: inTexture, target: outTexture,
+                          options: &app.windowController!.metalView!.uniforms,
+                          length: MemoryLayout<Uniforms>.stride)
+        */
+    }
+    /*
     override func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) {
 
         switch pass {
@@ -37,4 +48,5 @@ final class WaterRippleShader: Shader {
             break
         }
     }
+    */
 }

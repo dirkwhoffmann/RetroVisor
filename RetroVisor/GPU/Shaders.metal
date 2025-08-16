@@ -24,13 +24,23 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
 }
 
 //
-// Fragment shaders
+// Fragment shader
 //
 
-fragment float4 fragment_ripple(VertexOut in [[stage_in]],
-                                texture2d<float> tex [[texture(0)]],
-                                constant Uniforms& uniforms [[buffer(0)]],
-                                sampler sam [[sampler(0)]]) {
+/* The fragment shader used in the final render stage, where the computed
+ * texture is drawn onto a fullscreen quad.
+ *
+ * Features:
+ *
+ *  - Applies an optional zoom effect (magnification feature)
+ *  - Applies an optional water-ripple effect (window animation effect)
+ *  - Draws the final texture onto a fullscreen quad
+ */
+
+fragment float4 fragment_main(VertexOut in [[stage_in]],
+                              texture2d<float> tex [[texture(0)]],
+                              constant Uniforms& uniforms [[buffer(0)]],
+                              sampler sam [[sampler(0)]]) {
 
     float2 shift = float2(0.5 - 0.5 / uniforms.zoom, 0.5 - 0.5 / uniforms.zoom);
     float2 uv = in.texCoord / uniforms.zoom + shift;

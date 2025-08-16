@@ -30,8 +30,10 @@ class Shader {
     var name: String = ""
     var settings: [ShaderSetting] = []
 
+    /*
     var vertexDescriptor: MTLVertexDescriptor!
     var pipelineState: MTLRenderPipelineState!
+     */
 
     var passes: Int { return 1 }
 
@@ -42,10 +44,11 @@ class Shader {
 
     func activate(fragmentShader: String) {
 
-        let device = MTLCreateSystemDefaultDevice()!
+        // let device = MTLCreateSystemDefaultDevice()!
 
         print("Activating \(name)")
 
+        /*
         // Setup a vertex descriptor
         vertexDescriptor = MTLVertexDescriptor()
 
@@ -81,6 +84,7 @@ class Shader {
         } catch {
             fatalError("Failed to create pipeline state: \(error)")
         }
+         */
     }
 
     func retire() {
@@ -91,31 +95,7 @@ class Shader {
     func apply(commandBuffer: MTLCommandBuffer,
                in inTexture: MTLTexture, out outTexture: MTLTexture) {
 
-        var vertexBuffer1: MTLBuffer! { app.windowController?.metalView?.vertexBuffer1! }
-        var vertexBuffer2: MTLBuffer! { app.windowController?.metalView?.vertexBuffer2! }
-        var linearSampler: MTLSamplerState! { app.windowController?.metalView?.linearSampler! }
-        // var uniforms: Uniforms { app.windowController?.metalView?.uniforms! }
-
-        let renderPass1 = MTLRenderPassDescriptor()
-        renderPass1.colorAttachments[0].loadAction = .clear
-        renderPass1.colorAttachments[0].storeAction = .store
-        renderPass1.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
-        renderPass1.colorAttachments[0].texture = outTexture
-
-        if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass1) {
-
-            encoder.setVertexBuffer(vertexBuffer1, offset: 0, index: 0)
-            encoder.setFragmentTexture(inTexture, index: 0)
-            encoder.setFragmentSamplerState(linearSampler, index: 0)
-            encoder.setFragmentBytes(&app.windowController!.metalView!.uniforms,
-                                     length: MemoryLayout<Uniforms>.stride,
-                                     index: 0)
-
-            apply(to: encoder, pass: 1)
-
-            encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-            encoder.endEncoding()
-        }
+        fatalError("To be implemented by a subclass")
     }
 
     func get(key: String) -> Float { return 0 }

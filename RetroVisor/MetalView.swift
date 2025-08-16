@@ -66,10 +66,11 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var recorder: Recorder? { return windowController?.recorder }
 
     var commandQueue: MTLCommandQueue!
+    var pipelineState: MTLRenderPipelineState!
     var vertexBuffer1: MTLBuffer!
     var vertexBuffer2: MTLBuffer!
-    var nearestSampler: MTLSamplerState!
-    var linearSampler: MTLSamplerState!
+    //var nearestSampler: MTLSamplerState!
+    // var linearSampler: MTLSamplerState!
     var renderPass1: MTLRenderPassDescriptor!
     var renderPass2: MTLRenderPassDescriptor!
     var renderPass3: MTLRenderPassDescriptor!
@@ -105,14 +106,22 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         super.init(coder: coder)
 
-        device = MTLCreateSystemDefaultDevice()
-        guard let device = device else { return }
-
-        delegate = self
-        clearColor = MTLClearColorMake(0, 0, 0, 1)
         delegate = self
         enableSetNeedsDisplay = true
         framebufferOnly = false
+        clearColor = MTLClearColorMake(0, 0, 0, 1)
+
+        initMetal()
+
+        // Enable the magnification gesture
+        let magnifyRecognizer = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnify(_:)))
+        addGestureRecognizer(magnifyRecognizer)
+    }
+
+    func initMetal() {
+
+        device = ShaderLibrary.device
+        guard let device = device else { return }
 
         // Create a command queue
         commandQueue = device.makeCommandQueue()
@@ -123,9 +132,25 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Setup the vertex buffers
         updateVertexBuffers(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
 
-        // Create texture samplers
-        nearestSampler = makeSamplerState(minFilter: .nearest, magFilter: .nearest)
-        linearSampler  = makeSamplerState(minFilter: .linear,  magFilter: .linear)
+        // Load shaders from the default library
+        let vertexFunc = ShaderLibrary.library.makeFunction(name: "vertex_main")!
+        let fragmentFunc = ShaderLibrary.library.makeFunction(name: "fragment_main")!
+
+        // Setup a vertex descriptor (single interleaved buffer)
+        let vertexDescriptor = MTLVertexDescriptor()
+        vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex>.stride
+        vertexDescriptor.layouts[0].stepRate = 1
+        vertexDescriptor.layouts[0].stepFunction = MTLVertexStepFunction.perVertex
+
+        // Positions
+        vertexDescriptor.attributes[0].format = .float4
+        vertexDescriptor.attributes[0].offset = 0
+        vertexDescriptor.attributes[0].bufferIndex = 0
+
+        // Texture coordinates
+        vertexDescriptor.attributes[1].format = .float2
+        vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
+        vertexDescriptor.attributes[1].bufferIndex = 0
 
         // Create the render pass descriptor for pass 1
         renderPass1 = MTLRenderPassDescriptor()
@@ -142,9 +167,19 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Setup the effect shader
         waterRippleShader.activate()
 
-        // Enable the magnification gesture
-        let magnifyRecognizer = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnify(_:)))
-        addGestureRecognizer(magnifyRecognizer)
+        // Setup the pipelin descriptor for the post-processing phase
+        let pipelineDescriptor = MTLRenderPipelineDescriptor()
+        pipelineDescriptor.vertexFunction = vertexFunc
+        pipelineDescriptor.fragmentFunction = fragmentFunc
+        pipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat
+        pipelineDescriptor.vertexDescriptor = vertexDescriptor
+
+        // Create the pipeline states
+        do {
+            pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+        } catch {
+            fatalError("Failed to create pipeline state: \(error)")
+        }
     }
 
     func makeSamplerState(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerState {
@@ -340,7 +375,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         }
 
         //
-        // Third pass: Water-ripple effect
+        // Final phase: Render to the screen
         //
 
         guard let renderPass3 = view.currentRenderPassDescriptor else { return }
@@ -348,17 +383,23 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass3) {
 
-            // encoder.setRenderPipelineState(pipelineState2)
+            let animates = intensity.current > 0
+
+            encoder.setRenderPipelineState(pipelineState)
             encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
             encoder.setFragmentTexture(outTexture, index: 0)
-            encoder.setFragmentSamplerState(intensity.current > 0 ? linearSampler : nearestSampler, index: 0)
+            if animates {
+                encoder.setFragmentSamplerState(ShaderLibrary.linear, index: 0)
+            } else {
+                encoder.setFragmentSamplerState(ShaderLibrary.nearest, index: 0)
+            }
 
             // Pass uniforms: time and center
             encoder.setFragmentBytes(&uniforms,
                                      length: MemoryLayout<Uniforms>.stride,
                                      index: 0)
 
-            waterRippleShader.apply(to: encoder)
+            // waterRippleShader.apply(to: encoder)
 
             encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
             encoder.endEncoding()
