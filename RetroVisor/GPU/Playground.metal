@@ -43,10 +43,10 @@ inline half4 sample(texture2d<half, access::sample> inTexture,
     return inTexture.sample(sam, uvIn);
 }
 
-inline float shapeMask(float2 pos, constant MyUniforms& uniforms)
+inline float shapeMask(float2 pos, float2 dotSize, constant MyUniforms& uniforms)
 {
     // Normalize position into [-1..1] range relative to dotSize
-    float2 uv = pos / uniforms.dotSize;
+    float2 uv = pos / dotSize;
 
     if (uniforms.shape == 0) {
         // Ellipse: inside if uv.x^2 + uv.y^2 <= 1
@@ -57,7 +57,7 @@ inline float shapeMask(float2 pos, constant MyUniforms& uniforms)
     }
 }
 
-constant MyUniforms u = { uint2(12,12), 16, 9, 0 };
+constant MyUniforms u = { uint2(12,32), float2(16,18), 2, 0 };
 
 kernel void playground1(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
                         texture2d<half, access::write>  outTexture [[ texture(1) ]],
@@ -80,33 +80,47 @@ kernel void playground1(texture2d<half, access::sample> inTexture  [[ texture(0)
     // uint height = inTexture.get_height();
 
     // Find which dot cell we are in
-     uint2 cell = gid / u.maskSpacing;
-     float2 center = float2(cell * u.maskSpacing) + float2(u.maskSpacing) * 0.5;
+    uint2 cell = gid / u.maskSpacing;
+    float2 center = float2(cell * u.maskSpacing) + float2(u.maskSpacing) * 0.5;
 
-     // Position relative to current dot center
-     float2 rel = float2(gid) - center;
+    // Sample the image at the dot’s center (cheaper than averaging the whole cell,
+    //float2 texSize = float2(inTexture.get_width(), inTexture.get_height());
+    // float2 uvCenter = center / texSize;
+    half3 colorAtCenter = half3(sample(inTexture, outTexture, uniforms, sam, uint2(center)));
 
-     // Horizontal blending: also consider left & right neighbors
-     float2 leftCenter  = center - float2(u.maskSpacing.x, 0.0);
-     float2 rightCenter = center + float2(u.maskSpacing.x, 0.0);
+    // Convert to brightness (you could also just use max() or length())
+    float weight = colorAtCenter.r; //  luminance(colorAtCenter);
 
-     float2 relLeft  = float2(gid) - leftCenter;
-     float2 relRight = float2(gid) - rightCenter;
+    // ---- Step 2: scale dot size based on weight ----
+    float2 scaledDotSize = u.dotSize * weight;
 
-     // Mask contributions
-     float m0 = shapeMask(rel, u);
-     float mL = shapeMask(relLeft, u);
-     float mR = shapeMask(relRight, u);
+    // Position relative to current dot center
+    float2 rel = float2(gid) - center;
 
-     // Combine with horizontal glow (soft blending)
-     float glow = m0 + exp(-length(relLeft) / u.softness) * mL + exp(-length(relRight) / u.softness) * mR;
-     // float glow = m0;
+    // Horizontal blending: also consider left & right neighbors
+    float2 leftCenter  = center - float2(u.maskSpacing.x, 0.0);
+    float2 rightCenter = center + float2(u.maskSpacing.x, 0.0);
 
-     // Clamp
-     glow = saturate(glow);
+    float2 relLeft  = float2(gid) - leftCenter;
+    float2 relRight = float2(gid) - rightCenter;
 
-     // Output (for now just grayscale, later modulate with input image color & size)
-     outTexture.write(half4(half3(glow, 0, 0), 1.0), gid);
+    // Mask contributions
+    float m0 = shapeMask(rel, scaledDotSize, u);
+    float mL = shapeMask(relLeft, scaledDotSize, u);
+    float mR = shapeMask(relRight, scaledDotSize, u);
+
+    // Combine with horizontal glow (soft blending)
+    float glow = m0 + exp(-length(relLeft) / u.softness) * mL + exp(-length(relRight) / u.softness) * mR;
+    // float glow = m0;
+
+    // Clamp
+    glow = saturate(glow);
+
+    // Modulate final glow by input color
+    half3 result = colorAtCenter * half(glow);
+
+    // Output (for now just grayscale, later modulate with input image color & size)
+    outTexture.write(half4(result, 1.0), gid);
 }
 
 kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
