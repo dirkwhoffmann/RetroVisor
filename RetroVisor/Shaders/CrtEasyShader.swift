@@ -240,7 +240,6 @@ final class CRTEasyShader: Shader {
 
     override func set(key: String, value: Float) {
 
-        print("set(\(key) \(value))")
         switch key {
         case "BRIGHT_BOOST": crtUniforms.BRIGHT_BOOST = value
         case "DILATION": crtUniforms.DILATION = value

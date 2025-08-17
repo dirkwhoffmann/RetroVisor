@@ -9,6 +9,7 @@
 
 import Cocoa
 
+/*
 var shaderSettings: [ShaderSetting] = [
 
     ShaderSetting(
@@ -155,6 +156,7 @@ var shaderSettings: [ShaderSetting] = [
         help: nil
     ),
 ]
+*/
 
 class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NSTableViewDataSource {
 
@@ -199,8 +201,8 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         guard let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "settingsCell"), owner: self) as? ShaderSettingCell else { return nil }
 
-        cell.shaderSetting = shaderSettings[row]
-        cell.value = get(key: shaderSettings[row].key)
+        cell.shaderSetting = shader.settings[row]
+        cell.value = get(key: shader.settings[row].key)
         return cell
     }
 

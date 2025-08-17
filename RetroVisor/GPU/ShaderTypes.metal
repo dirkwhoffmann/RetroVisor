@@ -60,4 +60,13 @@ struct CrtUniforms {
     uint  ENABLE_LANCZOS;
 };
 
+struct PlaygroundUniforms {
+
+    float GRID_WIDTH;
+    float GRID_HEIGHT;
+    float DOT_WIDTH;
+    float DOT_HEIGHT;
+    float GLOW;
+};
+
 #endif
