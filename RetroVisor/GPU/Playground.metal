@@ -37,6 +37,52 @@ inline half4 sample(texture2d<half, access::sample> inTexture,
 }
 */
 
+/*
+inline float shapeMask(float2 pos,
+                       float2 dotSize,
+                       constant PlaygroundUniforms& uniforms)
+{
+    // Normalize position into [-1..1] range relative to dotSize
+    float2 uv = pos / dotSize;
+
+    // Effective corner radius, relative to the smaller dimension
+    float cornerRadius = uniforms.CORNER * min(dotSize.x, dotSize.y);
+    // cornerRadius = 0;
+
+    // Signed distance to rounded rectangle
+    float2 d = abs(uv) - 1.0 + cornerRadius;
+    float dist = length(max(d, 0.0)) - cornerRadius;
+
+    // Soft mask: 1 inside, 0 outside, feathered edge
+    // return saturate(1.0 - (abs(uv.x) + abs(uv.y)));
+    // return dist <= 0 ? 1.0 : 0.0;
+    return smoothstep(0.0, -uniforms.FEATHER, dist);
+}
+*/
+
+inline float shapeMask(float2 pos,
+                       float2 dotSize,
+                       constant PlaygroundUniforms& uniforms)
+{
+    int fadeMode = 2;
+    
+    // Normalize position into [-1..1] range relative to dotSize
+    // float2 uv = pos / dotSize;
+
+    // Superellipse distance
+    float d = pow(abs(pos.x)/dotSize.x, uniforms.CORNER) + pow(abs(pos.y)/dotSize.y, uniforms.CORNER) - 1.0;
+
+    // Fade profile
+    if (fadeMode == 0) { // linear
+        return clamp(1.0 - d/uniforms.FEATHER, 0.0, 1.0);
+    } else if (fadeMode == 1) { // smoothstep
+        return smoothstep(uniforms.FEATHER, 0.0, d);
+    } else { // gaussian
+        return exp(-(d*d)/(2.0*uniforms.FEATHER*uniforms.FEATHER));
+    }
+}
+
+/*
 inline float shapeMask(float2 pos, float2 dotSize, constant PlaygroundUniforms& uniforms)
 {
     // Normalize position into [-1..1] range relative to dotSize
@@ -52,6 +98,7 @@ inline float shapeMask(float2 pos, float2 dotSize, constant PlaygroundUniforms& 
         return saturate(1.0 - (abs(uv.x) + abs(uv.y)));
     }
 }
+*/
 
 kernel void playground1(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
                         texture2d<half, access::write>  image      [[ texture(1) ]],
@@ -113,6 +160,8 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
     float2 outSize = float2(outTexture.get_width(), outTexture.get_height());
 
 
+    half4 color = inTexture.sample(sam, remap(float2(gid), outSize, uniforms.texRect));
+
     // Find the dot cell we are in
     uint2 maskSpacing = uint2(uint(u.GRID_WIDTH), uint(u.GRID_HEIGHT));
 
@@ -132,11 +181,9 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
     float weightR = centerWeightR.r;
     weight = weight; // 0.25 * weightL + 0.5 * weight + 0.25 * weightR;
 
-    // ---- Step 2: scale dot size based on weight ----
-    float2 minDotSize = float2(u.MIN_DOT_WIDTH, u.MAX_DOT_WIDTH);
-    float2 maxDotSize = float2(u.MIN_DOT_HEIGHT, u.MAX_DOT_HEIGHT);
-    // float2 dotSize = float2(u.DOT_WIDTH, u.DOT_HEIGHT);
-    // float2 scaledDotSize = mix(minDotSize, maxDotSize, weight);
+    // Scale dot size based on weight
+    float2 minDotSize = float2(u.MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT);
+    float2 maxDotSize = float2(u.MAX_DOT_WIDTH, u.MAX_DOT_HEIGHT);
     float2 scaledDotSize = mix(minDotSize, maxDotSize, weight);
     float2 scaledDotSizeL = mix(minDotSize, maxDotSize, weightL);
     float2 scaledDotSizeR = mix(minDotSize, maxDotSize, weightR);
@@ -160,6 +207,7 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
 
     // Modulate final glow by input color
     half3 result = centerWeight * half(glow);
+    // half3 result = color.rgb * half(glow);
 
     // Output (for now just grayscale, later modulate with input image color & size)
     outTexture.write(half4(result, 1.0), gid);

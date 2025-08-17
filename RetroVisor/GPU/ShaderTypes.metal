@@ -68,7 +68,8 @@ struct PlaygroundUniforms {
     float MAX_DOT_WIDTH;
     float MIN_DOT_HEIGHT;
     float MAX_DOT_HEIGHT;
-    float GLOW;
+    float CORNER;
+    float FEATHER;
 };
 
 #endif

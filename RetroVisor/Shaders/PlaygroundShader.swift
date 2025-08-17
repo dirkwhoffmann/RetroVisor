@@ -20,7 +20,8 @@ struct PlaygroundUniforms {
     var MAX_DOT_WIDTH: Float
     var MIN_DOT_HEIGHT: Float
     var MAX_DOT_HEIGHT: Float
-    var GLOW: Float
+    var CORNER: Float
+    var FEATHER: Float
 
     static let defaults = PlaygroundUniforms(
 
@@ -30,7 +31,8 @@ struct PlaygroundUniforms {
         MAX_DOT_WIDTH: 10,
         MIN_DOT_HEIGHT: 8,
         MAX_DOT_HEIGHT: 16,
-        GLOW: 5
+        CORNER: 2,
+        FEATHER: 0.25
     )
 }
 
@@ -100,12 +102,20 @@ final class PlaygroundShader: Shader {
             ),
 
             ShaderSetting(
-                name: "Glow",
-                key: "GLOW",
-                range: 1.0...60.0,
+                name: "Corner fraction",
+                key: "CORNER",
+                range: 1.0...10.0,
                 step: 0.1,
                 help: nil
             ),
+
+            ShaderSetting(
+                name: "Feather",
+                key: "FEATHER",
+                range: 0.0...10.0,
+                step: 0.01,
+                help: nil
+            )
         ]
     }
 
@@ -115,10 +125,11 @@ final class PlaygroundShader: Shader {
         case "GRID_WIDTH": return uniforms.GRID_WIDTH
         case "GRID_HEIGHT": return uniforms.GRID_HEIGHT
         case "MIN_DOT_WIDTH": return uniforms.MIN_DOT_WIDTH
-        case "MIN_DOT_HEIGHT": return uniforms.MIN_DOT_HEIGHT
         case "MAX_DOT_WIDTH": return uniforms.MAX_DOT_WIDTH
+        case "MIN_DOT_HEIGHT": return uniforms.MIN_DOT_HEIGHT
         case "MAX_DOT_HEIGHT": return uniforms.MAX_DOT_HEIGHT
-        case "GLOW": return uniforms.GLOW
+        case "CORNER": return uniforms.CORNER
+        case "FEATHER": return uniforms.FEATHER
 
         default:
             NSSound.beep()
@@ -132,10 +143,11 @@ final class PlaygroundShader: Shader {
         case "GRID_WIDTH": uniforms.GRID_WIDTH = value
         case "GRID_HEIGHT": uniforms.GRID_HEIGHT = value
         case "MIN_DOT_WIDTH": uniforms.MIN_DOT_WIDTH = value
-        case "MIN_DOT_HEIGHT": uniforms.MIN_DOT_HEIGHT = value
         case "MAX_DOT_WIDTH": uniforms.MAX_DOT_WIDTH = value
+        case "MIN_DOT_HEIGHT": uniforms.MIN_DOT_HEIGHT = value
         case "MAX_DOT_HEIGHT": uniforms.MAX_DOT_HEIGHT = value
-        case "GLOW": uniforms.GLOW = value
+        case "CORNER": uniforms.CORNER = value
+        case "FEATHER": uniforms.FEATHER = value
 
         default:
             NSSound.beep()
