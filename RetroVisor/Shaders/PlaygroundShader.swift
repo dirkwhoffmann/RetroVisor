@@ -36,6 +36,7 @@ final class PlaygroundShader: Shader {
     var pass2: Kernel!
     var uniforms: PlaygroundUniforms = .defaults
 
+    var image: MTLTexture!
     var dotmask: MTLTexture!
 
     init() {
@@ -138,6 +139,7 @@ final class PlaygroundShader: Shader {
                 mipmapped: false
             )
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
+            image = outTexture.device.makeTexture(descriptor: desc)
             dotmask = outTexture.device.makeTexture(descriptor: desc)
         }
 
@@ -146,7 +148,7 @@ final class PlaygroundShader: Shader {
         //
 
         pass1.apply(commandBuffer: commandBuffer,
-                    source: inTexture, target: dotmask,
+                    textures: [inTexture, image, dotmask],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
@@ -157,8 +159,10 @@ final class PlaygroundShader: Shader {
         //
 
         pass2.apply(commandBuffer: commandBuffer,
-                    textures: [inTexture, dotmask, outTexture],
+                    textures: [image, dotmask, outTexture],
                     options: &app.windowController!.metalView!.uniforms,
-                    length: MemoryLayout<Uniforms>.stride)
+                    length: MemoryLayout<Uniforms>.stride,
+                    options2: &uniforms,
+                    length2: MemoryLayout<PlaygroundUniforms>.stride)
     }
 }
