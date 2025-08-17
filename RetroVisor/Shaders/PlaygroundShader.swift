@@ -16,16 +16,20 @@ struct PlaygroundUniforms {
 
     var GRID_WIDTH: Float
     var GRID_HEIGHT: Float
-    var DOT_WIDTH: Float
-    var DOT_HEIGHT: Float
+    var MIN_DOT_WIDTH: Float
+    var MAX_DOT_WIDTH: Float
+    var MIN_DOT_HEIGHT: Float
+    var MAX_DOT_HEIGHT: Float
     var GLOW: Float
 
     static let defaults = PlaygroundUniforms(
 
         GRID_WIDTH: 12,
         GRID_HEIGHT: 18,
-        DOT_WIDTH: 10,
-        DOT_HEIGHT: 16,
+        MIN_DOT_WIDTH: 5,
+        MAX_DOT_WIDTH: 10,
+        MIN_DOT_HEIGHT: 8,
+        MAX_DOT_HEIGHT: 16,
         GLOW: 5
     )
 }
@@ -64,16 +68,32 @@ final class PlaygroundShader: Shader {
             ),
 
             ShaderSetting(
-                name: "Dot width",
-                key: "DOT_WIDTH",
+                name: "Minimal dot width",
+                key: "MIN_DOT_WIDTH",
                 range: 1.0...60.0,
                 step: 1.0,
                 help: nil
             ),
 
             ShaderSetting(
-                name: "Dot height",
-                key: "DOT_HEIGHT",
+                name: "Maximal dot width",
+                key: "MAX_DOT_WIDTH",
+                range: 1.0...60.0,
+                step: 1.0,
+                help: nil
+            ),
+
+            ShaderSetting(
+                name: "Minimal dot height",
+                key: "MIN_DOT_HEIGHT",
+                range: 1.0...60.0,
+                step: 1.0,
+                help: nil
+            ),
+
+            ShaderSetting(
+                name: "Maximal dot height",
+                key: "MAX_DOT_HEIGHT",
                 range: 1.0...60.0,
                 step: 1.0,
                 help: nil
@@ -94,8 +114,10 @@ final class PlaygroundShader: Shader {
         switch key {
         case "GRID_WIDTH": return uniforms.GRID_WIDTH
         case "GRID_HEIGHT": return uniforms.GRID_HEIGHT
-        case "DOT_WIDTH": return uniforms.DOT_WIDTH
-        case "DOT_HEIGHT": return uniforms.DOT_HEIGHT
+        case "MIN_DOT_WIDTH": return uniforms.MIN_DOT_WIDTH
+        case "MIN_DOT_HEIGHT": return uniforms.MIN_DOT_HEIGHT
+        case "MAX_DOT_WIDTH": return uniforms.MAX_DOT_WIDTH
+        case "MAX_DOT_HEIGHT": return uniforms.MAX_DOT_HEIGHT
         case "GLOW": return uniforms.GLOW
 
         default:
@@ -109,8 +131,10 @@ final class PlaygroundShader: Shader {
         switch key {
         case "GRID_WIDTH": uniforms.GRID_WIDTH = value
         case "GRID_HEIGHT": uniforms.GRID_HEIGHT = value
-        case "DOT_WIDTH": uniforms.DOT_WIDTH = value
-        case "DOT_HEIGHT": uniforms.DOT_HEIGHT = value
+        case "MIN_DOT_WIDTH": uniforms.MIN_DOT_WIDTH = value
+        case "MIN_DOT_HEIGHT": uniforms.MIN_DOT_HEIGHT = value
+        case "MAX_DOT_WIDTH": uniforms.MAX_DOT_WIDTH = value
+        case "MAX_DOT_HEIGHT": uniforms.MAX_DOT_HEIGHT = value
         case "GLOW": uniforms.GLOW = value
 
         default:

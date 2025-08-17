@@ -113,35 +113,38 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
     float2 outSize = float2(outTexture.get_width(), outTexture.get_height());
 
 
-    // Find which dot cell we are in
+    // Find the dot cell we are in
     uint2 maskSpacing = uint2(uint(u.GRID_WIDTH), uint(u.GRID_HEIGHT));
-    float2 dotSize = float2(u.DOT_WIDTH, u.DOT_HEIGHT);
 
-    uint2 cell = gid / maskSpacing;
-    float2 center = float2(cell * maskSpacing) + float2(maskSpacing) * 0.5;
-    float2 leftCenter  = center - float2(maskSpacing.x, 0.0);
-    float2 rightCenter = center + float2(maskSpacing.x, 0.0);
+    // uint2 cell = gid / maskSpacing;
+    float2 center = float2(uint2(gid / maskSpacing) * maskSpacing) + float2(maskSpacing) * 0.5;
+    float2 centerL = center - float2(maskSpacing.x, 0.0);
+    float2 centerR = center + float2(maskSpacing.x, 0.0);
 
-    // Sample the blur image to get the center weights
-    half3 colorAtCenter = half3(blur.sample(sam, remap(center, outSize, uniforms.texRect)));
-    half3 colorAtLeftCenter = half3(blur.sample(sam, remap(leftCenter, outSize, uniforms.texRect)));
-    half3 colorAtRightCenter = half3(blur.sample(sam, remap(rightCenter, outSize, uniforms.texRect)));
+    // Get the center weights from the blurred image
+    half3 centerWeight = half3(blur.sample(sam, remap(center, outSize, uniforms.texRect)));
+    half3 centerWeightL = half3(blur.sample(sam, remap(centerL, outSize, uniforms.texRect)));
+    half3 centerWeightR = half3(blur.sample(sam, remap(centerR, outSize, uniforms.texRect)));
 
     // Convert to brightness
-    float weight = colorAtCenter.r; //  luminance(colorAtCenter);
-    float weightL = colorAtLeftCenter.r;
-    float weightR = colorAtRightCenter.r;
-    weight = 0.75 * weight + 0.25 * weightL;
+    float weight = centerWeight.r; //  luminance(colorAtCenter);
+    float weightL = centerWeightL.r;
+    float weightR = centerWeightR.r;
+    weight = weight; // 0.25 * weightL + 0.5 * weight + 0.25 * weightR;
 
     // ---- Step 2: scale dot size based on weight ----
-    float2 scaledDotSize = dotSize * weight;
-    float2 scaledDotSizeL = dotSize * weightL;
-    float2 scaledDotSizeR = dotSize * weightR;
+    float2 minDotSize = float2(u.MIN_DOT_WIDTH, u.MAX_DOT_WIDTH);
+    float2 maxDotSize = float2(u.MIN_DOT_HEIGHT, u.MAX_DOT_HEIGHT);
+    // float2 dotSize = float2(u.DOT_WIDTH, u.DOT_HEIGHT);
+    // float2 scaledDotSize = mix(minDotSize, maxDotSize, weight);
+    float2 scaledDotSize = mix(minDotSize, maxDotSize, weight);
+    float2 scaledDotSizeL = mix(minDotSize, maxDotSize, weightL);
+    float2 scaledDotSizeR = mix(minDotSize, maxDotSize, weightR);
 
     // Position relative to current dot centers
     float2 rel = float2(gid) - center;
-    float2 relLeft  = float2(gid) - leftCenter;
-    float2 relRight = float2(gid) - rightCenter;
+    float2 relLeft  = float2(gid) - centerL;
+    float2 relRight = float2(gid) - centerR;
 
     // Mask contributions
     float m0 = shapeMask(rel, scaledDotSize, u);
@@ -156,7 +159,7 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
     glow = saturate(glow);
 
     // Modulate final glow by input color
-    half3 result = colorAtCenter * half(glow);
+    half3 result = centerWeight * half(glow);
 
     // Output (for now just grayscale, later modulate with input image color & size)
     outTexture.write(half4(result, 1.0), gid);
