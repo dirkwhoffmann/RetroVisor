@@ -8,6 +8,7 @@
 // -----------------------------------------------------------------------------
 
 import MetalKit
+import MetalPerformanceShaders
 
 // This shader is my personal playground for developing self-made CRT effects.
 
@@ -36,6 +37,7 @@ final class PlaygroundShader: Shader {
     var pass2: Kernel!
     var uniforms: PlaygroundUniforms = .defaults
 
+    var blur: MTLTexture!
     var image: MTLTexture!
     var dotmask: MTLTexture!
 
@@ -126,11 +128,20 @@ final class PlaygroundShader: Shader {
     override func apply(commandBuffer: MTLCommandBuffer,
                         in inTexture: MTLTexture, out outTexture: MTLTexture) {
 
-        // Create the dotmask texture if needed
-        if dotmask == nil ||
-            dotmask!.width  != outTexture.width ||
-            dotmask!.height != outTexture.height ||
-            dotmask!.pixelFormat != outTexture.pixelFormat {
+        // Create textures if needed
+        if inTexture.width != blur?.width || inTexture.height != blur?.height {
+
+            let desc = MTLTextureDescriptor.texture2DDescriptor(
+                pixelFormat: inTexture.pixelFormat,
+                width: inTexture.width,
+                height: inTexture.height,
+                mipmapped: false
+            )
+            desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
+            blur = inTexture.device.makeTexture(descriptor: desc)
+        }
+
+        if dotmask?.width != outTexture.width || dotmask?.height != outTexture.height {
 
             let desc = MTLTextureDescriptor.texture2DDescriptor(
                 pixelFormat: outTexture.pixelFormat,
@@ -144,22 +155,34 @@ final class PlaygroundShader: Shader {
         }
 
         //
+        // Pass 1: Create a blurred helper texture
+        //
+
+        let width = Int(2 * uniforms.GRID_WIDTH) | 1
+        let height = Int(uniforms.GRID_HEIGHT) | 1
+        let blurFilter = MPSImageBox(device: PlaygroundShader.device,
+                               kernelWidth: width, kernelHeight: height)
+        blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: inTexture, destinationTexture: blur)
+
+        //
         // Pass 1: Create the dotmask
         //
 
+        /*
         pass1.apply(commandBuffer: commandBuffer,
                     textures: [inTexture, image, dotmask],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
+        */
 
         //
         // Pass 2: Render the image
         //
 
         pass2.apply(commandBuffer: commandBuffer,
-                    textures: [image, dotmask, outTexture],
+                    textures: [inTexture, blur, outTexture],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
