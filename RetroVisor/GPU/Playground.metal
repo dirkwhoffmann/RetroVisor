@@ -16,25 +16,48 @@ using namespace metal;
 // This is my personal playground. Haters back off!
 //
 
-// Returns a value in [0,1]: 1 inside the ellipse, fading outside
-float ellipseMask(float2 point, float2 center, float2 radius, float edgeWidth)
+struct MyUniforms {
+
+    uint2  maskSpacing;   // distance between dot centers (x, y)
+    float2 dotSize;       // size of ellipse/diamond in pixels
+    float  softness;      // glow softness factor
+    uint   shape;         // 0 = ellipse, 1 = diamond
+};
+
+// Reads a single pixel at integer coordinate gid
+inline half4 sample(texture2d<half, access::sample> inTexture,
+                    texture2d<half, access::write> outTexture,
+                    constant Uniforms& uniforms,
+                    sampler sam,
+                    uint2 gid)
 {
-    // Vector from center to point
-    float2 delta = point - center;
+    // Normalize gid to 0..1 in output texture
+    float2 uvOut = (float2(gid) + 0.5) /
+                   float2(outTexture.get_width(), outTexture.get_height());
 
-    // Scale into unit circle space
-    float2 scaled = delta / radius;
+    // Remap to texRect in input texture
+    float2 uvIn = uniforms.texRect.xy +
+                  uvOut * (uniforms.texRect.zw - uniforms.texRect.xy);
 
-    // Distance in ellipse space
-    float len = length(scaled);
-
-    // Distance from center to ellipse border along this direction
-    float distanceToBorder = length(delta) / len;
-
-    // Compute mask: 1 inside, fade outside
-    float d = length(delta);
-    return 1.0 - smoothstep(distanceToBorder, distanceToBorder + edgeWidth, d);
+    // Sample input texture using normalized coords
+    return inTexture.sample(sam, uvIn);
 }
+
+inline float shapeMask(float2 pos, constant MyUniforms& uniforms)
+{
+    // Normalize position into [-1..1] range relative to dotSize
+    float2 uv = pos / uniforms.dotSize;
+
+    if (uniforms.shape == 0) {
+        // Ellipse: inside if uv.x^2 + uv.y^2 <= 1
+        return saturate(1.0 - length(uv));
+    } else {
+        // Diamond: L1 norm (Manhattan distance)
+        return saturate(1.0 - (abs(uv.x) + abs(uv.y)));
+    }
+}
+
+constant MyUniforms u = { uint2(12,12), 16, 9, 0 };
 
 kernel void playground1(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
                         texture2d<half, access::write>  outTexture [[ texture(1) ]],
@@ -43,68 +66,47 @@ kernel void playground1(texture2d<half, access::sample> inTexture  [[ texture(0)
                         uint2                           gid        [[ thread_position_in_grid ]])
 {
     // Normalize gid to 0..1 in output texture
-    float2 uvOut = (float2(gid) + 0.5) / float2(outTexture.get_width(), outTexture.get_height());
+    // float2 uvOut = (float2(gid) + 0.5) / float2(outTexture.get_width(), outTexture.get_height());
 
     // Remap to texRect in input texture
-    float2 uvIn = uniforms.texRect.xy + uvOut * (uniforms.texRect.zw - uniforms.texRect.xy);
-
-    // Sample input texture using normalized coords
-    // half4 result = inTexture.sample(s, uvIn);
+    // float2 uvIn = uniforms.texRect.xy + uvOut * (uniforms.texRect.zw - uniforms.texRect.xy);
 
     //
     // Experimental...
     //
 
-    uint width = inTexture.get_width();
+
+    // uint width = inTexture.get_width();
     // uint height = inTexture.get_height();
-    float beamWidth = 4.0;
 
-    half3 color = half3(0.0);
+    // Find which dot cell we are in
+     uint2 cell = gid / u.maskSpacing;
+     float2 center = float2(cell * u.maskSpacing) + float2(u.maskSpacing) * 0.5;
 
-    /*
-    float totalWeight = 0.0;
+     // Position relative to current dot center
+     float2 rel = float2(gid) - center;
 
-    int N = int(beamWidth);
-    float texelSizeX = 1.0 / float(width);
+     // Horizontal blending: also consider left & right neighbors
+     float2 leftCenter  = center - float2(u.maskSpacing.x, 0.0);
+     float2 rightCenter = center + float2(u.maskSpacing.x, 0.0);
 
-    // Horizontal smear
-    for (int i = -N; i <= N; ++i) {
-        float offset = float(i);
-        float w = exp(-0.5 * (offset / beamWidth) * (offset / beamWidth));
-        float2 sampleUV = uvIn + float2(offset * texelSizeX, 0.0);
-        color += half3(inTexture.sample(sam, sampleUV)) * w;
-        totalWeight += w;
-    }
+     float2 relLeft  = float2(gid) - leftCenter;
+     float2 relRight = float2(gid) - rightCenter;
 
-    color /= totalWeight;
-    */
-    color = half3(inTexture.sample(sam, uvIn));
+     // Mask contributions
+     float m0 = shapeMask(rel, u);
+     float mL = shapeMask(relLeft, u);
+     float mR = shapeMask(relRight, u);
 
-    float maskSpacingX = 6;
-    float maskSpacingY = 8;
-    float bubbleRadius = .5;
+     // Combine with horizontal glow (soft blending)
+     float glow = m0 + exp(-length(relLeft) / u.softness) * mL + exp(-length(relRight) / u.softness) * mR;
+     // float glow = m0;
 
-    // Compute mask pattern coordinates
-    float2 maskUV = float2(gid) / float2(maskSpacingX, maskSpacingY);
+     // Clamp
+     glow = saturate(glow);
 
-    // Calculate distance to nearest bubble center
-    float2 nearestCenter = floor(maskUV) + 0.5;
-    float2 delta = maskUV - nearestCenter;
-    float dist = length(delta);
-
-    maskUV = fract(maskUV);
-
-    float bubble = ellipseMask(maskUV, float2(0.5,0.5), float2(0.15, 0.4), 0.3);
-
-    /*
-    // Circular bubble falloff
-    float bubble = smoothstep(bubbleRadius, 0.0, dist);
-
-    // Modulate original color by bubble intensity
-    half3 outColor = color.rgb * half(bubble);
-*/
-    half3 outColor = half3(bubble,bubble,bubble);
-    outTexture.write(half4(outColor, 1.0), gid);
+     // Output (for now just grayscale, later modulate with input image color & size)
+     outTexture.write(half4(half3(glow, 0, 0), 1.0), gid);
 }
 
 kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
