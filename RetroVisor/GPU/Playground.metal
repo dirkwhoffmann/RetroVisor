@@ -17,6 +17,7 @@ using namespace metal;
 //
 
 // Reads a single pixel at integer coordinate gid
+/*
 inline half4 sample(texture2d<half, access::sample> inTexture,
                     texture2d<half, access::write> outTexture,
                     constant Uniforms& uniforms,
@@ -34,6 +35,7 @@ inline half4 sample(texture2d<half, access::sample> inTexture,
     // Sample input texture using normalized coords
     return inTexture.sample(sam, uvIn);
 }
+*/
 
 inline float shapeMask(float2 pos, float2 dotSize, constant PlaygroundUniforms& uniforms)
 {
@@ -72,6 +74,15 @@ kernel void playground1(texture2d<half, access::sample> inTexture  [[ texture(0)
     dotmask.write(color, gid);
 }
 
+inline float2 remap(float2 uv, float2 rect, float4 texRect)
+{
+    // Normalize gid to 0..1 in rect
+    float2 uvOut = (float2(uv) + 0.5) / rect;
+
+    // Remap to texRect in input texture
+    return texRect.xy + uvOut * (texRect.zw - texRect.xy);
+}
+
 kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
                         texture2d<half, access::sample> blur       [[ texture(1) ]],
                         texture2d<half, access::write>  outTexture [[ texture(2) ]],
@@ -81,6 +92,7 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
                         uint2                           gid        [[ thread_position_in_grid ]])
 {
 
+    /* DISPLAY BLUR TEXTURE
     // Normalize gid to 0..1 in output texture
     float2 uvOut = (float2(gid) + 0.5) / float2(outTexture.get_width(), outTexture.get_height());
 
@@ -91,14 +103,14 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
     half4 c = blur.sample(sam, uvIn);
     outTexture.write(c, gid);
     return;
+    */
 
     //
     // Experimental...
     //
 
-    float2 texSize = float2(inTexture.get_width(), inTexture.get_height());
-
-    // half3 colorAtCenter = inTexture.sample(s, uvCenter).rgb;
+    // float2 inize = float2(inTexture.get_width(), inTexture.get_height());
+    float2 outSize = float2(outTexture.get_width(), outTexture.get_height());
 
 
     // Find which dot cell we are in
@@ -110,10 +122,10 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
     float2 leftCenter  = center - float2(maskSpacing.x, 0.0);
     float2 rightCenter = center + float2(maskSpacing.x, 0.0);
 
-    // Sample the image at the centers
-    half3 colorAtCenter = half3(inTexture.sample(sam, center / texSize));
-    half3 colorAtLeftCenter = half3(inTexture.sample(sam, leftCenter / texSize));
-    half3 colorAtRightCenter = half3(inTexture.sample(sam, rightCenter / texSize));
+    // Sample the blur image to get the center weights
+    half3 colorAtCenter = half3(blur.sample(sam, remap(center, outSize, uniforms.texRect)));
+    half3 colorAtLeftCenter = half3(blur.sample(sam, remap(leftCenter, outSize, uniforms.texRect)));
+    half3 colorAtRightCenter = half3(blur.sample(sam, remap(rightCenter, outSize, uniforms.texRect)));
 
     // Convert to brightness
     float weight = colorAtCenter.r; //  luminance(colorAtCenter);

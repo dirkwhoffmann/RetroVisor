@@ -50,7 +50,7 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Grid width",
                 key: "GRID_WIDTH",
-                range: 1.0...30.0,
+                range: 1.0...60.0,
                 step: 1.0,
                 help: nil
             ),
@@ -58,7 +58,7 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Grid height",
                 key: "GRID_HEIGHT",
-                range: 1.0...30.0,
+                range: 1.0...60.0,
                 step: 1.0,
                 help: nil
             ),
@@ -66,7 +66,7 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Dot width",
                 key: "DOT_WIDTH",
-                range: 1.0...30.0,
+                range: 1.0...60.0,
                 step: 1.0,
                 help: nil
             ),
@@ -74,7 +74,7 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Dot height",
                 key: "DOT_HEIGHT",
-                range: 1.0...30.0,
+                range: 1.0...60.0,
                 step: 1.0,
                 help: nil
             ),
@@ -82,7 +82,7 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Glow",
                 key: "GLOW",
-                range: 1.0...30.0,
+                range: 1.0...60.0,
                 step: 0.1,
                 help: nil
             ),
