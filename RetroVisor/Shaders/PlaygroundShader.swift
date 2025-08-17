@@ -32,7 +32,7 @@ struct PlaygroundUniforms {
         MIN_DOT_HEIGHT: 8,
         MAX_DOT_HEIGHT: 16,
         CORNER: 2,
-        FEATHER: 0.25
+        FEATHER: 0.2
     )
 }
 
@@ -112,7 +112,7 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Feather",
                 key: "FEATHER",
-                range: 0.0...10.0,
+                range: 0.0...1.0,
                 step: 0.01,
                 help: nil
             )

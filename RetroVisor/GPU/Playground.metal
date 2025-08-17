@@ -61,26 +61,91 @@ inline float shapeMask(float2 pos,
 */
 
 inline float shapeMask(float2 pos,
-                       float2 dotSize,
+                       float2 radius,
+                       constant PlaygroundUniforms& uniforms)
+{
+    // Normalize coordinates to [-1..1] relative to radius
+    float2 uv = abs(pos) / radius;
+
+    // Superellipse / rounded rect exponent
+    float n = uniforms.CORNER; // n=2 -> ellipse, n>2 -> more rectangular
+
+    // Distance metric for superellipse
+    float dShape = pow(uv.x, n) + pow(uv.y, n);
+
+    // Distance to border: positive inside, zero at boundary, negative outside
+    float distToBorder = 1.0 - dShape;
+
+    // Absolute feather size in normalized units
+    float featherAbs = saturate(uniforms.FEATHER) * 1.0; // scale factor can be tuned
+
+    // Feathered intensity based on distance to border
+    float intensity;
+    if (featherAbs > 0.0)
+    {
+        intensity = clamp(distToBorder / featherAbs, 0.0, 1.0);
+    }
+    else
+    {
+        // Hard cutoff
+        intensity = distToBorder > 0.0 ? 1.0 : 0.0;
+    }
+
+    return intensity;
+}
+#if 0
+inline float shapeMask(float2 pos,
+                       float2 radius,
                        constant PlaygroundUniforms& uniforms)
 {
     int fadeMode = 2;
-    
-    // Normalize position into [-1..1] range relative to dotSize
-    // float2 uv = pos / dotSize;
+    int n = uniforms.CORNER;
 
-    // Superellipse distance
-    float d = pow(abs(pos.x)/dotSize.x, uniforms.CORNER) + pow(abs(pos.y)/dotSize.y, uniforms.CORNER) - 1.0;
+    /*
+    float2 uv = pos / radius;
+        float d = pow(abs(uv.x), n) + pow(abs(uv.y), n); // normalized distance
 
-    // Fade profile
-    if (fadeMode == 0) { // linear
-        return clamp(1.0 - d/uniforms.FEATHER, 0.0, 1.0);
-    } else if (fadeMode == 1) { // smoothstep
-        return smoothstep(uniforms.FEATHER, 0.0, d);
-    } else { // gaussian
-        return exp(-(d*d)/(2.0*uniforms.FEATHER*uniforms.FEATHER));
-    }
+        // Effective feather in absolute units
+        float feather = uniforms.FEATHER * min(radius.x, radius.y);
+
+        if (feather <= 0.0) {
+            // Hard cutoff at boundary
+            return d <= 1.0 ? 1.0 : 0.0;
+        }
+
+        if (fadeMode == 0) { // linear
+            return clamp(1.0 - d / feather, 0.0, 1.0);
+        } else if (fadeMode == 1) { // smoothstep
+            return smoothstep(1.0, 0.0, d / feather);
+        } else { // gaussian with hard cutoff fallback
+            float g = exp(-(d * d) / (2.0 * feather * feather));
+            // blend Gaussian with hard cutoff when very close to the boundary
+            float hardCut = d <= 1.0 ? 1.0 : 0.0;
+            // Use smoothstep to mix smoothly between Gaussian and hard cutoff
+            float blendFactor = saturate(feather * 10.0); // small feather → blendFactor ~0 → hard cutoff
+            return mix(hardCut, g, blendFactor);
+        }
+     */
+
+
+    // normalize position into shape space
+     float d = pow(abs(pos.x)/radius.x, uniforms.CORNER) + pow(abs(pos.y)/radius.y, uniforms.CORNER);
+
+    // Effective feather based on radius (use smaller dimension for consistency)
+    // float feather = uniforms.FEATHER * min(radius.x, radius.y);
+    float feather = uniforms.FEATHER;
+
+     // d = 0 at center, 1 at boundary
+     if (fadeMode == 0) { // linear
+         return clamp(1.0 - d/feather, 0.0, 1.0);
+     } else if (fadeMode == 1) { // smoothstep
+         return smoothstep(1.0, 0.0, d/feather);
+     } else { // gaussian
+         return exp(-(d*d)/(2.0*feather*feather));
+     }
+
 }
+#endif
 
 /*
 inline float shapeMask(float2 pos, float2 dotSize, constant PlaygroundUniforms& uniforms)
