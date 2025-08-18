@@ -153,26 +153,27 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
     float2 scaledDotSizeL = mix(minDotSize, maxDotSize, weightL);
     float2 scaledDotSizeR = mix(minDotSize, maxDotSize, weightR);
 
-    // Position relative to current dot centers
+    // Compute relative position to dot centers
+    /*
     float2 rel = float2(gid) - center;
     float2 relLeft  = float2(gid) - centerL;
     float2 relRight = float2(gid) - centerR;
+    */
 
-    // Mask contributions
-    float m0 = shapeMask(rel, scaledDotSize, u);
-    float mL = shapeMask(relLeft, scaledDotSizeL, u);
-    float mR = shapeMask(relRight, scaledDotSizeR, u);
+    // Compute mask contributions
+    float m0 = shapeMask(float2(gid) - center, scaledDotSize, u);
+    float mL = shapeMask(float2(gid) - centerL, scaledDotSizeL, u);
+    float mR = shapeMask(float2(gid) - centerR, scaledDotSizeR, u);
 
     // Combine with horizontal glow (soft blending)
     // float glow = m0 + exp(-length(relLeft) / u.GLOW) * mL + exp(-length(relRight) / u.GLOW) * mR;
-    float glow = max(m0, m0 + mL + mR);
+    float intensity = saturate(max(m0, m0 + mL + mR));
 
     // Clamp
-    glow = saturate(glow);
+    // glow = saturate(glow);
 
     // Modulate final glow by input color
-    half3 result = centerWeight * half(glow);
-    // half3 result = color.rgb * half(glow);
+    half3 result = pow(centerWeight, 4.01 - 2 * u.BRIGHTNESS) * half(intensity);
 
     // Output (for now just grayscale, later modulate with input image color & size)
     outTexture.write(half4(result, 1.0), gid);

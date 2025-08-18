@@ -14,6 +14,7 @@ import MetalPerformanceShaders
 
 struct PlaygroundUniforms {
 
+    var BRIGHTNESS: Float
     var GRID_WIDTH: Float
     var GRID_HEIGHT: Float
     var MIN_DOT_WIDTH: Float
@@ -25,6 +26,7 @@ struct PlaygroundUniforms {
 
     static let defaults = PlaygroundUniforms(
 
+        BRIGHTNESS: 1,
         GRID_WIDTH: 20,
         GRID_HEIGHT: 20,
         MIN_DOT_WIDTH: 1,
@@ -52,6 +54,14 @@ final class PlaygroundShader: Shader {
         super.init(name: "Dirk's Playground")
 
         settings = [
+
+            ShaderSetting(
+                name: "Brightness",
+                key: "BRIGHTNESS",
+                range: 0.0...2.0,
+                step: 0.01,
+                help: nil
+            ),
 
             ShaderSetting(
                 name: "Grid width",
@@ -122,6 +132,7 @@ final class PlaygroundShader: Shader {
     override func get(key: String) -> Float {
 
         switch key {
+        case "BRIGHTNESS": return uniforms.BRIGHTNESS
         case "GRID_WIDTH": return uniforms.GRID_WIDTH
         case "GRID_HEIGHT": return uniforms.GRID_HEIGHT
         case "MIN_DOT_WIDTH": return uniforms.MIN_DOT_WIDTH
@@ -140,6 +151,7 @@ final class PlaygroundShader: Shader {
     override func set(key: String, value: Float) {
 
         switch key {
+        case "BRIGHTNESS": uniforms.BRIGHTNESS = value
         case "GRID_WIDTH": uniforms.GRID_WIDTH = value
         case "GRID_HEIGHT": uniforms.GRID_HEIGHT = value
         case "MIN_DOT_WIDTH": uniforms.MIN_DOT_WIDTH = value

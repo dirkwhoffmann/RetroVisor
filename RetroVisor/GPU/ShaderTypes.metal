@@ -62,6 +62,7 @@ struct CrtUniforms {
 
 struct PlaygroundUniforms {
 
+    float BRIGHTNESS;
     float GRID_WIDTH;
     float GRID_HEIGHT;
     float MIN_DOT_WIDTH;
