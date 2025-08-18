@@ -136,22 +136,27 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
     float2 centerR = center + float2(maskSpacing.x, 0.0);
 
     // Get the center weights from the blurred image
-    half3 centerWeight = half3(blur.sample(sam, remap(center, outSize, uniforms.texRect)));
-    half3 centerWeightL = half3(blur.sample(sam, remap(centerL, outSize, uniforms.texRect)));
-    half3 centerWeightR = half3(blur.sample(sam, remap(centerR, outSize, uniforms.texRect)));
+    half3 weight = half3(blur.sample(sam, remap(center, outSize, uniforms.texRect)));
+    half3 weightL = half3(blur.sample(sam, remap(centerL, outSize, uniforms.texRect)));
+    half3 weightR = half3(blur.sample(sam, remap(centerR, outSize, uniforms.texRect)));
 
-    // Convert to brightness
-    float weight = centerWeight.r; //  luminance(colorAtCenter);
-    float weightL = centerWeightL.r;
-    float weightR = centerWeightR.r;
-    weight = weight; // 0.25 * weightL + 0.5 * weight + 0.25 * weightR;
+    // weight = weight; // 0.25 * weightL + 0.5 * weight + 0.25 * weightR;
 
     // Scale dot size based on weight
     float2 minDotSize = float2(u.MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT);
     float2 maxDotSize = float2(u.MAX_DOT_WIDTH, u.MAX_DOT_HEIGHT);
-    float2 scaledDotSize = mix(minDotSize, maxDotSize, weight);
-    float2 scaledDotSizeL = mix(minDotSize, maxDotSize, weightL);
-    float2 scaledDotSizeR = mix(minDotSize, maxDotSize, weightR);
+
+    float2 scaledRDotSize = mix(minDotSize, maxDotSize, weight.r);
+    float2 scaledRDotSizeL = mix(minDotSize, maxDotSize, weightL.r);
+    float2 scaledRDotSizeR = mix(minDotSize, maxDotSize, weightR.r);
+
+    float2 scaledGDotSize = mix(minDotSize, maxDotSize, weight.g);
+    float2 scaledGDotSizeL = mix(minDotSize, maxDotSize, weightL.g);
+    float2 scaledGDotSizeR = mix(minDotSize, maxDotSize, weightR.g);
+
+    float2 scaledBDotSize = mix(minDotSize, maxDotSize, weight.b);
+    float2 scaledBDotSizeL = mix(minDotSize, maxDotSize, weightL.b);
+    float2 scaledBDotSizeR = mix(minDotSize, maxDotSize, weightR.b);
 
     // Compute relative position to dot centers
     /*
@@ -161,19 +166,31 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
     */
 
     // Compute mask contributions
-    float m0 = shapeMask(float2(gid) - center, scaledDotSize, u);
-    float mL = shapeMask(float2(gid) - centerL, scaledDotSizeL, u);
-    float mR = shapeMask(float2(gid) - centerR, scaledDotSizeR, u);
+    float m0r = shapeMask(float2(gid) - center, scaledRDotSize, u);
+    float mLr = shapeMask(float2(gid) - centerL, scaledRDotSizeL, u);
+    float mRr = shapeMask(float2(gid) - centerR, scaledRDotSizeR, u);
+
+    float m0g = shapeMask(float2(gid) - center, scaledGDotSize, u);
+    float mLg = shapeMask(float2(gid) - centerL, scaledGDotSizeL, u);
+    float mRg = shapeMask(float2(gid) - centerR, scaledGDotSizeR, u);
+
+    float m0b = shapeMask(float2(gid) - center, scaledBDotSize, u);
+    float mLb = shapeMask(float2(gid) - centerL, scaledBDotSizeL, u);
+    float mRb = shapeMask(float2(gid) - centerR, scaledBDotSizeR, u);
+
+    float3 m0 = float3(m0r, m0g, m0b);
+    float3 mL = float3(mLr, mLg, mLb);
+    float3 mR = float3(mRr, mRg, mRb);
 
     // Combine with horizontal glow (soft blending)
     // float glow = m0 + exp(-length(relLeft) / u.GLOW) * mL + exp(-length(relRight) / u.GLOW) * mR;
-    float intensity = saturate(max(m0, m0 + mL + mR));
+    float3 intensity = saturate(max(m0, m0 + mL + mR));
 
     // Clamp
     // glow = saturate(glow);
 
     // Modulate final glow by input color
-    half3 result = pow(centerWeight, 4.01 - 2 * u.BRIGHTNESS) * half(intensity);
+    half3 result = u.BRIGHTNESS * pow(weight, 4.01 - 2 * u.GLOW) * half3(intensity);
 
     // Output (for now just grayscale, later modulate with input image color & size)
     outTexture.write(half4(result, 1.0), gid);

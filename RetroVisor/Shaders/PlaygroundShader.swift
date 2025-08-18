@@ -15,6 +15,7 @@ import MetalPerformanceShaders
 struct PlaygroundUniforms {
 
     var BRIGHTNESS: Float
+    var GLOW: Float
     var GRID_WIDTH: Float
     var GRID_HEIGHT: Float
     var MIN_DOT_WIDTH: Float
@@ -27,6 +28,7 @@ struct PlaygroundUniforms {
     static let defaults = PlaygroundUniforms(
 
         BRIGHTNESS: 1,
+        GLOW: 1,
         GRID_WIDTH: 20,
         GRID_HEIGHT: 20,
         MIN_DOT_WIDTH: 1,
@@ -58,6 +60,14 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Brightness",
                 key: "BRIGHTNESS",
+                range: 0.0...2.0,
+                step: 0.01,
+                help: nil
+            ),
+
+            ShaderSetting(
+                name: "Glow",
+                key: "GLOW",
                 range: 0.0...2.0,
                 step: 0.01,
                 help: nil
@@ -133,6 +143,7 @@ final class PlaygroundShader: Shader {
 
         switch key {
         case "BRIGHTNESS": return uniforms.BRIGHTNESS
+        case "GLOW": return uniforms.GLOW
         case "GRID_WIDTH": return uniforms.GRID_WIDTH
         case "GRID_HEIGHT": return uniforms.GRID_HEIGHT
         case "MIN_DOT_WIDTH": return uniforms.MIN_DOT_WIDTH
@@ -152,6 +163,7 @@ final class PlaygroundShader: Shader {
 
         switch key {
         case "BRIGHTNESS": uniforms.BRIGHTNESS = value
+        case "GLOW": uniforms.GLOW = value
         case "GRID_WIDTH": uniforms.GRID_WIDTH = value
         case "GRID_HEIGHT": uniforms.GRID_HEIGHT = value
         case "MIN_DOT_WIDTH": uniforms.MIN_DOT_WIDTH = value
@@ -207,7 +219,7 @@ final class PlaygroundShader: Shader {
         //
 
         let width = Int(2 * uniforms.GRID_WIDTH) | 1
-        let height = Int(uniforms.GRID_HEIGHT) | 1
+        let height = 1
         let blurFilter = MPSImageBox(device: PlaygroundShader.device,
                                kernelWidth: width, kernelHeight: height)
         blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: inTexture, destinationTexture: blur)
