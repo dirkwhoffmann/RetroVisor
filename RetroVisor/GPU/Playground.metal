@@ -60,6 +60,7 @@ inline float shapeMask(float2 pos,
 }
 */
 
+/*
 inline float shapeMask(float2 pos,
                        float2 radius,
                        constant PlaygroundUniforms& uniforms)
@@ -93,6 +94,8 @@ inline float shapeMask(float2 pos,
 
     return intensity;
 }
+*/
+
 #if 0
 inline float shapeMask(float2 pos,
                        float2 radius,
@@ -147,23 +150,30 @@ inline float shapeMask(float2 pos,
 }
 #endif
 
-/*
+
 inline float shapeMask(float2 pos, float2 dotSize, constant PlaygroundUniforms& uniforms)
 {
     // Normalize position into [-1..1] range relative to dotSize
     float2 uv = pos / dotSize;
+    float len = length(uv);
 
     int shape = 0;
 
     if (shape == 0) {
         // Ellipse: inside if uv.x^2 + uv.y^2 <= 1
-        return saturate(1.0 - length(uv));
+        // return saturate(1.0 - length(uv));
+        // return smoothstep(1.0 * uniforms.FEATHER, 0.0, length(uv));
+        if (len > (1.0 - uniforms.FEATHER)) {
+            return smoothstep(1.0 + uniforms.FEATHER, 1.0 - uniforms.FEATHER, len);
+        }
+        return 1.0;
+        // return saturate(1.0 - pow(length(uv), uniforms.FEATHER));
     } else {
         // Diamond: L1 norm (Manhattan distance)
         return saturate(1.0 - (abs(uv.x) + abs(uv.y)));
     }
 }
-*/
+
 
 kernel void playground1(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
                         texture2d<half, access::write>  image      [[ texture(1) ]],
@@ -265,7 +275,7 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
 
     // Combine with horizontal glow (soft blending)
     // float glow = m0 + exp(-length(relLeft) / u.GLOW) * mL + exp(-length(relRight) / u.GLOW) * mR;
-    float glow = m0 + mL + mR;
+    float glow = max(m0, m0 + mL + mR);
 
     // Clamp
     glow = saturate(glow);

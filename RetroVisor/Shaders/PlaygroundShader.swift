@@ -25,13 +25,13 @@ struct PlaygroundUniforms {
 
     static let defaults = PlaygroundUniforms(
 
-        GRID_WIDTH: 12,
-        GRID_HEIGHT: 18,
-        MIN_DOT_WIDTH: 5,
+        GRID_WIDTH: 20,
+        GRID_HEIGHT: 20,
+        MIN_DOT_WIDTH: 1,
         MAX_DOT_WIDTH: 10,
-        MIN_DOT_HEIGHT: 8,
-        MAX_DOT_HEIGHT: 16,
-        CORNER: 2,
+        MIN_DOT_HEIGHT: 1,
+        MAX_DOT_HEIGHT: 10,
+        CORNER: 2.0,
         FEATHER: 0.2
     )
 }
