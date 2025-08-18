@@ -60,7 +60,7 @@ final class CRTEasyShader: Shader {
 
     init() {
 
-        super.init(name: "crteasy")
+        super.init(name: "CrtEasy")
 
         settings = [
 

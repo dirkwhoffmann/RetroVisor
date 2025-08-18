@@ -20,7 +20,7 @@ struct PlaygroundUniforms {
     var MAX_DOT_WIDTH: Float
     var MIN_DOT_HEIGHT: Float
     var MAX_DOT_HEIGHT: Float
-    var CORNER: Float
+    var SHAPE: Float
     var FEATHER: Float
 
     static let defaults = PlaygroundUniforms(
@@ -31,7 +31,7 @@ struct PlaygroundUniforms {
         MAX_DOT_WIDTH: 10,
         MIN_DOT_HEIGHT: 1,
         MAX_DOT_HEIGHT: 10,
-        CORNER: 2.0,
+        SHAPE: 2.0,
         FEATHER: 0.2
     )
 }
@@ -49,7 +49,7 @@ final class PlaygroundShader: Shader {
 
     init() {
 
-        super.init(name: "Playground")
+        super.init(name: "Dirk's Playground")
 
         settings = [
 
@@ -102,15 +102,15 @@ final class PlaygroundShader: Shader {
             ),
 
             ShaderSetting(
-                name: "Corner fraction",
-                key: "CORNER",
+                name: "Phospor shape",
+                key: "SHAPE",
                 range: 1.0...10.0,
-                step: 0.1,
+                step: 0.01,
                 help: nil
             ),
 
             ShaderSetting(
-                name: "Feather",
+                name: "Phosphor feather",
                 key: "FEATHER",
                 range: 0.0...1.0,
                 step: 0.01,
@@ -128,7 +128,7 @@ final class PlaygroundShader: Shader {
         case "MAX_DOT_WIDTH": return uniforms.MAX_DOT_WIDTH
         case "MIN_DOT_HEIGHT": return uniforms.MIN_DOT_HEIGHT
         case "MAX_DOT_HEIGHT": return uniforms.MAX_DOT_HEIGHT
-        case "CORNER": return uniforms.CORNER
+        case "SHAPE": return uniforms.SHAPE
         case "FEATHER": return uniforms.FEATHER
 
         default:
@@ -146,7 +146,7 @@ final class PlaygroundShader: Shader {
         case "MAX_DOT_WIDTH": uniforms.MAX_DOT_WIDTH = value
         case "MIN_DOT_HEIGHT": uniforms.MIN_DOT_HEIGHT = value
         case "MAX_DOT_HEIGHT": uniforms.MAX_DOT_HEIGHT = value
-        case "CORNER": uniforms.CORNER = value
+        case "SHAPE": uniforms.SHAPE = value
         case "FEATHER": uniforms.FEATHER = value
 
         default:

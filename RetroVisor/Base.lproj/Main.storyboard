@@ -1050,16 +1050,10 @@ Gw
                             <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KdT-3W-BYW">
                                 <rect key="frame" x="437" y="436" width="187" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="nRe-V5-fv0" id="Las-yg-GfP">
+                                <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="Las-yg-GfP">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="message"/>
-                                    <menu key="menu" id="iFS-P0-Kr5">
-                                        <items>
-                                            <menuItem title="None" state="on" id="nRe-V5-fv0"/>
-                                            <menuItem title="CRT" tag="1" id="2Rt-Hl-jdI"/>
-                                            <menuItem title="Trust Me, Don't Click" tag="2" id="QF1-PN-6U7"/>
-                                        </items>
-                                    </menu>
+                                    <menu key="menu" id="iFS-P0-Kr5"/>
                                 </popUpButtonCell>
                                 <connections>
                                     <action selector="shaderSelectAction:" target="lT8-2t-dOu" id="bgc-xz-rfh"/>

@@ -16,164 +16,54 @@ using namespace metal;
 // This is my personal playground. Haters back off!
 //
 
-// Reads a single pixel at integer coordinate gid
-/*
-inline half4 sample(texture2d<half, access::sample> inTexture,
-                    texture2d<half, access::write> outTexture,
-                    constant Uniforms& uniforms,
-                    sampler sam,
-                    uint2 gid)
+// Fast Padé approximation for the Minkowski norm (|u|^n + |v|^n)^(1/n)
+inline float minkowski(float2 uv, float n)
 {
-    // Normalize gid to 0..1 in output texture
-    float2 uvOut = (float2(gid) + 0.5) /
-                   float2(outTexture.get_width(), outTexture.get_height());
+    float2 a = abs(uv);
+    float m = max(a.x, a.y);
+    if (m == 0.0f) return 0.0f;
 
-    // Remap to texRect in input texture
-    float2 uvIn = uniforms.texRect.xy +
-                  uvOut * (uniforms.texRect.zw - uniforms.texRect.xy);
+    float l = min(a.x, a.y);
+    float t = l / m;
 
-    // Sample input texture using normalized coords
-    return inTexture.sample(sam, uvIn);
+    // s = t^n  (use fast log2/exp2; clamp to avoid log2(0))
+    float s = fast::exp2(n * fast::log2(max(t, 1e-8f)));
+
+    float invn = 1.0f / n;
+    float A = 0.5f * (1.0f + invn); // (n+1)/(2n)
+    float B = 0.5f * (1.0f - invn); // (n-1)/(2n)
+
+    float g = (1.0f + A * s) / (1.0f + B * s);
+    return m * g;
 }
-*/
 
-/*
-inline float shapeMask(float2 pos,
-                       float2 dotSize,
-                       constant PlaygroundUniforms& uniforms)
+inline float superellipseLenApprox(float2 uv, float n)
 {
-    // Normalize position into [-1..1] range relative to dotSize
-    float2 uv = pos / dotSize;
+    float2 a = abs(uv);
 
-    // Effective corner radius, relative to the smaller dimension
-    float cornerRadius = uniforms.CORNER * min(dotSize.x, dotSize.y);
-    // cornerRadius = 0;
+    float m = max(a.x, a.y);
+    float l = min(a.x, a.y);
 
-    // Signed distance to rounded rectangle
-    float2 d = abs(uv) - 1.0 + cornerRadius;
-    float dist = length(max(d, 0.0)) - cornerRadius;
+    float k = exp2(1.0f / n) - 1.0f;
 
-    // Soft mask: 1 inside, 0 outside, feathered edge
-    // return saturate(1.0 - (abs(uv.x) + abs(uv.y)));
-    // return dist <= 0 ? 1.0 : 0.0;
-    return smoothstep(0.0, -uniforms.FEATHER, dist);
+    return m + k * l;
 }
-*/
-
-/*
-inline float shapeMask(float2 pos,
-                       float2 radius,
-                       constant PlaygroundUniforms& uniforms)
-{
-    // Normalize coordinates to [-1..1] relative to radius
-    float2 uv = abs(pos) / radius;
-
-    // Superellipse / rounded rect exponent
-    float n = uniforms.CORNER; // n=2 -> ellipse, n>2 -> more rectangular
-
-    // Distance metric for superellipse
-    float dShape = pow(uv.x, n) + pow(uv.y, n);
-
-    // Distance to border: positive inside, zero at boundary, negative outside
-    float distToBorder = 1.0 - dShape;
-
-    // Absolute feather size in normalized units
-    float featherAbs = saturate(uniforms.FEATHER) * 1.0; // scale factor can be tuned
-
-    // Feathered intensity based on distance to border
-    float intensity;
-    if (featherAbs > 0.0)
-    {
-        intensity = clamp(distToBorder / featherAbs, 0.0, 1.0);
-    }
-    else
-    {
-        // Hard cutoff
-        intensity = distToBorder > 0.0 ? 1.0 : 0.0;
-    }
-
-    return intensity;
-}
-*/
-
-#if 0
-inline float shapeMask(float2 pos,
-                       float2 radius,
-                       constant PlaygroundUniforms& uniforms)
-{
-    int fadeMode = 2;
-    int n = uniforms.CORNER;
-
-    /*
-    float2 uv = pos / radius;
-        float d = pow(abs(uv.x), n) + pow(abs(uv.y), n); // normalized distance
-
-        // Effective feather in absolute units
-        float feather = uniforms.FEATHER * min(radius.x, radius.y);
-
-        if (feather <= 0.0) {
-            // Hard cutoff at boundary
-            return d <= 1.0 ? 1.0 : 0.0;
-        }
-
-        if (fadeMode == 0) { // linear
-            return clamp(1.0 - d / feather, 0.0, 1.0);
-        } else if (fadeMode == 1) { // smoothstep
-            return smoothstep(1.0, 0.0, d / feather);
-        } else { // gaussian with hard cutoff fallback
-            float g = exp(-(d * d) / (2.0 * feather * feather));
-            // blend Gaussian with hard cutoff when very close to the boundary
-            float hardCut = d <= 1.0 ? 1.0 : 0.0;
-            // Use smoothstep to mix smoothly between Gaussian and hard cutoff
-            float blendFactor = saturate(feather * 10.0); // small feather → blendFactor ~0 → hard cutoff
-            return mix(hardCut, g, blendFactor);
-        }
-     */
-
-
-    // normalize position into shape space
-     float d = pow(abs(pos.x)/radius.x, uniforms.CORNER) + pow(abs(pos.y)/radius.y, uniforms.CORNER);
-
-    // Effective feather based on radius (use smaller dimension for consistency)
-    // float feather = uniforms.FEATHER * min(radius.x, radius.y);
-    float feather = uniforms.FEATHER;
-
-     // d = 0 at center, 1 at boundary
-     if (fadeMode == 0) { // linear
-         return clamp(1.0 - d/feather, 0.0, 1.0);
-     } else if (fadeMode == 1) { // smoothstep
-         return smoothstep(1.0, 0.0, d/feather);
-     } else { // gaussian
-         return exp(-(d*d)/(2.0*feather*feather));
-     }
-
-}
-#endif
-
 
 inline float shapeMask(float2 pos, float2 dotSize, constant PlaygroundUniforms& uniforms)
 {
     // Normalize position into [-1..1] range relative to dotSize
     float2 uv = pos / dotSize;
-    float len = length(uv);
 
-    int shape = 0;
+    // Compute the distance via the Minkowski norm (1 = Manhattan, 2 = Euclidean)
+    float len = minkowski(uv, uniforms.SHAPE);
 
-    if (shape == 0) {
-        // Ellipse: inside if uv.x^2 + uv.y^2 <= 1
-        // return saturate(1.0 - length(uv));
-        // return smoothstep(1.0 * uniforms.FEATHER, 0.0, length(uv));
-        if (len > (1.0 - uniforms.FEATHER)) {
-            return smoothstep(1.0 + uniforms.FEATHER, 1.0 - uniforms.FEATHER, len);
-        }
-        return 1.0;
-        // return saturate(1.0 - pow(length(uv), uniforms.FEATHER));
+    // Blur the edge
+    if (len > (1.0 - uniforms.FEATHER)) {
+        return smoothstep(1.0 + uniforms.FEATHER, 1.0 - uniforms.FEATHER, len);
     } else {
-        // Diamond: L1 norm (Manhattan distance)
-        return saturate(1.0 - (abs(uv.x) + abs(uv.y)));
+        return 1.0;
     }
 }
-
 
 kernel void playground1(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
                         texture2d<half, access::write>  image      [[ texture(1) ]],
@@ -235,7 +125,7 @@ kernel void playground2(texture2d<half, access::sample> inTexture  [[ texture(0)
     float2 outSize = float2(outTexture.get_width(), outTexture.get_height());
 
 
-    half4 color = inTexture.sample(sam, remap(float2(gid), outSize, uniforms.texRect));
+    // half4 color = inTexture.sample(sam, remap(float2(gid), outSize, uniforms.texRect));
 
     // Find the dot cell we are in
     uint2 maskSpacing = uint2(uint(u.GRID_WIDTH), uint(u.GRID_HEIGHT));
