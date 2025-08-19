@@ -57,9 +57,11 @@ final class PlaygroundShader: Shader {
     var pass2: Kernel!
     var uniforms: PlaygroundUniforms = .defaults
 
-    var blur: MTLTexture!
     var image: MTLTexture!
-    var dotmask: MTLTexture!
+
+    var luma: MTLTexture!
+    var chroma: MTLTexture!
+    var blur: MTLTexture!
 
     init() {
 
@@ -78,7 +80,7 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Chroma Sigma",
                 key: "CHROMA_SIGMA",
-                range: 1.0...4.0,
+                range: 1.0...20.0,
                 step: 0.01,
                 help: nil
             ),
@@ -241,20 +243,9 @@ final class PlaygroundShader: Shader {
                         in inTexture: MTLTexture, out outTexture: MTLTexture) {
 
         // Create textures if needed
-        if inTexture.width != blur?.width || inTexture.height != blur?.height {
+        if luma?.width != outTexture.width || luma?.height != outTexture.height {
 
-            let desc = MTLTextureDescriptor.texture2DDescriptor(
-                pixelFormat: inTexture.pixelFormat,
-                width: inTexture.width,
-                height: inTexture.height,
-                mipmapped: false
-            )
-            desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-            blur = inTexture.device.makeTexture(descriptor: desc)
-        }
-
-        if dotmask?.width != outTexture.width || dotmask?.height != outTexture.height {
-
+            // TODO: USE DIFFERENT TEXTURE FORMATS FOR LUMA AND CHROME TO SAVE BANDWIDTH
             let desc = MTLTextureDescriptor.texture2DDescriptor(
                 pixelFormat: outTexture.pixelFormat,
                 width: outTexture.width,
@@ -262,41 +253,42 @@ final class PlaygroundShader: Shader {
                 mipmapped: false
             )
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-            image = outTexture.device.makeTexture(descriptor: desc)
-            dotmask = outTexture.device.makeTexture(descriptor: desc)
+            luma = outTexture.device.makeTexture(descriptor: desc)
+            chroma = outTexture.device.makeTexture(descriptor: desc)
+            blur = outTexture.device.makeTexture(descriptor: desc)
         }
 
-        // DEPRECATED
-        /*
-        let width = Int(2 * uniforms.GRID_WIDTH) | 1
-        let height = 1
-        let blurFilter = MPSImageBox(device: PlaygroundShader.device,
-                               kernelWidth: width, kernelHeight: height)
-        blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: inTexture, destinationTexture: blur)
-        */
-
         //
-        // Pass 1: Emulate video signal artifacts
+        // Pass 1: Split RGB signal into luma and chroma
         //
 
         pass1.apply(commandBuffer: commandBuffer,
-                    textures: [inTexture, outTexture],
+                    textures: [inTexture, luma, chroma],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
 
         //
-        // Pass 2: Emulate CRT artifacts
+        // Pass 2: Low-pass filter the chroma channels
         //
 
-        /*
+        let width = Int(4 * uniforms.CHROMA_SIGMA) | 1
+        let height = 1
+        let blurFilter = MPSImageBox(device: PlaygroundShader.device,
+                               kernelWidth: width, kernelHeight: height)
+        blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: chroma, destinationTexture: blur)
+
+
+        //
+        // Pass 3: Emulate CRT artifacts
+        //
+
         pass2.apply(commandBuffer: commandBuffer,
-                    textures: [image, outTexture],
+                    textures: [luma, blur, outTexture],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
-         */
     }
 }
