@@ -144,7 +144,7 @@ class PlaygroundKernel1: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
 
-        self.init(name: "playground1", sampler: sampler)
+        self.init(name: "playground::composite", sampler: sampler)
     }
 }
 
@@ -152,7 +152,7 @@ class PlaygroundKernel2: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
 
-        self.init(name: "playground2", sampler: sampler)
+        self.init(name: "playground::crt", sampler: sampler)
     }
 }
 

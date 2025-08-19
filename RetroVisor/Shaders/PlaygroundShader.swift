@@ -214,35 +214,32 @@ final class PlaygroundShader: Shader {
             dotmask = outTexture.device.makeTexture(descriptor: desc)
         }
 
-        //
-        // Pass 1: Create a blurred helper texture
-        //
-
+        // DEPRECATED
+        /*
         let width = Int(2 * uniforms.GRID_WIDTH) | 1
         let height = 1
         let blurFilter = MPSImageBox(device: PlaygroundShader.device,
                                kernelWidth: width, kernelHeight: height)
         blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: inTexture, destinationTexture: blur)
+        */
 
         //
-        // Pass 1: Create the dotmask
+        // Pass 1: Emulate video signal artifacts
         //
 
-        /*
         pass1.apply(commandBuffer: commandBuffer,
-                    textures: [inTexture, image, dotmask],
+                    textures: [inTexture, image],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
-        */
 
         //
-        // Pass 2: Render the image
+        // Pass 2: Emulate CRT artifacts
         //
 
         pass2.apply(commandBuffer: commandBuffer,
-                    textures: [inTexture, blur, outTexture],
+                    textures: [image, outTexture],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
