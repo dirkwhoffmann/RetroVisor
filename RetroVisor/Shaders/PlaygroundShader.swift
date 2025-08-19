@@ -55,6 +55,7 @@ final class PlaygroundShader: Shader {
 
     var pass1: Kernel!
     var pass2: Kernel!
+    var smoothPass: Kernel!
     var uniforms: PlaygroundUniforms = .defaults
 
     var image: MTLTexture!
@@ -237,6 +238,7 @@ final class PlaygroundShader: Shader {
         super.activate()
         pass1 = PlaygroundKernel1(sampler: ShaderLibrary.linear)
         pass2 = PlaygroundKernel2(sampler: ShaderLibrary.linear)
+        smoothPass = SmoothChroma(sampler: ShaderLibrary.linear)
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,
@@ -273,12 +275,22 @@ final class PlaygroundShader: Shader {
         // Pass 2: Low-pass filter the chroma channels
         //
 
+        /*
         let width = Int(4 * uniforms.CHROMA_SIGMA) | 1
         let height = 1
         let blurFilter = MPSImageBox(device: PlaygroundShader.device,
                                kernelWidth: width, kernelHeight: height)
         blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: chroma, destinationTexture: blur)
+        */
 
+        smoothPass.apply(commandBuffer: commandBuffer,
+                    textures: [chroma, blur],
+                    options: &app.windowController!.metalView!.uniforms,
+                    length: MemoryLayout<Uniforms>.stride,
+                    options2: &uniforms,
+                    length2: MemoryLayout<PlaygroundUniforms>.stride)
+
+        // blur = chroma;
 
         //
         // Pass 3: Emulate CRT artifacts

@@ -148,6 +148,14 @@ class PlaygroundKernel1: Kernel {
     }
 }
 
+class SmoothChroma: Kernel {
+
+    convenience init?(sampler: MTLSamplerState) {
+
+        self.init(name: "playground::smoothChroma", sampler: sampler)
+    }
+}
+
 class PlaygroundKernel2: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
