@@ -62,6 +62,13 @@ struct CrtUniforms {
 
 struct PlaygroundUniforms {
 
+    // Chroma phase
+    uint  PAL;
+    float CHROMA_SIGMA;
+    float PAL_BLEND;
+    float CHROMA_GAIN;
+
+    // CRT phase
     float BRIGHTNESS;
     float GLOW;
     float GRID_WIDTH;

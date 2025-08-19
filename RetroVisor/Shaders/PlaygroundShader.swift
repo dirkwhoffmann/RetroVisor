@@ -14,6 +14,11 @@ import MetalPerformanceShaders
 
 struct PlaygroundUniforms {
 
+    var PAL: Int32
+    var CHROMA_SIGMA: Float
+    var PAL_BLEND: Float
+    var CHROMA_GAIN: Float
+
     var BRIGHTNESS: Float
     var GLOW: Float
     var GRID_WIDTH: Float
@@ -26,6 +31,11 @@ struct PlaygroundUniforms {
     var FEATHER: Float
 
     static let defaults = PlaygroundUniforms(
+
+        PAL: 0,
+        CHROMA_SIGMA: 1.3,
+        PAL_BLEND: 0.4,
+        CHROMA_GAIN: 1.0,
 
         BRIGHTNESS: 1,
         GLOW: 1,
@@ -56,6 +66,38 @@ final class PlaygroundShader: Shader {
         super.init(name: "Dirk's Playground")
 
         settings = [
+
+            ShaderSetting(
+                name: "PAL",
+                key: "PAL",
+                range: nil,
+                step: 1.0,
+                help: nil
+            ),
+
+            ShaderSetting(
+                name: "Chroma Sigma",
+                key: "CHROMA_SIGMA",
+                range: 1.0...4.0,
+                step: 0.01,
+                help: nil
+            ),
+
+            ShaderSetting(
+                name: "PAL Blend",
+                key: "PAL_BLEND",
+                range: 0.0...2.0,
+                step: 0.01,
+                help: nil
+            ),
+
+            ShaderSetting(
+                name: "Chroma Gain",
+                key: "CHROMA_GAIN",
+                range: 0.5...2.0,
+                step: 0.01,
+                help: nil
+            ),
 
             ShaderSetting(
                 name: "Brightness",
@@ -142,6 +184,11 @@ final class PlaygroundShader: Shader {
     override func get(key: String) -> Float {
 
         switch key {
+        case "PAL": return Float(uniforms.PAL)
+        case "CHROMA_SIGMA": return uniforms.CHROMA_SIGMA
+        case "PAL_BLEND": return uniforms.PAL_BLEND
+        case "CHROMA_GAIN": return uniforms.CHROMA_GAIN
+
         case "BRIGHTNESS": return uniforms.BRIGHTNESS
         case "GLOW": return uniforms.GLOW
         case "GRID_WIDTH": return uniforms.GRID_WIDTH
@@ -162,6 +209,11 @@ final class PlaygroundShader: Shader {
     override func set(key: String, value: Float) {
 
         switch key {
+        case "PAL": uniforms.PAL = Int32(value)
+        case "CHROMA_SIGMA": uniforms.CHROMA_SIGMA = value
+        case "PAL_BLEND": uniforms.PAL_BLEND = value
+        case "CHROMA_GAIN": uniforms.CHROMA_GAIN = value
+
         case "BRIGHTNESS": uniforms.BRIGHTNESS = value
         case "GLOW": uniforms.GLOW = value
         case "GRID_WIDTH": uniforms.GRID_WIDTH = value
@@ -228,7 +280,7 @@ final class PlaygroundShader: Shader {
         //
 
         pass1.apply(commandBuffer: commandBuffer,
-                    textures: [inTexture, image],
+                    textures: [inTexture, outTexture],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
@@ -238,11 +290,13 @@ final class PlaygroundShader: Shader {
         // Pass 2: Emulate CRT artifacts
         //
 
+        /*
         pass2.apply(commandBuffer: commandBuffer,
                     textures: [image, outTexture],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
+         */
     }
 }

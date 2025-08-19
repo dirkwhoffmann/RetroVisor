@@ -12,10 +12,73 @@
 
 using namespace metal;
 
+//
+// Welcome to Dirk's shader playground. Haters back off!
+//
+
 namespace playground {
 
     //
-    // This is my personal playground. Haters back off!
+    // Color space helpers
+    //
+
+    inline float3 rgb_to_yiq(float3 rgb) {
+        // NTSC YIQ (BT.470)
+        return float3(
+            dot(rgb, float3(0.299,  0.587,  0.114)),   // Y
+            dot(rgb, float3(0.596, -0.274, -0.322)),   // I
+            dot(rgb, float3(0.211, -0.523,  0.312))    // Q
+        );
+    }
+
+    inline float3 yiq_to_rgb(float3 yiq) {
+        float Y = yiq.x, I = yiq.y, Q = yiq.z;
+        float3 rgb = float3(
+            Y + 0.956*I + 0.621*Q,
+            Y - 0.272*I - 0.647*Q,
+            Y - 1.106*I + 1.703*Q
+        );
+        return clamp(rgb, 0.0, 1.0);
+    }
+
+    inline float3 rgb_to_yuv601(float3 rgb) {
+        // PAL-ish YUV (BT.601)
+        return float3(
+            dot(rgb, float3(0.299,  0.587,  0.114)),        // Y
+            dot(rgb, float3(-0.14713, -0.28886,  0.436)),   // U
+            dot(rgb, float3(0.615,   -0.51499, -0.10001))   // V
+        );
+    }
+
+    inline float3 yuv601_to_rgb(float3 yuv) {
+        float Y = yuv.x, U = yuv.y, V = yuv.z;
+        float3 rgb = float3(
+            Y + 1.13983*V,
+            Y - 0.39465*U - 0.58060*V,
+            Y + 2.03211*U
+        );
+        return clamp(rgb, 0.0, 1.0);
+    }
+
+    inline void gaussianWeights(const int halfWidth, float sigma, thread float *wOut)
+    {
+        // halfWidth=3 → 7 taps; halfWidth=4 → 9 taps, etc.
+        float twoSigma2 = 2.0f * sigma * sigma;
+        float sum = 0.0f;
+        wOut[0] = 1.0f; // center
+        for (int i = 1; i <= halfWidth; ++i) {
+            float x = (float)i;
+            float v = exp(- (x*x) / twoSigma2);
+            wOut[i] = v;
+            sum += 2.0f * v;
+        }
+        sum += 1.0f;
+        float inv = 1.0f / sum;
+        for (int i = 0; i <= halfWidth; ++i) wOut[i] *= inv;
+    }
+
+    //
+    // Geometry helpers
     //
 
     // Fast Padé approximation for the Minkowski norm (|u|^n + |v|^n)^(1/n)
@@ -39,6 +102,7 @@ namespace playground {
         return m * g;
     }
 
+    /*
     inline float superellipseLenApprox(float2 uv, float n)
     {
         float2 a = abs(uv);
@@ -50,6 +114,7 @@ namespace playground {
 
         return m + k * l;
     }
+    */
 
     inline float shapeMask(float2 pos, float2 dotSize, constant PlaygroundUniforms& uniforms)
     {
@@ -67,9 +132,130 @@ namespace playground {
         }
     }
 
+    /*
+    inline float2 remap(float2 uv, float2 rect, float4 texRect)
+    {
+        // Normalize gid to 0..1 in rect
+        float2 uvOut = (float2(uv) + 0.5) / rect;
+
+        // Remap to texRect in input texture
+        return texRect.xy + uvOut * (texRect.zw - texRect.xy);
+    }
+    */
+
+    inline float2 remap(float2 uv, float4 texRect)
+    {
+        // Remap to texRect in input texture
+        return texRect.xy + uv * (texRect.zw - texRect.xy);
+    }
+
     kernel void composite(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
                           texture2d<half, access::write>  outTexture [[ texture(1) ]],
-                          // texture2d<half, access::write>  dotmask    [[ texture(2) ]],
+                          constant Uniforms               &uniforms  [[ buffer(0)  ]],
+                          constant PlaygroundUniforms     &u         [[ buffer(1)  ]],
+                          sampler                         sam        [[ sampler(0) ]],
+                          uint2                           gid        [[ thread_position_in_grid ]])
+    {
+        if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) return;
+
+        // Normalize gid to 0..1 in output texture
+        // float2 uvOut = (float2(gid) + 0.5) / float2(outTexture.get_width(), outTexture.get_height());
+
+        // Remap to texRect in input texture
+        // float2 uvIn = uniforms.texRect.xy + uvOut * (uniforms.texRect.zw - uniforms.texRect.xy);
+
+        // Sample input texture using normalized coords
+        // half4 color = inTexture.sample(sam, uvIn);
+
+
+
+        const float2 texSize = float2(outTexture.get_width(), outTexture.get_height());
+        const float2 uv = (float2(gid) + 0.5f) / texSize;
+
+        const float2 texelSize = 1.0 / texSize; // float2(1.0/width, 1.0/height)
+
+        // Read center pixel once
+        float3 rgbCenter = float3(inTexture.sample(sam, remap(uv, uniforms.texRect)).rgb);
+        float3 yccCenter;
+
+        const bool isPAL = (u.PAL == 1);
+        if (isPAL) yccCenter = rgb_to_yuv601(rgbCenter);
+        else       yccCenter = rgb_to_yiq(rgbCenter);
+
+        // We preserve sharp luma from the center sample.
+        float  Y = yccCenter.x;
+
+        // Horizontal low-pass on chroma only (I/Q for NTSC or U/V for PAL)
+        // Use a small, adjustable Gaussian (default to 7 taps).
+        const int halfWidth = 3; // 7-tap; increase to 4 for 9-tap if you like
+        float w[halfWidth + 1];
+        float sigma = max(0.25f, u.CHROMA_SIGMA); // guard against tiny/zero
+        gaussianWeights(halfWidth, sigma, w);
+
+        float2 stepX = float2(texelSize.x, 0.0f);
+
+        float C1 = 0.0f; // I or U
+        float C2 = 0.0f; // Q or V
+
+        // Center contribution
+        C1 += w[0] * yccCenter.y;
+        C2 += w[0] * yccCenter.z;
+
+        // Side taps (sample RGB, convert to YIQ/YUV, accumulate only chroma)
+        // Luma from neighbors is intentionally NOT mixed in to keep edges crisp.
+        for (int i = 1; i <= halfWidth; ++i) {
+            float2 duv = stepX * float(i);
+
+            float3 rgbL = float3(inTexture.sample(sam, remap(uv - duv, uniforms.texRect)).rgb);
+            float3 rgbR = float3(inTexture.sample(sam, remap(uv + duv, uniforms.texRect)).rgb);
+
+            float3 yccL = isPAL ? rgb_to_yuv601(rgbL) : rgb_to_yiq(rgbL);
+            float3 yccR = isPAL ? rgb_to_yuv601(rgbR) : rgb_to_yiq(rgbR);
+
+            C1 += w[i] * (yccL.y + yccR.y);
+            C2 += w[i] * (yccL.z + yccR.z);
+        }
+
+        // Optional PAL vertical delay-line blend (emulates phase alternation cancel).
+        // This softens vertical chroma detail (typical on PAL) while keeping luma sharp.
+        if (isPAL && u.PAL_BLEND > 0.0f) {
+            float2 vStep = float2(0.0f, texelSize.y);
+            float3 rgbUp = float3(inTexture.sample(sam, remap(uv - vStep, uniforms.texRect)).rgb);
+            float3 rgbDn = float3(inTexture.sample(sam, remap(uv + vStep, uniforms.texRect)).rgb);
+
+            // Convert neighbors
+            float3 yccUp = rgb_to_yuv601(rgbUp);
+            float3 yccDn = rgb_to_yuv601(rgbDn);
+
+            // Approximate PAL line alternation: invert V on one line before averaging.
+            // Use current line parity to decide which neighbor to invert.
+            const bool odd = ((gid.y & 1u) != 0u);
+            float Vup = odd ? -yccUp.z : yccUp.z;
+            float Vdn = odd ? yccDn.z  : -yccDn.z;
+
+            float Uavg = 0.5f * (yccUp.y + yccDn.y);
+            float Vavg = 0.5f * (Vup     + Vdn);
+
+            // Blend towards delay-line average
+            C1 = mix(C1, Uavg, u.PAL_BLEND);
+            C2 = mix(C2, Vavg, u.PAL_BLEND);
+        }
+
+        // Optional chroma gain (helps compensate perceived desaturation after blur)
+        C1 *= u.CHROMA_GAIN;
+        C2 *= u.CHROMA_GAIN;
+
+        // Recombine and write
+        float3 outRGB;
+        if (isPAL) outRGB = yuv601_to_rgb(float3(Y, C1, C2));
+        else       outRGB = yiq_to_rgb   (float3(Y, C1, C2));
+
+        outTexture.write(half4(float4(outRGB, 1.0)), gid);
+    }
+
+    /*
+    kernel void composite(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
+                          texture2d<half, access::write>  outTexture [[ texture(1) ]],
                           constant Uniforms               &uniforms  [[ buffer(0)  ]],
                           constant PlaygroundUniforms     &u         [[ buffer(1)  ]],
                           sampler                         sam        [[ sampler(0) ]],
@@ -86,16 +272,7 @@ namespace playground {
 
         outTexture.write(color, gid);
     }
-
-    inline float2 remap(float2 uv, float2 rect, float4 texRect)
-    {
-        // Normalize gid to 0..1 in rect
-        float2 uvOut = (float2(uv) + 0.5) / rect;
-        return uvOut;
-        
-        // Remap to texRect in input texture
-        return texRect.xy + uvOut * (texRect.zw - texRect.xy);
-    }
+    */
 
     kernel void crt(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
                     // texture2d<half, access::sample> blur       [[ texture(1) ]],
@@ -124,7 +301,7 @@ namespace playground {
         //
 
         // float2 inize = float2(inTexture.get_width(), inTexture.get_height());
-        float2 outSize = float2(outTexture.get_width(), outTexture.get_height());
+        // float2 outSize = float2(outTexture.get_width(), outTexture.get_height());
 
 
         // half4 color = inTexture.sample(sam, remap(float2(gid), outSize, uniforms.texRect));
@@ -138,9 +315,15 @@ namespace playground {
         float2 centerR = center + float2(maskSpacing.x, 0.0);
 
         // Get the center weights from the blurred image
-        half3 weight = half3(inTexture.sample(sam, remap(center, outSize, uniforms.texRect)));
+        /*
+         half3 weight = half3(inTexture.sample(sam, remap(center, outSize, uniforms.texRect)));
         half3 weightL = half3(inTexture.sample(sam, remap(centerL, outSize, uniforms.texRect)));
         half3 weightR = half3(inTexture.sample(sam, remap(centerR, outSize, uniforms.texRect)));
+         */
+        half3 weight = half3(inTexture.sample(sam, center));
+        half3 weightL = half3(inTexture.sample(sam, centerL));
+        half3 weightR = half3(inTexture.sample(sam, centerR));
+
 
         // weight = weight; // 0.25 * weightL + 0.5 * weight + 0.25 * weightR;
 
