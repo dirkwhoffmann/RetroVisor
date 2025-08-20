@@ -13,7 +13,7 @@
 using namespace metal;
 
 //
-// Welcome to Dirk's shader playground.
+// Welcome to Dirk's shader playground
 //
 
 namespace playground {
@@ -63,25 +63,6 @@ namespace playground {
         );
         return clamp(rgb, 0.0, 1.0);
     }
-
-    /*
-    inline void gaussianWeights(const int halfWidth, float sigma, thread float *wOut)
-    {
-        // halfWidth=3 → 7 taps; halfWidth=4 → 9 taps, etc.
-        float twoSigma2 = 2.0f * sigma * sigma;
-        float sum = 0.0f;
-        wOut[0] = 1.0f; // center
-        for (int i = 1; i <= halfWidth; ++i) {
-            float x = (float)i;
-            float v = exp(- (x*x) / twoSigma2);
-            wOut[i] = v;
-            sum += 2.0f * v;
-        }
-        sum += 1.0f;
-        float inv = 1.0f / sum;
-        for (int i = 0; i <= halfWidth; ++i) wOut[i] *= inv;
-    }
-     */
 
     //
     // Geometry helpers
@@ -192,21 +173,6 @@ namespace playground {
         outTex.write(half4(half3(rgb), 1.0), gid);
     }
 
-    /*
-    inline float3 fetchRGB(float2 uv,
-                                texture2d<half, access::sample> luma,
-                                texture2d<half, access::sample> chroma,
-                                sampler sam,
-                                constant PlaygroundUniforms &u)
-    {
-        // Sample luma and chroma from textures
-        float3 ycc = float3(luma.sample(sam, uv).x, chroma.sample(sam, uv).x, chroma.sample(sam, uv).y);
-
-        // Convert to RGB depending on PAL/NTSC
-        return (u.PAL == 1) ? YUV2RGB(ycc) : YIQ2RGB(ycc);
-    }
-     */
-    
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                     texture2d<half, access::write>  outTex    [[ texture(1) ]],
                     constant Uniforms               &uniforms [[ buffer(0)  ]],
@@ -214,29 +180,27 @@ namespace playground {
                     sampler                         sam       [[ sampler(0) ]],
                     uint2                           gid       [[ thread_position_in_grid ]])
     {
-        // Normalize gid to 0..1 in output texture
-        float2 uv = (float2(gid) + 0.5) / float2(outTex.get_width(), outTex.get_height());
+        // float2 iSize = float2(inTex.get_width(), inTex.get_height());
+        float2 size = float2(outTex.get_width(), outTex.get_height());
 
+        // Normalize gid to 0..1 in output texture
+        float2 uv = (float2(gid) + 0.5) / size;
+
+        /*
         // Compose RGB value
-        // float3 rgb = fetchRGB(uv, luma, chroma, sam, u);
         half3 ycc = inTex.sample(sam, uv).xyz;
         // half3 rgb = half3(u.PAL ? YUV2RGB(float3(ycc)) : YIQ2RGB(float3(ycc)));
         half3 rgb = ycc;
         
         outTex.write(half4(rgb, 1.0), gid);
         return;
+        */
 
         //
         // Experimental...
         //
 
-        // float2 inize = float2(inTexture.get_width(), inTexture.get_height());
-        // float2 outSize = float2(outTexture.get_width(), outTexture.get_height());
-
-
-        // half4 color = inTexture.sample(sam, remap(float2(gid), outSize, uniforms.texRect));
-
-        /*
+        // half4 color = inTex.sample(sam, uv);
 
         // Find the dot cell we are in
         uint2 maskSpacing = uint2(uint(u.GRID_WIDTH), uint(u.GRID_HEIGHT));
@@ -246,11 +210,10 @@ namespace playground {
         float2 centerL = center - float2(maskSpacing.x, 0.0);
         float2 centerR = center + float2(maskSpacing.x, 0.0);
 
-        // Get the center weights from the blurred image
-        half3 weight = half3(inTexture.sample(sam, center));
-        half3 weightL = half3(inTexture.sample(sam, centerL));
-        half3 weightR = half3(inTexture.sample(sam, centerR));
-
+        // Get the center weights
+        half3 weight = half3(inTex.sample(sam, center / size));
+        half3 weightL = half3(inTex.sample(sam, centerL / size));
+        half3 weightR = half3(inTex.sample(sam, centerR / size));
 
         // weight = weight; // 0.25 * weightL + 0.5 * weight + 0.25 * weightR;
 
@@ -269,8 +232,6 @@ namespace playground {
         float2 scaledBDotSize = mix(minDotSize, maxDotSize, weight.b);
         float2 scaledBDotSizeL = mix(minDotSize, maxDotSize, weightL.b);
         float2 scaledBDotSizeR = mix(minDotSize, maxDotSize, weightR.b);
-
-        // Compute relative position to dot centers
 
         // Compute mask contributions
         float m0r = shapeMask(float2(gid) - center, scaledRDotSize, u);
@@ -293,15 +254,11 @@ namespace playground {
         // float glow = m0 + exp(-length(relLeft) / u.GLOW) * mL + exp(-length(relRight) / u.GLOW) * mR;
         float3 intensity = saturate(max(m0, m0 + mL + mR));
 
-        // Clamp
-        // glow = saturate(glow);
-
         // Modulate final glow by input color
         half3 result = u.BRIGHTNESS * pow(weight, 4.01 - 2 * u.GLOW) * half3(intensity);
 
         // Output (for now just grayscale, later modulate with input image color & size)
-        outTexture.write(half4(result, 1.0), gid);
-        */
+        outTex.write(half4(result, 1.0), gid);
     }
 
 }

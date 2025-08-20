@@ -33,9 +33,15 @@ class ShaderSettingCell: NSTableCellView {
 
             valuePopup.isHidden = true
             valueSlider.isHidden = true
+            valueStepper.isHidden = true
+            valueSlider.isHidden = true
+            valueLabel.isHidden = true
 
             if let range = shaderSetting.range {
 
+                valueStepper.isHidden = false
+                valueSlider.isHidden = false
+                valueLabel.isHidden = false
                 valueSlider.isHidden = false
                 valueSlider.minValue = range.lowerBound
                 valueSlider.maxValue = range.upperBound
@@ -46,10 +52,6 @@ class ShaderSettingCell: NSTableCellView {
 
             if let values = shaderSetting.values {
 
-                valueStepper.isHidden = true
-                valueSlider.isHidden = true
-                valueLabel.isHidden = true
-                
                 valuePopup.isHidden = false
                 valuePopup.removeAllItems()
                 for value in values {
