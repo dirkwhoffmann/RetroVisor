@@ -947,8 +947,24 @@
                                                                         <action selector="sliderAction:" target="Aqb-b3-WEx" id="WDZ-lK-xnk"/>
                                                                     </connections>
                                                                 </slider>
+                                                                <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bAx-z1-Crh">
+                                                                    <rect key="frame" x="496" y="16" width="19" height="28"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                                                    <stepperCell key="cell" continuous="YES" alignment="left" maxValue="100" id="cTT-dv-cfC"/>
+                                                                    <connections>
+                                                                        <action selector="stepperAction:" target="Aqb-b3-WEx" id="noz-G0-Zj2"/>
+                                                                    </connections>
+                                                                </stepper>
+                                                                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Cav-jP-BDS">
+                                                                    <rect key="frame" x="335" y="21" width="18" height="18"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                                                    <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="w7z-Ej-0JJ">
+                                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                                        <font key="font" metaFont="system"/>
+                                                                    </buttonCell>
+                                                                </button>
                                                                 <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FRa-Wr-czd">
-                                                                    <rect key="frame" x="328" y="16" width="25" height="25"/>
+                                                                    <rect key="frame" x="302" y="16" width="25" height="25"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                                     <buttonCell key="cell" type="help" bezelStyle="helpButton" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xn1-g2-2p9">
                                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -958,34 +974,28 @@
                                                                         <action selector="helpButton:" target="Aqb-b3-WEx" id="Jyr-q7-QcL"/>
                                                                     </connections>
                                                                 </button>
-                                                                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Vh4-Jb-tdX">
-                                                                    <rect key="frame" x="497" y="21" width="18" height="18"/>
+                                                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eYq-gO-MBM">
+                                                                    <rect key="frame" x="360" y="16" width="158" height="25"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                                    <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="QVV-0k-giH">
-                                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                                        <font key="font" metaFont="system"/>
-                                                                    </buttonCell>
+                                                                    <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="nLC-aR-rh0">
+                                                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                                        <font key="font" metaFont="menu"/>
+                                                                        <menu key="menu" id="UBj-iC-sV0"/>
+                                                                    </popUpButtonCell>
                                                                     <connections>
-                                                                        <action selector="enableAction:" target="Aqb-b3-WEx" id="GqC-ZR-iyb"/>
+                                                                        <action selector="popupAction:" target="Aqb-b3-WEx" id="kOF-B5-Oph"/>
                                                                     </connections>
-                                                                </button>
-                                                                <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bAx-z1-Crh">
-                                                                    <rect key="frame" x="496" y="16" width="19" height="28"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                                    <stepperCell key="cell" continuous="YES" alignment="left" maxValue="100" id="cTT-dv-cfC"/>
-                                                                    <connections>
-                                                                        <action selector="stepperAction:" target="Aqb-b3-WEx" id="noz-G0-Zj2"/>
-                                                                    </connections>
-                                                                </stepper>
+                                                                </popUpButton>
                                                             </subviews>
                                                             <connections>
-                                                                <outlet property="checkbox" destination="Vh4-Jb-tdX" id="mIk-hd-7l7"/>
                                                                 <outlet property="controller" destination="lT8-2t-dOu" id="HPf-hS-Mag"/>
                                                                 <outlet property="helpButtom" destination="FRa-Wr-czd" id="trO-kD-zPr"/>
                                                                 <outlet property="imageView" destination="NHQ-Us-uM1" id="iDP-OB-eqd"/>
+                                                                <outlet property="optCeckbox" destination="Cav-jP-BDS" id="gom-A0-rFm"/>
                                                                 <outlet property="optionLabel" destination="UWn-OM-ZBF" id="uux-5e-lr9"/>
                                                                 <outlet property="subLabel" destination="U1c-jQ-7bf" id="DaB-J6-GXO"/>
                                                                 <outlet property="valueLabel" destination="yyJ-wV-I7z" id="LoA-dC-ZBu"/>
+                                                                <outlet property="valuePopup" destination="eYq-gO-MBM" id="jsS-s1-gHs"/>
                                                                 <outlet property="valueSlider" destination="M85-HQ-X74" id="IY3-3g-Pzp"/>
                                                                 <outlet property="valueStepper" destination="bAx-z1-Crh" id="YVg-ve-aLj"/>
                                                             </connections>

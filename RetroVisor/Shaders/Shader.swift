@@ -13,12 +13,35 @@ struct ShaderSetting {
 
     let name: String
     let key: String
+
+    // Indicates if the setting can be disabled
+    let optional: Bool
+
+    // Parameters for numeric arguments
     let range: ClosedRange<Double>?
     let step: Float
+
+    // Parameters for enum-like arguments
+    let values: [(String,Int)]?
+
+    // Optional help string
     let help: String?
 
     var formatString: String {
         return step < 0.1 ? "%.2f" : step < 1.0 ? "%.1f" : "%.0f"
+    }
+
+    init(name: String, key: String, optional: Bool = false,
+         range: ClosedRange<Double>? = nil, step: Float = 0.01,
+         values: [(String,Int)]? = nil, help: String? = nil) {
+
+        self.name = name
+        self.key = key
+        self.optional = optional
+        self.range = range
+        self.step = step
+        self.values = values
+        self.help = help
     }
 }
 
@@ -53,6 +76,8 @@ class Shader : Loggable {
     }
 
     func get(key: String) -> Float { return 0 }
+    func isEnabled(key: String) -> Bool { return true }
     func set(key: String, value: Float) {}
+    func set(key: String, enable: Bool) {}
     func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) { }
 }

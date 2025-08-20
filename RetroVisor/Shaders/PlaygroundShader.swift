@@ -15,6 +15,7 @@ import MetalPerformanceShaders
 struct PlaygroundUniforms {
 
     var PAL: Int32
+    var INPUT_PIXEL_SIZE: Float
     var CHROMA_RADIUS: Float
     var PAL_BLEND: Float
     var CHROMA_GAIN: Float
@@ -33,6 +34,7 @@ struct PlaygroundUniforms {
     static let defaults = PlaygroundUniforms(
 
         PAL: 0,
+        INPUT_PIXEL_SIZE: 2,
         CHROMA_RADIUS: 1.3,
         PAL_BLEND: 0.4,
         CHROMA_GAIN: 1.0,
@@ -72,115 +74,118 @@ final class PlaygroundShader: Shader {
         settings = [
 
             ShaderSetting(
-                name: "PAL",
+                name: "Video Standard",
                 key: "PAL",
-                range: nil,
-                step: 1.0,
-                help: nil
+                values: [("PAL", 1), ("NTSC", 0)]
+            ),
+
+            /*
+            ShaderSetting(
+                name: "Input Width",
+                key: "INPUT_WIDTH",
+                optional: true,
+                range: 128...1280,
+                step: 1
             ),
 
             ShaderSetting(
-                name: "Chroma Radius",
-                key: "CHROMA_RADIUS",
-                range: 1.0...20.0,
-                step: 0.01,
-                help: nil
+                name: "Input Height",
+                key: "INPUT_HEIGHT",
+                optional: true,
+                range: 128...1280,
+                step: 1
+            ),
+            */
+            ShaderSetting(
+                name: "Input Pixel Size",
+                key: "INPUT_PIXEL_SIZE",
+                optional: true,
+                range: 1...16,
+                step: 1
             ),
 
             ShaderSetting(
                 name: "PAL Blend",
                 key: "PAL_BLEND",
                 range: 0.0...2.0,
-                step: 0.01,
-                help: nil
+                step: 0.01
             ),
 
             ShaderSetting(
                 name: "Chroma Gain",
                 key: "CHROMA_GAIN",
                 range: 0.1...20.0,
-                step: 0.01,
-                help: nil
+                step: 0.01
             ),
 
             ShaderSetting(
                 name: "Brightness",
                 key: "BRIGHTNESS",
                 range: 0.0...2.0,
-                step: 0.01,
-                help: nil
+                step: 0.01
             ),
 
             ShaderSetting(
                 name: "Glow",
                 key: "GLOW",
                 range: 0.0...2.0,
-                step: 0.01,
-                help: nil
+                step: 0.01
             ),
 
             ShaderSetting(
-                name: "Grid width",
+                name: "Grid Width",
                 key: "GRID_WIDTH",
                 range: 1.0...60.0,
-                step: 1.0,
-                help: nil
+                step: 1.0
             ),
 
             ShaderSetting(
-                name: "Grid height",
+                name: "Grid Height",
                 key: "GRID_HEIGHT",
                 range: 1.0...60.0,
-                step: 1.0,
-                help: nil
+                step: 1.0
             ),
 
             ShaderSetting(
-                name: "Minimal dot width",
+                name: "Minimal Dot Width",
                 key: "MIN_DOT_WIDTH",
                 range: 1.0...60.0,
-                step: 1.0,
-                help: nil
+                step: 1.0
             ),
 
             ShaderSetting(
-                name: "Maximal dot width",
+                name: "Maximal Dot Width",
                 key: "MAX_DOT_WIDTH",
                 range: 1.0...60.0,
-                step: 1.0,
-                help: nil
+                step: 1.0
             ),
 
             ShaderSetting(
-                name: "Minimal dot height",
+                name: "Minimal Dot Height",
                 key: "MIN_DOT_HEIGHT",
                 range: 1.0...60.0,
-                step: 1.0,
-                help: nil
+                step: 1.0
             ),
 
             ShaderSetting(
-                name: "Maximal dot height",
+                name: "Maximal Dot Height",
                 key: "MAX_DOT_HEIGHT",
                 range: 1.0...60.0,
-                step: 1.0,
-                help: nil
+                step: 1.0
             ),
 
             ShaderSetting(
-                name: "Phospor shape",
+                name: "Phospor Shape",
                 key: "SHAPE",
                 range: 1.0...10.0,
-                step: 0.01,
-                help: nil
+                step: 0.01
             ),
 
             ShaderSetting(
-                name: "Phosphor feather",
+                name: "Phosphor Feather",
                 key: "FEATHER",
                 range: 0.0...1.0,
-                step: 0.01,
-                help: nil
+                step: 0.01
             )
         ]
     }
@@ -189,6 +194,7 @@ final class PlaygroundShader: Shader {
 
         switch key {
         case "PAL": return Float(uniforms.PAL)
+        case "INPUT_PIXEL_SIZE": return uniforms.INPUT_PIXEL_SIZE
         case "CHROMA_RADIUS": return uniforms.CHROMA_RADIUS
         case "PAL_BLEND": return uniforms.PAL_BLEND
         case "CHROMA_GAIN": return uniforms.CHROMA_GAIN
@@ -214,6 +220,7 @@ final class PlaygroundShader: Shader {
 
         switch key {
         case "PAL": uniforms.PAL = Int32(value)
+        case "INPUT_PIXEL_SIZE": uniforms.INPUT_PIXEL_SIZE = value
         case "CHROMA_RADIUS": uniforms.CHROMA_RADIUS = value
         case "PAL_BLEND": uniforms.PAL_BLEND = value
         case "CHROMA_GAIN": uniforms.CHROMA_GAIN = value
@@ -237,21 +244,30 @@ final class PlaygroundShader: Shader {
     override func activate() {
 
         super.activate()
-        pass1 = PlaygroundKernel1(sampler: ShaderLibrary.nearest)
-        pass2 = PlaygroundKernel2(sampler: ShaderLibrary.nearest)
-        smoothPass = SmoothChroma(sampler: ShaderLibrary.nearest)
+        pass1 = PlaygroundKernel1(sampler: ShaderLibrary.linear)
+        pass2 = PlaygroundKernel2(sampler: ShaderLibrary.linear)
+        smoothPass = SmoothChroma(sampler: ShaderLibrary.linear)
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,
                         in inTexture: MTLTexture, out outTexture: MTLTexture) {
 
-        // Create textures if needed
-        if ycc?.width != outTexture.width || ycc?.height != outTexture.height {
+        // Get the effect window size
+        let width = outTexture.width
+        let height = outTexture.height
 
+        // Estimate the size of the retro image under the effect window
+        let inputWidth = width / Int(uniforms.INPUT_PIXEL_SIZE)
+        let inputHeight = height / Int(uniforms.INPUT_PIXEL_SIZE)
+
+        // Create helper textures if needed
+        if ycc?.width != inputWidth || ycc?.height != inputHeight {
+
+            print("Creating textures of size \(inputWidth) x \(inputHeight)")
             let desc = MTLTextureDescriptor.texture2DDescriptor(
                 pixelFormat: outTexture.pixelFormat,
-                width: outTexture.width,
-                height: outTexture.height,
+                width: inputWidth,
+                height: inputHeight,
                 mipmapped: false
             )
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
@@ -263,7 +279,7 @@ final class PlaygroundShader: Shader {
         }
 
         //
-        // Pass 1: Convert RGB signal to luma/chroma space (YUV or YIQ)
+        // Pass 1: Downscale the input texture and convert RGB to YUV or YIQ
         //
 
         pass1.apply(commandBuffer: commandBuffer,
@@ -277,10 +293,10 @@ final class PlaygroundShader: Shader {
         // Pass 2: Low-pass filter the chroma channels
         //
 
-        let width = Int(4 * uniforms.CHROMA_RADIUS) | 1
-        let height = 1
+        let kernelWidth = Int(4 * uniforms.CHROMA_RADIUS) | 1
+        let kernelHeight = 1
         let blurFilter = MPSImageBox(device: PlaygroundShader.device,
-                               kernelWidth: width, kernelHeight: height)
+                               kernelWidth: kernelWidth, kernelHeight: kernelHeight)
         blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: ycc, destinationTexture: blur)
 
 

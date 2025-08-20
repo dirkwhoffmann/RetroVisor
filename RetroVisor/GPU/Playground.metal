@@ -164,44 +164,6 @@ namespace playground {
         float3 ycc = u.PAL == 1 ? RGB2YUV(rgb) : RGB2YIQ(rgb);
 
         outTex.write(half4(half3(ycc), 1.0), gid);
-
-        /*
-        // Optional PAL vertical delay-line blend (emulates phase alternation cancel).
-        // This softens vertical chroma detail (typical on PAL) while keeping luma sharp.
-        if (isPAL && u.CHROMA_GAIN > 0.0f) {
-            float2 vStep = float2(0.0f, texelSize.y);
-            float3 rgbUp = float3(inTexture.sample(sam, remap(uv - vStep, uniforms.texRect)).rgb);
-            float3 rgbDn = float3(inTexture.sample(sam, remap(uv + vStep, uniforms.texRect)).rgb);
-
-            // Convert neighbors
-            float3 yccUp = RGB2YUV(rgbUp);
-            float3 yccDn = RGB2YUV(rgbDn);
-
-            // Approximate PAL line alternation: invert V on one line before averaging.
-            // Use current line parity to decide which neighbor to invert.
-            const bool odd = ((gid.y & 1u) != 0u);
-            float Vup = odd ? -yccUp.z : yccUp.z;
-            float Vdn = odd ? yccDn.z  : -yccDn.z;
-
-            float Uavg = 0.5f * (yccUp.y + yccDn.y);
-            float Vavg = 0.5f * (Vup     + Vdn);
-
-            // Blend towards delay-line average
-            C1 = mix(C1, Uavg, u.CHROMA_GAIN);
-            C2 = mix(C2, Vavg, u.CHROMA_GAIN);
-        }
-
-         // Optional chroma gain (helps compensate perceived desaturation after blur)
-        C1 *= u.CHROMA_GAIN;
-        C2 *= u.CHROMA_GAIN;
-         */
-
-        // Recombine and write
-        /*
-        float3 outRGB;
-        if (isPAL) outRGB = YUV2RGB(float3(Y, C1, C2));
-        else       outRGB = YIQ2RGB(float3(Y, C1, C2));
-        */
     }
 
 
@@ -280,11 +242,11 @@ namespace playground {
                     uint2                           gid       [[ thread_position_in_grid ]])
     {
         // Normalize gid to 0..1 in output texture
-        // float2 uv = (float2(gid) + 0.5) / float2(outTex.get_width(), outTex.get_height());
+        float2 uv = (float2(gid) + 0.5) / float2(outTex.get_width(), outTex.get_height());
 
         // Compose RGB value
         // float3 rgb = fetchRGB(uv, luma, chroma, sam, u);
-        half3 ycc = inTex.read(gid).xyz;
+        half3 ycc = inTex.sample(sam, uv).xyz;
         // half3 rgb = half3(u.PAL ? YUV2RGB(float3(ycc)) : YIQ2RGB(float3(ycc)));
         half3 rgb = ycc;
         
