@@ -64,8 +64,12 @@ final class PlaygroundShader: Shader {
 
     var luma: MTLTexture!
     var ycc: MTLTexture!
-    var sobel: MTLTexture!
+    var source: MTLTexture!
     var blur: MTLTexture!
+
+    var texRect: SIMD4<Float> { app.windowController!.metalView!.uniforms.texRect }
+
+    var transform = MPSScaleTransform.init() // scaleX: 1.5, scaleY: 1.5, translateX: 0.0, translateY: 0.0)
 
     init() {
 
@@ -248,6 +252,28 @@ final class PlaygroundShader: Shader {
         smoothPass = SmoothChroma(sampler: ShaderLibrary.linear)
     }
 
+    func crop(commandBuffer: MTLCommandBuffer, input: MTLTexture, output: MTLTexture, rect: CGRect) {
+
+        let scaleX = Double(output.width) / (Double(rect.width) * Double(input.width))
+        let scaleY = Double(output.height) / (Double(rect.height) * Double(input.height))
+        let transX = (-Double(rect.minX) * Double(input.width)) * scaleX
+        let transY = (-Double(rect.minY) * Double(input.height)) * scaleY
+
+        // let filter = MPSImageLanczosScale(device: PlaygroundShader.device)
+        let filter = MPSImageBilinearScale(device: PlaygroundShader.device)
+
+        var transform = MPSScaleTransform(scaleX: scaleX,
+                                          scaleY: scaleY,
+                                          translateX: transX,
+                                          translateY: transY)
+
+        withUnsafePointer(to: &transform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
+            filter.scaleTransform = transformPtr
+            filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
+        }
+    }
+
+
     override func apply(commandBuffer: MTLCommandBuffer,
                         in inTexture: MTLTexture, out outTexture: MTLTexture) {
 
@@ -272,64 +298,76 @@ final class PlaygroundShader: Shader {
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
             ycc = outTexture.device.makeTexture(descriptor: desc)
             luma = outTexture.device.makeTexture(descriptor: desc)
-            sobel = outTexture.device.makeTexture(descriptor: desc)
+            source = outTexture.device.makeTexture(descriptor: desc)
             blur = outTexture.device.makeTexture(descriptor: desc)
             image = outTexture.device.makeTexture(descriptor: desc)
         }
 
         //
-        // Pass 1: Downscale the input texture and convert RGB to YUV or YIQ
+        // Pass 1: Crop and downsample the input area
         //
 
+        let tr = app.windowController!.metalView!.uniforms.texRect
+
+        let rect = CGRect(x: CGFloat(tr.x),
+                          y: CGFloat(tr.y),
+                          width: CGFloat(tr.z - tr.x),
+                          height: CGFloat(tr.w - tr.y))
+
+        crop(commandBuffer: commandBuffer, input: inTexture, output: source, rect: rect)
+
+
+        //
+        // Pass 2: Convert RGB to YUV or YIQ
+        //
+
+        /*
         pass1.apply(commandBuffer: commandBuffer,
-                    textures: [inTexture, ycc],
+                    textures: [source, ycc],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
+         */
 
         //
         // Pass 2: Low-pass filter the chroma channels
         //
 
+        /*
         let kernelWidth = Int(4 * uniforms.CHROMA_RADIUS) | 1
         let kernelHeight = 1
         let blurFilter = MPSImageBox(device: PlaygroundShader.device,
                                kernelWidth: kernelWidth, kernelHeight: kernelHeight)
         blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: ycc, destinationTexture: blur)
-        
-        let kernel: [Float] = [-0.25, -0.5, 0, 0.5, 0.25] // horizontal kernel
-        let convolution = MPSImageConvolution(device: PlaygroundShader.device,
-                                              kernelWidth: 5,
-                                              kernelHeight: 1,
-                                              weights: kernel)
-        convolution.encode(commandBuffer: commandBuffer,
-                           sourceTexture: blur,
-                           destinationTexture: sobel)
 
+         */
 
         //
         // Pass 2: Apply edge compensation
         //
 
+        /*
         smoothPass.apply(commandBuffer: commandBuffer,
-                    textures: [ycc, blur, sobel, image],
+                    textures: [ycc, blur, source, image],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
-        
+        */
         // blur = chroma;
 
         //
         // Pass 3: Emulate CRT artifacts
         //
 
+
         pass2.apply(commandBuffer: commandBuffer,
-                    textures: [image, outTexture],
+                    textures: [source, outTexture],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
+
     }
 }

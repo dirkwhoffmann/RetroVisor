@@ -155,7 +155,7 @@ namespace playground {
         float2 uv = (float2(gid) + 0.5) / rect;
 
         // Remap to texRect in input texture
-        uv = uniforms.texRect.xy + uv * (uniforms.texRect.zw - uniforms.texRect.xy);
+        // uv = uniforms.texRect.xy + uv * (uniforms.texRect.zw - uniforms.texRect.xy);
 
         // Read pixel
         float3 rgb = float3(inTex.sample(sam, uv).rgb);
