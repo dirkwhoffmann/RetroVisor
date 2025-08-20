@@ -64,7 +64,7 @@ final class PlaygroundShader: Shader {
 
     var luma: MTLTexture!
     var ycc: MTLTexture!
-    var chroma: MTLTexture!
+    var sobel: MTLTexture!
     var blur: MTLTexture!
 
     init() {
@@ -87,15 +87,14 @@ final class PlaygroundShader: Shader {
                 range: 128...1280,
                 step: 1
             ),
-
+             */
             ShaderSetting(
-                name: "Input Height",
-                key: "INPUT_HEIGHT",
-                optional: true,
-                range: 128...1280,
+                name: "Chroma Radius",
+                key: "CHROMA_RADIUS",
+                range: 1...10,
                 step: 1
             ),
-            */
+
             ShaderSetting(
                 name: "Input Pixel Size",
                 key: "INPUT_PIXEL_SIZE",
@@ -273,7 +272,7 @@ final class PlaygroundShader: Shader {
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
             ycc = outTexture.device.makeTexture(descriptor: desc)
             luma = outTexture.device.makeTexture(descriptor: desc)
-            chroma = outTexture.device.makeTexture(descriptor: desc)
+            sobel = outTexture.device.makeTexture(descriptor: desc)
             blur = outTexture.device.makeTexture(descriptor: desc)
             image = outTexture.device.makeTexture(descriptor: desc)
         }
@@ -298,6 +297,15 @@ final class PlaygroundShader: Shader {
         let blurFilter = MPSImageBox(device: PlaygroundShader.device,
                                kernelWidth: kernelWidth, kernelHeight: kernelHeight)
         blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: ycc, destinationTexture: blur)
+        
+        let kernel: [Float] = [-0.25, -0.5, 0, 0.5, 0.25] // horizontal kernel
+        let convolution = MPSImageConvolution(device: PlaygroundShader.device,
+                                              kernelWidth: 5,
+                                              kernelHeight: 1,
+                                              weights: kernel)
+        convolution.encode(commandBuffer: commandBuffer,
+                           sourceTexture: blur,
+                           destinationTexture: sobel)
 
 
         //
@@ -305,7 +313,7 @@ final class PlaygroundShader: Shader {
         //
 
         smoothPass.apply(commandBuffer: commandBuffer,
-                    textures: [ycc, blur, image],
+                    textures: [ycc, blur, sobel, image],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,

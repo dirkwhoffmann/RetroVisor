@@ -169,7 +169,8 @@ namespace playground {
 
     kernel void smoothChroma(texture2d<half, access::sample> ycc       [[ texture(0) ]],
                              texture2d<half, access::sample> blur      [[ texture(1) ]],
-                             texture2d<half, access::write>  outTex    [[ texture(2) ]],
+                             texture2d<half, access::sample> sobel     [[ texture(2) ]],
+                             texture2d<half, access::write>  outTex    [[ texture(3) ]],
                              constant Uniforms               &uniforms [[ buffer(0)  ]],
                              constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
                              sampler                         sam       [[ sampler(0) ]],
@@ -179,45 +180,35 @@ namespace playground {
         uint H = outTex.get_height();
         if (gid.x >= W || gid.y >= H) return;
 
+        // Read pixel
         half4 yccC = ycc.read(gid);
-        half4 blurC = blur.read(gid) * u.CHROMA_GAIN;
 
-        // read local neighborhood
-        const int R = 2; // window radius (5 taps horizontally)
-        half4 origMax = 0.0h, blurMax = 0.0h;
+        // Search the maximum chroma value in surrounding pixels
+        int radius = u.CHROMA_RADIUS;
+        half maxU = yccC.y, maxV = yccC.z;
+        int maxDxU = 0, maxDxV = 0;
 
-        for (int dx = -R; dx <= R; dx++) {
-            // float2 uvOff = uv + float2(dx / float(W), 0.0);
-            uint2 uvOff = gid + uint2(dx, 0);
-            half4 o = ycc.read(uvOff);
-            half4 b = blur.read(uvOff);
+        for (int dx = -radius; dx <= radius; dx++) {
 
-            origMax = max(origMax, o);   // example: process only one channel (I or Q)
-            blurMax = max(blurMax, b);
+            if (dx == 0) continue;
+            int x = clamp(int(gid.x) + dx, 0, int(W - 1));
+            half4 sample = ycc.read(uint2(x, gid.y));
+
+            if (sample.y > maxU) { maxU = sample.y; maxDxU = abs(dx); }
+            if (sample.z > maxV) { maxV = sample.z; maxDxV = abs(dx); }
         }
 
-        half4 out = clamp(blurC, 0, origMax);
+        // Interpolation weights based on distance
+        float distU = float(maxDxU) / float(max(1, radius));
+        float distV = float(maxDxV) / float(max(1, radius));
+        half uOut = mix(half(yccC.y), maxU, half(smoothstep(0.0, 1.0, 1.0 - distU)));
+        half vOut = mix(half(yccC.z), maxV, half(smoothstep(0.0, 1.0, 1.0 - distV)));
 
-/*
-        half4 blurred = blur.read(gid);
-
-        blurMax = clamp(blurMax, 1e-5h, 1.0);
-        half4 gain = origMax / blurMax; // (blurMax > 1e-5h) ? (origMax / blurMax) : 1.0h;
-        // Clamp to avoid overshoot
-        // gain = clamp(gain, 1.0h, 100.0h);
-
-        half4 out = blurred * gain;
-        outTex.write(clamp(out, 0.0h, 1.0h), gid);
-
-
-        half4 yccC = ycc.read(gid);
-        // half4 blurC = blur.read(gid);
- */
-
-        float3 combined = float3(yccC.x, out.y, out.z);
-
-        // Reconstruct RGB; clamp to displayable range
+        // Recombine with luma and convert back to RGB
+        float3 combined = float3(yccC.x, uOut, vOut);
         float3 rgb = u.PAL ? YUV2RGB(combined) : YIQ2RGB(combined);
+
+        // Write pixel
         outTex.write(half4(half3(rgb), 1.0), gid);
     }
 
