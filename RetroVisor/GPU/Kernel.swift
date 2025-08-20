@@ -140,7 +140,15 @@ class CrtEasyKernel: Kernel {
 // My personal playground. Nothing to see here. Move on.
 //
 
-class CompositeKernel: Kernel {
+class ColorSpaceFilter: Kernel {
+
+    convenience init?(sampler: MTLSamplerState) {
+
+        self.init(name: "playground::colorSpace", sampler: sampler)
+    }
+}
+
+class CompositeFilter: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
 
@@ -148,15 +156,7 @@ class CompositeKernel: Kernel {
     }
 }
 
-class SmoothChroma: Kernel {
-
-    convenience init?(sampler: MTLSamplerState) {
-
-        self.init(name: "playground::smoothChroma", sampler: sampler)
-    }
-}
-
-class PlaygroundKernel2: Kernel {
+class CrtFilter: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
 

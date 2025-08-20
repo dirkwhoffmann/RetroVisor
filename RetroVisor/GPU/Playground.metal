@@ -13,7 +13,7 @@
 using namespace metal;
 
 //
-// Welcome to Dirk's shader playground. Haters back off!
+// Welcome to Dirk's shader playground.
 //
 
 namespace playground {
@@ -64,6 +64,7 @@ namespace playground {
         return clamp(rgb, 0.0, 1.0);
     }
 
+    /*
     inline void gaussianWeights(const int halfWidth, float sigma, thread float *wOut)
     {
         // halfWidth=3 → 7 taps; halfWidth=4 → 9 taps, etc.
@@ -80,6 +81,7 @@ namespace playground {
         float inv = 1.0f / sum;
         for (int i = 0; i <= halfWidth; ++i) wOut[i] *= inv;
     }
+     */
 
     //
     // Geometry helpers
@@ -122,29 +124,12 @@ namespace playground {
         }
     }
 
-    /*
-    inline float2 remap(float2 uv, float2 rect, float4 texRect)
-    {
-        // Normalize gid to 0..1 in rect
-        float2 uvOut = (float2(uv) + 0.5) / rect;
-
-        // Remap to texRect in input texture
-        return texRect.xy + uvOut * (texRect.zw - texRect.xy);
-    }
-    */
-
-    // Remap to texRect in input texture
-    inline float2 remap(float2 uv, float4 texRect)
-    {
-        return texRect.xy + uv * (texRect.zw - texRect.xy);
-    }
-
-    kernel void composite(texture2d<half, access::sample> inTex     [[ texture(0) ]],
-                          texture2d<half, access::write>  outTex    [[ texture(1) ]],
-                          constant Uniforms               &uniforms [[ buffer(0)  ]],
-                          constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
-                          sampler                         sam       [[ sampler(0) ]],
-                          uint2                           gid       [[ thread_position_in_grid ]])
+    kernel void colorSpace(texture2d<half, access::sample> inTex     [[ texture(0) ]],
+                           texture2d<half, access::write>  outTex    [[ texture(1) ]],
+                           constant Uniforms               &uniforms [[ buffer(0)  ]],
+                           constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
+                           sampler                         sam       [[ sampler(0) ]],
+                           uint2                           gid       [[ thread_position_in_grid ]])
     {
         // if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) return;
 
@@ -163,15 +148,13 @@ namespace playground {
         outTex.write(half4(half3(ycc), 1.0), gid);
     }
 
-
-    kernel void smoothChroma(texture2d<half, access::sample> ycc       [[ texture(0) ]],
-                             //texture2d<half, access::sample> blur      [[ texture(1) ]],
-                             // texture2d<half, access::sample> sobel     [[ texture(2) ]],
-                             texture2d<half, access::write>  outTex    [[ texture(1) ]],
-                             constant Uniforms               &uniforms [[ buffer(0)  ]],
-                             constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
-                             sampler                         sam       [[ sampler(0) ]],
-                             uint2                           gid       [[ thread_position_in_grid ]])
+    
+    kernel void composite(texture2d<half, access::sample> ycc       [[ texture(0) ]],
+                          texture2d<half, access::write>  outTex    [[ texture(1) ]],
+                          constant Uniforms               &uniforms [[ buffer(0)  ]],
+                          constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
+                          sampler                         sam       [[ sampler(0) ]],
+                          uint2                           gid       [[ thread_position_in_grid ]])
     {
         uint W = outTex.get_width();
         uint H = outTex.get_height();
@@ -209,6 +192,7 @@ namespace playground {
         outTex.write(half4(half3(rgb), 1.0), gid);
     }
 
+    /*
     inline float3 fetchRGB(float2 uv,
                                 texture2d<half, access::sample> luma,
                                 texture2d<half, access::sample> chroma,
@@ -221,7 +205,8 @@ namespace playground {
         // Convert to RGB depending on PAL/NTSC
         return (u.PAL == 1) ? YUV2RGB(ycc) : YIQ2RGB(ycc);
     }
-
+     */
+    
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                     texture2d<half, access::write>  outTex    [[ texture(1) ]],
                     constant Uniforms               &uniforms [[ buffer(0)  ]],

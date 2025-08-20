@@ -235,9 +235,9 @@ final class PlaygroundShader: Shader {
     override func activate() {
 
         super.activate()
-        splitKernel = CompositeKernel(sampler: ShaderLibrary.linear)
-        crtKernel = PlaygroundKernel2(sampler: ShaderLibrary.linear)
-        chromaKernel = SmoothChroma(sampler: ShaderLibrary.linear)
+        splitKernel = ColorSpaceFilter(sampler: ShaderLibrary.linear)
+        crtKernel = CrtFilter(sampler: ShaderLibrary.linear)
+        chromaKernel = CompositeFilter(sampler: ShaderLibrary.linear)
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,
@@ -291,7 +291,7 @@ final class PlaygroundShader: Shader {
                             rect: texRect);
 
         //
-        // Pass 2: Convert RGB to YUV or YIQ space
+        // Pass 2: Convert RGB pixels into YUV/YIQ space
         //
 
         splitKernel.apply(commandBuffer: commandBuffer,
