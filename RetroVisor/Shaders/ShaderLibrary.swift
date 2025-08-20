@@ -8,6 +8,7 @@
 // -----------------------------------------------------------------------------
 
 import MetalKit
+import MetalPerformanceShaders
 
 /* `ShaderLibrary` is the central hub for all available GPU shaders.
  * It maintains an ordered list of `Shader` instances that can be queried by
@@ -98,4 +99,42 @@ final class ShaderLibrary {
 extension Shader {
 
     var id: Int? { ShaderLibrary.shared.shaders.firstIndex { $0 === self } }
+}
+
+extension ShaderLibrary {
+    
+    static func scale(device: MTLDevice, commandBuffer: MTLCommandBuffer,
+                      input: MTLTexture, output: MTLTexture, rect: SIMD4<Float>) {
+
+        scale(device: device,
+              commandBuffer: commandBuffer,
+              input: input,
+              output: output,
+              x: Double(rect.x),
+              y: Double(rect.y),
+              width: Double(rect.z - rect.x),
+              height: Double(rect.w - rect.y))
+    }
+
+    static func scale(device: MTLDevice, commandBuffer: MTLCommandBuffer,
+                      input: MTLTexture, output: MTLTexture,
+                      x: Double, y: Double, width: Double, height: Double) {
+
+        let scaleX = Double(output.width) / (width * Double(input.width))
+        let scaleY = Double(output.height) / (height * Double(input.height))
+        let transX = (-x * Double(input.width)) * scaleX
+        let transY = (-y * Double(input.height)) * scaleY
+
+        let filter = MPSImageBilinearScale(device: device)
+
+        var transform = MPSScaleTransform(scaleX: scaleX,
+                                          scaleY: scaleY,
+                                          translateX: transX,
+                                          translateY: transY)
+
+        withUnsafePointer(to: &transform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
+            filter.scaleTransform = transformPtr
+            filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
+        }
+    }
 }

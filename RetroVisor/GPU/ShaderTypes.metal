@@ -66,8 +66,6 @@ struct PlaygroundUniforms {
     uint  PAL;
     float INPUT_PIXEL_SIZE;
     float CHROMA_RADIUS;
-    float PAL_BLEND;
-    float CHROMA_GAIN;
 
     // CRT phase
     float BRIGHTNESS;

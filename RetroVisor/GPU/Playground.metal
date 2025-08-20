@@ -154,9 +154,6 @@ namespace playground {
         // Normalize gid to 0..1 in rect
         float2 uv = (float2(gid) + 0.5) / rect;
 
-        // Remap to texRect in input texture
-        // uv = uniforms.texRect.xy + uv * (uniforms.texRect.zw - uniforms.texRect.xy);
-
         // Read pixel
         float3 rgb = float3(inTex.sample(sam, uv).rgb);
 
@@ -168,9 +165,9 @@ namespace playground {
 
 
     kernel void smoothChroma(texture2d<half, access::sample> ycc       [[ texture(0) ]],
-                             texture2d<half, access::sample> blur      [[ texture(1) ]],
-                             texture2d<half, access::sample> sobel     [[ texture(2) ]],
-                             texture2d<half, access::write>  outTex    [[ texture(3) ]],
+                             //texture2d<half, access::sample> blur      [[ texture(1) ]],
+                             // texture2d<half, access::sample> sobel     [[ texture(2) ]],
+                             texture2d<half, access::write>  outTex    [[ texture(1) ]],
                              constant Uniforms               &uniforms [[ buffer(0)  ]],
                              constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
                              sampler                         sam       [[ sampler(0) ]],

@@ -140,7 +140,7 @@ class CrtEasyKernel: Kernel {
 // My personal playground. Nothing to see here. Move on.
 //
 
-class PlaygroundKernel1: Kernel {
+class CompositeKernel: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
 

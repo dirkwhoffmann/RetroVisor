@@ -17,8 +17,6 @@ struct PlaygroundUniforms {
     var PAL: Int32
     var INPUT_PIXEL_SIZE: Float
     var CHROMA_RADIUS: Float
-    var PAL_BLEND: Float
-    var CHROMA_GAIN: Float
 
     var BRIGHTNESS: Float
     var GLOW: Float
@@ -34,10 +32,8 @@ struct PlaygroundUniforms {
     static let defaults = PlaygroundUniforms(
 
         PAL: 0,
-        INPUT_PIXEL_SIZE: 2,
+        INPUT_PIXEL_SIZE: 1,
         CHROMA_RADIUS: 1.3,
-        PAL_BLEND: 0.4,
-        CHROMA_GAIN: 1.0,
 
         BRIGHTNESS: 1,
         GLOW: 1,
@@ -57,7 +53,7 @@ final class PlaygroundShader: Shader {
 
     var pass1: Kernel!
     var pass2: Kernel!
-    var smoothPass: Kernel!
+    var chromaPass: Kernel!
     var uniforms: PlaygroundUniforms = .defaults
 
     var image: MTLTexture!
@@ -83,15 +79,6 @@ final class PlaygroundShader: Shader {
                 values: [("PAL", 1), ("NTSC", 0)]
             ),
 
-            /*
-            ShaderSetting(
-                name: "Input Width",
-                key: "INPUT_WIDTH",
-                optional: true,
-                range: 128...1280,
-                step: 1
-            ),
-             */
             ShaderSetting(
                 name: "Chroma Radius",
                 key: "CHROMA_RADIUS",
@@ -107,6 +94,7 @@ final class PlaygroundShader: Shader {
                 step: 1
             ),
 
+            /*
             ShaderSetting(
                 name: "PAL Blend",
                 key: "PAL_BLEND",
@@ -120,6 +108,7 @@ final class PlaygroundShader: Shader {
                 range: 0.1...20.0,
                 step: 0.01
             ),
+            */
 
             ShaderSetting(
                 name: "Brightness",
@@ -199,9 +188,6 @@ final class PlaygroundShader: Shader {
         case "PAL": return Float(uniforms.PAL)
         case "INPUT_PIXEL_SIZE": return uniforms.INPUT_PIXEL_SIZE
         case "CHROMA_RADIUS": return uniforms.CHROMA_RADIUS
-        case "PAL_BLEND": return uniforms.PAL_BLEND
-        case "CHROMA_GAIN": return uniforms.CHROMA_GAIN
-
         case "BRIGHTNESS": return uniforms.BRIGHTNESS
         case "GLOW": return uniforms.GLOW
         case "GRID_WIDTH": return uniforms.GRID_WIDTH
@@ -225,9 +211,6 @@ final class PlaygroundShader: Shader {
         case "PAL": uniforms.PAL = Int32(value)
         case "INPUT_PIXEL_SIZE": uniforms.INPUT_PIXEL_SIZE = value
         case "CHROMA_RADIUS": uniforms.CHROMA_RADIUS = value
-        case "PAL_BLEND": uniforms.PAL_BLEND = value
-        case "CHROMA_GAIN": uniforms.CHROMA_GAIN = value
-
         case "BRIGHTNESS": uniforms.BRIGHTNESS = value
         case "GLOW": uniforms.GLOW = value
         case "GRID_WIDTH": uniforms.GRID_WIDTH = value
@@ -247,11 +230,12 @@ final class PlaygroundShader: Shader {
     override func activate() {
 
         super.activate()
-        pass1 = PlaygroundKernel1(sampler: ShaderLibrary.linear)
+        pass1 = CompositeKernel(sampler: ShaderLibrary.linear)
         pass2 = PlaygroundKernel2(sampler: ShaderLibrary.linear)
-        smoothPass = SmoothChroma(sampler: ShaderLibrary.linear)
+        chromaPass = SmoothChroma(sampler: ShaderLibrary.linear)
     }
 
+    /*
     func crop(commandBuffer: MTLCommandBuffer, input: MTLTexture, output: MTLTexture, rect: CGRect) {
 
         let scaleX = Double(output.width) / (Double(rect.width) * Double(input.width))
@@ -272,7 +256,7 @@ final class PlaygroundShader: Shader {
             filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
         }
     }
-
+    */
 
     override func apply(commandBuffer: MTLCommandBuffer,
                         in inTexture: MTLTexture, out outTexture: MTLTexture) {
@@ -307,67 +291,43 @@ final class PlaygroundShader: Shader {
         // Pass 1: Crop and downsample the input area
         //
 
-        let tr = app.windowController!.metalView!.uniforms.texRect
-
-        let rect = CGRect(x: CGFloat(tr.x),
-                          y: CGFloat(tr.y),
-                          width: CGFloat(tr.z - tr.x),
-                          height: CGFloat(tr.w - tr.y))
-
-        crop(commandBuffer: commandBuffer, input: inTexture, output: source, rect: rect)
-
+        ShaderLibrary.scale(device: PlaygroundShader.device,
+                         commandBuffer: commandBuffer,
+                         input: inTexture,
+                         output: source,
+                         rect: texRect);
 
         //
-        // Pass 2: Convert RGB to YUV or YIQ
+        // Pass 2: Convert RGB to YUV or YIQ space
         //
 
-        /*
         pass1.apply(commandBuffer: commandBuffer,
                     textures: [source, ycc],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
-         */
 
         //
-        // Pass 2: Low-pass filter the chroma channels
+        // Pass 3: Apply chroma effects
         //
 
-        /*
-        let kernelWidth = Int(4 * uniforms.CHROMA_RADIUS) | 1
-        let kernelHeight = 1
-        let blurFilter = MPSImageBox(device: PlaygroundShader.device,
-                               kernelWidth: kernelWidth, kernelHeight: kernelHeight)
-        blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: ycc, destinationTexture: blur)
-
-         */
+        chromaPass.apply(commandBuffer: commandBuffer,
+                         textures: [ycc, image],
+                         options: &app.windowController!.metalView!.uniforms,
+                         length: MemoryLayout<Uniforms>.stride,
+                         options2: &uniforms,
+                         length2: MemoryLayout<PlaygroundUniforms>.stride)
 
         //
-        // Pass 2: Apply edge compensation
+        // Pass 4: Emulate CRT artifacts
         //
-
-        /*
-        smoothPass.apply(commandBuffer: commandBuffer,
-                    textures: [ycc, blur, source, image],
-                    options: &app.windowController!.metalView!.uniforms,
-                    length: MemoryLayout<Uniforms>.stride,
-                    options2: &uniforms,
-                    length2: MemoryLayout<PlaygroundUniforms>.stride)
-        */
-        // blur = chroma;
-
-        //
-        // Pass 3: Emulate CRT artifacts
-        //
-
 
         pass2.apply(commandBuffer: commandBuffer,
-                    textures: [source, outTexture],
+                    textures: [image, outTexture],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
-
     }
 }
