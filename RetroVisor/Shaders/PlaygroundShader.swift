@@ -51,17 +51,22 @@ struct PlaygroundUniforms {
 @MainActor
 final class PlaygroundShader: Shader {
 
-    var pass1: Kernel!
-    var pass2: Kernel!
-    var chromaPass: Kernel!
+    var splitKernel: Kernel!
+    var crtKernel: Kernel!
+    var chromaKernel: Kernel!
     var uniforms: PlaygroundUniforms = .defaults
 
-    var image: MTLTexture!
+    // Result of pass 1: Downscaled input texture
+    var src: MTLTexture!
 
-    var luma: MTLTexture!
+    // Result of pass 2: Texture in YUV/YIQ space
     var ycc: MTLTexture!
-    var source: MTLTexture!
-    var blur: MTLTexture!
+
+    // Result of pass 3: Texture with composite effects applied
+    var rgb: MTLTexture!
+
+    // Result of pass 4: Texture with CRT effects applied
+    var crt: MTLTexture!
 
     var texRect: SIMD4<Float> { app.windowController!.metalView!.uniforms.texRect }
 
@@ -230,61 +235,49 @@ final class PlaygroundShader: Shader {
     override func activate() {
 
         super.activate()
-        pass1 = CompositeKernel(sampler: ShaderLibrary.linear)
-        pass2 = PlaygroundKernel2(sampler: ShaderLibrary.linear)
-        chromaPass = SmoothChroma(sampler: ShaderLibrary.linear)
+        splitKernel = CompositeKernel(sampler: ShaderLibrary.linear)
+        crtKernel = PlaygroundKernel2(sampler: ShaderLibrary.linear)
+        chromaKernel = SmoothChroma(sampler: ShaderLibrary.linear)
     }
-
-    /*
-    func crop(commandBuffer: MTLCommandBuffer, input: MTLTexture, output: MTLTexture, rect: CGRect) {
-
-        let scaleX = Double(output.width) / (Double(rect.width) * Double(input.width))
-        let scaleY = Double(output.height) / (Double(rect.height) * Double(input.height))
-        let transX = (-Double(rect.minX) * Double(input.width)) * scaleX
-        let transY = (-Double(rect.minY) * Double(input.height)) * scaleY
-
-        // let filter = MPSImageLanczosScale(device: PlaygroundShader.device)
-        let filter = MPSImageBilinearScale(device: PlaygroundShader.device)
-
-        var transform = MPSScaleTransform(scaleX: scaleX,
-                                          scaleY: scaleY,
-                                          translateX: transX,
-                                          translateY: transY)
-
-        withUnsafePointer(to: &transform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
-            filter.scaleTransform = transformPtr
-            filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
-        }
-    }
-    */
 
     override func apply(commandBuffer: MTLCommandBuffer,
-                        in inTexture: MTLTexture, out outTexture: MTLTexture) {
+                        in inTex: MTLTexture, out outTex: MTLTexture) {
 
-        // Get the effect window size
-        let width = outTexture.width
-        let height = outTexture.height
+        // Size of the downscaled input texture
+        let inpWidth = outTex.width / Int(uniforms.INPUT_PIXEL_SIZE)
+        let inpHeight = outTex.height / Int(uniforms.INPUT_PIXEL_SIZE)
 
-        // Estimate the size of the retro image under the effect window
-        let inputWidth = width / Int(uniforms.INPUT_PIXEL_SIZE)
-        let inputHeight = height / Int(uniforms.INPUT_PIXEL_SIZE)
+        // Size of the upscaled CRT texture
+        let crtWidth = 2 * outTex.width
+        let crtHeight = 2 * outTex.height
 
-        // Create helper textures if needed
-        if ycc?.width != inputWidth || ycc?.height != inputHeight {
+        // Update intermediate textures
+        if ycc?.width != inpWidth || ycc?.height != inpHeight {
 
-            print("Creating textures of size \(inputWidth) x \(inputHeight)")
+            print("Creating downscaled textures (\(inpWidth) x \(inpHeight))...")
             let desc = MTLTextureDescriptor.texture2DDescriptor(
-                pixelFormat: outTexture.pixelFormat,
-                width: inputWidth,
-                height: inputHeight,
+                pixelFormat: outTex.pixelFormat,
+                width: inpWidth,
+                height: inpHeight,
                 mipmapped: false
             )
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-            ycc = outTexture.device.makeTexture(descriptor: desc)
-            luma = outTexture.device.makeTexture(descriptor: desc)
-            source = outTexture.device.makeTexture(descriptor: desc)
-            blur = outTexture.device.makeTexture(descriptor: desc)
-            image = outTexture.device.makeTexture(descriptor: desc)
+            src = outTex.device.makeTexture(descriptor: desc)
+            ycc = outTex.device.makeTexture(descriptor: desc)
+            rgb = outTex.device.makeTexture(descriptor: desc)
+        }
+
+        if crt?.width != crtWidth || crt?.height != crtHeight {
+
+            print("Creating upscaled CRT texture (\(crtWidth) x \(crtHeight))...")
+            let desc = MTLTextureDescriptor.texture2DDescriptor(
+                pixelFormat: outTex.pixelFormat,
+                width: crtWidth,
+                height: crtHeight,
+                mipmapped: false
+            )
+            desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
+            crt = outTex.device.makeTexture(descriptor: desc)
         }
 
         //
@@ -292,17 +285,17 @@ final class PlaygroundShader: Shader {
         //
 
         ShaderLibrary.scale(device: PlaygroundShader.device,
-                         commandBuffer: commandBuffer,
-                         input: inTexture,
-                         output: source,
-                         rect: texRect);
+                            commandBuffer: commandBuffer,
+                            input: inTex,
+                            output: src,
+                            rect: texRect);
 
         //
         // Pass 2: Convert RGB to YUV or YIQ space
         //
 
-        pass1.apply(commandBuffer: commandBuffer,
-                    textures: [source, ycc],
+        splitKernel.apply(commandBuffer: commandBuffer,
+                    textures: [src, ycc],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
@@ -312,22 +305,29 @@ final class PlaygroundShader: Shader {
         // Pass 3: Apply chroma effects
         //
 
-        chromaPass.apply(commandBuffer: commandBuffer,
-                         textures: [ycc, image],
-                         options: &app.windowController!.metalView!.uniforms,
-                         length: MemoryLayout<Uniforms>.stride,
-                         options2: &uniforms,
-                         length2: MemoryLayout<PlaygroundUniforms>.stride)
+        chromaKernel.apply(commandBuffer: commandBuffer,
+                           textures: [ycc, rgb],
+                           options: &app.windowController!.metalView!.uniforms,
+                           length: MemoryLayout<Uniforms>.stride,
+                           options2: &uniforms,
+                           length2: MemoryLayout<PlaygroundUniforms>.stride)
 
         //
         // Pass 4: Emulate CRT artifacts
         //
 
-        pass2.apply(commandBuffer: commandBuffer,
-                    textures: [image, outTexture],
-                    options: &app.windowController!.metalView!.uniforms,
-                    length: MemoryLayout<Uniforms>.stride,
-                    options2: &uniforms,
-                    length2: MemoryLayout<PlaygroundUniforms>.stride)
+        crtKernel.apply(commandBuffer: commandBuffer,
+                        textures: [rgb, crt],
+                        options: &app.windowController!.metalView!.uniforms,
+                        length: MemoryLayout<Uniforms>.stride,
+                        options2: &uniforms,
+                        length2: MemoryLayout<PlaygroundUniforms>.stride)
+
+        //
+        // Pass 5: Downscale to final texture
+        //
+
+        let filter = MPSImageBilinearScale(device: PlaygroundShader.device)
+        filter.encode(commandBuffer: commandBuffer, sourceTexture: crt, destinationTexture: outTex)
     }
 }
