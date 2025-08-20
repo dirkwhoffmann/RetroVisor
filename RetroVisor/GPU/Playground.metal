@@ -139,18 +139,17 @@ namespace playground {
         return texRect.xy + uv * (texRect.zw - texRect.xy);
     }
 
-    kernel void composite(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
-                          texture2d<half, access::write>  luma       [[ texture(1) ]],
-                          texture2d<half, access::write>  chroma     [[ texture(2) ]],
-                          constant Uniforms               &uniforms  [[ buffer(0)  ]],
-                          constant PlaygroundUniforms     &u         [[ buffer(1)  ]],
-                          sampler                         sam        [[ sampler(0) ]],
-                          uint2                           gid        [[ thread_position_in_grid ]])
+    kernel void composite(texture2d<half, access::sample> inTex     [[ texture(0) ]],
+                          texture2d<half, access::write>  outTex    [[ texture(1) ]],
+                          constant Uniforms               &uniforms [[ buffer(0)  ]],
+                          constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
+                          sampler                         sam       [[ sampler(0) ]],
+                          uint2                           gid       [[ thread_position_in_grid ]])
     {
         // if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) return;
 
         // Get size of output texture
-        const float2 rect = float2(luma.get_width(), luma.get_height());
+        const float2 rect = float2(outTex.get_width(), outTex.get_height());
 
         // Normalize gid to 0..1 in rect
         float2 uv = (float2(gid) + 0.5) / rect;
@@ -159,18 +158,17 @@ namespace playground {
         uv = uniforms.texRect.xy + uv * (uniforms.texRect.zw - uniforms.texRect.xy);
 
         // Read pixel
-        float3 rgb = float3(inTexture.sample(sam, uv).rgb);
+        float3 rgb = float3(inTex.sample(sam, uv).rgb);
 
         // Split components
         float3 ycc = u.PAL == 1 ? RGB2YUV(rgb) : RGB2YIQ(rgb);
 
-        luma.write(half4(ycc.x, 0.0, 0.0, 0.0), gid);
-        chroma.write(half4(ycc.y, ycc.z, 0.0, 0.0), gid);
+        outTex.write(half4(half3(ycc), 1.0), gid);
 
         /*
         // Optional PAL vertical delay-line blend (emulates phase alternation cancel).
         // This softens vertical chroma detail (typical on PAL) while keeping luma sharp.
-        if (isPAL && u.PAL_BLEND > 0.0f) {
+        if (isPAL && u.CHROMA_GAIN > 0.0f) {
             float2 vStep = float2(0.0f, texelSize.y);
             float3 rgbUp = float3(inTexture.sample(sam, remap(uv - vStep, uniforms.texRect)).rgb);
             float3 rgbDn = float3(inTexture.sample(sam, remap(uv + vStep, uniforms.texRect)).rgb);
@@ -189,8 +187,8 @@ namespace playground {
             float Vavg = 0.5f * (Vup     + Vdn);
 
             // Blend towards delay-line average
-            C1 = mix(C1, Uavg, u.PAL_BLEND);
-            C2 = mix(C2, Vavg, u.PAL_BLEND);
+            C1 = mix(C1, Uavg, u.CHROMA_GAIN);
+            C2 = mix(C2, Vavg, u.CHROMA_GAIN);
         }
 
          // Optional chroma gain (helps compensate perceived desaturation after blur)
@@ -207,25 +205,58 @@ namespace playground {
     }
 
 
-    kernel void smoothChroma(texture2d<half, access::sample> inTexture  [[ texture(0) ]],
-                             texture2d<half, access::write>  outTexture [[ texture(1) ]],
-                             constant Uniforms               &uniforms  [[ buffer(0)  ]],
-                             constant PlaygroundUniforms     &u         [[ buffer(1)  ]],
-                             sampler                         sam        [[ sampler(0) ]],
-                             uint2                           gid        [[ thread_position_in_grid ]])
+    kernel void smoothChroma(texture2d<half, access::sample> ycc       [[ texture(0) ]],
+                             texture2d<half, access::sample> blur      [[ texture(1) ]],
+                             texture2d<half, access::write>  outTex    [[ texture(2) ]],
+                             constant Uniforms               &uniforms [[ buffer(0)  ]],
+                             constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
+                             sampler                         sam       [[ sampler(0) ]],
+                             uint2                           gid       [[ thread_position_in_grid ]])
     {
-        // Normalize gid to 0..1 in output texture
-        // float2 uvOut = (float2(gid) + 0.5) / float2(outTexture.get_width(), outTexture.get_height());
+        uint W = outTex.get_width();
+        uint H = outTex.get_height();
+        if (gid.x >= W || gid.y >= H) return;
 
-        // Remap to texRect in input texture
-        // float2 uvIn = uniforms.texRect.xy + uvOut * (uniforms.texRect.zw - uniforms.texRect.xy);
+        half4 yccC = ycc.read(gid);
+        half4 blurC = blur.read(gid) * u.CHROMA_GAIN;
 
-        // Sample input texture using normalized coords
-        // half4 color = inTexture.sample(sam, uvIn);
+        // read local neighborhood
+        const int R = 2; // window radius (5 taps horizontally)
+        half4 origMax = 0.0h, blurMax = 0.0h;
 
-        half4 color = inTexture.read(gid);
+        for (int dx = -R; dx <= R; dx++) {
+            // float2 uvOff = uv + float2(dx / float(W), 0.0);
+            uint2 uvOff = gid + uint2(dx, 0);
+            half4 o = ycc.read(uvOff);
+            half4 b = blur.read(uvOff);
 
-        outTexture.write(color, gid);
+            origMax = max(origMax, o);   // example: process only one channel (I or Q)
+            blurMax = max(blurMax, b);
+        }
+
+        half4 out = clamp(blurC, 0, origMax);
+
+/*
+        half4 blurred = blur.read(gid);
+
+        blurMax = clamp(blurMax, 1e-5h, 1.0);
+        half4 gain = origMax / blurMax; // (blurMax > 1e-5h) ? (origMax / blurMax) : 1.0h;
+        // Clamp to avoid overshoot
+        // gain = clamp(gain, 1.0h, 100.0h);
+
+        half4 out = blurred * gain;
+        outTex.write(clamp(out, 0.0h, 1.0h), gid);
+
+
+        half4 yccC = ycc.read(gid);
+        // half4 blurC = blur.read(gid);
+ */
+
+        float3 combined = float3(yccC.x, out.y, out.z);
+
+        // Reconstruct RGB; clamp to displayable range
+        float3 rgb = u.PAL ? YUV2RGB(combined) : YIQ2RGB(combined);
+        outTex.write(half4(half3(rgb), 1.0), gid);
     }
 
     inline float3 fetchRGB(float2 uv,
@@ -241,21 +272,23 @@ namespace playground {
         return (u.PAL == 1) ? YUV2RGB(ycc) : YIQ2RGB(ycc);
     }
 
-    kernel void crt(texture2d<half, access::sample> luma       [[ texture(0) ]],
-                    texture2d<half, access::sample> chroma     [[ texture(1) ]],
-                    texture2d<half, access::write>  outTexture [[ texture(2) ]],
-                    constant Uniforms               &uniforms  [[ buffer(0)  ]],
-                    constant PlaygroundUniforms     &u         [[ buffer(1)  ]],
-                    sampler                         sam        [[ sampler(0) ]],
-                    uint2                           gid        [[ thread_position_in_grid ]])
+    kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
+                    texture2d<half, access::write>  outTex    [[ texture(1) ]],
+                    constant Uniforms               &uniforms [[ buffer(0)  ]],
+                    constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
+                    sampler                         sam       [[ sampler(0) ]],
+                    uint2                           gid       [[ thread_position_in_grid ]])
     {
         // Normalize gid to 0..1 in output texture
-        float2 uv = (float2(gid) + 0.5) / float2(outTexture.get_width(), outTexture.get_height());
+        // float2 uv = (float2(gid) + 0.5) / float2(outTex.get_width(), outTex.get_height());
 
         // Compose RGB value
-        float3 rgb = fetchRGB(uv, luma, chroma, sam, u);
-
-        outTexture.write(half4(half3(rgb), 1.0), gid);
+        // float3 rgb = fetchRGB(uv, luma, chroma, sam, u);
+        half3 ycc = inTex.read(gid).xyz;
+        // half3 rgb = half3(u.PAL ? YUV2RGB(float3(ycc)) : YIQ2RGB(float3(ycc)));
+        half3 rgb = ycc;
+        
+        outTex.write(half4(rgb, 1.0), gid);
         return;
 
         //

@@ -64,7 +64,7 @@ struct PlaygroundUniforms {
 
     // Chroma phase
     uint  PAL;
-    float CHROMA_SIGMA;
+    float CHROMA_RADIUS;
     float PAL_BLEND;
     float CHROMA_GAIN;
 

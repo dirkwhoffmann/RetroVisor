@@ -15,7 +15,7 @@ import MetalPerformanceShaders
 struct PlaygroundUniforms {
 
     var PAL: Int32
-    var CHROMA_SIGMA: Float
+    var CHROMA_RADIUS: Float
     var PAL_BLEND: Float
     var CHROMA_GAIN: Float
 
@@ -33,7 +33,7 @@ struct PlaygroundUniforms {
     static let defaults = PlaygroundUniforms(
 
         PAL: 0,
-        CHROMA_SIGMA: 1.3,
+        CHROMA_RADIUS: 1.3,
         PAL_BLEND: 0.4,
         CHROMA_GAIN: 1.0,
 
@@ -61,6 +61,7 @@ final class PlaygroundShader: Shader {
     var image: MTLTexture!
 
     var luma: MTLTexture!
+    var ycc: MTLTexture!
     var chroma: MTLTexture!
     var blur: MTLTexture!
 
@@ -79,8 +80,8 @@ final class PlaygroundShader: Shader {
             ),
 
             ShaderSetting(
-                name: "Chroma Sigma",
-                key: "CHROMA_SIGMA",
+                name: "Chroma Radius",
+                key: "CHROMA_RADIUS",
                 range: 1.0...20.0,
                 step: 0.01,
                 help: nil
@@ -97,7 +98,7 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Chroma Gain",
                 key: "CHROMA_GAIN",
-                range: 0.5...2.0,
+                range: 0.1...20.0,
                 step: 0.01,
                 help: nil
             ),
@@ -188,7 +189,7 @@ final class PlaygroundShader: Shader {
 
         switch key {
         case "PAL": return Float(uniforms.PAL)
-        case "CHROMA_SIGMA": return uniforms.CHROMA_SIGMA
+        case "CHROMA_RADIUS": return uniforms.CHROMA_RADIUS
         case "PAL_BLEND": return uniforms.PAL_BLEND
         case "CHROMA_GAIN": return uniforms.CHROMA_GAIN
 
@@ -213,7 +214,7 @@ final class PlaygroundShader: Shader {
 
         switch key {
         case "PAL": uniforms.PAL = Int32(value)
-        case "CHROMA_SIGMA": uniforms.CHROMA_SIGMA = value
+        case "CHROMA_RADIUS": uniforms.CHROMA_RADIUS = value
         case "PAL_BLEND": uniforms.PAL_BLEND = value
         case "CHROMA_GAIN": uniforms.CHROMA_GAIN = value
 
@@ -236,18 +237,17 @@ final class PlaygroundShader: Shader {
     override func activate() {
 
         super.activate()
-        pass1 = PlaygroundKernel1(sampler: ShaderLibrary.linear)
-        pass2 = PlaygroundKernel2(sampler: ShaderLibrary.linear)
-        smoothPass = SmoothChroma(sampler: ShaderLibrary.linear)
+        pass1 = PlaygroundKernel1(sampler: ShaderLibrary.nearest)
+        pass2 = PlaygroundKernel2(sampler: ShaderLibrary.nearest)
+        smoothPass = SmoothChroma(sampler: ShaderLibrary.nearest)
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,
                         in inTexture: MTLTexture, out outTexture: MTLTexture) {
 
         // Create textures if needed
-        if luma?.width != outTexture.width || luma?.height != outTexture.height {
+        if ycc?.width != outTexture.width || ycc?.height != outTexture.height {
 
-            // TODO: USE DIFFERENT TEXTURE FORMATS FOR LUMA AND CHROME TO SAVE BANDWIDTH
             let desc = MTLTextureDescriptor.texture2DDescriptor(
                 pixelFormat: outTexture.pixelFormat,
                 width: outTexture.width,
@@ -255,17 +255,19 @@ final class PlaygroundShader: Shader {
                 mipmapped: false
             )
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
+            ycc = outTexture.device.makeTexture(descriptor: desc)
             luma = outTexture.device.makeTexture(descriptor: desc)
             chroma = outTexture.device.makeTexture(descriptor: desc)
             blur = outTexture.device.makeTexture(descriptor: desc)
+            image = outTexture.device.makeTexture(descriptor: desc)
         }
 
         //
-        // Pass 1: Split RGB signal into luma and chroma
+        // Pass 1: Convert RGB signal to luma/chroma space (YUV or YIQ)
         //
 
         pass1.apply(commandBuffer: commandBuffer,
-                    textures: [inTexture, luma, chroma],
+                    textures: [inTexture, ycc],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
@@ -275,21 +277,24 @@ final class PlaygroundShader: Shader {
         // Pass 2: Low-pass filter the chroma channels
         //
 
-        /*
-        let width = Int(4 * uniforms.CHROMA_SIGMA) | 1
+        let width = Int(4 * uniforms.CHROMA_RADIUS) | 1
         let height = 1
         let blurFilter = MPSImageBox(device: PlaygroundShader.device,
                                kernelWidth: width, kernelHeight: height)
-        blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: chroma, destinationTexture: blur)
-        */
+        blurFilter.encode(commandBuffer: commandBuffer, sourceTexture: ycc, destinationTexture: blur)
+
+
+        //
+        // Pass 2: Apply edge compensation
+        //
 
         smoothPass.apply(commandBuffer: commandBuffer,
-                    textures: [chroma, blur],
+                    textures: [ycc, blur, image],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
-
+        
         // blur = chroma;
 
         //
@@ -297,7 +302,7 @@ final class PlaygroundShader: Shader {
         //
 
         pass2.apply(commandBuffer: commandBuffer,
-                    textures: [luma, blur, outTexture],
+                    textures: [image, outTexture],
                     options: &app.windowController!.metalView!.uniforms,
                     length: MemoryLayout<Uniforms>.stride,
                     options2: &uniforms,
