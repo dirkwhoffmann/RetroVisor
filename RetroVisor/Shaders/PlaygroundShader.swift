@@ -241,54 +241,59 @@ final class PlaygroundShader: Shader {
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,
-                        in inTex: MTLTexture, out outTex: MTLTexture) {
+                        in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
 
         // Size of the downscaled input texture
-        let inpWidth = outTex.width / Int(uniforms.INPUT_PIXEL_SIZE)
-        let inpHeight = outTex.height / Int(uniforms.INPUT_PIXEL_SIZE)
+        let inpWidth = output.width / Int(uniforms.INPUT_PIXEL_SIZE)
+        let inpHeight = output.height / Int(uniforms.INPUT_PIXEL_SIZE)
 
         // Size of the upscaled CRT texture
-        let crtWidth = 2 * outTex.width
-        let crtHeight = 2 * outTex.height
+        let crtWidth = 2 * output.width
+        let crtHeight = 2 * output.height
 
         // Update intermediate textures
         if ycc?.width != inpWidth || ycc?.height != inpHeight {
 
             print("Creating downscaled textures (\(inpWidth) x \(inpHeight))...")
             let desc = MTLTextureDescriptor.texture2DDescriptor(
-                pixelFormat: outTex.pixelFormat,
+                pixelFormat: output.pixelFormat,
                 width: inpWidth,
                 height: inpHeight,
                 mipmapped: false
             )
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-            src = outTex.device.makeTexture(descriptor: desc)
-            ycc = outTex.device.makeTexture(descriptor: desc)
-            rgb = outTex.device.makeTexture(descriptor: desc)
+            src = output.device.makeTexture(descriptor: desc)
+            ycc = output.device.makeTexture(descriptor: desc)
+            rgb = output.device.makeTexture(descriptor: desc)
         }
 
         if crt?.width != crtWidth || crt?.height != crtHeight {
 
             print("Creating upscaled CRT texture (\(crtWidth) x \(crtHeight))...")
             let desc = MTLTextureDescriptor.texture2DDescriptor(
-                pixelFormat: outTex.pixelFormat,
+                pixelFormat: output.pixelFormat,
                 width: crtWidth,
                 height: crtHeight,
                 mipmapped: false
             )
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-            crt = outTex.device.makeTexture(descriptor: desc)
+            crt = output.device.makeTexture(descriptor: desc)
         }
 
         //
         // Pass 1: Crop and downsample the input area
         //
 
+        /*
         ShaderLibrary.scale(device: PlaygroundShader.device,
                             commandBuffer: commandBuffer,
-                            input: inTex,
+                            input: input,
                             output: src,
                             rect: texRect);
+        */
+        ShaderLibrary.bilinear.apply(commandBuffer: commandBuffer,
+                                     in: input, out: src, rect: rect)
+
 
         //
         // Pass 2: Convert RGB pixels into YUV/YIQ space
@@ -317,17 +322,19 @@ final class PlaygroundShader: Shader {
         //
 
         crtKernel.apply(commandBuffer: commandBuffer,
-                        textures: [rgb, crt],
+                        textures: [rgb, output],
                         options: &app.windowController!.metalView!.uniforms,
                         length: MemoryLayout<Uniforms>.stride,
                         options2: &uniforms,
                         length2: MemoryLayout<PlaygroundUniforms>.stride)
 
+        /*
         //
         // Pass 5: Downscale to final texture
         //
 
         let filter = MPSImageBilinearScale(device: PlaygroundShader.device)
         filter.encode(commandBuffer: commandBuffer, sourceTexture: crt, destinationTexture: outTex)
+        */
     }
 }

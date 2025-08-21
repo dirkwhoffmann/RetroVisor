@@ -19,9 +19,6 @@ final class PassthroughShader: Shader {
         super.init(name: "Passthrough")
     }
 
-    override func get(key: String) -> Float { return 0 }
-    override func set(key: String, value: Float) { }
-
     override func activate() {
 
         super.activate()
@@ -29,11 +26,16 @@ final class PassthroughShader: Shader {
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,
-                        in inTexture: MTLTexture, out outTexture: MTLTexture) {
+                        in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
 
+        ShaderLibrary.lanczos.apply(commandBuffer: commandBuffer,
+                                    in: input, out: output, rect: rect)
+
+        /*
         passthrough.apply(commandBuffer: commandBuffer,
-                          source: inTexture, target: outTexture,
+                          source: input, target: output,
                           options: &app.windowController!.metalView!.uniforms,
                           length: MemoryLayout<Uniforms>.stride)
+        */
     }
 }

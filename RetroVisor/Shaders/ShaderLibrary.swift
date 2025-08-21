@@ -28,6 +28,8 @@ import MetalPerformanceShaders
 final class ShaderLibrary {
 
     static let shared = ShaderLibrary()
+    static let lanczos = LanczosShader()
+    static let bilinear = BilinearShader()
 
     static let device: MTLDevice = {
             guard let device = MTLCreateSystemDefaultDevice() else {
@@ -101,6 +103,7 @@ extension Shader {
     var id: Int? { ShaderLibrary.shared.shaders.firstIndex { $0 === self } }
 }
 
+/*
 extension ShaderLibrary {
     
     static func scale(device: MTLDevice, commandBuffer: MTLCommandBuffer,
@@ -138,3 +141,4 @@ extension ShaderLibrary {
         }
     }
 }
+ */

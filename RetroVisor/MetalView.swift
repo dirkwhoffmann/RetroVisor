@@ -82,8 +82,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var textureCache: CVMetalTextureCache!
 
     var inTexture: MTLTexture?  // Input texture from the screen capturer
-    var midTexture: MTLTexture? // Output of the first effect render stage
-    var outTexture: MTLTexture? // Output of the second effect render stage
+    var outTexture: MTLTexture? // Effect shader output
 
     var time: Float = 0.0
     var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
@@ -185,8 +184,8 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     func updateTextures(width: Int, height: Int) {
 
-        let width = NSScreen.scaleFactor * width
-        let height = NSScreen.scaleFactor * height
+        let width = 2 * NSScreen.scaleFactor * width
+        let height = 2 * NSScreen.scaleFactor * height
 
         if outTexture?.width != width || outTexture?.height != height {
 
@@ -196,7 +195,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                                                       mipmapped: false)
             descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
 
-            midTexture = device!.makeTexture(descriptor: descriptor)
             outTexture = device!.makeTexture(descriptor: descriptor)
         }
     }
@@ -261,8 +259,13 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Stage 1: Apply the effect shader
         //
 
+        let rect = CGRect(x: Double(uniforms.texRect.x),
+                          y: Double(uniforms.texRect.y),
+                          width: Double(uniforms.texRect.z - uniforms.texRect.x),
+                          height: Double(uniforms.texRect.w - uniforms.texRect.y))
+
         ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer,
-                                                 in: inTexture, out: outTexture)
+                                                 in: inTexture, out: outTexture, rect: rect)
 
         //
         // Stage 2: (Optional) in-texture blurring

@@ -272,10 +272,10 @@ final class CRTEasyShader: Shader {
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,
-                        in inTexture: MTLTexture, out outTexture: MTLTexture) {
+                        in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
 
         kernel.apply(commandBuffer: commandBuffer,
-                     source: inTexture, target: outTexture,
+                     source: input, target: output,
                      options: &app.windowController!.metalView!.uniforms,
                      length: MemoryLayout<Uniforms>.stride,
                      options2: &crtUniforms,

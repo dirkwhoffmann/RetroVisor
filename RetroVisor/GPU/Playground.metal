@@ -255,8 +255,10 @@ namespace playground {
         float3 intensity = saturate(max(m0, m0 + mL + mR));
 
         // Modulate final glow by input color
-        half3 result = u.BRIGHTNESS * pow(weight, 4.01 - 2 * u.GLOW) * half3(intensity);
+        half3 result = u.BRIGHTNESS * pow(half3(intensity), 4.01 - 2 * u.GLOW) * inTex.sample(sam, uv).rgb; // half3(intensity);
 
+        result.g = 0;
+        result.b = 0;
         // Output (for now just grayscale, later modulate with input image color & size)
         outTex.write(half4(result, 1.0), gid);
     }

@@ -8,6 +8,7 @@
 // -----------------------------------------------------------------------------
 
 import MetalKit
+import MetalPerformanceShaders
 
 struct ShaderSetting {
 
@@ -70,7 +71,7 @@ class Shader : Loggable {
     }
 
     func apply(commandBuffer: MTLCommandBuffer,
-               in inTexture: MTLTexture, out outTexture: MTLTexture) {
+               in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
 
         fatalError("To be implemented by a subclass")
     }
@@ -80,4 +81,43 @@ class Shader : Loggable {
     func set(key: String, value: Float) {}
     func set(key: String, enable: Bool) {}
     func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) { }
+}
+
+class ScaleShader<F: MPSUnaryImageKernel> : Shader {
+
+    override func apply(commandBuffer: MTLCommandBuffer,
+                        in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
+
+        let filter = MPSImageLanczosScale(device: output.device)
+        var transform = MPSScaleTransform.init(in: input, out: output, rect: rect)
+
+        withUnsafePointer(to: &transform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
+
+            filter.scaleTransform = transformPtr
+            filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
+        }
+    }
+}
+
+class BilinearShader: ScaleShader<MPSImageBilinearScale> {
+
+    init() { super.init(name: "Lanczos") }
+}
+
+class LanczosShader: ScaleShader<MPSImageLanczosScale> {
+
+    init() { super.init(name: "Lanczos") }
+}
+
+extension MPSScaleTransform {
+
+    init(in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
+
+        let scaleX = Double(output.width) / (rect.width * Double(input.width))
+        let scaleY = Double(output.height) / (rect.height * Double(input.height))
+        let transX = (-rect.minX * Double(input.width)) * scaleX
+        let transY = (-rect.minY * Double(input.height)) * scaleY
+
+        self.init(scaleX: scaleX, scaleY: scaleY, translateX: transX, translateY: transY)
+    }
 }
