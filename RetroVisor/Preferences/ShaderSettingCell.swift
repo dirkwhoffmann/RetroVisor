@@ -113,6 +113,7 @@ class ShaderSettingCell: NSTableCellView {
 
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
+        controller.shader.set(key: subLabel.stringValue, value: Float(sender.selectedTag()))
         value = Float(sender.selectedTag())
     }
 

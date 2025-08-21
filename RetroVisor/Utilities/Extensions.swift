@@ -9,6 +9,13 @@
 
 import AppKit
 
+extension CGRect {
+
+    static var unity = CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0)
+
+    static var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }
+}
+
 extension NSScreen {
 
     static var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }

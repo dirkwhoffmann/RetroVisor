@@ -71,24 +71,25 @@ class Shader : Loggable {
     }
 
     func apply(commandBuffer: MTLCommandBuffer,
-               in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
+               in input: MTLTexture, out output: MTLTexture, rect: CGRect = .unity) {
 
         fatalError("To be implemented by a subclass")
     }
 
-    func get(key: String) -> Float { return 0 }
+    func get(key: String) -> Float { NSSound.beep(); return 0 }
     func isEnabled(key: String) -> Bool { return true }
-    func set(key: String, value: Float) {}
-    func set(key: String, enable: Bool) {}
+    func set(key: String, value: Float) { NSSound.beep() }
+    func set(key: String, item: Int) { NSSound.beep() }
+    func set(key: String, enable: Bool) { NSSound.beep() }
     func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) { }
 }
 
-class ScaleShader<F: MPSUnaryImageKernel> : Shader {
+class ScaleShader<F: MPSImageScale> : Shader {
 
     override func apply(commandBuffer: MTLCommandBuffer,
                         in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
 
-        let filter = MPSImageLanczosScale(device: output.device)
+        let filter = F(device: output.device)
         var transform = MPSScaleTransform.init(in: input, out: output, rect: rect)
 
         withUnsafePointer(to: &transform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
@@ -101,7 +102,7 @@ class ScaleShader<F: MPSUnaryImageKernel> : Shader {
 
 class BilinearShader: ScaleShader<MPSImageBilinearScale> {
 
-    init() { super.init(name: "Lanczos") }
+    init() { super.init(name: "Bilinear") }
 }
 
 class LanczosShader: ScaleShader<MPSImageLanczosScale> {

@@ -184,8 +184,10 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     func updateTextures(width: Int, height: Int) {
 
-        let width = 2 * NSScreen.scaleFactor * width
-        let height = 2 * NSScreen.scaleFactor * height
+        let width = NSScreen.scaleFactor * width
+        let height = NSScreen.scaleFactor * height
+
+        // print("Creating out texture of size \(width)x\(height)")
 
         if outTexture?.width != width || outTexture?.height != height {
 
