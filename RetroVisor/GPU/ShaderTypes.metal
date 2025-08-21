@@ -65,6 +65,8 @@ struct PlaygroundUniforms {
     uint  PAL;
     float INPUT_PIXEL_SIZE;
     float CHROMA_RADIUS;
+    float SCANLINE_BRIGHTNESS;
+    float SCANLINE_WEIGHT;
 
     // CRT phase
     float BRIGHTNESS;

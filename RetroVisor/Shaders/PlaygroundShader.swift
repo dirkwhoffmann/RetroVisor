@@ -18,6 +18,9 @@ struct PlaygroundUniforms {
     var INPUT_PIXEL_SIZE: Float
     var CHROMA_RADIUS: Float
 
+    var SCANLINE_BRIGHTNESS: Float
+    var SCANLINE_WEIGHT: Float
+
     var BRIGHTNESS: Float
     var GLOW: Float
     var GRID_WIDTH: Float
@@ -34,6 +37,9 @@ struct PlaygroundUniforms {
         PAL: 0,
         INPUT_PIXEL_SIZE: 1,
         CHROMA_RADIUS: 1.3,
+
+        SCANLINE_BRIGHTNESS: 1.0,
+        SCANLINE_WEIGHT: 1.0,
 
         BRIGHTNESS: 1,
         GLOW: 1,
@@ -79,6 +85,14 @@ final class PlaygroundShader: Shader {
         settings = [
 
             ShaderSetting(
+                name: "Input Pixel Size",
+                key: "INPUT_PIXEL_SIZE",
+                optional: true,
+                range: 1...16,
+                step: 1
+            ),
+
+            ShaderSetting(
                 name: "Video Standard",
                 key: "PAL",
                 values: [("PAL", 1), ("NTSC", 0)]
@@ -92,28 +106,18 @@ final class PlaygroundShader: Shader {
             ),
 
             ShaderSetting(
-                name: "Input Pixel Size",
-                key: "INPUT_PIXEL_SIZE",
-                optional: true,
-                range: 1...16,
-                step: 1
-            ),
-
-            /*
-            ShaderSetting(
-                name: "PAL Blend",
-                key: "PAL_BLEND",
+                name: "Scanline Brightness",
+                key: "SCANLINE_BRIGHTNESS",
                 range: 0.0...2.0,
                 step: 0.01
             ),
 
             ShaderSetting(
-                name: "Chroma Gain",
-                key: "CHROMA_GAIN",
+                name: "Scanline Weight",
+                key: "SCANLINE_WEIGHT",
                 range: 0.1...20.0,
                 step: 0.01
             ),
-            */
 
             ShaderSetting(
                 name: "Brightness",
@@ -193,6 +197,9 @@ final class PlaygroundShader: Shader {
         case "PAL": return Float(uniforms.PAL)
         case "INPUT_PIXEL_SIZE": return uniforms.INPUT_PIXEL_SIZE
         case "CHROMA_RADIUS": return uniforms.CHROMA_RADIUS
+        case "SCANLINE_BRIGHTNESS": return uniforms.SCANLINE_BRIGHTNESS
+        case "SCANLINE_WEIGHT": return uniforms.SCANLINE_WEIGHT
+
         case "BRIGHTNESS": return uniforms.BRIGHTNESS
         case "GLOW": return uniforms.GLOW
         case "GRID_WIDTH": return uniforms.GRID_WIDTH
@@ -216,6 +223,9 @@ final class PlaygroundShader: Shader {
         case "PAL": uniforms.PAL = Int32(value)
         case "INPUT_PIXEL_SIZE": uniforms.INPUT_PIXEL_SIZE = value
         case "CHROMA_RADIUS": uniforms.CHROMA_RADIUS = value
+        case "SCANLINE_BRIGHTNESS": uniforms.SCANLINE_BRIGHTNESS = value
+        case "SCANLINE_WEIGHT": uniforms.SCANLINE_WEIGHT = value
+
         case "BRIGHTNESS": uniforms.BRIGHTNESS = value
         case "GLOW": uniforms.GLOW = value
         case "GRID_WIDTH": uniforms.GRID_WIDTH = value
