@@ -35,7 +35,6 @@ struct Uniforms {
     float2 window;
     float2 center;
     float2 mouse;
-    float4 texRect;
 };
 
 struct CrtUniforms {

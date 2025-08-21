@@ -52,7 +52,7 @@ struct Uniforms {
     var window: SIMD2<Float>
     var center: SIMD2<Float>
     var mouse: SIMD2<Float>
-    var texRect: SIMD4<Float>
+    // var texRect: SIMD4<Float>
 }
 
 class MetalView: MTKView, Loggable, MTKViewDelegate {
@@ -76,13 +76,18 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                  resolution: [0, 0],
                                  window: [0, 0],
                                  center: [0, 0],
-                                 mouse: [0, 0],
-                                 texRect: [0.0, 0.0, 1.0, 1.0])
+                                 mouse: [0, 0])
 
     var textureCache: CVMetalTextureCache!
 
-    var inTexture: MTLTexture?  // Input texture from the screen capturer
-    var outTexture: MTLTexture? // Effect shader output
+    // Input texture from the screen capturer
+    var inTexture: MTLTexture?
+
+    // Area of the input texture covered by the effect window
+    var texRect: CGRect = .unity
+
+    // Final output texture rendered in the effect window
+    var outTexture: MTLTexture?
 
     var time: Float = 0.0
     var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
@@ -168,6 +173,9 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     func textureRectDidChange(_ rect: CGRect?) {
 
+        texRect = rect ?? .unity
+
+        /*
         if let rect = rect {
 
             uniforms.texRect = [ Float(rect.minX),
@@ -175,6 +183,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                  Float(rect.maxX),
                                  Float(rect.maxY) ]
         }
+        */
     }
 
     func updateTextures(rect: NSRect) {
@@ -261,13 +270,15 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Stage 1: Apply the effect shader
         //
 
+        /*
         let rect = CGRect(x: Double(uniforms.texRect.x),
                           y: Double(uniforms.texRect.y),
                           width: Double(uniforms.texRect.z - uniforms.texRect.x),
                           height: Double(uniforms.texRect.w - uniforms.texRect.y))
+        */
 
         ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer,
-                                                 in: inTexture, out: outTexture, rect: rect)
+                                                 in: inTexture, out: outTexture, rect: texRect)
 
         //
         // Stage 2: (Optional) in-texture blurring

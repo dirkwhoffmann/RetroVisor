@@ -166,8 +166,8 @@ fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
     float2 output_size = uniforms.window;
 
     // Normalize the texture coordinate
-    float2 texOrigin = uniforms.texRect.xy;
-    float2 texSize = uniforms.texRect.zw - uniforms.texRect.xy;
+    float2 texOrigin = float2(0,0); // uniforms.texRect.xy;
+    float2 texSize =  float2(1.0,1.0); //  uniforms.texRect.zw - uniforms.texRect.xy;
     float2 normuv = (in.texCoord - texOrigin) / texSize;
 
     return crt_easymode(texture_size,
@@ -200,8 +200,8 @@ kernel void crtEasy(texture2d<float, access::sample> inTexture   [[ texture(0) ]
     float2 uvOut   = (float2(gid) + 0.5) / outSize;
 
     // 2) Map into texRect (normalized 0..1 on input texture)
-    float2 texOrigin = uniforms.texRect.xy;
-    float2 texSize   = uniforms.texRect.zw - uniforms.texRect.xy;
+    float2 texOrigin = float2(0,0); //  uniforms.texRect.xy;
+    float2 texSize   = float2(1.0, 1.0); // uniforms.texRect.zw - uniforms.texRect.xy;
     float2 texCoord  = texOrigin + uvOut * texSize;
 
     // 3) The same "normuv" as used in the fragment path

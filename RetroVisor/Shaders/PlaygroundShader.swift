@@ -68,7 +68,7 @@ final class PlaygroundShader: Shader {
     // Result of pass 4: Texture with CRT effects applied
     var crt: MTLTexture!
 
-    var texRect: SIMD4<Float> { app.windowController!.metalView!.uniforms.texRect }
+    // var texRect: SIMD4<Float> { app.windowController!.metalView!.uniforms.texRect }
 
     var transform = MPSScaleTransform.init() // scaleX: 1.5, scaleY: 1.5, translateX: 0.0, translateY: 0.0)
 
