@@ -181,12 +181,12 @@ fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
 }
 
 // Compute kernel variant
-kernel void crtEasy(texture2d<float, access::sample> inTexture   [[ texture(0) ]],
-                    texture2d<float, access::write>   outTexture [[ texture(1) ]],
-                    constant Uniforms                 &uniforms  [[ buffer(0) ]],
-                    constant CrtUniforms              &crtUniforms  [[ buffer(1) ]],
-                    sampler                           sam        [[ sampler(0) ]],
-                    uint2                             gid        [[ thread_position_in_grid ]])
+kernel void crtEasy(texture2d<float, access::sample> inTexture     [[ texture(0) ]],
+                    texture2d<float, access::write>   outTexture   [[ texture(1) ]],
+                    constant Uniforms                 &uniforms    [[ buffer(0) ]],
+                    constant CrtUniforms              &crtUniforms [[ buffer(1) ]],
+                    sampler                           sam          [[ sampler(0) ]],
+                    uint2                             gid          [[ thread_position_in_grid ]])
 {
     // (Optional) bounds check if you over-dispatch:
     // if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) return;

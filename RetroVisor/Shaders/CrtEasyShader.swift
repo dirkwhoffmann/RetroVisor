@@ -58,6 +58,9 @@ final class CRTEasyShader: Shader {
     var kernel: Kernel!
     var crtUniforms: CrtUniforms = .defaults
 
+    // Input texture passed to the CRTEasy kernel
+    var src: MTLTexture!
+
     init() {
 
         super.init(name: "CrtEasy")
@@ -271,11 +274,36 @@ final class CRTEasyShader: Shader {
         kernel = CrtEasyKernel(sampler: ShaderLibrary.linear)
     }
 
+    func updateTextures(in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
+
+        let inpWidth = output.width // / Int(uniforms.INPUT_PIXEL_SIZE)
+        let inpHeight = output.height // / Int(uniforms.INPUT_PIXEL_SIZE)
+
+        if src?.width != inpWidth || src?.height != inpHeight {
+
+            let desc = MTLTextureDescriptor.texture2DDescriptor(
+                pixelFormat: output.pixelFormat,
+                width: inpWidth,
+                height: inpHeight,
+                mipmapped: false
+            )
+            desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
+            src = output.device.makeTexture(descriptor: desc)
+        }
+    }
+    
     override func apply(commandBuffer: MTLCommandBuffer,
                         in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
 
+        updateTextures(in: input, out: output, rect: rect)
+
+        // Crop and downscale the captured screen contents
+        let scaler = ShaderLibrary.bilinear
+        scaler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
+
+        // Apply the CRTEasy kernel
         kernel.apply(commandBuffer: commandBuffer,
-                     source: input, target: output,
+                     source: src, target: output,
                      options: &app.windowController!.metalView!.uniforms,
                      length: MemoryLayout<Uniforms>.stride,
                      options2: &crtUniforms,
