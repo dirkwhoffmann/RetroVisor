@@ -26,10 +26,11 @@ enum ResampleFilterType: Int32 {
 
 class ResampleFilter {
 
-    var type: ResampleFilterType
+    var type = ResampleFilterType.bilinear
 
-    init(type: ResampleFilterType) {
+    convenience init(type: ResampleFilterType) {
 
+        self.init()
         self.type = type
     }
 
@@ -59,27 +60,23 @@ enum BlurFilterType: Int32 {
 
 class BlurFilter {
 
-    var type: BlurFilterType
-    var resampler: ResampleFilter
+    var type = BlurFilterType.box
+    var resampler = ResampleFilter(type: .bilinear)
+    var scaleX = Float(1.0)
+    var scaleY = Float(1.0)
+    var radius = Float(1.0)
 
-    var down: MTLTexture?
-    var blur: MTLTexture?
+    private var down: MTLTexture?
+    private var blur: MTLTexture?
 
-    init (type: BlurFilterType, resampler: ResampleFilter) {
+    convenience init (type: BlurFilterType, resampler: ResampleFilter) {
 
+        self.init()
         self.type = type
         self.resampler = resampler
     }
 
-    func apply(commandBuffer: MTLCommandBuffer,
-               in input: MTLTexture, out output: MTLTexture,
-               scaleX: Float = 1.0, scaleY: Float = 1.0, radius: Float) {
-
-        var R: Int { Int(radius) | 1 }
-
-        //
-        // Step 1: Downscale the input texture
-        //
+    func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
         let W = Int(ceil(Float(input.width) * scaleX))
         let H = Int(ceil(Float(input.height) * scaleY))
@@ -97,32 +94,49 @@ class BlurFilter {
             down = output.device.makeTexture(descriptor: desc)
             blur = output.device.makeTexture(descriptor: desc)
         }
-        resampler.apply(commandBuffer: commandBuffer, in: input, out: down!)
+    }
 
-        //
-        // Step 2: Blur the downsampled texture
-        //
+    func apply(commandBuffer: MTLCommandBuffer, in input: MTLTexture, out output: MTLTexture) {
 
-        switch type {
-        case .box:
-            let filter = MPSImageBox(device: output.device, kernelWidth: R, kernelHeight: R)
-            filter.encode(commandBuffer: commandBuffer, sourceTexture: down!, destinationTexture: blur!)
-        case .tent:
-            let filter = MPSImageTent(device: output.device, kernelWidth: R, kernelHeight: R)
-            filter.encode(commandBuffer: commandBuffer, sourceTexture: down!, destinationTexture: blur!)
-        case .gaussian:
-            let filter = MPSImageGaussianBlur(device: output.device, sigma: radius)
-            filter.encode(commandBuffer: commandBuffer, sourceTexture: down!, destinationTexture: blur!)
-        case .median:
-            let filter = MPSImageMedian(device: output.device, kernelDiameter: R)
-            filter.encode(commandBuffer: commandBuffer, sourceTexture: down!, destinationTexture: blur!)
+        var R: Int { Int(radius) | 1 }
+
+        func applyBlur(in input: MTLTexture, out output: MTLTexture) {
+
+            switch type {
+            case .box:
+                let filter = MPSImageBox(device: output.device, kernelWidth: R, kernelHeight: R)
+                filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
+            case .tent:
+                let filter = MPSImageTent(device: output.device, kernelWidth: R, kernelHeight: R)
+                filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
+            case .gaussian:
+                let filter = MPSImageGaussianBlur(device: output.device, sigma: radius)
+                filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
+            case .median:
+                let filter = MPSImageMedian(device: output.device, kernelDiameter: 3 + R)
+                filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
+            }
         }
 
-        //
-        // Step 3: Upscale the blurred texture
-        //
+        if scaleX == 1.0 && scaleY == 1.0 {
 
-        resampler.apply(commandBuffer: commandBuffer, in: blur!, out: output)
+            // Apply blur without scaling
+            applyBlur(in: input, out: output)
+
+        } else {
+
+            // Prepare intermediate textures
+            updateTextures(in: input, out: output)
+            
+            // Downscale the input texture
+            resampler.apply(commandBuffer: commandBuffer, in: input, out: down!)
+
+            // Blur the downsampled texture
+            applyBlur(in: down!, out: blur!)
+
+            // Upscale the blurred texture
+            resampler.apply(commandBuffer: commandBuffer, in: blur!, out: output)
+        }
     }
 }
 
@@ -138,3 +152,25 @@ extension MPSScaleTransform {
         self.init(scaleX: scaleX, scaleY: scaleY, translateX: transX, translateY: transY)
     }
 }
+
+extension MPSImageScale {
+
+    func encode(commandBuffer: any MTLCommandBuffer,
+                sourceTexture: any MTLTexture, destinationTexture: any MTLTexture,
+                rect: CGRect) {
+
+        var transform = MPSScaleTransform.init(in: sourceTexture,
+                                               out: destinationTexture,
+                                               rect: rect)
+
+        withUnsafePointer(to: &transform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
+
+            scaleTransform = transformPtr
+            encode(commandBuffer: commandBuffer,
+                   sourceTexture: sourceTexture,
+                   destinationTexture: destinationTexture)
+            scaleTransform = nil
+        }
+    }
+}
+

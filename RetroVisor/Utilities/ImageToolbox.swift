@@ -8,6 +8,7 @@
 // -----------------------------------------------------------------------------
 
 import Cocoa
+import MetalKit
 
 //
 // Extensions to CGImage
@@ -465,6 +466,30 @@ public extension NSImage {
     func red() {
 
         tint(NSColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.5))
+    }
+}
+
+
+
+//
+// Extensions to MTKTexture
+//
+
+
+extension MTLTexture {
+
+    func makeTexture(width: Int, height: Int) -> MTLTexture? {
+
+        print("Creating new texture \(width)x\(height)")
+
+        let desc = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: pixelFormat,
+            width: width,
+            height: height,
+            mipmapped: false
+        )
+        desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
+        return device.makeTexture(descriptor: desc)
     }
 }
 

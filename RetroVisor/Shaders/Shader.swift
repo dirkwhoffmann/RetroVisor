@@ -114,5 +114,3 @@ class LanczosShader: ScaleShader<MPSImageLanczosScale> {
 
     init() { super.init(name: "Lanczos") }
 }
-
-
