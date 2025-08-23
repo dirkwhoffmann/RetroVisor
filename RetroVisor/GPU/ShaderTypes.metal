@@ -61,21 +61,29 @@ struct CrtUniforms {
 
 struct PlaygroundUniforms {
 
+    float INPUT_PIXEL_SIZE;
+    uint  RESAMPLE_FILTER;
+
     // Chroma phase
     uint  PAL;
-    float INPUT_PIXEL_SIZE;
     float CHROMA_RADIUS;
 
     // Bloom effect
+    uint  BLOOM_ENABLE;
+    uint  BLOOM_FILTER;
     float BLOOM_THRESHOLD;
     float BLOOM_INTENSITY;
-    
+    float BLOOM_RADIUS_X;
+    float BLOOM_RADIUS_Y;
+
+    uint  SCANLINE_ENABLE;
     float SCANLINE_BRIGHTNESS;
     float SCANLINE_WEIGHT1;
     float SCANLINE_WEIGHT2;
     float SCANLINE_WEIGHT3;
     float SCANLINE_WEIGHT4;
 
+    uint  DOTMASK_ENABLE;
     uint  DOTMASK;
     float DOTMASK_BRIGHTESS;
 

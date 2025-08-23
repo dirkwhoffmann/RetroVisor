@@ -15,6 +15,7 @@ enum ResampleFilterType: Int32 {
     case bilinear = 0
     case lanczos = 1
 
+    /*
     func getFilter(device: MTLDevice) -> MPSImageScale {
 
         switch self {
@@ -22,11 +23,22 @@ enum ResampleFilterType: Int32 {
         case .lanczos: return MPSImageLanczosScale(device: device)
         }
     }
+    */
 }
 
+@MainActor
 class ResampleFilter {
 
     var type = ResampleFilterType.bilinear
+
+    var bilinearFilter: MPSImageBilinearScale!
+    var lanczosFilter: MPSImageLanczosScale!
+
+    init() {
+
+        bilinearFilter = MPSImageBilinearScale(device: ShaderLibrary.device)
+        lanczosFilter = MPSImageLanczosScale(device: ShaderLibrary.device)
+    }
 
     convenience init(type: ResampleFilterType) {
 
@@ -38,8 +50,7 @@ class ResampleFilter {
                in input: MTLTexture, out output: MTLTexture,
                rect: CGRect = .unity) {
 
-        let filter = type.getFilter(device: output.device)
-
+        let filter = type == .bilinear ? bilinearFilter! : lanczosFilter!
         var transform = MPSScaleTransform.init(in: input, out: output, rect: rect)
 
         withUnsafePointer(to: &transform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
@@ -58,6 +69,7 @@ enum BlurFilterType: Int32 {
     case median = 3
 }
 
+@MainActor
 class BlurFilter {
 
     var blurType = BlurFilterType.box

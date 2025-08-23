@@ -188,13 +188,15 @@ namespace playground {
 
         half4 color = half4(half3(rgb), 1.0);
 
-        // if (options.dotMask) {
-        uint xoffset = gid.x % dotMask.get_width();
-        uint yoffset = gid.y % dotMask.get_height();
-        half4 dotColor = dotMask.read(uint2(xoffset, yoffset));
-        half4 gain = min(color, 1 - color) * dotColor;
-        half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
-        color += gain - loose;
+        if (u.DOTMASK_ENABLE) {
+
+            uint xoffset = gid.x % dotMask.get_width();
+            uint yoffset = gid.y % dotMask.get_height();
+            half4 dotColor = dotMask.read(uint2(xoffset, yoffset));
+            half4 gain = min(color, 1 - color) * dotColor;
+            half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
+            color += gain - loose;
+        }
 
         outTex.write(color, gid);
 
@@ -202,11 +204,14 @@ namespace playground {
         // Brightness pass
         //
 
-        // Keep only if brighter than threshold
-        float3 mask = smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(yccC.x));
+        if (u.BLOOM_ENABLE) {
+            
+            // Keep only if brighter than threshold
+            float3 mask = smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(yccC.x));
 
-        // Scale the bright part
-        brightTex.write(half4(half3(rgb * mask * u.BLOOM_INTENSITY), 1.0), gid);
+            // Scale the bright part
+            brightTex.write(half4(half3(rgb * mask * u.BLOOM_INTENSITY), 1.0), gid);
+        }
     }
 
     half4 scanline(half4 x, float weight) {
@@ -231,7 +236,6 @@ namespace playground {
 
         // Read texel
         half4 color = inTex.sample(sam, uv);
-        half4 bloom = bloomTex.sample(sam, uv);
 
         /*
         uint line = gid.y % 4;
@@ -247,6 +251,7 @@ namespace playground {
         }
         */
 
+        /*
         // Apply dot mask effect
         // if (options.dotMask) {
         uint xoffset = gid.x % dotMask.get_width();
@@ -256,11 +261,15 @@ namespace playground {
         half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
         color += gain - loose;
         // }
+        */
 
         // Apply bloom effect
-        outTex.write(saturate(bloom + color), gid);
-        return;
 
+        if (u.BLOOM_ENABLE) {
+
+            half4 bloom = bloomTex.sample(sam, uv);
+            color = saturate(color + bloom);
+        }
 
         outTex.write(color, gid);
         return;

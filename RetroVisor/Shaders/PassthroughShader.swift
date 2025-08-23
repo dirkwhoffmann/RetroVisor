@@ -159,7 +159,7 @@ final class PassthroughShader: Shader {
         }
     }
 
-    func updateTextures(in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
+    func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
         let srcW = output.width / Int(uniforms.INPUT_PIXEL_SIZE)
         let srcH = output.height / Int(uniforms.INPUT_PIXEL_SIZE)
@@ -175,7 +175,7 @@ final class PassthroughShader: Shader {
                         in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
 
         // Create helper textures if needed
-        updateTextures(in: input, out: output, rect: rect)
+        updateTextures(in: input, out: output)
 
         // Rescale to the source texture size
         resampler.type = uniforms.RESAMPLE_FILTER

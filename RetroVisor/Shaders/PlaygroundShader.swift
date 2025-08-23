@@ -14,11 +14,14 @@ import MetalPerformanceShaders
 
 struct PlaygroundUniforms {
 
-    var PAL: Int32
     var INPUT_PIXEL_SIZE: Float
+    var RESAMPLE_FILTER: ResampleFilterType
+    
+    var PAL: Int32
     var CHROMA_RADIUS: Float
 
     var BLOOM_ENABLE: Int32
+    var BLOOM_FILTER: BlurFilterType
     var BLOOM_THRESHOLD: Float
     var BLOOM_INTENSITY: Float
     var BLOOM_RADIUS_X: Float
@@ -48,11 +51,14 @@ struct PlaygroundUniforms {
 
     static let defaults = PlaygroundUniforms(
 
-        PAL: 0,
         INPUT_PIXEL_SIZE: 1,
+        RESAMPLE_FILTER: .bilinear,
+
+        PAL: 0,
         CHROMA_RADIUS: 1.3,
 
         BLOOM_ENABLE: 0,
+        BLOOM_FILTER: .box,
         BLOOM_THRESHOLD: 0.7,
         BLOOM_INTENSITY: 1.0,
         BLOOM_RADIUS_X: 5,
@@ -106,6 +112,12 @@ final class PlaygroundShader: Shader {
     // Result of pass 5: Texture with CRT effects applied
     var crt: MTLTexture!
 
+    // Resampler used for image scaling
+    var resampler = ResampleFilter()
+
+    // Blur filter
+    var blurFilter = BlurFilter()
+
     // The dotmask texture
     var dotmask: MTLTexture!
 
@@ -130,6 +142,12 @@ final class PlaygroundShader: Shader {
             ),
 
             ShaderSetting(
+                name: "Resampler",
+                key: "RESAMPLE_FILTER",
+                values: [("BILINEAR", 0), ("LANCZOS", 1)]
+            ),
+
+            ShaderSetting(
                 name: "Video Standard",
                 key: "PAL",
                 values: [("PAL", 1), ("NTSC", 0)]
@@ -143,8 +161,14 @@ final class PlaygroundShader: Shader {
             ),
 
             ShaderSetting(
-                name: "Bloom Threshold",
+                name: "Bloom Filter",
                 enableKey: "BLOOM_ENABLE",
+                key: "BLOOM_FILTER",
+                values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
+            ),
+
+            ShaderSetting(
+                name: "Bloom Threshold",
                 key: "BLOOM_THRESHOLD",
                 range: 0.0...1.0,
                 step: 0.01
@@ -229,6 +253,7 @@ final class PlaygroundShader: Shader {
                 step: 0.01
             ),
 
+            /*
             ShaderSetting(
                 name: "Glow",
                 key: "GLOW",
@@ -291,6 +316,7 @@ final class PlaygroundShader: Shader {
                 range: 0.0...1.0,
                 step: 0.01
             )
+            */
         ]
     }
 
@@ -302,6 +328,7 @@ final class PlaygroundShader: Shader {
         case "CHROMA_RADIUS": return uniforms.CHROMA_RADIUS
 
         case "BLOOM_ENABLE": return Float(uniforms.BLOOM_ENABLE)
+        case "BLOOM_FILTER": return Float(uniforms.BLOOM_FILTER.rawValue)
         case "BLOOM_THRESHOLD": return uniforms.BLOOM_THRESHOLD
         case "BLOOM_INTENSITY": return uniforms.BLOOM_INTENSITY
         case "BLOOM_RADIUS_X": return uniforms.BLOOM_RADIUS_X
@@ -343,6 +370,7 @@ final class PlaygroundShader: Shader {
         case "CHROMA_RADIUS": uniforms.CHROMA_RADIUS = value
 
         case "BLOOM_ENABLE": uniforms.BLOOM_ENABLE = Int32(value)
+        case "BLOOM_FILTER": uniforms.BLOOM_FILTER = BlurFilterType(rawValue: Int32(value))!
         case "BLOOM_THRESHOLD": uniforms.BLOOM_THRESHOLD = value
         case "BLOOM_INTENSITY": uniforms.BLOOM_INTENSITY = value
         case "BLOOM_RADIUS_X": uniforms.BLOOM_RADIUS_X = value
@@ -378,16 +406,6 @@ final class PlaygroundShader: Shader {
     override func isGrayedOut(key: String) -> Bool {
 
         return false
-    }
-    
-    override func set(key: String, enable: Bool) {
-
-        switch key {
-        case "BLOOM_THRESHOLD": uniforms.BLOOM_ENABLE = enable ? 1 : 0
-
-        default:
-            NSSound.beep()
-        }
     }
 
     override func activate() {
@@ -462,8 +480,7 @@ final class PlaygroundShader: Shader {
         dotmask = image?.toTexture(device: ShaderLibrary.device)
     }
 
-    override func apply(commandBuffer: MTLCommandBuffer,
-                        in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
+    func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
         // Size of the downscaled input texture
         let inpWidth = output.width / Int(uniforms.INPUT_PIXEL_SIZE)
@@ -476,32 +493,16 @@ final class PlaygroundShader: Shader {
         // Update intermediate textures
         if ycc?.width != inpWidth || ycc?.height != inpHeight {
 
-            print("Creating downscaled textures (\(inpWidth) x \(inpHeight))...")
-            let desc = MTLTextureDescriptor.texture2DDescriptor(
-                pixelFormat: output.pixelFormat,
-                width: inpWidth,
-                height: inpHeight,
-                mipmapped: false
-            )
-            desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-            src = output.device.makeTexture(descriptor: desc)
-            ycc = output.device.makeTexture(descriptor: desc)
-            bri = output.device.makeTexture(descriptor: desc)
-            blm = output.device.makeTexture(descriptor: desc)
-            rgb = output.device.makeTexture(descriptor: desc)
+            src = output.makeTexture(width: inpWidth, height: inpHeight)
+            ycc = output.makeTexture(width: inpWidth, height: inpHeight)
+            bri = output.makeTexture(width: inpWidth, height: inpHeight)
+            blm = output.makeTexture(width: inpWidth, height: inpHeight)
+            rgb = output.makeTexture(width: inpWidth, height: inpHeight)
         }
 
         if crt?.width != crtWidth || crt?.height != crtHeight {
 
-            print("Creating upscaled CRT texture (\(crtWidth) x \(crtHeight))...")
-            let desc = MTLTextureDescriptor.texture2DDescriptor(
-                pixelFormat: output.pixelFormat,
-                width: crtWidth,
-                height: crtHeight,
-                mipmapped: false
-            )
-            desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-            crt = output.device.makeTexture(descriptor: desc)
+            crt = output.makeTexture(width: crtWidth, height: crtHeight)
         }
 
         if (dotmaskType != uniforms.DOTMASK || dotmaskBrightness != uniforms.DOTMASK_BRIGHTNESS) {
@@ -510,16 +511,22 @@ final class PlaygroundShader: Shader {
             dotmaskType = uniforms.DOTMASK
             dotmaskBrightness = uniforms.DOTMASK_BRIGHTNESS
         }
+    }
+
+    override func apply(commandBuffer: MTLCommandBuffer,
+                        in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
+
+        updateTextures(in: input, out: output)
 
         //
         // Pass 1: Crop and downsample the input area
         //
 
-        ShaderLibrary.bilinear.apply(commandBuffer: commandBuffer,
-                                     in: input, out: src, rect: rect)
+        resampler.type = uniforms.RESAMPLE_FILTER
+        resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
 
         //
-        // Pass 2: Convert RGB pixels into YUV/YIQ space
+        // Pass 2: Convert RGB image into YUV/YIQ space
         //
 
         splitKernel.apply(commandBuffer: commandBuffer,
@@ -544,18 +551,25 @@ final class PlaygroundShader: Shader {
         // Pass 4: Create the bloom texture
         //
 
+        // print("FILTER: \(uniforms.BLOOM_FILTER)")
+        blurFilter.blurType = uniforms.BLOOM_FILTER
+        blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
+        blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
+        blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
+        /*
         let blur = MPSImageBox(device: bri.device,
                                kernelWidth: Int(uniforms.BLOOM_RADIUS_X * 2) | 1,
                                kernelHeight: Int(uniforms.BLOOM_RADIUS_Y * 2) | 1)
         blur.encode(commandBuffer: commandBuffer,
                     inPlaceTexture: &bri, fallbackCopyAllocator: nil)
+        */
 
         //
         // Pass 5: Emulate CRT artifacts
         //
 
         crtKernel.apply(commandBuffer: commandBuffer,
-                        textures: [rgb, dotmask, bri, output],
+                        textures: [rgb, dotmask, blm, output],
                         options: &app.windowController!.metalView!.uniforms,
                         length: MemoryLayout<Uniforms>.stride,
                         options2: &uniforms,
