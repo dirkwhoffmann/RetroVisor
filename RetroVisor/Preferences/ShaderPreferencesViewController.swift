@@ -32,7 +32,6 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
                                   action: nil,
                                   keyEquivalent: "")
             item.tag = shader.id ?? 0
-            // item.isEnabled = true
             shaderSelector.menu?.addItem(item)
         }
         shaderSelector.selectItem(at: 0)
@@ -46,18 +45,6 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
         tableView.reloadData()
     }
 
-    // DEPRECATED
-    func get(key: String) -> Float {
-
-        return shader.get(key: key)
-    }
-
-    // DEPRECATED
-    func set(key: String, value: Float) {
-
-        shader.set(key: key, value: value)
-    }
-
     func numberOfRows(in tableView: NSTableView) -> Int {
 
         return shader.settings.count
@@ -67,7 +54,7 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
         guard let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "settingsCell"), owner: self) as? ShaderSettingCell else { return nil }
 
         cell.shaderSetting = shader.settings[row]
-        cell.value = get(key: shader.settings[row].key)
+        cell.value = shader.get(key: shader.settings[row].key)
         return cell
     }
 
@@ -76,8 +63,6 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
         print("shaderSelectAction \(sender.selectedTag())")
 
         ShaderLibrary.shared.selectShader(at: sender.selectedTag())
-
-        // app.crtUniforms.ENABLE = Int32(sender.selectedTag())
         refresh()
     }
 

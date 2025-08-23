@@ -87,18 +87,6 @@ class BlurFilter {
 
             down = output.makeTexture(width: W, height: H)
             blur = output.makeTexture(width: W, height: H)
-            /*
-            print("Creating downsampling texture (\(W) x \(H))...")
-            let desc = MTLTextureDescriptor.texture2DDescriptor(
-                pixelFormat: output.pixelFormat,
-                width: W,
-                height: H,
-                mipmapped: false
-            )
-            desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-            down = output.device.makeTexture(descriptor: desc)
-            blur = output.device.makeTexture(descriptor: desc)
-            */
         }
     }
 

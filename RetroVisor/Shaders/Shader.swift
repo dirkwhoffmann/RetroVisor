@@ -66,25 +66,25 @@ class Shader : Loggable {
         self.name = name
     }
 
-    func activate() {
-        log("Activating \(name)")
-    }
+    // Called once when the user selects this shader
+    func activate() { log("Activating \(name)") }
 
-    func retire() {
-        log("Retiring \(name)")
-    }
+    // Called once when the user selects another shader
+    func retire() { log("Retiring \(name)") }
 
+    // Runs the shader
     func apply(commandBuffer: MTLCommandBuffer,
                in input: MTLTexture, out output: MTLTexture, rect: CGRect = .unity) {
 
         fatalError("To be implemented by a subclass")
     }
 
-    func get(key: String) -> Float { NSSound.beep(); return 0 }
+    // Indicates whether a shader option is enabled
     func isEnabled(key: String) -> Bool { return true }
-    func set(key: String, value: Float) { NSSound.beep() }
-    func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) { }
 
+    // Get or sets the value of a shader option
+    func get(key: String) -> Float { NSSound.beep(); return 0 }
+    func set(key: String, value: Float) { NSSound.beep() }
     func set(key: String, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
     func set(key: String, item: Int) { set(key: key, value: Float(item)) }
 }

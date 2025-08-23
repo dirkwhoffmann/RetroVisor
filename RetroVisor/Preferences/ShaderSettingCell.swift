@@ -22,20 +22,37 @@ class ShaderSettingCell: NSTableCellView {
     @IBOutlet weak var valueLabel: NSTextField!
     @IBOutlet weak var helpButtom: NSButton!
 
+    var shader: Shader { return ShaderLibrary.shared.currentShader }
+    
     var shaderSetting: ShaderSetting! {
 
         didSet {
+
+            let enabled = shader.isEnabled(key: shaderSetting.key)
+            let enableKey = shaderSetting.enableKey
+            let active = enableKey == nil ? true : shader.get(key: enableKey!) != 0
+
+            print("shaderSetting \(shaderSetting.name): disSet")
 
             optionLabel.stringValue = shaderSetting.name
             subLabel.stringValue = shaderSetting.key
             helpButtom.isHidden = shaderSetting.help == nil
             optCeckbox.isHidden = !shaderSetting.optional
 
+            optionLabel.textColor = enabled ? .textColor : .disabledControlTextColor
+            subLabel.textColor = enabled ? .textColor : .disabledControlTextColor
+            helpButtom.isEnabled = true
+            optCeckbox.isEnabled = true
+
             valuePopup.isHidden = true
             valueSlider.isHidden = true
             valueStepper.isHidden = true
-            valueSlider.isHidden = true
             valueLabel.isHidden = true
+
+            valuePopup.isEnabled = active
+            valueSlider.isEnabled = active
+            valueStepper.isEnabled = active
+            valueLabel.isEnabled = active
 
             if let range = shaderSetting.range {
 
@@ -61,43 +78,21 @@ class ShaderSettingCell: NSTableCellView {
                     item.tag = value.1
                     valuePopup.menu?.addItem(item)
                 }
-                valuePopup.selectItem(at: 0) // TODO: SELECT PROPER VALUE
             }
-        }
-    }
 
-    var isEnabled: Bool = true {
-
-        didSet {
-
-            optCeckbox.state = isEnabled ? .on : .off
+            update()
         }
     }
 
     var value: Float! { didSet { update() } }
-/*
-            if shaderSetting.range != nil {
-
-                valueSlider.floatValue = value
-                valueStepper.floatValue = value
-                valueLabel.stringValue = String(format: shaderSetting.formatString, value)
-            }
-
-            if shaderSetting.values != nil {
-
-                valuePopup.selectItem(withTag: Int(value))
-            }
-        }
-    }
- */
 
     func update() {
 
-        let value = controller.get(key: shaderSetting.key)
+        let value = shader.get(key: shaderSetting.key)
 
         if !optCeckbox.isHidden {
 
-            let enabled = controller.get(key: shaderSetting.enableKey!) != 0
+            let enabled = shader.get(key: shaderSetting.enableKey!) != 0
             optCeckbox.state = enabled ? .on : .off;
         }
 
@@ -112,21 +107,23 @@ class ShaderSettingCell: NSTableCellView {
 
             valuePopup.selectItem(withTag: Int(value))
         }
-
     }
 
+    /*
     @IBAction func optAction(_ sender: NSButton) {
 
         controller.shader.set(key: subLabel.stringValue, enable: sender.state == .on)
-        isEnabled = controller.shader.isEnabled(key: subLabel.stringValue)
+        update();
+        // isEnabled = controller.shader.isEnabled(key: subLabel.stringValue)
     }
+    */
 
     @IBAction func sliderAction(_ sender: NSControl) {
 
         let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
-        controller.shader.set(key: subLabel.stringValue, value: rounded)
-        value = controller.get(key: subLabel.stringValue)
+        shader.set(key: subLabel.stringValue, value: rounded)
+        value = shader.get(key: subLabel.stringValue)
     }
 
     @IBAction func stepperAction(_ sender: NSControl) {
@@ -136,7 +133,7 @@ class ShaderSettingCell: NSTableCellView {
 
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
-        controller.shader.set(key: shaderSetting.key, value: Float(sender.selectedTag()))
+        shader.set(key: shaderSetting.key, value: Float(sender.selectedTag()))
         update();
     }
 
@@ -144,8 +141,9 @@ class ShaderSettingCell: NSTableCellView {
 
         if let enableKey = shaderSetting.enableKey {
 
-            controller.shader.set(key: enableKey, enable: sender.state == .on)
+            shader.set(key: enableKey, enable: sender.state == .on)
             update();
+            controller.tableView.reloadData()
         }
     }
 
