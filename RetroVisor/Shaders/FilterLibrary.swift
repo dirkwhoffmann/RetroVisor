@@ -60,11 +60,13 @@ enum BlurFilterType: Int32 {
 
 class BlurFilter {
 
-    var type = BlurFilterType.box
+    var blurType = BlurFilterType.box
+    var blurWidth = Float(1.0)
+    var blurHeight = Float(1.0)
+
     var resampler = ResampleFilter(type: .bilinear)
-    var scaleX = Float(1.0)
-    var scaleY = Float(1.0)
-    var radius = Float(1.0)
+    var resampleX = Float(1.0)
+    var resampleY = Float(1.0)
 
     private var down: MTLTexture?
     private var blur: MTLTexture?
@@ -72,17 +74,20 @@ class BlurFilter {
     convenience init (type: BlurFilterType, resampler: ResampleFilter) {
 
         self.init()
-        self.type = type
+        self.blurType = type
         self.resampler = resampler
     }
 
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
-        let W = Int(ceil(Float(input.width) * scaleX))
-        let H = Int(ceil(Float(input.height) * scaleY))
+        let W = Int(ceil(Float(input.width) * resampleX))
+        let H = Int(ceil(Float(input.height) * resampleY))
 
         if down?.width != W || down?.height != H {
 
+            down = output.makeTexture(width: W, height: H)
+            blur = output.makeTexture(width: W, height: H)
+            /*
             print("Creating downsampling texture (\(W) x \(H))...")
             let desc = MTLTextureDescriptor.texture2DDescriptor(
                 pixelFormat: output.pixelFormat,
@@ -93,32 +98,35 @@ class BlurFilter {
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
             down = output.device.makeTexture(descriptor: desc)
             blur = output.device.makeTexture(descriptor: desc)
+            */
         }
     }
 
     func apply(commandBuffer: MTLCommandBuffer, in input: MTLTexture, out output: MTLTexture) {
 
-        var R: Int { Int(radius) | 1 }
+        var rw: Int { Int(blurWidth) | 1 }
+        var rh: Int { Int(blurHeight) | 1 }
+        var sigma: Float { blurWidth / 4.0 }
 
         func applyBlur(in input: MTLTexture, out output: MTLTexture) {
 
-            switch type {
+            switch blurType {
             case .box:
-                let filter = MPSImageBox(device: output.device, kernelWidth: R, kernelHeight: R)
+                let filter = MPSImageBox(device: output.device, kernelWidth: rw, kernelHeight: rh)
                 filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
             case .tent:
-                let filter = MPSImageTent(device: output.device, kernelWidth: R, kernelHeight: R)
+                let filter = MPSImageTent(device: output.device, kernelWidth: rw, kernelHeight: rh)
                 filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
             case .gaussian:
-                let filter = MPSImageGaussianBlur(device: output.device, sigma: radius)
+                let filter = MPSImageGaussianBlur(device: output.device, sigma: sigma)
                 filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
             case .median:
-                let filter = MPSImageMedian(device: output.device, kernelDiameter: 3 + R)
+                let filter = MPSImageMedian(device: output.device, kernelDiameter: max(3, rw))
                 filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
             }
         }
 
-        if scaleX == 1.0 && scaleY == 1.0 {
+        if resampleX == 1.0 && resampleY == 1.0 {
 
             // Apply blur without scaling
             applyBlur(in: input, out: output)
