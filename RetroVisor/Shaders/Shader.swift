@@ -28,10 +28,12 @@ struct ShaderSetting {
     let help: String?
 
     // Indicates if the setting can be disabled
+    /*
     var optional: Bool {
         enableKey != nil
     }
-
+    */
+    
     var formatString: String {
         return step < 0.1 ? "%.2f" : step < 1.0 ? "%.1f" : "%.0f"
     }
@@ -79,14 +81,14 @@ class Shader : Loggable {
         fatalError("To be implemented by a subclass")
     }
 
-    // Indicates whether a shader option is enabled
-    func isEnabled(key: String) -> Bool { return true }
-
     // Get or sets the value of a shader option
     func get(key: String) -> Float { NSSound.beep(); return 0 }
     func set(key: String, value: Float) { NSSound.beep() }
     func set(key: String, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
     func set(key: String, item: Int) { set(key: key, value: Float(item)) }
+
+    // Indicates whether a shader option should be grayed out in the settings
+    func isGrayedOut(key: String) -> Bool { return false }
 }
 
 class ScaleShader<F: MPSImageScale> : Shader {

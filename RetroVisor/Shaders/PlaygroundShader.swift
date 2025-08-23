@@ -375,6 +375,11 @@ final class PlaygroundShader: Shader {
         }
     }
 
+    override func isGrayedOut(key: String) -> Bool {
+
+        return false
+    }
+    
     override func set(key: String, enable: Bool) {
 
         switch key {

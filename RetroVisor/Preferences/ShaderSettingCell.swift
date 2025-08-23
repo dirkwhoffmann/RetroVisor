@@ -28,19 +28,19 @@ class ShaderSettingCell: NSTableCellView {
 
         didSet {
 
-            let enabled = shader.isEnabled(key: shaderSetting.key)
             let enableKey = shaderSetting.enableKey
-            let active = enableKey == nil ? true : shader.get(key: enableKey!) != 0
+            let enabled = enableKey == nil ? true : shader.get(key: enableKey!) != 0
+            let active = !shader.isGrayedOut(key: shaderSetting.key)
 
-            print("shaderSetting \(shaderSetting.name): disSet")
+            // print("shaderSetting \(shaderSetting.name): didSet")
 
             optionLabel.stringValue = shaderSetting.name
             subLabel.stringValue = shaderSetting.key
             helpButtom.isHidden = shaderSetting.help == nil
-            optCeckbox.isHidden = !shaderSetting.optional
+            optCeckbox.isHidden = shaderSetting.enableKey == nil
 
-            optionLabel.textColor = enabled ? .textColor : .disabledControlTextColor
-            subLabel.textColor = enabled ? .textColor : .disabledControlTextColor
+            optionLabel.textColor = active ? .textColor : .disabledControlTextColor
+            subLabel.textColor = active ? .textColor : .disabledControlTextColor
             helpButtom.isEnabled = true
             optCeckbox.isEnabled = true
 
@@ -49,10 +49,10 @@ class ShaderSettingCell: NSTableCellView {
             valueStepper.isHidden = true
             valueLabel.isHidden = true
 
-            valuePopup.isEnabled = active
-            valueSlider.isEnabled = active
-            valueStepper.isEnabled = active
-            valueLabel.isEnabled = active
+            valuePopup.isEnabled = enabled && active
+            valueSlider.isEnabled = enabled && active
+            valueStepper.isEnabled = enabled && active
+            valueLabel.textColor = enabled && active ? .textColor : .disabledControlTextColor
 
             if let range = shaderSetting.range {
 
@@ -135,6 +135,7 @@ class ShaderSettingCell: NSTableCellView {
 
         shader.set(key: shaderSetting.key, value: Float(sender.selectedTag()))
         update();
+        controller.tableView.reloadData()
     }
 
     @IBAction func enableAction(_ sender: NSButton) {
