@@ -962,6 +962,9 @@
                                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                         <font key="font" metaFont="system"/>
                                                                     </buttonCell>
+                                                                    <connections>
+                                                                        <action selector="enableAction:" target="Aqb-b3-WEx" id="REH-wN-E0N"/>
+                                                                    </connections>
                                                                 </button>
                                                                 <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FRa-Wr-czd">
                                                                     <rect key="frame" x="302" y="16" width="25" height="25"/>
@@ -979,7 +982,7 @@
                                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                                     <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="nLC-aR-rh0">
                                                                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                                        <font key="font" metaFont="menu"/>
+                                                                        <font key="font" metaFont="message"/>
                                                                         <menu key="menu" id="UBj-iC-sV0"/>
                                                                     </popUpButtonCell>
                                                                     <connections>

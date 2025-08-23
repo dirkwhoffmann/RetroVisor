@@ -65,8 +65,19 @@ struct PlaygroundUniforms {
     uint  PAL;
     float INPUT_PIXEL_SIZE;
     float CHROMA_RADIUS;
+
+    // Bloom effect
+    float BLOOM_THRESHOLD;
+    float BLOOM_INTENSITY;
+    
     float SCANLINE_BRIGHTNESS;
-    float SCANLINE_WEIGHT;
+    float SCANLINE_WEIGHT1;
+    float SCANLINE_WEIGHT2;
+    float SCANLINE_WEIGHT3;
+    float SCANLINE_WEIGHT4;
+
+    uint  DOTMASK;
+    float DOTMASK_BRIGHTESS;
 
     // CRT phase
     float BRIGHTNESS;

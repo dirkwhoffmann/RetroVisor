@@ -129,9 +129,19 @@ namespace playground {
         outTex.write(half4(half3(ycc), 1.0), gid);
     }
 
-    
+    inline float3 brightPass(float3 color, float luma, float threshold, float intensity) {
+
+        // Keep only if brighter than threshold
+        float mask = smoothstep(threshold, threshold + 0.1, luma);
+
+        // Scale the bright part
+        return color * mask * intensity;
+    }
+
     kernel void composite(texture2d<half, access::sample> ycc       [[ texture(0) ]],
-                          texture2d<half, access::write>  outTex    [[ texture(1) ]],
+                          texture2d<half, access::sample> dotMask   [[ texture(1) ]],
+                          texture2d<half, access::write>  outTex    [[ texture(2) ]],
+                          texture2d<half, access::write>  brightTex [[ texture(3) ]],
                           constant Uniforms               &uniforms [[ buffer(0)  ]],
                           constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
                           sampler                         sam       [[ sampler(0) ]],
@@ -170,11 +180,44 @@ namespace playground {
         float3 rgb = u.PAL ? YUV2RGB(combined) : YIQ2RGB(combined);
 
         // Write pixel
-        outTex.write(half4(half3(rgb), 1.0), gid);
+        // outTex.write(half4(half3(rgb), 1.0), gid);
+
+        //
+        // Dotmask
+        //
+
+        half4 color = half4(half3(rgb), 1.0);
+
+        // if (options.dotMask) {
+        uint xoffset = gid.x % dotMask.get_width();
+        uint yoffset = gid.y % dotMask.get_height();
+        half4 dotColor = dotMask.read(uint2(xoffset, yoffset));
+        half4 gain = min(color, 1 - color) * dotColor;
+        half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
+        color += gain - loose;
+
+        outTex.write(color, gid);
+
+        //
+        // Brightness pass
+        //
+
+        // Keep only if brighter than threshold
+        float3 mask = smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(yccC.x));
+
+        // Scale the bright part
+        brightTex.write(half4(half3(rgb * mask * u.BLOOM_INTENSITY), 1.0), gid);
+    }
+
+    half4 scanline(half4 x, float weight) {
+
+        return pow(x, exp(4*(weight - 0.5)));
     }
 
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
-                    texture2d<half, access::write>  outTex    [[ texture(1) ]],
+                    texture2d<half, access::sample> dotMask   [[ texture(1) ]],
+                    texture2d<half, access::sample> bloomTex  [[ texture(2) ]],
+                    texture2d<half, access::write>  outTex    [[ texture(3) ]],
                     constant Uniforms               &uniforms [[ buffer(0)  ]],
                     constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
                     sampler                         sam       [[ sampler(0) ]],
@@ -185,6 +228,42 @@ namespace playground {
 
         // Normalize gid to 0..1 in output texture
         float2 uv = (float2(gid) + 0.5) / size;
+
+        // Read texel
+        half4 color = inTex.sample(sam, uv);
+        half4 bloom = bloomTex.sample(sam, uv);
+
+        /*
+        uint line = gid.y % 4;
+
+        if (line == 0) {
+            color = scanline(color, u.SCANLINE_WEIGHT1);
+        } else if (line == 1) {
+            color = scanline(color, u.SCANLINE_WEIGHT2);
+        } else if (line == 2) {
+            color = scanline(color, u.SCANLINE_WEIGHT3);
+        } else if (line == 3) {
+            color = scanline(color, u.SCANLINE_WEIGHT4);
+        }
+        */
+
+        // Apply dot mask effect
+        // if (options.dotMask) {
+        uint xoffset = gid.x % dotMask.get_width();
+        uint yoffset = gid.y % dotMask.get_height();
+        half4 dotColor = dotMask.read(uint2(xoffset, yoffset));
+        half4 gain = min(color, 1 - color) * dotColor;
+        half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
+        color += gain - loose;
+        // }
+
+        // Apply bloom effect
+        outTex.write(saturate(bloom + color), gid);
+        return;
+
+
+        outTex.write(color, gid);
+        return;
 
         /*
         // Compose RGB value

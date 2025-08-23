@@ -31,9 +31,6 @@ class Recorder: Loggable {
     // The current recording state
     var isRecording: Bool { countdown == 0 }
 
-    // Time when the recorder started
-    // private var startTime: CMTime?
-
     // The recorded screen cutout
     private(set) var recordingRect: NSRect?
 

@@ -74,10 +74,8 @@ class ShaderSettingCell: NSTableCellView {
         }
     }
 
-    var value: Float! {
-
-        didSet {
-
+    var value: Float! { didSet { update() } }
+/*
             if shaderSetting.range != nil {
 
                 valueSlider.floatValue = value
@@ -90,6 +88,31 @@ class ShaderSettingCell: NSTableCellView {
                 valuePopup.selectItem(withTag: Int(value))
             }
         }
+    }
+ */
+
+    func update() {
+
+        let value = controller.get(key: shaderSetting.key)
+
+        if !optCeckbox.isHidden {
+
+            let enabled = controller.get(key: shaderSetting.enableKey!) != 0
+            optCeckbox.state = enabled ? .on : .off;
+        }
+
+        if !valueSlider.isHidden {
+
+            valueSlider.floatValue = value
+            valueStepper.floatValue = value
+            valueLabel.stringValue = String(format: shaderSetting.formatString, value)
+        }
+
+        if !valuePopup.isHidden {
+
+            valuePopup.selectItem(withTag: Int(value))
+        }
+
     }
 
     @IBAction func optAction(_ sender: NSButton) {
@@ -113,14 +136,17 @@ class ShaderSettingCell: NSTableCellView {
 
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
-        controller.shader.set(key: subLabel.stringValue, value: Float(sender.selectedTag()))
-        value = Float(sender.selectedTag())
+        controller.shader.set(key: shaderSetting.key, value: Float(sender.selectedTag()))
+        update();
     }
 
     @IBAction func enableAction(_ sender: NSButton) {
 
-        controller.shader.set(key: subLabel.stringValue, value: sender.state == .on ? 1.0 : 0.0)
-        value = controller.get(key: subLabel.stringValue)
+        if let enableKey = shaderSetting.enableKey {
+
+            controller.shader.set(key: enableKey, enable: sender.state == .on)
+            update();
+        }
     }
 
     @IBAction func helpButton(_ sender: NSButton) {

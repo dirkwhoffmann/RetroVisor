@@ -8,6 +8,7 @@
 // -----------------------------------------------------------------------------
 
 import MetalKit
+import MetalPerformanceShaders
 
 @MainActor
 final class PassthroughShader: Shader {
@@ -16,11 +17,15 @@ final class PassthroughShader: Shader {
 
         var SCALER: Int32
         var INPUT_PIXEL_SIZE: Float
+        var BLUR_ENABLE: Int32
+        var BLUR_RADIUS: Int32
 
         static let defaults = Uniforms(
 
             SCALER: 0,
-            INPUT_PIXEL_SIZE: 1
+            INPUT_PIXEL_SIZE: 1,
+            BLUR_ENABLE: 0,
+            BLUR_RADIUS: 1
         )
     }
 
@@ -28,6 +33,9 @@ final class PassthroughShader: Shader {
 
     // Downscaled input texture
     var src: MTLTexture!
+
+    // Blurred texture
+    var blur: MTLTexture!
 
     init() {
 
@@ -44,8 +52,15 @@ final class PassthroughShader: Shader {
             ShaderSetting(
                 name: "Input Pixel Size",
                 key: "INPUT_PIXEL_SIZE",
-                optional: true,
                 range: 1...16,
+                step: 1
+            ),
+
+            ShaderSetting(
+                name: "Blur Radius",
+                enableKey: "BLUR_ENABLE",
+                key: "BLUR_RADIUS",
+                range: 0...10,
                 step: 1
             )
         ]
@@ -57,6 +72,8 @@ final class PassthroughShader: Shader {
 
         case "SCALER":              return Float(uniforms.SCALER)
         case "INPUT_PIXEL_SIZE":    return uniforms.INPUT_PIXEL_SIZE
+        case "BLUR_ENABLE":         return Float(uniforms.BLUR_ENABLE)
+        case "BLUR_RADIUS":         return Float(uniforms.BLUR_RADIUS)
 
         default:
             return super.get(key: key)
@@ -65,10 +82,14 @@ final class PassthroughShader: Shader {
 
     override func set(key: String, value: Float) {
 
+        print("set(\(key)=\(value))")
+        
         switch key {
 
         case "SCALER":              uniforms.SCALER = Int32(value)
         case "INPUT_PIXEL_SIZE":    uniforms.INPUT_PIXEL_SIZE = value
+        case "BLUR_ENABLE":         uniforms.BLUR_ENABLE = Int32(value)
+        case "BLUR_RADIUS":         uniforms.BLUR_RADIUS = Int32(value)
 
         default:
             super.set(key: key, value: value)
@@ -91,6 +112,7 @@ final class PassthroughShader: Shader {
             )
             desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
             src = output.device.makeTexture(descriptor: desc)
+            blur = output.device.makeTexture(descriptor: desc)
         }
     }
 
@@ -99,20 +121,28 @@ final class PassthroughShader: Shader {
 
         let scaler = uniforms.SCALER == 0 ? ShaderLibrary.bilinear :  ShaderLibrary.lanczos
 
-        if uniforms.INPUT_PIXEL_SIZE != 1 {
+        updateTextures(in: input, out: output, rect: rect)
 
-            updateTextures(in: input, out: output, rect: rect)
+        // Rescale to the source texture size
+        scaler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
 
-            // Rescale to the source texture size
-            scaler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
+        // Optional blur
+        if uniforms.BLUR_ENABLE != 0 {
+
+            let kernelWidth = Int(2 * uniforms.BLUR_RADIUS | 1)
+            let filter = MPSImageGaussianBlur(device: output.device, sigma: Float(kernelWidth) * 0.1)
+//            let filter = MPSImageTent(device: output.device, kernelWidth: kernelWidth, kernelHeight: 1)
+
+            // filter.encode(commandBuffer: commandBuffer, inPlaceTexture: &src)
+            filter.encode(commandBuffer: commandBuffer, sourceTexture: src, destinationTexture: blur)
 
             // Rescale to the output texture size
-            scaler.apply(commandBuffer: commandBuffer, in: src, out: output)
+            scaler.apply(commandBuffer: commandBuffer, in: blur, out: output)
 
         } else {
 
-            // Rescale the output texture size
-            scaler.apply(commandBuffer: commandBuffer, in: input, out: output, rect: rect)
+            // Rescale to the output texture size
+            scaler.apply(commandBuffer: commandBuffer, in: src, out: output)
         }
     }
 }

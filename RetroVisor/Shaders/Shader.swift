@@ -13,10 +13,9 @@ import MetalPerformanceShaders
 struct ShaderSetting {
 
     let name: String
-    let key: String
 
-    // Indicates if the setting can be disabled
-    let optional: Bool
+    let enableKey: String?
+    let key: String
 
     // Parameters for numeric arguments
     let range: ClosedRange<Double>?
@@ -28,17 +27,22 @@ struct ShaderSetting {
     // Optional help string
     let help: String?
 
+    // Indicates if the setting can be disabled
+    var optional: Bool {
+        enableKey != nil
+    }
+
     var formatString: String {
         return step < 0.1 ? "%.2f" : step < 1.0 ? "%.1f" : "%.0f"
     }
 
-    init(name: String, key: String, optional: Bool = false,
+    init(name: String, enableKey: String? = nil, key: String,
          range: ClosedRange<Double>? = nil, step: Float = 0.01,
          values: [(String,Int)]? = nil, help: String? = nil) {
 
         self.name = name
         self.key = key
-        self.optional = optional
+        self.enableKey = enableKey
         self.range = range
         self.step = step
         self.values = values
@@ -79,9 +83,10 @@ class Shader : Loggable {
     func get(key: String) -> Float { NSSound.beep(); return 0 }
     func isEnabled(key: String) -> Bool { return true }
     func set(key: String, value: Float) { NSSound.beep() }
-    func set(key: String, item: Int) { NSSound.beep() }
-    func set(key: String, enable: Bool) { NSSound.beep() }
     func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) { }
+
+    func set(key: String, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
+    func set(key: String, item: Int) { set(key: key, value: Float(item)) }
 }
 
 class ScaleShader<F: MPSImageScale> : Shader {
@@ -110,15 +115,4 @@ class LanczosShader: ScaleShader<MPSImageLanczosScale> {
     init() { super.init(name: "Lanczos") }
 }
 
-extension MPSScaleTransform {
 
-    init(in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
-
-        let scaleX = Double(output.width) / (rect.width * Double(input.width))
-        let scaleY = Double(output.height) / (rect.height * Double(input.height))
-        let transX = (-rect.minX * Double(input.width)) * scaleX
-        let transY = (-rect.minY * Double(input.height)) * scaleY
-
-        self.init(scaleX: scaleX, scaleY: scaleY, translateX: transX, translateY: transY)
-    }
-}
