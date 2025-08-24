@@ -65,6 +65,16 @@ final class ShaderLibrary {
          return device.makeSamplerState(descriptor: desc)!
      }()
 
+    static var mipmapLinear: MTLSamplerState = {
+        let desc = MTLSamplerDescriptor()
+        desc.minFilter = .linear
+        desc.magFilter = .linear
+        desc.mipFilter = .linear
+        desc.sAddressMode = .clampToEdge
+        desc.tAddressMode = .clampToEdge
+        return device.makeSamplerState(descriptor: desc)!
+    }()
+
     // The shader library
     private(set) var shaders: [Shader] = []
 

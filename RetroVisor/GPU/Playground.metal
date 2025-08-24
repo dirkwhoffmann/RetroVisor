@@ -152,6 +152,12 @@ namespace playground {
         // Normalized texture coords
         // float2 uv = in.texCoord;
 
+        // Display the mimap texture for debugging
+        // half4 mcol = input.sample(sam, uv, level(2));
+        half4 mcol = input.sample(sam, uv, level(3)).xxxw;
+        output.write(mcol, gid);
+        return;
+
         // Sample original color
         half3 srcColor = input.sample(sam, uv).rgb;
 
@@ -164,14 +170,16 @@ namespace playground {
         float2 gridCoord = floor(pixelCoord / cellSize);
         float2 gridCenter = (gridCoord + 0.5) * cellSize;
 
-        // Distance to nearest dot center (in pixels)
-        float2 d = pixelCoord - gridCenter;
+        // Normalized distance to nearest dot center (in pixels)
+        float2 d = (pixelCoord - gridCenter) / cellSize / float2(u.MAX_DOT_WIDTH, u.MAX_DOT_HEIGHT);
+        // d = max(d, float2(u.MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT));
         float dist = length(d);
 
         // --- Radius depends on luminance ---
         // float2 minWH = float2(u.MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT)
         // float2 maxWH = float2(u.MAX_DOT_WIDTH, u.MAX_DOT_HEIGHT)
-        float radius = mix(u.MIN_DOT_WIDTH, u.MAX_DOT_WIDTH, pow(luminance, u.GLOW));
+        // float radius = mix(u.MIN_DOT_WIDTH, u.MAX_DOT_WIDTH, pow(luminance, u.GLOW));
+        float radius = mix(u.MIN_DOT_WIDTH, 1.0, pow(luminance, u.GLOW));
 
         // --- Dot falloff ---
         // Smoothstep makes soft edges, bigger for bright pixels

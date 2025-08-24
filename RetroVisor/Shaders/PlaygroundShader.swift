@@ -77,12 +77,12 @@ struct PlaygroundUniforms {
 
         BRIGHTNESS: 1,
         GLOW: 1,
-        GRID_WIDTH: 6,
-        GRID_HEIGHT: 6,
-        MIN_DOT_WIDTH: 1,
-        MAX_DOT_WIDTH: 4,
-        MIN_DOT_HEIGHT: 1,
-        MAX_DOT_HEIGHT: 4,
+        GRID_WIDTH: 5,
+        GRID_HEIGHT: 8,
+        MIN_DOT_WIDTH: 0.1,
+        MAX_DOT_WIDTH: 0.9,
+        MIN_DOT_HEIGHT: 0.1,
+        MAX_DOT_HEIGHT: 0.9,
         SHAPE: 2.0,
         FEATHER: 0.2
     )
@@ -100,7 +100,7 @@ final class PlaygroundShader: Shader {
     // Result of pass 1: Downscaled input texture
     var src: MTLTexture!
 
-    // Result of pass 2: Texture in YUV/YIQ space, Bright areas
+    // Result of pass 2: Texture in YUV/YIQ space
     var ycc: MTLTexture!
 
     // Result of pass 3: Textures with composite effects applied
@@ -283,28 +283,28 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Minimal Dot Width",
                 key: "MIN_DOT_WIDTH",
-                range: 1.0...10.0,
+                range: 0.0...1.0,
                 step: 0.01
             ),
 
             ShaderSetting(
                 name: "Maximal Dot Width",
                 key: "MAX_DOT_WIDTH",
-                range: 1.0...10.0,
+                range: 0.0...1.0,
                 step: 0.01
             ),
 
             ShaderSetting(
                 name: "Minimal Dot Height",
                 key: "MIN_DOT_HEIGHT",
-                range: 1.0...10.0,
+                range: 0.0...1.0,
                 step: 0.01
             ),
 
             ShaderSetting(
                 name: "Maximal Dot Height",
                 key: "MAX_DOT_HEIGHT",
-                range: 1.0...10.0,
+                range: 0.0...1.0,
                 step: 0.01
             ),
 
@@ -419,7 +419,7 @@ final class PlaygroundShader: Shader {
         splitKernel = ColorSpaceFilter(sampler: ShaderLibrary.linear)
         crtKernel = CrtFilter(sampler: ShaderLibrary.linear)
         chromaKernel = CompositeFilter(sampler: ShaderLibrary.linear)
-        shadowMaskKernel = ShadowMaskFilter(sampler: ShaderLibrary.linear)
+        shadowMaskKernel = ShadowMaskFilter(sampler: ShaderLibrary.mipmapLinear)
         dotMaskLibrary = DotMaskLibrary()
     }
 
@@ -503,7 +503,7 @@ final class PlaygroundShader: Shader {
         if ycc?.width != inpWidth || ycc?.height != inpHeight {
 
             src = output.makeTexture(width: inpWidth, height: inpHeight)
-            ycc = output.makeTexture(width: inpWidth, height: inpHeight)
+            ycc = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
             bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
             rgb = output.makeTexture(width: inpWidth, height: inpHeight)
@@ -549,6 +549,12 @@ final class PlaygroundShader: Shader {
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
 
+        let pyramid = MPSImageGaussianPyramid(device: ycc.device) // , centerWeight: 1.0)
+
+        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
+
+
+        //
         //
         // Pass 3: Apply chroma effects
         //
