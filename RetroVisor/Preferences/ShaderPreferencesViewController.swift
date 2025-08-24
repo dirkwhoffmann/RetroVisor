@@ -121,8 +121,9 @@ extension ShaderPreferencesViewController: NSOutlineViewDelegate {
             return cell
 
         } else if let row = item as? ShaderSetting {
+
             let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("RowCell"), owner: self) as! NSTableCellView
-            cell.textField?.stringValue = row.title
+            cell.textField?.stringValue = row.name
             return cell
         }
         return nil
