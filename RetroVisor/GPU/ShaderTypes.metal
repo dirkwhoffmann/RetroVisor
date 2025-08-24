@@ -100,6 +100,7 @@ struct PlaygroundUniforms {
     float FEATHER;
 
     uint  DEBUG;
+    float DEBUG_SLIDER;
 };
 
 #endif

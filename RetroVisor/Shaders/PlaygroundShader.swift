@@ -60,6 +60,7 @@ struct PlaygroundUniforms {
     var FEATHER: Float
 
     var DEBUG: Int32
+    var DEBUG_SLIDER: Float
 
     static let defaults = PlaygroundUniforms(
 
@@ -98,7 +99,8 @@ struct PlaygroundUniforms {
         SHAPE: 2.0,
         FEATHER: 0.2,
 
-        DEBUG: 0
+        DEBUG: 0,
+        DEBUG_SLIDER: 0.5
     )
 }
 
@@ -109,6 +111,8 @@ final class PlaygroundShader: Shader {
     var crtKernel: Kernel!
     var chromaKernel: Kernel!
     var shadowMaskKernel: Kernel!
+    var debugKernel: Kernel!
+
     var uniforms: PlaygroundUniforms = .defaults
 
     // Result of pass 1: Downscaled input texture
@@ -126,6 +130,9 @@ final class PlaygroundShader: Shader {
 
     // Result of pass 5: Texture with CRT effects applied
     var crt: MTLTexture!
+
+    // Performance shader for computing mipmaps
+    var pyramid: MPSImagePyramid!
 
     // Resampler used for image scaling
     var resampler = ResampleFilter()
@@ -340,11 +347,24 @@ final class PlaygroundShader: Shader {
                 name: "Debug",
                 key: "DEBUG",
                 values: [ ("Off", 0),
-                          ("Luma", 1),
-                          ("Chroma U/I", 2),
-                          ("Chroma V/Q", 3),
-                          ("Shadow", 4) ]
+                          ("Ycc", 1),
+                          ("Ycc (Mipmap 1)", 2),
+                          ("Ycc (Mipmap 2)", 3),
+                          ("Ycc (Mipmap 3)", 4),
+                          ("Ycc (Mipmap 4)", 5),
+                          ("Luma", 6),
+                          ("Chroma U/I", 7),
+                          ("Chroma V/Q", 8),
+                          ("Shadow texture", 9),
+                          ("Bloom texture", 10) ]
             ),
+
+            ShaderSetting(
+                name: "Debug Slider",
+                key: "DEBUG_SLIDER",
+                range: 0.0...1.0,
+                step: 0.01
+            )
         ]
     }
 
@@ -385,6 +405,7 @@ final class PlaygroundShader: Shader {
         case "FEATHER": return uniforms.FEATHER
 
         case "DEBUG": return Float(uniforms.DEBUG)
+        case "DEBUG_SLIDER": return uniforms.DEBUG_SLIDER
 
         default:
             NSSound.beep()
@@ -429,6 +450,7 @@ final class PlaygroundShader: Shader {
         case "FEATHER": uniforms.FEATHER = value
 
         case "DEBUG": uniforms.DEBUG = Int32(value)
+        case "DEBUG_SLIDER": uniforms.DEBUG_SLIDER = value
 
         default:
             NSSound.beep()
@@ -444,9 +466,11 @@ final class PlaygroundShader: Shader {
 
         super.activate()
         splitKernel = ColorSpaceFilter(sampler: ShaderLibrary.linear)
-        crtKernel = CrtFilter(sampler: ShaderLibrary.linear)
+        crtKernel = CrtFilter(sampler: ShaderLibrary.mipmapLinear)
         chromaKernel = CompositeFilter(sampler: ShaderLibrary.linear)
         shadowMaskKernel = ShadowMaskFilter(sampler: ShaderLibrary.mipmapLinear)
+        debugKernel = DebugFilter(sampler: ShaderLibrary.mipmapLinear)
+        pyramid = MPSImageGaussianPyramid(device: ShaderLibrary.device)
         dotMaskLibrary = DotMaskLibrary()
     }
 
@@ -491,17 +515,14 @@ final class PlaygroundShader: Shader {
         resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
 
         //
-        // Pass 2: Convert RGB image into YUV/YIQ space
+        // Pass 2: Convert RGB image into YUV/YIQ space and compute mipmaps
         //
 
         splitKernel.apply(commandBuffer: commandBuffer,
-                    textures: [src, ycc],
-                    // options: &app.windowController!.metalView!.uniforms,
-                    // length: MemoryLayout<Uniforms>.stride,
-                    options: &uniforms,
-                    length: MemoryLayout<PlaygroundUniforms>.stride)
+                          textures: [src, ycc],
+                          options: &uniforms,
+                          length: MemoryLayout<PlaygroundUniforms>.stride)
 
-        let pyramid = MPSImageGaussianPyramid(device: ycc.device)
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
 
 
@@ -520,8 +541,6 @@ final class PlaygroundShader: Shader {
 
         chromaKernel.apply(commandBuffer: commandBuffer,
                            textures: [ycc, dotmask, rgb, bri],
-                           // options: &app.windowController!.metalView!.uniforms,
-                           // length: MemoryLayout<Uniforms>.stride,
                            options: &uniforms,
                            length: MemoryLayout<PlaygroundUniforms>.stride)
 
@@ -531,8 +550,6 @@ final class PlaygroundShader: Shader {
 
         shadowMaskKernel.apply(commandBuffer: commandBuffer,
                                textures: [ycc, shadow],
-                               // options: &app.windowController!.metalView!.uniforms,
-                               // length: MemoryLayout<Uniforms>.stride,
                                options: &uniforms,
                                length: MemoryLayout<PlaygroundUniforms>.stride)
 
@@ -555,12 +572,12 @@ final class PlaygroundShader: Shader {
         blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
         blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
         /*
-        let blur = MPSImageBox(device: bri.device,
-                               kernelWidth: Int(uniforms.BLOOM_RADIUS_X * 2) | 1,
-                               kernelHeight: Int(uniforms.BLOOM_RADIUS_Y * 2) | 1)
-        blur.encode(commandBuffer: commandBuffer,
-                    inPlaceTexture: &bri, fallbackCopyAllocator: nil)
-        */
+         let blur = MPSImageBox(device: bri.device,
+         kernelWidth: Int(uniforms.BLOOM_RADIUS_X * 2) | 1,
+         kernelHeight: Int(uniforms.BLOOM_RADIUS_Y * 2) | 1)
+         blur.encode(commandBuffer: commandBuffer,
+         inPlaceTexture: &bri, fallbackCopyAllocator: nil)
+         */
 
         //
         // Pass 5: Emulate CRT artifacts
@@ -568,18 +585,20 @@ final class PlaygroundShader: Shader {
 
         crtKernel.apply(commandBuffer: commandBuffer,
                         textures: [rgb, shadow, dotmask, blm, output],
-                        // options: &app.windowController!.metalView!.uniforms,
-                        // length: MemoryLayout<Uniforms>.stride,
                         options: &uniforms,
                         length: MemoryLayout<PlaygroundUniforms>.stride)
 
-        /*
+
         //
-        // Pass 5: Downscale to final texture
+        // Optional: Run the debugger
         //
 
-        let filter = MPSImageBilinearScale(device: PlaygroundShader.device)
-        filter.encode(commandBuffer: commandBuffer, sourceTexture: crt, destinationTexture: outTex)
-        */
+        if uniforms.DEBUG > 0 {
+
+            debugKernel.apply(commandBuffer: commandBuffer,
+                              textures: [ycc, shadow, dotmask, blm, output],
+                              options: &uniforms,
+                              length: MemoryLayout<PlaygroundUniforms>.stride)
+        }
     }
 }

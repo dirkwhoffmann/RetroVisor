@@ -180,3 +180,10 @@ class CrtFilter: Kernel {
     }
 }
 
+class DebugFilter: Kernel {
+
+    convenience init?(sampler: MTLSamplerState) {
+
+        self.init(name: "playground::debug", sampler: sampler)
+    }
+}
