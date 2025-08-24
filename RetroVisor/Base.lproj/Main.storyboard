@@ -946,7 +946,7 @@ Gw
                                     <rect key="frame" x="1" y="1" width="598" height="368"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="56" rowSizeStyle="automatic" viewBased="YES" indentationPerLevel="13" outlineTableColumn="c5N-k9-a4Q" id="G8x-pD-oM6" customClass="MyOutlineView" customModule="RetroVisor" customModuleProvider="target">
+                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="56" rowSizeStyle="automatic" viewBased="YES" indentationPerLevel="13" outlineTableColumn="c5N-k9-a4Q" id="G8x-pD-oM6" customClass="MyOutlineView" customModule="RetroVisor" customModuleProvider="target">
                                             <rect key="frame" x="0.0" y="0.0" width="598" height="368"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
@@ -969,19 +969,8 @@ Gw
                                                             <rect key="frame" x="8" y="0.0" width="581" height="42"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b20-Zq-66q">
-                                                                    <rect key="frame" x="4" y="4" width="31.5" height="32"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" imagePosition="only" alignment="center" inset="2" id="tnl-rG-Qsd">
-                                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                                        <font key="font" metaFont="system"/>
-                                                                    </buttonCell>
-                                                                    <connections>
-                                                                        <action selector="disclosureAction:" target="cJo-c0-E6g" id="NXF-ka-L9k"/>
-                                                                    </connections>
-                                                                </button>
                                                                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="flA-tZ-9cP">
-                                                                    <rect key="frame" x="38" y="13" width="542" height="16"/>
+                                                                    <rect key="frame" x="41" y="15" width="529" height="16"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Label" id="weY-LU-aQ1">
                                                                         <font key="font" metaFont="systemHeavy" size="13"/>
@@ -989,6 +978,22 @@ Gw
                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
+                                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b20-Zq-66q">
+                                                                    <rect key="frame" x="7" y="7.5" width="31.5" height="32"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                    <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="only" alignment="center" inset="2" id="tnl-rG-Qsd">
+                                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                                        <font key="font" metaFont="system"/>
+                                                                    </buttonCell>
+                                                                    <connections>
+                                                                        <action selector="disclosureAction:" target="cJo-c0-E6g" id="NXF-ka-L9k"/>
+                                                                    </connections>
+                                                                </button>
+                                                                <imageView hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ccq-BU-lFG">
+                                                                    <rect key="frame" x="520" y="-3" width="48" height="48"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSAdvanced" id="LaG-hg-yN1"/>
+                                                                </imageView>
                                                             </subviews>
                                                             <connections>
                                                                 <outlet property="controller" destination="lT8-2t-dOu" id="FId-1g-Hg0"/>
@@ -1001,12 +1006,12 @@ Gw
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NHQ-Us-uM1">
-                                                                    <rect key="frame" x="3" y="3" width="48" height="48"/>
+                                                                    <rect key="frame" x="33" y="3" width="48" height="48"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" image="NSAdvanced" id="TmJ-qt-Jgy"/>
                                                                 </imageView>
                                                                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UWn-OM-ZBF">
-                                                                    <rect key="frame" x="57" y="26" width="222" height="16"/>
+                                                                    <rect key="frame" x="82" y="26" width="187" height="16"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Lorem ipsum dolor " id="mtV-RY-ydi">
                                                                         <font key="font" metaFont="systemBold"/>
@@ -1024,7 +1029,7 @@ Gw
                                                                     </textFieldCell>
                                                                 </textField>
                                                                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="U1c-jQ-7bf">
-                                                                    <rect key="frame" x="57" y="12" width="222" height="14"/>
+                                                                    <rect key="frame" x="83" y="12" width="187" height="14"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Lorem ipsum dolor" id="C76-2H-Xwz">
                                                                         <font key="font" metaFont="smallSystem"/>
@@ -1517,6 +1522,7 @@ Gw
         </scene>
     </scenes>
     <resources>
+        <image name="NSAddTemplate" width="18" height="17"/>
         <image name="NSAdvanced" width="32" height="32"/>
         <image name="NSColorPanel" width="32" height="32"/>
         <image name="NSTouchBarCommunicationVideoTemplate" width="24" height="17"/>

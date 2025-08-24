@@ -29,8 +29,11 @@ class ShaderPreferencesViewController: NSViewController {
 
         outlineView.delegate = self
         outlineView.dataSource = self
-        // outlineView.rowSizeStyle = .large
         outlineView.indentationPerLevel = 0
+
+        outlineView.intercellSpacing = NSSize(width: 0, height: 2)
+        outlineView.gridColor = .controlBackgroundColor // windowBackgroundColor
+        outlineView.gridStyleMask = [.solidHorizontalGridLineMask]
 
         // Add all available shaders to the shader selector popup
         shaderSelector.removeAllItems()

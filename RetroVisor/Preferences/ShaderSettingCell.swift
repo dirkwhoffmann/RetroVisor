@@ -17,6 +17,16 @@ class ShaderGroupCell: NSTableCellView {
 
     var shaderSettingGroup: ShaderSettingGroup!
 
+    override func draw(_ dirtyRect: NSRect) {
+
+        //NSColor.controlAccentColor.withAlphaComponent(0.15).setFill()
+        // NSColor.controlAccentColor.setFill()
+        NSColor.separatorColor.setFill()
+        // NSColor.alternatingContentBackgroundColors[1].setFill()
+        dirtyRect.fill()
+        super.draw(dirtyRect)
+       }
+
     @IBAction func disclosureAction(_ sender: NSControl) {
 
         if controller.outlineView.isItemExpanded(shaderSettingGroup) {

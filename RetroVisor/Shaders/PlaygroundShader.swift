@@ -160,7 +160,7 @@ final class PlaygroundShader: Shader {
 
         settings = [
 
-            ShaderSettingGroup(title: "General", children: [
+            ShaderSettingGroup(title: "General Settings", children: [
 
                 ShaderSetting(
                     name: "Input Pixel Size",
@@ -178,7 +178,7 @@ final class PlaygroundShader: Shader {
                 ShaderSetting(
                     name: "Video Standard",
                     key: "PAL",
-                values: [("PAL", 1), ("NTSC", 0)]
+                    values: [("PAL", 1), ("NTSC", 0)]
                 ),
 
                 ShaderSetting(
@@ -187,6 +187,9 @@ final class PlaygroundShader: Shader {
                     range: 1...10,
                     step: 1
                 ),
+            ]),
+
+            ShaderSettingGroup(title: "Bloom Settings", children: [
 
                 ShaderSetting(
                     name: "Bloom Filter",
@@ -261,6 +264,10 @@ final class PlaygroundShader: Shader {
                  ),
                  */
 
+            ]),
+
+            ShaderSettingGroup(title: "Dot Mask Settings", children: [
+
                 ShaderSetting(
                     name: "Dotmask",
                     enableKey: "DOTMASK_ENABLE",
@@ -290,6 +297,10 @@ final class PlaygroundShader: Shader {
                     range: 0.0...2.0,
                     step: 0.01
                 ),
+
+            ]),
+
+            ShaderSettingGroup(title: "Shadow Mask", children: [
 
                 ShaderSetting(
                     name: "Grid Width",
