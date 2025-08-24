@@ -525,7 +525,6 @@ final class PlaygroundShader: Shader {
 
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
 
-
         //
         //
         // Pass 3: Apply chroma effects
@@ -556,12 +555,6 @@ final class PlaygroundShader: Shader {
         let shadowFilter = MPSImageGaussianBlur(device: ycc.device, sigma: uniforms.FEATHER)
         shadowFilter.encode(commandBuffer: commandBuffer, inPlaceTexture: &shadow)
 
-
-        //
-        // Pass 4: Create the bloom texture
-        //
-
-
         //
         // Pass 4: Create the bloom texture
         //
@@ -571,13 +564,6 @@ final class PlaygroundShader: Shader {
         blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
         blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
         blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
-        /*
-         let blur = MPSImageBox(device: bri.device,
-         kernelWidth: Int(uniforms.BLOOM_RADIUS_X * 2) | 1,
-         kernelHeight: Int(uniforms.BLOOM_RADIUS_Y * 2) | 1)
-         blur.encode(commandBuffer: commandBuffer,
-         inPlaceTexture: &bri, fallbackCopyAllocator: nil)
-         */
 
         //
         // Pass 5: Emulate CRT artifacts
@@ -587,7 +573,6 @@ final class PlaygroundShader: Shader {
                         textures: [rgb, shadow, dotmask, blm, output],
                         options: &uniforms,
                         length: MemoryLayout<PlaygroundUniforms>.stride)
-
 
         //
         // Optional: Run the debugger

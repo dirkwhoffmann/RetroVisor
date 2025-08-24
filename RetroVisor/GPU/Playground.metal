@@ -171,31 +171,23 @@ namespace playground {
                            sampler                         sam       [[ sampler(0) ]],
                            uint2                           gid       [[ thread_position_in_grid ]])
     {
-        uint2 size = (output.get_width(), output.get_height());
-        float2 uv = (float2(gid) + 0.5) / float2(size);
-
-
-        // Display the mimap texture for debugging
-        /*
-         half4 mcol = input.sample(sam, uv, level(3)).xxxw;
-         output.write(mcol, gid);
-         return;
-         */
+        uint2 size = uint2(output.get_width(), output.get_height());
+        Coord2 uv = (float2(gid) + 0.5) / float2(size);
 
         // Sample original color
-        half3 srcColor = input.sample(sam, uv, level(3)).rgb;
+        Color4 srcColor = input.sample(sam, uv, level(3));
 
-        // Convert to luminance (or just use intensity modulation)
-        float luminance = srcColor.x; //  dot(srcColor, float3(0.299, 0.587, 0.114));
+        // Get the luminance
+        float luminance = srcColor.x;
 
-        // --- Dot lattice setup ---
-        float2 cellSize = float2(u.GRID_WIDTH, u.GRID_HEIGHT);      // grid spacing in *pixels*
-        float2 pixelCoord = float2(gid); // uv * screenSize;
+        // Set up the dot lattice
+        float2 cellSize = float2(u.GRID_WIDTH, u.GRID_HEIGHT);
+        float2 pixelCoord = float2(gid);
         float2 gridCoord = floor(pixelCoord / cellSize);
         float2 gridCenter = (gridCoord + 0.5) * cellSize;
 
         // Normalized distance to nearest dot center (in pixels)
-        float2 d = (pixelCoord - gridCenter) / cellSize / float2(u.MAX_DOT_WIDTH, u.MAX_DOT_HEIGHT);
+        float2 d = (pixelCoord - gridCenter) / cellSize; //  / float2(u.MAX_DOT_WIDTH, u.MAX_DOT_HEIGHT);
         // d = max(d, float2(u.MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT));
         float dist = length(d);
 
