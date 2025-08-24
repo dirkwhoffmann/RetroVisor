@@ -138,6 +138,21 @@ namespace playground {
         return color * mask * intensity;
     }
 
+    kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
+                        texture2d<half, access::write>  output    [[ texture(1) ]],
+                        sampler                         sam       [[ sampler(0) ]],
+                        uint2                           gid       [[ thread_position_in_grid ]])
+    {
+        // uint2 inSize = (input.get_width(), input.get_height());
+        uint2 gridSize = (input.get_width(), input.get_height());
+        // uint2 mgid = gid % gridSize;
+
+        float2 uv = (float2(gid % gridSize) + 0.5) / float2(gridSize);
+
+        half4 color = input.sample(sam, uv);
+        output.write(color, gid);
+    }
+
     kernel void composite(texture2d<half, access::sample> ycc       [[ texture(0) ]],
                           texture2d<half, access::sample> dotMask   [[ texture(1) ]],
                           texture2d<half, access::write>  outTex    [[ texture(2) ]],
@@ -190,9 +205,12 @@ namespace playground {
 
         if (u.DOTMASK_ENABLE) {
 
-            uint xoffset = gid.x % dotMask.get_width();
-            uint yoffset = gid.y % dotMask.get_height();
+            /*
+            uint xoffset = (gid.x % (2 * dotMask.get_width())) / 2;
+            uint yoffset = (gid.y % (2 * dotMask.get_height())) / 2;
             half4 dotColor = dotMask.read(uint2(xoffset, yoffset));
+            */
+            half4 dotColor = dotMask.read(gid);
             half4 gain = min(color, 1 - color) * dotColor;
             half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
             color += gain - loose;
@@ -204,14 +222,17 @@ namespace playground {
         // Brightness pass
         //
 
-        if (u.BLOOM_ENABLE) {
-            
+        // if (u.BLOOM_ENABLE) {
+
+            // Compute luminance
+            float Y = dot(rgb, float3(0.299, 0.587, 0.114));
+
             // Keep only if brighter than threshold
-            float3 mask = smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(yccC.x));
+            half3 mask = half3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(Y)));
 
             // Scale the bright part
-            brightTex.write(half4(half3(rgb * mask * u.BLOOM_INTENSITY), 1.0), gid);
-        }
+            brightTex.write(half4(color.rgb * mask * u.BLOOM_INTENSITY, 1.0), gid);
+        // }
     }
 
     half4 scanline(half4 x, float weight) {
@@ -237,6 +258,12 @@ namespace playground {
         // Read texel
         half4 color = inTex.sample(sam, uv);
 
+        // Show the dotmask texture for now
+        /*
+        color = dotMask.sample(sam, uv);
+        outTex.write(color, gid);
+        return;
+        */
         /*
         uint line = gid.y % 4;
 
@@ -269,8 +296,12 @@ namespace playground {
 
             half4 bloom = bloomTex.sample(sam, uv);
             color = saturate(color + bloom);
+            outTex.write(color, gid);
+            return;
         }
 
+        // half4 bloom = bloomTex.sample(sam, uv);
+        // outTex.write(bloom, gid);
         outTex.write(color, gid);
         return;
 

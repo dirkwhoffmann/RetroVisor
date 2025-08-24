@@ -46,18 +46,22 @@ final class ShaderLibrary {
         }()
 
     static var linear: MTLSamplerState = {
-         let desc = MTLSamplerDescriptor()
-         desc.minFilter = .linear
-         desc.magFilter = .linear
-         desc.mipFilter = .notMipmapped
-         return device.makeSamplerState(descriptor: desc)!
-     }()
+        let desc = MTLSamplerDescriptor()
+        desc.minFilter = .linear
+        desc.magFilter = .linear
+        desc.mipFilter = .notMipmapped
+        desc.sAddressMode = .repeat
+        desc.tAddressMode = .repeat
+        return device.makeSamplerState(descriptor: desc)!
+    }()
 
      static var nearest: MTLSamplerState = {
          let desc = MTLSamplerDescriptor()
          desc.minFilter = .nearest
          desc.magFilter = .nearest
          desc.mipFilter = .notMipmapped
+         desc.sAddressMode = .repeat
+         desc.tAddressMode = .repeat
          return device.makeSamplerState(descriptor: desc)!
      }()
 

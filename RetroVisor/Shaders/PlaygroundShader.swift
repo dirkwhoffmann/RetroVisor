@@ -124,6 +124,9 @@ final class PlaygroundShader: Shader {
     var dotmaskType: Int32?
     var dotmaskBrightness: Float?
 
+    //
+    var dotMaskLibrary: DotMaskLibrary!
+
     // var texRect: SIMD4<Float> { app.windowController!.metalView!.uniforms.texRect }
 
     var transform = MPSScaleTransform.init() // scaleX: 1.5, scaleY: 1.5, translateX: 0.0, translateY: 0.0)
@@ -414,8 +417,10 @@ final class PlaygroundShader: Shader {
         splitKernel = ColorSpaceFilter(sampler: ShaderLibrary.linear)
         crtKernel = CrtFilter(sampler: ShaderLibrary.linear)
         chromaKernel = CompositeFilter(sampler: ShaderLibrary.linear)
+        dotMaskLibrary = DotMaskLibrary()
     }
 
+/*
     func updateDotMask() {
 
         let brightness = uniforms.DOTMASK_BRIGHTNESS
@@ -479,6 +484,7 @@ final class PlaygroundShader: Shader {
         // Convert image to texture
         dotmask = image?.toTexture(device: ShaderLibrary.device)
     }
+*/
 
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
@@ -498,6 +504,7 @@ final class PlaygroundShader: Shader {
             bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
             rgb = output.makeTexture(width: inpWidth, height: inpHeight)
+            dotmask = output.makeTexture(width: inpWidth, height: inpHeight)
         }
 
         if crt?.width != crtWidth || crt?.height != crtHeight {
@@ -505,12 +512,14 @@ final class PlaygroundShader: Shader {
             crt = output.makeTexture(width: crtWidth, height: crtHeight)
         }
 
+        /*
         if (dotmaskType != uniforms.DOTMASK || dotmaskBrightness != uniforms.DOTMASK_BRIGHTNESS) {
 
             updateDotMask()
             dotmaskType = uniforms.DOTMASK
             dotmaskBrightness = uniforms.DOTMASK_BRIGHTNESS
         }
+        */
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,
@@ -540,12 +549,25 @@ final class PlaygroundShader: Shader {
         // Pass 3: Apply chroma effects
         //
 
+        let descriptor = DotMaskDescriptor(type: Int(uniforms.DOTMASK),
+                                           brightness: uniforms.DOTMASK_BRIGHTNESS,
+                                           blur: uniforms.BRIGHTNESS)
+
+        dotMaskLibrary.create(commandBuffer: commandBuffer,
+                              descriptor: descriptor,
+                              texture: &dotmask)
+
         chromaKernel.apply(commandBuffer: commandBuffer,
                            textures: [ycc, dotmask, rgb, bri],
                            options: &app.windowController!.metalView!.uniforms,
                            length: MemoryLayout<Uniforms>.stride,
                            options2: &uniforms,
                            length2: MemoryLayout<PlaygroundUniforms>.stride)
+
+        //
+        // Pass 4: Create the bloom texture
+        //
+
 
         //
         // Pass 4: Create the bloom texture

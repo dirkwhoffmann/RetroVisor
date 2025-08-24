@@ -14,16 +14,6 @@ enum ResampleFilterType: Int32 {
 
     case bilinear = 0
     case lanczos = 1
-
-    /*
-    func getFilter(device: MTLDevice) -> MPSImageScale {
-
-        switch self {
-        case .bilinear: return MPSImageBilinearScale(device: device)
-        case .lanczos: return MPSImageLanczosScale(device: device)
-        }
-    }
-    */
 }
 
 @MainActor
