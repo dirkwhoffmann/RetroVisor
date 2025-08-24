@@ -12,6 +12,16 @@ import MetalPerformanceShaders
 
 // This shader is my personal playground for developing self-made CRT effects.
 
+/*
+enum PlaygroundDebug: Int32 {
+
+    case off = 0
+    case luma = 1
+    case chroma = 2
+    case shadow = 3
+}
+*/
+
 struct PlaygroundUniforms {
 
     var INPUT_PIXEL_SIZE: Float
@@ -49,6 +59,8 @@ struct PlaygroundUniforms {
     var SHAPE: Float
     var FEATHER: Float
 
+    var DEBUG: Int32
+
     static let defaults = PlaygroundUniforms(
 
         INPUT_PIXEL_SIZE: 1,
@@ -84,7 +96,9 @@ struct PlaygroundUniforms {
         MIN_DOT_HEIGHT: 0.1,
         MAX_DOT_HEIGHT: 0.9,
         SHAPE: 2.0,
-        FEATHER: 0.2
+        FEATHER: 0.2,
+
+        DEBUG: 0
     )
 }
 
@@ -320,8 +334,17 @@ final class PlaygroundShader: Shader {
                 key: "FEATHER",
                 range: 0.0...3.0,
                 step: 0.01
-            )
+            ),
 
+            ShaderSetting(
+                name: "Debug",
+                key: "DEBUG",
+                values: [ ("Off", 0),
+                          ("Luma", 1),
+                          ("Chroma U/I", 2),
+                          ("Chroma V/Q", 3),
+                          ("Shadow", 4) ]
+            ),
         ]
     }
 
@@ -360,6 +383,8 @@ final class PlaygroundShader: Shader {
         case "MAX_DOT_HEIGHT": return uniforms.MAX_DOT_HEIGHT
         case "SHAPE": return uniforms.SHAPE
         case "FEATHER": return uniforms.FEATHER
+
+        case "DEBUG": return Float(uniforms.DEBUG)
 
         default:
             NSSound.beep()
@@ -402,6 +427,8 @@ final class PlaygroundShader: Shader {
         case "MAX_DOT_HEIGHT": uniforms.MAX_DOT_HEIGHT = value
         case "SHAPE": uniforms.SHAPE = value
         case "FEATHER": uniforms.FEATHER = value
+
+        case "DEBUG": uniforms.DEBUG = Int32(value)
 
         default:
             NSSound.beep()
@@ -469,10 +496,10 @@ final class PlaygroundShader: Shader {
 
         splitKernel.apply(commandBuffer: commandBuffer,
                     textures: [src, ycc],
-                    options: &app.windowController!.metalView!.uniforms,
-                    length: MemoryLayout<Uniforms>.stride,
-                    options2: &uniforms,
-                    length2: MemoryLayout<PlaygroundUniforms>.stride)
+                    // options: &app.windowController!.metalView!.uniforms,
+                    // length: MemoryLayout<Uniforms>.stride,
+                    options: &uniforms,
+                    length: MemoryLayout<PlaygroundUniforms>.stride)
 
         let pyramid = MPSImageGaussianPyramid(device: ycc.device)
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
@@ -493,10 +520,10 @@ final class PlaygroundShader: Shader {
 
         chromaKernel.apply(commandBuffer: commandBuffer,
                            textures: [ycc, dotmask, rgb, bri],
-                           options: &app.windowController!.metalView!.uniforms,
-                           length: MemoryLayout<Uniforms>.stride,
-                           options2: &uniforms,
-                           length2: MemoryLayout<PlaygroundUniforms>.stride)
+                           // options: &app.windowController!.metalView!.uniforms,
+                           // length: MemoryLayout<Uniforms>.stride,
+                           options: &uniforms,
+                           length: MemoryLayout<PlaygroundUniforms>.stride)
 
         //
         // Pass 4: Compute the shadow mask
@@ -504,10 +531,10 @@ final class PlaygroundShader: Shader {
 
         shadowMaskKernel.apply(commandBuffer: commandBuffer,
                                textures: [ycc, shadow],
-                               options: &app.windowController!.metalView!.uniforms,
-                               length: MemoryLayout<Uniforms>.stride,
-                               options2: &uniforms,
-                               length2: MemoryLayout<PlaygroundUniforms>.stride)
+                               // options: &app.windowController!.metalView!.uniforms,
+                               // length: MemoryLayout<Uniforms>.stride,
+                               options: &uniforms,
+                               length: MemoryLayout<PlaygroundUniforms>.stride)
 
         let shadowFilter = MPSImageGaussianBlur(device: ycc.device, sigma: uniforms.FEATHER)
         shadowFilter.encode(commandBuffer: commandBuffer, inPlaceTexture: &shadow)
@@ -541,10 +568,10 @@ final class PlaygroundShader: Shader {
 
         crtKernel.apply(commandBuffer: commandBuffer,
                         textures: [rgb, shadow, dotmask, blm, output],
-                        options: &app.windowController!.metalView!.uniforms,
-                        length: MemoryLayout<Uniforms>.stride,
-                        options2: &uniforms,
-                        length2: MemoryLayout<PlaygroundUniforms>.stride)
+                        // options: &app.windowController!.metalView!.uniforms,
+                        // length: MemoryLayout<Uniforms>.stride,
+                        options: &uniforms,
+                        length: MemoryLayout<PlaygroundUniforms>.stride)
 
         /*
         //

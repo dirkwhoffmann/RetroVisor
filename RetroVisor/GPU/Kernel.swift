@@ -99,7 +99,7 @@ class Kernel {
 
         // Compute how many groups are needed (rounding up to cover all pixels)
         let threadgroupsPerGrid = MTLSize(
-            width: (width + threadsPerThreadgroup.width  - 1) / threadsPerThreadgroup.width,
+            width: (width + threadsPerThreadgroup.width - 1) / threadsPerThreadgroup.width,
             height: (height + threadsPerThreadgroup.height - 1) / threadsPerThreadgroup.height,
             depth: 1
         )

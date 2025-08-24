@@ -16,6 +16,12 @@ using namespace metal;
 // Welcome to Dirk's shader playground
 //
 
+typedef float   Coord;
+typedef float2  Coord2;
+typedef half    Color;
+typedef half3   Color3;
+typedef half4   Color4;
+
 namespace playground {
 
     //
@@ -32,6 +38,11 @@ namespace playground {
         );
     }
 
+    inline half3 RGB2YIQ(half3 rgb) {
+
+        return half3(RGB2YIQ(float3(rgb)));
+    }
+
     inline float3 YIQ2RGB(float3 yiq) {
 
         float Y = yiq.x, I = yiq.y, Q = yiq.z;
@@ -43,6 +54,11 @@ namespace playground {
         return clamp(rgb, 0.0, 1.0);
     }
 
+    inline half3 YIQ2RGB(half3 yiq) {
+
+        return half3(YIQ2RGB(float3(yiq)));
+    }
+
     inline float3 RGB2YUV(float3 rgb) {
 
         // PAL-ish YUV (BT.601)
@@ -51,6 +67,11 @@ namespace playground {
             dot(rgb, float3(-0.14713, -0.28886,  0.436)),   // U
             dot(rgb, float3(0.615,    -0.51499, -0.10001))  // V
         );
+    }
+
+    inline half3 RGB2YUV(half3 rgb) {
+
+        return half3(RGB2YUV(float3(rgb)));
     }
 
     inline float3 YUV2RGB(float3 yuv) {
@@ -64,10 +85,16 @@ namespace playground {
         return clamp(rgb, 0.0, 1.0);
     }
 
+    inline half3 YUV2RGB(half3 yuv) {
+
+        return half3(YUV2RGB(float3(yuv)));
+    }
+
     //
     // Geometry helpers
     //
 
+    /*
     // Fast Padé approximation for the Minkowski norm (|u|^n + |v|^n)^(1/n)
     inline float minkowski(float2 uv, float n)
     {
@@ -104,11 +131,11 @@ namespace playground {
             return 1.0;
         }
     }
+    */
 
     kernel void colorSpace(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                            texture2d<half, access::write>  outTex    [[ texture(1) ]],
-                           constant Uniforms               &uniforms [[ buffer(0)  ]],
-                           constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
+                           constant PlaygroundUniforms     &u        [[ buffer(0)  ]],
                            sampler                         sam       [[ sampler(0) ]],
                            uint2                           gid       [[ thread_position_in_grid ]])
     {
@@ -140,8 +167,8 @@ namespace playground {
 
     kernel void shadowMask(texture2d<half, access::sample> input     [[ texture(0) ]],
                            texture2d<half, access::write>  output    [[ texture(1) ]],
-                           constant Uniforms               &uniforms [[ buffer(0)  ]],
-                           constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
+                           // constant Uniforms               &uniforms [[ buffer(0)  ]],
+                           constant PlaygroundUniforms     &u        [[ buffer(0)  ]],
                            sampler                         sam       [[ sampler(0) ]],
                            uint2                           gid       [[ thread_position_in_grid ]])
     {
@@ -213,8 +240,8 @@ namespace playground {
                           texture2d<half, access::sample> dotMask   [[ texture(1) ]],
                           texture2d<half, access::write>  outTex    [[ texture(2) ]],
                           texture2d<half, access::write>  brightTex [[ texture(3) ]],
-                          constant Uniforms               &uniforms [[ buffer(0)  ]],
-                          constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
+                          // constant Uniforms               &uniforms [[ buffer(0)  ]],
+                          constant PlaygroundUniforms     &u        [[ buffer(0)  ]],
                           sampler                         sam       [[ sampler(0) ]],
                           uint2                           gid       [[ thread_position_in_grid ]])
     {
@@ -298,27 +325,56 @@ namespace playground {
                     texture2d<half, access::sample> dotMask   [[ texture(2) ]],
                     texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
                     texture2d<half, access::write>  outTex    [[ texture(4) ]],
-                    constant Uniforms               &uniforms [[ buffer(0)  ]],
-                    constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
+                    constant PlaygroundUniforms     &u        [[ buffer(0)  ]],
                     sampler                         sam       [[ sampler(0) ]],
                     uint2                           gid       [[ thread_position_in_grid ]])
     {
-        // float2 iSize = float2(inTex.get_width(), inTex.get_height());
-        float2 size = float2(outTex.get_width(), outTex.get_height());
+        // float2 size = float2(outTex.get_width(), outTex.get_height());
 
         // Normalize gid to 0..1 in output texture
-        float2 uv = (float2(gid) + 0.5) / size;
+        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(outTex.get_width(), outTex.get_height());;
 
-        // Read texel
+        if (u.DEBUG > 0) {
+
+            half4 color;
+            switch(u.DEBUG) {
+                case 1:
+                    color = inTex.sample(sam, uv).xxxw;
+                    break;
+                case 2:
+                    color = inTex.sample(sam, uv);
+                    color.x = 1.0;
+                    color.z = 0.0;
+                    color = Color4(u.PAL ? YUV2RGB(color.xyz) : YIQ2RGB(color.xyz), 1.0);
+                    break;
+                case 3:
+                    color = inTex.sample(sam, uv);
+                    color.x = 1.0;
+                    color.y = 0.0;
+                    color = Color4(u.PAL ? YUV2RGB(color.xyz) : YIQ2RGB(color.xyz), 1.0);
+                    break;
+                default:
+                    color = shadow.sample(sam, uv);
+                    break;
+            }
+            outTex.write(color, gid);
+            return;
+        }
+
+        // Read image
         half4 color = inTex.sample(sam, uv);
 
-        // Show the shadow texture for now
+        // Read shadow mask
+        half4 shadowColor = shadow.sample(sam, uv);
 
+        // Show the shadow texture for now
+        /*
         color = shadow.sample(sam, uv);
         outTex.write(color, gid);
         return;
+        */
 
-
+        color *= shadowColor; 
 
 
 
@@ -375,6 +431,7 @@ namespace playground {
         // Experimental...
         //
 
+        /*
         // half4 color = inTex.sample(sam, uv);
 
         // Find the dot cell we are in
@@ -436,6 +493,7 @@ namespace playground {
         result.b = 0;
         // Output (for now just grayscale, later modulate with input image color & size)
         outTex.write(half4(result, 1.0), gid);
+        */
     }
 
 }

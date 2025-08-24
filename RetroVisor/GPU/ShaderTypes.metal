@@ -98,6 +98,8 @@ struct PlaygroundUniforms {
     float MAX_DOT_HEIGHT;
     float SHAPE;
     float FEATHER;
+
+    uint  DEBUG;
 };
 
 #endif
