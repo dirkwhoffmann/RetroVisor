@@ -77,12 +77,12 @@ struct PlaygroundUniforms {
 
         BRIGHTNESS: 1,
         GLOW: 1,
-        GRID_WIDTH: 20,
-        GRID_HEIGHT: 20,
+        GRID_WIDTH: 6,
+        GRID_HEIGHT: 6,
         MIN_DOT_WIDTH: 1,
-        MAX_DOT_WIDTH: 10,
+        MAX_DOT_WIDTH: 4,
         MIN_DOT_HEIGHT: 1,
-        MAX_DOT_HEIGHT: 10,
+        MAX_DOT_HEIGHT: 4,
         SHAPE: 2.0,
         FEATHER: 0.2
     )
@@ -94,6 +94,7 @@ final class PlaygroundShader: Shader {
     var splitKernel: Kernel!
     var crtKernel: Kernel!
     var chromaKernel: Kernel!
+    var shadowMaskKernel: Kernel!
     var uniforms: PlaygroundUniforms = .defaults
 
     // Result of pass 1: Downscaled input texture
@@ -118,11 +119,12 @@ final class PlaygroundShader: Shader {
     // Blur filter
     var blurFilter = BlurFilter()
 
-    // The dotmask texture
+    // Shadow mask and dot mask textures
+    var shadow: MTLTexture!
     var dotmask: MTLTexture!
 
-    var dotmaskType: Int32?
-    var dotmaskBrightness: Float?
+    // var dotmaskType: Int32?
+    // var dotmaskBrightness: Float?
 
     //
     var dotMaskLibrary: DotMaskLibrary!
@@ -256,7 +258,7 @@ final class PlaygroundShader: Shader {
                 step: 0.01
             ),
 
-            /*
+
             ShaderSetting(
                 name: "Glow",
                 key: "GLOW",
@@ -281,29 +283,29 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Minimal Dot Width",
                 key: "MIN_DOT_WIDTH",
-                range: 1.0...60.0,
-                step: 1.0
+                range: 1.0...10.0,
+                step: 0.01
             ),
 
             ShaderSetting(
                 name: "Maximal Dot Width",
                 key: "MAX_DOT_WIDTH",
-                range: 1.0...60.0,
-                step: 1.0
+                range: 1.0...10.0,
+                step: 0.01
             ),
 
             ShaderSetting(
                 name: "Minimal Dot Height",
                 key: "MIN_DOT_HEIGHT",
-                range: 1.0...60.0,
-                step: 1.0
+                range: 1.0...10.0,
+                step: 0.01
             ),
 
             ShaderSetting(
                 name: "Maximal Dot Height",
                 key: "MAX_DOT_HEIGHT",
-                range: 1.0...60.0,
-                step: 1.0
+                range: 1.0...10.0,
+                step: 0.01
             ),
 
             ShaderSetting(
@@ -319,7 +321,7 @@ final class PlaygroundShader: Shader {
                 range: 0.0...1.0,
                 step: 0.01
             )
-            */
+
         ]
     }
 
@@ -417,6 +419,7 @@ final class PlaygroundShader: Shader {
         splitKernel = ColorSpaceFilter(sampler: ShaderLibrary.linear)
         crtKernel = CrtFilter(sampler: ShaderLibrary.linear)
         chromaKernel = CompositeFilter(sampler: ShaderLibrary.linear)
+        shadowMaskKernel = ShadowMaskFilter(sampler: ShaderLibrary.linear)
         dotMaskLibrary = DotMaskLibrary()
     }
 
@@ -504,6 +507,7 @@ final class PlaygroundShader: Shader {
             bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
             rgb = output.makeTexture(width: inpWidth, height: inpHeight)
+            shadow = output.makeTexture(width: inpWidth, height: inpHeight)
             dotmask = output.makeTexture(width: inpWidth, height: inpHeight)
         }
 
@@ -565,6 +569,17 @@ final class PlaygroundShader: Shader {
                            length2: MemoryLayout<PlaygroundUniforms>.stride)
 
         //
+        // Pass 4: Compute the shadow mask
+        //
+
+        shadowMaskKernel.apply(commandBuffer: commandBuffer,
+                               textures: [ycc, shadow],
+                               options: &app.windowController!.metalView!.uniforms,
+                               length: MemoryLayout<Uniforms>.stride,
+                               options2: &uniforms,
+                               length2: MemoryLayout<PlaygroundUniforms>.stride)
+
+        //
         // Pass 4: Create the bloom texture
         //
 
@@ -591,7 +606,7 @@ final class PlaygroundShader: Shader {
         //
 
         crtKernel.apply(commandBuffer: commandBuffer,
-                        textures: [rgb, dotmask, blm, output],
+                        textures: [rgb, shadow, dotmask, blm, output],
                         options: &app.windowController!.metalView!.uniforms,
                         length: MemoryLayout<Uniforms>.stride,
                         options2: &uniforms,

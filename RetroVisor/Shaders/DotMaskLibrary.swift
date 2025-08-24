@@ -57,14 +57,14 @@ class DotMaskLibrary {
         let N = UInt32(r: none, g: none, b: none)
 
         /*
-        let maskSize = [
-            CGSize(width: 1, height: 1),
-            CGSize(width: 3, height: 1),
-            CGSize(width: 4, height: 2),
-            CGSize(width: 3, height: 9),
-            CGSize(width: 4, height: 8)
-        ]
-        */
+         let maskSize = [
+         CGSize(width: 1, height: 1),
+         CGSize(width: 3, height: 1),
+         CGSize(width: 4, height: 2),
+         CGSize(width: 3, height: 9),
+         CGSize(width: 4, height: 8)
+         ]
+         */
 
         let maskData = [
 
@@ -128,7 +128,5 @@ class DotMaskLibrary {
         filter.encode(commandBuffer: commandBuffer, inPlaceTexture: &texture)
 
         self.descriptor = descriptor
-
     }
 }
-

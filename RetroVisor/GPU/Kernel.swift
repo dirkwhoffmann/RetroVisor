@@ -148,6 +148,14 @@ class ColorSpaceFilter: Kernel {
     }
 }
 
+class ShadowMaskFilter: Kernel {
+
+    convenience init?(sampler: MTLSamplerState) {
+
+        self.init(name: "playground::shadowMask", sampler: sampler)
+    }
+}
+
 class DotMaskFilter: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {

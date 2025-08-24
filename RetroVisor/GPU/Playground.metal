@@ -138,6 +138,53 @@ namespace playground {
         return color * mask * intensity;
     }
 
+    kernel void shadowMask(texture2d<half, access::sample> input     [[ texture(0) ]],
+                           texture2d<half, access::write>  output    [[ texture(1) ]],
+                           constant Uniforms               &uniforms [[ buffer(0)  ]],
+                           constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
+                           sampler                         sam       [[ sampler(0) ]],
+                           uint2                           gid       [[ thread_position_in_grid ]])
+    {
+        uint2 size = (output.get_width(), output.get_height());
+
+        float2 uv = (float2(gid % size) + 0.5) / float2(size);
+
+        // Normalized texture coords
+        // float2 uv = in.texCoord;
+
+        // Sample original color
+        half3 srcColor = input.sample(sam, uv).rgb;
+
+        // Convert to luminance (or just use intensity modulation)
+        float luminance = srcColor.x; //  dot(srcColor, float3(0.299, 0.587, 0.114));
+
+        // --- Dot lattice setup ---
+        float2 cellSize = float2(u.GRID_WIDTH, u.GRID_HEIGHT);      // grid spacing in *pixels*
+        float2 pixelCoord = float2(gid); // uv * screenSize;
+        float2 gridCoord = floor(pixelCoord / cellSize);
+        float2 gridCenter = (gridCoord + 0.5) * cellSize;
+
+        // Distance to nearest dot center (in pixels)
+        float2 d = pixelCoord - gridCenter;
+        float dist = length(d);
+
+        // --- Radius depends on luminance ---
+        // float2 minWH = float2(u.MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT)
+        // float2 maxWH = float2(u.MAX_DOT_WIDTH, u.MAX_DOT_HEIGHT)
+        float radius = mix(u.MIN_DOT_WIDTH, u.MAX_DOT_WIDTH, pow(luminance, u.GLOW));
+
+        // --- Dot falloff ---
+        // Smoothstep makes soft edges, bigger for bright pixels
+        float spot = smoothstep(radius, radius * 0.5, dist);
+
+        // Scale final brightness by luminance
+        half3 finalColor = half3(spot); //  srcColor * spot;
+
+        // return float4(finalColor, 1.0);
+
+        output.write(half4(finalColor, 1.0), gid);
+    }
+
     kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
                         texture2d<half, access::write>  output    [[ texture(1) ]],
                         sampler                         sam       [[ sampler(0) ]],
@@ -203,18 +250,15 @@ namespace playground {
 
         half4 color = half4(half3(rgb), 1.0);
 
+        /*
         if (u.DOTMASK_ENABLE) {
 
-            /*
-            uint xoffset = (gid.x % (2 * dotMask.get_width())) / 2;
-            uint yoffset = (gid.y % (2 * dotMask.get_height())) / 2;
-            half4 dotColor = dotMask.read(uint2(xoffset, yoffset));
-            */
             half4 dotColor = dotMask.read(gid);
             half4 gain = min(color, 1 - color) * dotColor;
             half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
             color += gain - loose;
         }
+        */
 
         outTex.write(color, gid);
 
@@ -241,9 +285,10 @@ namespace playground {
     }
 
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
-                    texture2d<half, access::sample> dotMask   [[ texture(1) ]],
-                    texture2d<half, access::sample> bloomTex  [[ texture(2) ]],
-                    texture2d<half, access::write>  outTex    [[ texture(3) ]],
+                    texture2d<half, access::sample> shadow    [[ texture(1) ]],
+                    texture2d<half, access::sample> dotMask   [[ texture(2) ]],
+                    texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
+                    texture2d<half, access::write>  outTex    [[ texture(4) ]],
                     constant Uniforms               &uniforms [[ buffer(0)  ]],
                     constant PlaygroundUniforms     &u        [[ buffer(1)  ]],
                     sampler                         sam       [[ sampler(0) ]],
@@ -258,12 +303,17 @@ namespace playground {
         // Read texel
         half4 color = inTex.sample(sam, uv);
 
-        // Show the dotmask texture for now
-        /*
-        color = dotMask.sample(sam, uv);
+        // Show the shadow texture for now
+
+        color = shadow.sample(sam, uv);
         outTex.write(color, gid);
         return;
-        */
+
+
+
+
+
+
         /*
         uint line = gid.y % 4;
 
@@ -278,17 +328,14 @@ namespace playground {
         }
         */
 
-        /*
         // Apply dot mask effect
-        // if (options.dotMask) {
-        uint xoffset = gid.x % dotMask.get_width();
-        uint yoffset = gid.y % dotMask.get_height();
-        half4 dotColor = dotMask.read(uint2(xoffset, yoffset));
-        half4 gain = min(color, 1 - color) * dotColor;
-        half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
-        color += gain - loose;
-        // }
-        */
+        if (u.DOTMASK_ENABLE) {
+
+            half4 dotColor = dotMask.read(gid);
+            half4 gain = min(color, 1 - color) * dotColor;
+            half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
+            color += gain - loose;
+        }
 
         // Apply bloom effect
 
