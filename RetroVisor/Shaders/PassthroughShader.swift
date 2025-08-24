@@ -59,53 +59,56 @@ final class PassthroughShader: Shader {
 
         settings = [
 
-            ShaderSetting(
-                name: "Input Pixel Size",
-                key: "INPUT_PIXEL_SIZE",
-                range: 1...16,
-                step: 1
-            ),
+            ShaderSettingGroup(title: "General", children: [
 
-            ShaderSetting(
-                name: "Blur Filter",
-                enableKey: "BLUR_ENABLE",
-                key: "BLUR_FILTER",
-                values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
-            ),
+                ShaderSetting(
+                    name: "Input Pixel Size",
+                    key: "INPUT_PIXEL_SIZE",
+                    range: 1...16,
+                    step: 1
+                ),
 
-            ShaderSetting(
-                name: "Blur width",
-                key: "BLUR_RADIUS_X",
-                range: 0.1...20.0,
-                step: 0.1
-            ),
+                ShaderSetting(
+                    name: "Blur Filter",
+                    enableKey: "BLUR_ENABLE",
+                    key: "BLUR_FILTER",
+                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
+                ),
 
-            ShaderSetting(
-                name: "Blur height",
-                key: "BLUR_RADIUS_Y",
-                range: 0.1...20.0,
-                step: 0.1
-            ),
+                ShaderSetting(
+                    name: "Blur width",
+                    key: "BLUR_RADIUS_X",
+                    range: 0.1...20.0,
+                    step: 0.1
+                ),
 
-            ShaderSetting(
-                name: "Resampler",
-                key: "RESAMPLE_FILTER",
-                values: [("BILINEAR", 0), ("LANCZOS", 1)]
-            ),
+                ShaderSetting(
+                    name: "Blur height",
+                    key: "BLUR_RADIUS_Y",
+                    range: 0.1...20.0,
+                    step: 0.1
+                ),
 
-            ShaderSetting(
-                name: "Scale X",
-                key: "RESAMPLE_SCALE_X",
-                range: 0.1...1.0,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Resampler",
+                    key: "RESAMPLE_FILTER",
+                    values: [("BILINEAR", 0), ("LANCZOS", 1)]
+                ),
 
-            ShaderSetting(
-                name: "Scale Y",
-                key: "RESAMPLE_SCALE_Y",
-                range: 0.1...1.0,
-                step: 0.01
-            )
+                ShaderSetting(
+                    name: "Scale X",
+                    key: "RESAMPLE_SCALE_X",
+                    range: 0.1...1.0,
+                    step: 0.01
+                ),
+
+                ShaderSetting(
+                    name: "Scale Y",
+                    key: "RESAMPLE_SCALE_Y",
+                    range: 0.1...1.0,
+                    step: 0.01
+                )
+            ])
         ]
     }
 

@@ -10,6 +10,18 @@
 import MetalKit
 import MetalPerformanceShaders
 
+class ShaderSettingGroup {
+
+    let title: String
+    var children: [ShaderSetting]
+
+    init(title: String, children: [ShaderSetting]) {
+
+        self.title = title
+        self.children = children
+    }
+}
+
 struct ShaderSetting {
 
     let name: String
@@ -61,7 +73,7 @@ class Shader : Loggable {
     let logging: Bool = false
 
     var name: String = ""
-    var settings: [ShaderSetting] = []
+    var settings: [ShaderSettingGroup] = []
 
     init(name: String) {
 

@@ -160,216 +160,219 @@ final class PlaygroundShader: Shader {
 
         settings = [
 
-            ShaderSetting(
-                name: "Input Pixel Size",
-                key: "INPUT_PIXEL_SIZE",
-                range: 1...16,
-                step: 1
-            ),
+            ShaderSettingGroup(title: "General", children: [
 
-            ShaderSetting(
-                name: "Resampler",
-                key: "RESAMPLE_FILTER",
-                values: [("BILINEAR", 0), ("LANCZOS", 1)]
-            ),
+                ShaderSetting(
+                    name: "Input Pixel Size",
+                    key: "INPUT_PIXEL_SIZE",
+                    range: 1...16,
+                    step: 1
+                ),
 
-            ShaderSetting(
-                name: "Video Standard",
-                key: "PAL",
+                ShaderSetting(
+                    name: "Resampler",
+                    key: "RESAMPLE_FILTER",
+                    values: [("BILINEAR", 0), ("LANCZOS", 1)]
+                ),
+
+                ShaderSetting(
+                    name: "Video Standard",
+                    key: "PAL",
                 values: [("PAL", 1), ("NTSC", 0)]
-            ),
+                ),
 
-            ShaderSetting(
-                name: "Chroma Radius",
-                key: "CHROMA_RADIUS",
-                range: 1...10,
-                step: 1
-            ),
+                ShaderSetting(
+                    name: "Chroma Radius",
+                    key: "CHROMA_RADIUS",
+                    range: 1...10,
+                    step: 1
+                ),
 
-            ShaderSetting(
-                name: "Bloom Filter",
-                enableKey: "BLOOM_ENABLE",
-                key: "BLOOM_FILTER",
-                values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
-            ),
+                ShaderSetting(
+                    name: "Bloom Filter",
+                    enableKey: "BLOOM_ENABLE",
+                    key: "BLOOM_FILTER",
+                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
+                ),
 
-            ShaderSetting(
-                name: "Bloom Threshold",
-                key: "BLOOM_THRESHOLD",
-                range: 0.0...1.0,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Bloom Threshold",
+                    key: "BLOOM_THRESHOLD",
+                    range: 0.0...1.0,
+                    step: 0.01
+                ),
 
-            ShaderSetting(
-                name: "Bloom Intensity",
-                key: "BLOOM_INTENSITY",
-                range: 0.1...2.0,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Bloom Intensity",
+                    key: "BLOOM_INTENSITY",
+                    range: 0.1...2.0,
+                    step: 0.01
+                ),
 
-            ShaderSetting(
-                name: "Bloom Radius X",
-                key: "BLOOM_RADIUS_X",
-                range: 0.0...30.0,
-                step: 1.0
-            ),
+                ShaderSetting(
+                    name: "Bloom Radius X",
+                    key: "BLOOM_RADIUS_X",
+                    range: 0.0...30.0,
+                    step: 1.0
+                ),
 
-            ShaderSetting(
-                name: "Bloom Radius Y",
-                key: "BLOOM_RADIUS_Y",
-                range: 0.0...30.0,
-                step: 1.0
-            ),
+                ShaderSetting(
+                    name: "Bloom Radius Y",
+                    key: "BLOOM_RADIUS_Y",
+                    range: 0.0...30.0,
+                    step: 1.0
+                ),
 
-            /*
-            ShaderSetting(
-                name: "Scanline Brightness",
-                enableKey: "SCANLINE_ENABLE",
-                key: "SCANLINE_BRIGHTNESS",
-                range: 0.0...2.0,
-                step: 0.01
-            ),
+                /*
+                 ShaderSetting(
+                 name: "Scanline Brightness",
+                 enableKey: "SCANLINE_ENABLE",
+                 key: "SCANLINE_BRIGHTNESS",
+                 range: 0.0...2.0,
+                 step: 0.01
+                 ),
 
-            ShaderSetting(
-                name: "Scanline Weight 1",
-                key: "SCANLINE_WEIGHT1",
-                range: 0.1...1.0,
-                step: 0.01
-            ),
+                 ShaderSetting(
+                 name: "Scanline Weight 1",
+                 key: "SCANLINE_WEIGHT1",
+                 range: 0.1...1.0,
+                 step: 0.01
+                 ),
 
-            ShaderSetting(
-                name: "Scanline Weight 2",
-                key: "SCANLINE_WEIGHT2",
-                range: 0.1...1.0,
-                step: 0.01
-            ),
+                 ShaderSetting(
+                 name: "Scanline Weight 2",
+                 key: "SCANLINE_WEIGHT2",
+                 range: 0.1...1.0,
+                 step: 0.01
+                 ),
 
-            ShaderSetting(
-                name: "Scanline Weight 3",
-                key: "SCANLINE_WEIGHT3",
-                range: 0.1...1.0,
-                step: 0.01
-            ),
+                 ShaderSetting(
+                 name: "Scanline Weight 3",
+                 key: "SCANLINE_WEIGHT3",
+                 range: 0.1...1.0,
+                 step: 0.01
+                 ),
 
-            ShaderSetting(
-                name: "Scanline Weight 4",
-                key: "SCANLINE_WEIGHT4",
-                range: 0.1...1.0,
-                step: 0.01
-            ),
-            */
-            
-            ShaderSetting(
-                name: "Dotmask",
-                enableKey: "DOTMASK_ENABLE",
-                key: "DOTMASK",
-                range: 0...4,
-                step: 1.0
-            ),
+                 ShaderSetting(
+                 name: "Scanline Weight 4",
+                 key: "SCANLINE_WEIGHT4",
+                 range: 0.1...1.0,
+                 step: 0.01
+                 ),
+                 */
 
-            ShaderSetting(
-                name: "Dotmask Brightness",
-                key: "DOTMASK_BRIGHTNESS",
-                range: 0...1,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Dotmask",
+                    enableKey: "DOTMASK_ENABLE",
+                    key: "DOTMASK",
+                    range: 0...4,
+                    step: 1.0
+                ),
 
-            ShaderSetting(
-                name: "Brightness",
-                key: "BRIGHTNESS",
-                range: 0.0...2.0,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Dotmask Brightness",
+                    key: "DOTMASK_BRIGHTNESS",
+                    range: 0...1,
+                    step: 0.01
+                ),
+
+                ShaderSetting(
+                    name: "Brightness",
+                    key: "BRIGHTNESS",
+                    range: 0.0...2.0,
+                    step: 0.01
+                ),
 
 
-            ShaderSetting(
-                name: "Glow",
-                key: "GLOW",
-                range: 0.0...2.0,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Glow",
+                    key: "GLOW",
+                    range: 0.0...2.0,
+                    step: 0.01
+                ),
 
-            ShaderSetting(
-                name: "Grid Width",
-                key: "GRID_WIDTH",
-                range: 1.0...60.0,
-                step: 1.0
-            ),
+                ShaderSetting(
+                    name: "Grid Width",
+                    key: "GRID_WIDTH",
+                    range: 1.0...60.0,
+                    step: 1.0
+                ),
 
-            ShaderSetting(
-                name: "Grid Height",
-                key: "GRID_HEIGHT",
-                range: 1.0...60.0,
-                step: 1.0
-            ),
+                ShaderSetting(
+                    name: "Grid Height",
+                    key: "GRID_HEIGHT",
+                    range: 1.0...60.0,
+                    step: 1.0
+                ),
 
-            ShaderSetting(
-                name: "Maximal Dot Width",
-                key: "MAX_DOT_WIDTH",
-                range: 0.0...1.0,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Maximal Dot Width",
+                    key: "MAX_DOT_WIDTH",
+                    range: 0.0...1.0,
+                    step: 0.01
+                ),
 
-            /*
-            ShaderSetting(
-                name: "Minimal Dot Height",
-                key: "MIN_DOT_HEIGHT",
-                range: 0.0...1.0,
-                step: 0.01
-            ),
-            */
+                /*
+                 ShaderSetting(
+                 name: "Minimal Dot Height",
+                 key: "MIN_DOT_HEIGHT",
+                 range: 0.0...1.0,
+                 step: 0.01
+                 ),
+                 */
 
-            ShaderSetting(
-                name: "Maximal Dot Height",
-                key: "MAX_DOT_HEIGHT",
-                range: 0.0...1.0,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Maximal Dot Height",
+                    key: "MAX_DOT_HEIGHT",
+                    range: 0.0...1.0,
+                    step: 0.01
+                ),
 
-            ShaderSetting(
-                name: "Minimal Dot Size",
-                key: "MIN_DOT_WIDTH",
-                range: 0.0...1.0,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Minimal Dot Size",
+                    key: "MIN_DOT_WIDTH",
+                    range: 0.0...1.0,
+                    step: 0.01
+                ),
 
-            ShaderSetting(
-                name: "Phospor Shape",
-                key: "SHAPE",
-                range: 1.0...10.0,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Phospor Shape",
+                    key: "SHAPE",
+                    range: 1.0...10.0,
+                    step: 0.01
+                ),
 
-            ShaderSetting(
-                name: "Phosphor Feather",
-                key: "FEATHER",
-                range: 0.0...3.0,
-                step: 0.01
-            ),
+                ShaderSetting(
+                    name: "Phosphor Feather",
+                    key: "FEATHER",
+                    range: 0.0...3.0,
+                    step: 0.01
+                ),
 
-            ShaderSetting(
-                name: "Debug",
-                key: "DEBUG",
-                values: [ ("Off", 0),
-                          ("Ycc", 1),
-                          ("Ycc (Mipmap 1)", 2),
-                          ("Ycc (Mipmap 2)", 3),
-                          ("Ycc (Mipmap 3)", 4),
-                          ("Ycc (Mipmap 4)", 5),
-                          ("Luma", 6),
-                          ("Chroma U/I", 7),
-                          ("Chroma V/Q", 8),
-                          ("Shadow texture", 9),
-                          ("Bloom texture", 10) ]
-            ),
+                ShaderSetting(
+                    name: "Debug",
+                    key: "DEBUG",
+                    values: [ ("Off", 0),
+                              ("Ycc", 1),
+                              ("Ycc (Mipmap 1)", 2),
+                              ("Ycc (Mipmap 2)", 3),
+                              ("Ycc (Mipmap 3)", 4),
+                              ("Ycc (Mipmap 4)", 5),
+                              ("Luma", 6),
+                              ("Chroma U/I", 7),
+                              ("Chroma V/Q", 8),
+                              ("Shadow texture", 9),
+                              ("Bloom texture", 10) ]
+                ),
 
-            ShaderSetting(
-                name: "Debug Slider",
-                key: "DEBUG_SLIDER",
-                range: 0.0...1.0,
-                step: 0.01
-            )
-        ]
+                ShaderSetting(
+                    name: "Debug Slider",
+                    key: "DEBUG_SLIDER",
+                    range: 0.0...1.0,
+                    step: 0.01
+                )
+            ])
+         ]
     }
 
     override func get(key: String) -> Float {

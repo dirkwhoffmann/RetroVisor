@@ -53,8 +53,8 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         guard let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "settingsCell"), owner: self) as? ShaderSettingCell else { return nil }
 
-        cell.shaderSetting = shader.settings[row]
-        cell.value = shader.get(key: shader.settings[row].key)
+        cell.shaderSetting = shader.settings[0].children[row]
+        cell.value = shader.get(key: shader.settings[0].children[row].key)
         return cell
     }
 
@@ -81,5 +81,50 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     @IBAction func okAction(_ sender: NSButton) {
 
         view.window?.close()
+    }
+}
+
+extension ShaderPreferencesViewController: NSOutlineViewDataSource {
+
+    func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
+
+        if let group = item as? ShaderSettingGroup {
+            return group.children.count
+        } else {
+            return shader.settings.count
+        }
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
+
+        return item is ShaderSettingGroup
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
+
+        if let group = item as? ShaderSettingGroup {
+            return group.children[index]
+        } else {
+            return shader.settings[index]
+        }
+    }
+}
+
+extension ShaderPreferencesViewController: NSOutlineViewDelegate {
+
+    func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
+
+        if let group = item as? ShaderSettingGroup {
+
+            let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("GroupCell"), owner: self) as! NSTableCellView
+            cell.textField?.stringValue = group.title
+            return cell
+
+        } else if let row = item as? ShaderSetting {
+            let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("RowCell"), owner: self) as! NSTableCellView
+            cell.textField?.stringValue = row.title
+            return cell
+        }
+        return nil
     }
 }
