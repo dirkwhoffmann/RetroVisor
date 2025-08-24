@@ -9,9 +9,16 @@
 
 import Cocoa
 
-class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NSTableViewDataSource {
+class MyOutlineView : NSOutlineView {
 
-    @IBOutlet weak var tableView: NSTableView!
+    override func frameOfOutlineCell(atRow row: Int) -> NSRect {
+        return .zero
+    }
+}
+
+class ShaderPreferencesViewController: NSViewController {
+
+    @IBOutlet weak var outlineView: NSOutlineView!
     @IBOutlet weak var shaderSelector: NSPopUpButton!
 
     var shader: Shader { return ShaderLibrary.shared.currentShader }
@@ -20,8 +27,10 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
 
         // oldSettings = app.crtUniforms
 
-        tableView.delegate = self
-        tableView.dataSource = self
+        outlineView.delegate = self
+        outlineView.dataSource = self
+        // outlineView.rowSizeStyle = .large
+        outlineView.indentationPerLevel = 0
 
         // Add all available shaders to the shader selector popup
         shaderSelector.removeAllItems()
@@ -42,9 +51,10 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
     func refresh() {
 
         shaderSelector.selectItem(withTag: shader.id ?? 0) // Int(app.crtUniforms.ENABLE))
-        tableView.reloadData()
+        outlineView.reloadData()
     }
 
+    /*
     func numberOfRows(in tableView: NSTableView) -> Int {
 
         return shader.settings.count
@@ -57,6 +67,7 @@ class ShaderPreferencesViewController: NSViewController, NSTableViewDelegate, NS
         cell.value = shader.get(key: shader.settings[0].children[row].key)
         return cell
     }
+    */
 
     @IBAction func shaderSelectAction(_ sender: NSPopUpButton) {
 
@@ -95,6 +106,10 @@ extension ShaderPreferencesViewController: NSOutlineViewDataSource {
         }
     }
 
+    func outlineView(_ outlineView: NSOutlineView, heightOfRowByItem item: Any) -> CGFloat {
+
+        return item is ShaderSettingGroup ? 42 : 56
+    }
     func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
 
         return item is ShaderSettingGroup
@@ -116,14 +131,18 @@ extension ShaderPreferencesViewController: NSOutlineViewDelegate {
 
         if let group = item as? ShaderSettingGroup {
 
-            let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("GroupCell"), owner: self) as! NSTableCellView
-            cell.textField?.stringValue = group.title
+            let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("GroupCell"), owner: self) as! ShaderGroupCell
+            cell.label.stringValue = group.title
+            cell.shaderSettingGroup = group
+            cell.refresh()
             return cell
 
         } else if let row = item as? ShaderSetting {
 
-            let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("RowCell"), owner: self) as! NSTableCellView
-            cell.textField?.stringValue = row.name
+            guard let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "RowCell"), owner: self) as? ShaderSettingCell else { return nil }
+
+            cell.shaderSetting = row
+            // cell.value = shader.get(key: shader.settings[0].children[row].key)
             return cell
         }
         return nil

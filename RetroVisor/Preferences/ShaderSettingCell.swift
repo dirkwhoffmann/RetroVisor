@@ -9,6 +9,43 @@
 
 import Cocoa
 
+class ShaderGroupCell: NSTableCellView {
+
+    @IBOutlet weak var controller: ShaderPreferencesViewController!
+    @IBOutlet weak var disclosureButton: NSButton!
+    @IBOutlet weak var label: NSTextField!
+
+    var shaderSettingGroup: ShaderSettingGroup!
+
+    @IBAction func disclosureAction(_ sender: NSControl) {
+
+        if controller.outlineView.isItemExpanded(shaderSettingGroup) {
+            controller.outlineView.collapseItem(shaderSettingGroup)
+        } else {
+            controller.outlineView.expandItem(shaderSettingGroup)
+        }
+        refresh()
+    }
+
+    func refresh() {
+
+        let config = NSImage.SymbolConfiguration(pointSize: 18, weight: .bold)
+
+        if controller.outlineView.isItemExpanded(shaderSettingGroup) {
+
+            let chevronDown = NSImage(systemSymbolName: "chevron.down", accessibilityDescription: "Collapse")?
+                .withSymbolConfiguration(config)
+            disclosureButton.image = chevronDown
+
+        } else {
+
+            let chevronRight = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: "Expand")?
+                .withSymbolConfiguration(config)
+            disclosureButton.image = chevronRight
+        }
+    }
+}
+
 class ShaderSettingCell: NSTableCellView {
 
     @IBOutlet weak var controller: ShaderPreferencesViewController!
@@ -31,8 +68,6 @@ class ShaderSettingCell: NSTableCellView {
             let enableKey = shaderSetting.enableKey
             let enabled = enableKey == nil ? true : shader.get(key: enableKey!) != 0
             let active = !shader.isGrayedOut(key: shaderSetting.key)
-
-            // print("shaderSetting \(shaderSetting.name): didSet")
 
             optionLabel.stringValue = shaderSetting.name
             subLabel.stringValue = shaderSetting.key
@@ -109,15 +144,6 @@ class ShaderSettingCell: NSTableCellView {
         }
     }
 
-    /*
-    @IBAction func optAction(_ sender: NSButton) {
-
-        controller.shader.set(key: subLabel.stringValue, enable: sender.state == .on)
-        update();
-        // isEnabled = controller.shader.isEnabled(key: subLabel.stringValue)
-    }
-    */
-
     @IBAction func sliderAction(_ sender: NSControl) {
 
         let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
@@ -135,7 +161,7 @@ class ShaderSettingCell: NSTableCellView {
 
         shader.set(key: shaderSetting.key, value: Float(sender.selectedTag()))
         update();
-        controller.tableView.reloadData()
+        controller.outlineView.reloadData()
     }
 
     @IBAction func enableAction(_ sender: NSButton) {
@@ -144,11 +170,11 @@ class ShaderSettingCell: NSTableCellView {
 
             shader.set(key: enableKey, enable: sender.state == .on)
             update();
-            controller.tableView.reloadData()
+            controller.outlineView.reloadData()
         }
     }
 
-    @IBAction func helpButton(_ sender: NSButton) {
+    @IBAction func helpAction(_ sender: NSButton) {
 
         print("Not implemented yet")
     }
