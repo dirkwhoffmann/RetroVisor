@@ -221,6 +221,7 @@ final class PlaygroundShader: Shader {
                 step: 1.0
             ),
 
+            /*
             ShaderSetting(
                 name: "Scanline Brightness",
                 enableKey: "SCANLINE_ENABLE",
@@ -256,7 +257,8 @@ final class PlaygroundShader: Shader {
                 range: 0.1...1.0,
                 step: 0.01
             ),
-
+            */
+            
             ShaderSetting(
                 name: "Dotmask",
                 enableKey: "DOTMASK_ENABLE",
@@ -302,29 +304,31 @@ final class PlaygroundShader: Shader {
             ),
 
             ShaderSetting(
-                name: "Minimal Dot Width",
-                key: "MIN_DOT_WIDTH",
-                range: 0.0...1.0,
-                step: 0.01
-            ),
-
-            ShaderSetting(
                 name: "Maximal Dot Width",
                 key: "MAX_DOT_WIDTH",
                 range: 0.0...1.0,
                 step: 0.01
             ),
 
+            /*
             ShaderSetting(
                 name: "Minimal Dot Height",
                 key: "MIN_DOT_HEIGHT",
                 range: 0.0...1.0,
                 step: 0.01
             ),
+            */
 
             ShaderSetting(
                 name: "Maximal Dot Height",
                 key: "MAX_DOT_HEIGHT",
+                range: 0.0...1.0,
+                step: 0.01
+            ),
+
+            ShaderSetting(
+                name: "Minimal Dot Size",
+                key: "MIN_DOT_WIDTH",
                 range: 0.0...1.0,
                 step: 0.01
             ),
