@@ -153,13 +153,14 @@ namespace playground {
         // float2 uv = in.texCoord;
 
         // Display the mimap texture for debugging
-        // half4 mcol = input.sample(sam, uv, level(2));
+        /*
         half4 mcol = input.sample(sam, uv, level(3)).xxxw;
         output.write(mcol, gid);
         return;
+        */
 
         // Sample original color
-        half3 srcColor = input.sample(sam, uv).rgb;
+        half3 srcColor = input.sample(sam, uv, level(3)).rgb;
 
         // Convert to luminance (or just use intensity modulation)
         float luminance = srcColor.x; //  dot(srcColor, float3(0.299, 0.587, 0.114));

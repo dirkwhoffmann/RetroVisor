@@ -318,7 +318,7 @@ final class PlaygroundShader: Shader {
             ShaderSetting(
                 name: "Phosphor Feather",
                 key: "FEATHER",
-                range: 0.0...1.0,
+                range: 0.0...3.0,
                 step: 0.01
             )
 
@@ -423,72 +423,6 @@ final class PlaygroundShader: Shader {
         dotMaskLibrary = DotMaskLibrary()
     }
 
-/*
-    func updateDotMask() {
-
-        let brightness = uniforms.DOTMASK_BRIGHTNESS
-
-        let max  = UInt8(85 + brightness * 170)
-        let base = UInt8((1 - brightness) * 85)
-        let none = UInt8(30 + (1 - brightness) * 55)
-
-        let R = UInt32(r: max, g: base, b: base)
-        let G = UInt32(r: base, g: max, b: base)
-        let B = UInt32(r: base, g: base, b: max)
-        let M = UInt32(r: max, g: base, b: max)
-        let W = UInt32(r: max, g: max, b: max)
-        let N = UInt32(r: none, g: none, b: none)
-
-        let maskSize = [
-            CGSize(width: 1, height: 1),
-            CGSize(width: 3, height: 1),
-            CGSize(width: 4, height: 1),
-            CGSize(width: 3, height: 9),
-            CGSize(width: 4, height: 8)
-        ]
-
-        let maskData = [
-
-            [ W ],
-            [ M, G, N ],
-            [ R, G, B, N ],
-            [ M, G, N,
-              M, G, N,
-              N, N, N,
-              N, M, G,
-              N, M, G,
-              N, N, N,
-              G, N, M,
-              G, N, M,
-              N, N, N],
-            [ R, G, B, N,
-              R, G, B, N,
-              R, G, B, N,
-              N, N, N, N,
-              B, N, R, G,
-              B, N, R, G,
-              B, N, R, G,
-              N, N, N, N]
-        ]
-
-        let n = Int(uniforms.DOTMASK)
-
-        // Create image representation in memory
-        let cap = Int(maskSize[n].width) * Int(maskSize[n].height)
-        let mask = calloc(cap, MemoryLayout<UInt32>.size)!
-        let ptr = mask.bindMemory(to: UInt32.self, capacity: cap)
-        for i in 0 ... cap - 1 {
-            ptr[i] = maskData[n][i]
-        }
-
-        // Create image
-        let image = NSImage.make(data: mask, rect: maskSize[n])
-
-        // Convert image to texture
-        dotmask = image?.toTexture(device: ShaderLibrary.device)
-    }
-*/
-
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
         // Size of the downscaled input texture
@@ -515,15 +449,6 @@ final class PlaygroundShader: Shader {
 
             crt = output.makeTexture(width: crtWidth, height: crtHeight)
         }
-
-        /*
-        if (dotmaskType != uniforms.DOTMASK || dotmaskBrightness != uniforms.DOTMASK_BRIGHTNESS) {
-
-            updateDotMask()
-            dotmaskType = uniforms.DOTMASK
-            dotmaskBrightness = uniforms.DOTMASK_BRIGHTNESS
-        }
-        */
     }
 
     override func apply(commandBuffer: MTLCommandBuffer,
@@ -549,8 +474,7 @@ final class PlaygroundShader: Shader {
                     options2: &uniforms,
                     length2: MemoryLayout<PlaygroundUniforms>.stride)
 
-        let pyramid = MPSImageGaussianPyramid(device: ycc.device) // , centerWeight: 1.0)
-
+        let pyramid = MPSImageGaussianPyramid(device: ycc.device)
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
 
 
@@ -584,6 +508,10 @@ final class PlaygroundShader: Shader {
                                length: MemoryLayout<Uniforms>.stride,
                                options2: &uniforms,
                                length2: MemoryLayout<PlaygroundUniforms>.stride)
+
+        let shadowFilter = MPSImageGaussianBlur(device: ycc.device, sigma: uniforms.FEATHER)
+        shadowFilter.encode(commandBuffer: commandBuffer, inPlaceTexture: &shadow)
+
 
         //
         // Pass 4: Create the bloom texture
