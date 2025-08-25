@@ -76,18 +76,17 @@ struct PlaygroundUniforms {
     float BLOOM_RADIUS_X;
     float BLOOM_RADIUS_Y;
 
+    /*
     uint  SCANLINE_ENABLE;
     float SCANLINE_BRIGHTNESS;
     float SCANLINE_WEIGHT1;
     float SCANLINE_WEIGHT2;
     float SCANLINE_WEIGHT3;
     float SCANLINE_WEIGHT4;
+     */
 
-    uint  DOTMASK_ENABLE;
-    uint  DOTMASK;
-    float DOTMASK_BRIGHTESS;
-
-    // CRT phase
+    // Shadow mask
+    uint  SHADOW_ENABLE;
     float BRIGHTNESS;
     float GLOW;
     float GRID_WIDTH;
@@ -99,7 +98,13 @@ struct PlaygroundUniforms {
     float SHAPE;
     float FEATHER;
 
-    uint  DEBUG;
+    // Dot mask
+    uint  DOTMASK_ENABLE;
+    uint  DOTMASK;
+    float DOTMASK_BRIGHTESS;
+
+    uint  DEBUG_ENABLE;
+    uint  DEBUG_TEXTURE;
     float DEBUG_SLIDER;
 };
 

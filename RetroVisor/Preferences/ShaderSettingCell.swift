@@ -13,45 +13,80 @@ class ShaderGroupCell: NSTableCellView {
 
     @IBOutlet weak var controller: ShaderPreferencesViewController!
     @IBOutlet weak var disclosureButton: NSButton!
+    @IBOutlet weak var enableButton: NSButton!
     @IBOutlet weak var label: NSTextField!
 
     var shaderSettingGroup: ShaderSettingGroup!
 
+    var shader: Shader { controller.shader }
+
     override func draw(_ dirtyRect: NSRect) {
 
-        //NSColor.controlAccentColor.withAlphaComponent(0.15).setFill()
-        // NSColor.controlAccentColor.setFill()
         NSColor.separatorColor.setFill()
-        // NSColor.alternatingContentBackgroundColors[1].setFill()
         dirtyRect.fill()
         super.draw(dirtyRect)
-       }
+    }
 
-    @IBAction func disclosureAction(_ sender: NSControl) {
+    @IBAction func disclosureAction(_ sender: NSButton) {
 
-        if controller.outlineView.isItemExpanded(shaderSettingGroup) {
-            controller.outlineView.collapseItem(shaderSettingGroup)
-        } else {
-            controller.outlineView.expandItem(shaderSettingGroup)
+        print("disclosureAction \(sender.state)")
+
+        var expanded = false {
+            didSet {
+                if expanded {
+                    controller.outlineView.expandItem(shaderSettingGroup)
+                } else {
+                    controller.outlineView.collapseItem(shaderSettingGroup)
+                }
+            }
         }
+
+        if let key = shaderSettingGroup.key {
+            shader.set(key: key, enable: sender.state == .on)
+        }
+        expanded = sender.state == .on
         refresh()
     }
 
+    /*
+    @IBAction func enableAction(_ sender: NSButton) {
+
+        print("enableAction \(sender.state)")
+        refresh()
+    }
+     */
+
     func refresh() {
+
+        var disclosureIcon: NSImage? {
+            if controller.outlineView.isItemExpanded(shaderSettingGroup) {
+                return NSImage(systemSymbolName: "chevron.down",
+                               accessibilityDescription: "Collapse")?
+                    .withSymbolConfiguration(config)
+            } else {
+                return NSImage(systemSymbolName: "chevron.right",
+                               accessibilityDescription: "Expand")?
+                    .withSymbolConfiguration(config)
+            }
+        }
 
         let config = NSImage.SymbolConfiguration(pointSize: 18, weight: .bold)
 
-        if controller.outlineView.isItemExpanded(shaderSettingGroup) {
+        let clickable = shaderSettingGroup.key != nil
+        let expandable = !clickable
 
-            let chevronDown = NSImage(systemSymbolName: "chevron.down", accessibilityDescription: "Collapse")?
-                .withSymbolConfiguration(config)
-            disclosureButton.image = chevronDown
+        enableButton.isHidden = !clickable
+        disclosureButton.isHidden = !expandable
 
-        } else {
+        if clickable {
 
-            let chevronRight = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: "Expand")?
-                .withSymbolConfiguration(config)
-            disclosureButton.image = chevronRight
+            let enabled = shader.get(key: shaderSettingGroup.key!) != 0
+            enableButton.state = enabled ? .on : .off
+        }
+
+        if expandable {
+
+            disclosureButton.image = disclosureIcon
         }
     }
 }

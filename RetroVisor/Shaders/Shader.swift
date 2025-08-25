@@ -13,11 +13,13 @@ import MetalPerformanceShaders
 class ShaderSettingGroup {
 
     let title: String
+    let key: String?
     var children: [ShaderSetting]
 
-    init(title: String, children: [ShaderSetting]) {
+    init(title: String, key: String? = nil, _ children: [ShaderSetting]) {
 
         self.title = title
+        self.key = key
         self.children = children
     }
 }

@@ -59,7 +59,7 @@ final class PassthroughShader: Shader {
 
         settings = [
 
-            ShaderSettingGroup(title: "General", children: [
+            ShaderSettingGroup(title: "General", [
 
                 ShaderSetting(
                     name: "Input Pixel Size",
@@ -69,8 +69,16 @@ final class PassthroughShader: Shader {
                 ),
 
                 ShaderSetting(
+                    name: "Resampler",
+                    key: "RESAMPLE_FILTER",
+                    values: [("BILINEAR", 0), ("LANCZOS", 1)]
+                ),
+                ]),
+
+            ShaderSettingGroup(title: "Blur Settings", key: "BLUR_ENABLE", [
+
+                ShaderSetting(
                     name: "Blur Filter",
-                    enableKey: "BLUR_ENABLE",
                     key: "BLUR_FILTER",
                     values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
                 ),
@@ -87,12 +95,6 @@ final class PassthroughShader: Shader {
                     key: "BLUR_RADIUS_Y",
                     range: 0.1...20.0,
                     step: 0.1
-                ),
-
-                ShaderSetting(
-                    name: "Resampler",
-                    key: "RESAMPLE_FILTER",
-                    values: [("BILINEAR", 0), ("LANCZOS", 1)]
                 ),
 
                 ShaderSetting(

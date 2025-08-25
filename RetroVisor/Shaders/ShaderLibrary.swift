@@ -91,6 +91,7 @@ final class ShaderLibrary {
 
     private init() {
 
+        print ("ShaderLibrary: init")
         shaders.append(PassthroughShader())
         currentShader = shaders[0]
     }

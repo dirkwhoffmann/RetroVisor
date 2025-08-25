@@ -970,7 +970,7 @@ Gw
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="flA-tZ-9cP">
-                                                                    <rect key="frame" x="41" y="15" width="529" height="16"/>
+                                                                    <rect key="frame" x="41" y="14" width="529" height="16"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Label" id="weY-LU-aQ1">
                                                                         <font key="font" metaFont="systemHeavy" size="13"/>
@@ -994,10 +994,22 @@ Gw
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSAdvanced" id="LaG-hg-yN1"/>
                                                                 </imageView>
+                                                                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qAw-IE-lPo">
+                                                                    <rect key="frame" x="8" y="12" width="30" height="20"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                    <buttonCell key="cell" type="check" title="Check" bezelStyle="regularSquare" imagePosition="only" controlSize="large" state="on" inset="2" id="yKh-fl-Q7K">
+                                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                                        <font key="font" metaFont="system"/>
+                                                                    </buttonCell>
+                                                                    <connections>
+                                                                        <action selector="disclosureAction:" target="cJo-c0-E6g" id="TvG-cI-QgD"/>
+                                                                    </connections>
+                                                                </button>
                                                             </subviews>
                                                             <connections>
                                                                 <outlet property="controller" destination="lT8-2t-dOu" id="FId-1g-Hg0"/>
                                                                 <outlet property="disclosureButton" destination="b20-Zq-66q" id="2ye-7P-S7h"/>
+                                                                <outlet property="enableButton" destination="qAw-IE-lPo" id="DuR-bd-SjX"/>
                                                                 <outlet property="label" destination="flA-tZ-9cP" id="2jA-hN-VKN"/>
                                                             </connections>
                                                         </tableCellView>
@@ -1073,13 +1085,16 @@ Gw
                                                                     </connections>
                                                                 </button>
                                                                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eYq-gO-MBM">
-                                                                    <rect key="frame" x="360" y="29" width="158" height="25"/>
+                                                                    <rect key="frame" x="360" y="13" width="158" height="25"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                                     <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="nLC-aR-rh0">
                                                                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                                                         <font key="font" metaFont="message"/>
                                                                         <menu key="menu" id="UBj-iC-sV0"/>
                                                                     </popUpButtonCell>
+                                                                    <connections>
+                                                                        <action selector="popupAction:" target="GCQ-XS-bvI" id="QKT-PJ-33F"/>
+                                                                    </connections>
                                                                 </popUpButton>
                                                             </subviews>
                                                             <connections>

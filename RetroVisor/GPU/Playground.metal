@@ -463,7 +463,7 @@ namespace playground {
 
             half4 color;
 
-            switch(u.DEBUG) {
+            switch(u.DEBUG_TEXTURE) {
 
                 case 1:
 

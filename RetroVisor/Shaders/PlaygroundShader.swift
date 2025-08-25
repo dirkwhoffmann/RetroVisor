@@ -12,16 +12,6 @@ import MetalPerformanceShaders
 
 // This shader is my personal playground for developing self-made CRT effects.
 
-/*
-enum PlaygroundDebug: Int32 {
-
-    case off = 0
-    case luma = 1
-    case chroma = 2
-    case shadow = 3
-}
-*/
-
 struct PlaygroundUniforms {
 
     var INPUT_PIXEL_SIZE: Float
@@ -37,17 +27,16 @@ struct PlaygroundUniforms {
     var BLOOM_RADIUS_X: Float
     var BLOOM_RADIUS_Y: Float
 
+    /*
     var SCANLINE_ENABLE: Int32
     var SCANLINE_BRIGHTNESS: Float
     var SCANLINE_WEIGHT1: Float
     var SCANLINE_WEIGHT2: Float
     var SCANLINE_WEIGHT3: Float
     var SCANLINE_WEIGHT4: Float
+    */
 
-    var DOTMASK_ENABLE: Int32
-    var DOTMASK: Int32
-    var DOTMASK_BRIGHTNESS: Float
-
+    var SHADOW_ENABLE: Float
     var BRIGHTNESS: Float
     var GLOW: Float
     var GRID_WIDTH: Float
@@ -59,7 +48,12 @@ struct PlaygroundUniforms {
     var SHAPE: Float
     var FEATHER: Float
 
-    var DEBUG: Int32
+    var DOTMASK_ENABLE: Int32
+    var DOTMASK: Int32
+    var DOTMASK_BRIGHTNESS: Float
+
+    var DEBUG_ENABLE: Int32
+    var DEBUG_TEXTURE: Int32
     var DEBUG_SLIDER: Float
 
     static let defaults = PlaygroundUniforms(
@@ -77,17 +71,16 @@ struct PlaygroundUniforms {
         BLOOM_RADIUS_X: 5,
         BLOOM_RADIUS_Y: 3,
 
+        /*
         SCANLINE_ENABLE: 0,
         SCANLINE_BRIGHTNESS: 1.0,
         SCANLINE_WEIGHT1: 0.5,
         SCANLINE_WEIGHT2: 0.5,
         SCANLINE_WEIGHT3: 0.5,
         SCANLINE_WEIGHT4: 0.5,
+        */
 
-        DOTMASK_ENABLE: 1,
-        DOTMASK: 0,
-        DOTMASK_BRIGHTNESS: 0.5,
-
+        SHADOW_ENABLE: 1,
         BRIGHTNESS: 1,
         GLOW: 1,
         GRID_WIDTH: 5,
@@ -99,8 +92,13 @@ struct PlaygroundUniforms {
         SHAPE: 2.0,
         FEATHER: 0.2,
 
-        DEBUG: 0,
-        DEBUG_SLIDER: 0.5
+        DOTMASK_ENABLE: 1,
+        DOTMASK: 0,
+        DOTMASK_BRIGHTNESS: 0.5,
+
+        DEBUG_ENABLE: 0,
+        DEBUG_TEXTURE: 1,
+        DEBUG_SLIDER: 1.0
     )
 }
 
@@ -160,7 +158,7 @@ final class PlaygroundShader: Shader {
 
         settings = [
 
-            ShaderSettingGroup(title: "General Settings", children: [
+            ShaderSettingGroup(title: "General Settings", [
 
                 ShaderSetting(
                     name: "Input Pixel Size",
@@ -189,11 +187,10 @@ final class PlaygroundShader: Shader {
                 ),
             ]),
 
-            ShaderSettingGroup(title: "Bloom Settings", children: [
+            ShaderSettingGroup(title: "Bloom Settings", key: "BLOOM_ENABLE", [
 
                 ShaderSetting(
                     name: "Bloom Filter",
-                    enableKey: "BLOOM_ENABLE",
                     key: "BLOOM_FILTER",
                     values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
                 ),
@@ -266,41 +263,7 @@ final class PlaygroundShader: Shader {
 
             ]),
 
-            ShaderSettingGroup(title: "Dot Mask Settings", children: [
-
-                ShaderSetting(
-                    name: "Dotmask",
-                    enableKey: "DOTMASK_ENABLE",
-                    key: "DOTMASK",
-                    range: 0...4,
-                    step: 1.0
-                ),
-
-                ShaderSetting(
-                    name: "Dotmask Brightness",
-                    key: "DOTMASK_BRIGHTNESS",
-                    range: 0...1,
-                    step: 0.01
-                ),
-
-                ShaderSetting(
-                    name: "Brightness",
-                    key: "BRIGHTNESS",
-                    range: 0.0...2.0,
-                    step: 0.01
-                ),
-
-
-                ShaderSetting(
-                    name: "Glow",
-                    key: "GLOW",
-                    range: 0.0...2.0,
-                    step: 0.01
-                ),
-
-            ]),
-
-            ShaderSettingGroup(title: "Shadow Mask", children: [
+            ShaderSettingGroup(title: "Shadow Mask", key: "SHADOW_ENABLE", [
 
                 ShaderSetting(
                     name: "Grid Width",
@@ -346,25 +309,61 @@ final class PlaygroundShader: Shader {
                     step: 0.01
                 ),
 
+                /*
                 ShaderSetting(
                     name: "Phospor Shape",
                     key: "SHAPE",
                     range: 1.0...10.0,
                     step: 0.01
                 ),
+                */
 
                 ShaderSetting(
                     name: "Phosphor Feather",
                     key: "FEATHER",
                     range: 0.0...3.0,
                     step: 0.01
+                )
+            ]),
+
+            ShaderSettingGroup(title: "Dot Mask Settings", key: "DOTMASK_ENABLE", [
+
+                ShaderSetting(
+                    name: "Dotmask",
+                    key: "DOTMASK",
+                    range: 0...4,
+                    step: 1.0
                 ),
 
                 ShaderSetting(
+                    name: "Dotmask Brightness",
+                    key: "DOTMASK_BRIGHTNESS",
+                    range: 0...1,
+                    step: 0.01
+                ),
+
+                ShaderSetting(
+                    name: "Brightness",
+                    key: "BRIGHTNESS",
+                    range: 0.0...2.0,
+                    step: 0.01
+                ),
+
+
+                ShaderSetting(
+                    name: "Glow",
+                    key: "GLOW",
+                    range: 0.0...2.0,
+                    step: 0.01
+                ),
+            ]),
+
+            ShaderSettingGroup(title: "Debug Settings", key: "DEBUG_ENABLE", [
+
+                ShaderSetting(
                     name: "Debug",
-                    key: "DEBUG",
-                    values: [ ("Off", 0),
-                              ("Ycc", 1),
+                    key: "DEBUG_TEXTURE",
+                    values: [ ("Ycc", 1),
                               ("Ycc (Mipmap 1)", 2),
                               ("Ycc (Mipmap 2)", 3),
                               ("Ycc (Mipmap 3)", 4),
@@ -382,7 +381,7 @@ final class PlaygroundShader: Shader {
                     range: 0.0...1.0,
                     step: 0.01
                 )
-            ])
+            ]),
          ]
     }
 
@@ -400,17 +399,16 @@ final class PlaygroundShader: Shader {
         case "BLOOM_RADIUS_X": return uniforms.BLOOM_RADIUS_X
         case "BLOOM_RADIUS_Y": return uniforms.BLOOM_RADIUS_Y
 
+            /*
         case "SCANLINE_ENABLE": return Float(uniforms.SCANLINE_ENABLE)
         case "SCANLINE_BRIGHTNESS": return uniforms.SCANLINE_BRIGHTNESS
         case "SCANLINE_WEIGHT1": return uniforms.SCANLINE_WEIGHT1
         case "SCANLINE_WEIGHT2": return uniforms.SCANLINE_WEIGHT2
         case "SCANLINE_WEIGHT3": return uniforms.SCANLINE_WEIGHT3
         case "SCANLINE_WEIGHT4": return uniforms.SCANLINE_WEIGHT4
+             */
 
-        case "DOTMASK_ENABLE": return Float(uniforms.DOTMASK_ENABLE)
-        case "DOTMASK": return Float(uniforms.DOTMASK)
-        case "DOTMASK_BRIGHTNESS": return uniforms.DOTMASK_BRIGHTNESS
-
+        case "SHADOW_ENABLE": return uniforms.SHADOW_ENABLE
         case "BRIGHTNESS": return uniforms.BRIGHTNESS
         case "GLOW": return uniforms.GLOW
         case "GRID_WIDTH": return uniforms.GRID_WIDTH
@@ -422,7 +420,12 @@ final class PlaygroundShader: Shader {
         case "SHAPE": return uniforms.SHAPE
         case "FEATHER": return uniforms.FEATHER
 
-        case "DEBUG": return Float(uniforms.DEBUG)
+        case "DOTMASK_ENABLE": return Float(uniforms.DOTMASK_ENABLE)
+        case "DOTMASK": return Float(uniforms.DOTMASK)
+        case "DOTMASK_BRIGHTNESS": return uniforms.DOTMASK_BRIGHTNESS
+
+        case "DEBUG_ENABLE": return Float(uniforms.DEBUG_ENABLE)
+        case "DEBUG_TEXTURE": return Float(uniforms.DEBUG_TEXTURE)
         case "DEBUG_SLIDER": return uniforms.DEBUG_SLIDER
 
         default:
@@ -445,17 +448,16 @@ final class PlaygroundShader: Shader {
         case "BLOOM_RADIUS_X": uniforms.BLOOM_RADIUS_X = value
         case "BLOOM_RADIUS_Y": uniforms.BLOOM_RADIUS_Y = value
 
+            /*
         case "SCANLINE_ENABLE": uniforms.SCANLINE_ENABLE = Int32(value)
         case "SCANLINE_BRIGHTNESS": uniforms.SCANLINE_BRIGHTNESS = value
         case "SCANLINE_WEIGHT1": uniforms.SCANLINE_WEIGHT1 = value
         case "SCANLINE_WEIGHT2": uniforms.SCANLINE_WEIGHT2 = value
         case "SCANLINE_WEIGHT3": uniforms.SCANLINE_WEIGHT3 = value
         case "SCANLINE_WEIGHT4": uniforms.SCANLINE_WEIGHT4 = value
-
-        case "DOTMASK_ENABLE": uniforms.DOTMASK_ENABLE = Int32(value)
-        case "DOTMASK": uniforms.DOTMASK = Int32(value)
-        case "DOTMASK_BRIGHTNESS": uniforms.DOTMASK_BRIGHTNESS = value
-
+             */
+            
+        case "SHADOW_ENABLE": uniforms.SHADOW_ENABLE = value
         case "BRIGHTNESS": uniforms.BRIGHTNESS = value
         case "GLOW": uniforms.GLOW = value
         case "GRID_WIDTH": uniforms.GRID_WIDTH = value
@@ -467,7 +469,12 @@ final class PlaygroundShader: Shader {
         case "SHAPE": uniforms.SHAPE = value
         case "FEATHER": uniforms.FEATHER = value
 
-        case "DEBUG": uniforms.DEBUG = Int32(value)
+        case "DOTMASK_ENABLE": uniforms.DOTMASK_ENABLE = Int32(value)
+        case "DOTMASK": uniforms.DOTMASK = Int32(value)
+        case "DOTMASK_BRIGHTNESS": uniforms.DOTMASK_BRIGHTNESS = value
+
+        case "DEBUG_ENABLE": uniforms.DEBUG_ENABLE = Int32(value)
+        case "DEBUG_TEXTURE": uniforms.DEBUG_TEXTURE = Int32(value)
         case "DEBUG_SLIDER": uniforms.DEBUG_SLIDER = value
 
         default:
@@ -596,7 +603,7 @@ final class PlaygroundShader: Shader {
         // Optional: Run the debugger
         //
 
-        if uniforms.DEBUG > 0 {
+        if uniforms.DEBUG_ENABLE > 0 {
 
             debugKernel.apply(commandBuffer: commandBuffer,
                               textures: [ycc, shadow, dotmask, blm, output],
