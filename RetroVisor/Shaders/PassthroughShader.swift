@@ -149,22 +149,9 @@ final class PassthroughShader: Shader {
             super.set(key: key, value: value)
         }
 
-
+        setHidden(key: "BLUR_RADIUS_Y",
+                  value: Int32(get(key: "BLUR_FILTER")) == BlurFilterType.gaussian.rawValue)
     }
-
-    /*
-    override func isHidden(key: String) -> Bool {
-
-        switch key {
-
-        case "BLUR_RADIUS_Y":
-            return Int32(get(key: "BLUR_FILTER")) == BlurFilterType.gaussian.rawValue
-
-        default:
-            return false
-        }
-    }
-    */
 
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 

@@ -28,7 +28,7 @@ class ShaderSettingGroup {
     }
 }
 
-struct ShaderSetting {
+class ShaderSetting {
 
     let name: String
 
@@ -98,14 +98,20 @@ class Shader : Loggable {
         fatalError("To be implemented by a subclass")
     }
 
+    // Looks up the shader setting with a given name
+    func findSetting(key: String) -> ShaderSetting? {
+        return settings.flatMap { $0.children }.first { $0.key == key }
+    }
+
     // Get or sets the value of a shader option
     func get(key: String) -> Float { NSSound.beep(); return 0 }
     func set(key: String, value: Float) { NSSound.beep() }
     func set(key: String, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
     func set(key: String, item: Int) { set(key: key, value: Float(item)) }
 
-    // Indicates whether a shader option should be hidden from the user
-    // func isHidden(key: String) -> Bool { return false }
+    func setHidden(key: String, value: Bool) {
+        if var setting = findSetting(key: key) { setting.hidden = value }
+    }
 }
 
 class ScaleShader<F: MPSImageScale> : Shader {

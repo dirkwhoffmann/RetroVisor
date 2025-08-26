@@ -28,19 +28,22 @@ class ShaderGroupView: NSTableCellView {
         self.group = group
         label.stringValue = group.title
 
+        let count = group.children.count
+        let optString = "\(count) option" + (count > 1 ? "s" : "")
+
         if clickable {
 
             enableButton.isHidden = false
             disclosureButton.isHidden = true
             enableButton.state = shader.get(key: group.key!) != 0 ? .on : .off
-            subLabel.stringValue = "\(group.key!) (\(group.children.count))"
+            subLabel.stringValue = "\(group.key!)"
         }
 
         if expandable {
 
             enableButton.isHidden = true
             disclosureButton.isHidden = false
-            subLabel.stringValue = " \(group.children.count)"
+            subLabel.stringValue = "\(optString)"
         }
     }
 
@@ -52,6 +55,7 @@ class ShaderGroupView: NSTableCellView {
 
     override func draw(_ dirtyRect: NSRect) {
 
+        // NSColor.controlAccentColor.withAlphaComponent(0.25).setFill()
         NSColor.separatorColor.setFill()
         dirtyRect.fill()
         super.draw(dirtyRect)
