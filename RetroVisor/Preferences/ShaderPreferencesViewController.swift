@@ -27,26 +27,6 @@ class MyOutlineView : NSOutlineView {
         return result
     }
 
-    /*
-    func rowView(for group: ShaderSettingGroup) -> NSTableRowView? {
-
-        let r = row(forItem: group)
-        let rv = rowView(atRow: row(forItem: group), makeIfNecessary: false)
-        return rv
-    }
-
-    func cellView(for group: ShaderSettingGroup) -> ShaderGroupCell? {
-
-        let rowView = rowView(for: group)!
-        for column in 0..<numberOfColumns {
-            if let cellView = rowView.view(atColumn: column) as? ShaderGroupCell {
-                return cellView
-            }
-        }
-        return nil // rowView(for: group)?.view(atColumn: 0) as? ShaderGroupCell
-    }
-    */
-
     override func frameOfOutlineCell(atRow row: Int) -> NSRect {
 
         return .zero
@@ -133,8 +113,8 @@ extension ShaderPreferencesViewController: NSOutlineViewDataSource {
     func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
 
         if let group = item as? ShaderSettingGroup {
-            // return group.children.count
-            return group.children.filter { !shader.isHidden(key: $0.key) }.count
+            return group.children.count
+            // return group.children.filter { $0.hidden == false }.count
         } else {
             return shader.settings.count
         }
@@ -142,7 +122,7 @@ extension ShaderPreferencesViewController: NSOutlineViewDataSource {
 
     func outlineView(_ outlineView: NSOutlineView, heightOfRowByItem item: Any) -> CGFloat {
 
-        return item is ShaderSettingGroup ? 42 : 56
+        return item is ShaderSettingGroup ? 56 : 56
     }
     func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
 
@@ -152,8 +132,8 @@ extension ShaderPreferencesViewController: NSOutlineViewDataSource {
     func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
 
         if let group = item as? ShaderSettingGroup {
-            // return group.children[index]
-            return group.children.filter { !shader.isHidden(key: $0.key) }[index]
+            return group.children[index]
+            // return group.children.filter { $0.hidden == false }[index]
         } else {
             return shader.settings[index]
         }

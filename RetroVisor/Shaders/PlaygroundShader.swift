@@ -482,11 +482,6 @@ final class PlaygroundShader: Shader {
         }
     }
 
-    override func isHidden(key: String) -> Bool {
-
-        return false
-    }
-
     override func activate() {
 
         super.activate()

@@ -14,16 +14,16 @@ class ShaderSettingGroup {
 
     let title: String
     let key: String?
-    let expand: Bool?
     var children: [ShaderSetting]
 
     var view: ShaderGroupView?
 
-    init(title: String, key: String? = nil, expand: Bool? = nil, _ children: [ShaderSetting]) {
+    var count: Int { children.filter { $0.hidden == false }.count }
+
+    init(title: String, key: String? = nil, _ children: [ShaderSetting]) {
 
         self.title = title
         self.key = key
-        self.expand = expand
         self.children = children
     }
 }
@@ -49,7 +49,7 @@ struct ShaderSetting {
     let help: String?
 
     // Indicates if this options should be hidden from the user
-    // var isHidden = false
+    var hidden = false
 
     var formatString: String {
         return step < 0.1 ? "%.2f" : step < 1.0 ? "%.1f" : "%.0f"
@@ -105,7 +105,7 @@ class Shader : Loggable {
     func set(key: String, item: Int) { set(key: key, value: Float(item)) }
 
     // Indicates whether a shader option should be hidden from the user
-    func isHidden(key: String) -> Bool { return false }
+    // func isHidden(key: String) -> Bool { return false }
 }
 
 class ScaleShader<F: MPSImageScale> : Shader {

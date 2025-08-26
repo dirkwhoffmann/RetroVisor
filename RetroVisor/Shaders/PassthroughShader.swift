@@ -148,8 +148,11 @@ final class PassthroughShader: Shader {
         default:
             super.set(key: key, value: value)
         }
+
+
     }
 
+    /*
     override func isHidden(key: String) -> Bool {
 
         switch key {
@@ -161,6 +164,7 @@ final class PassthroughShader: Shader {
             return false
         }
     }
+    */
 
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 

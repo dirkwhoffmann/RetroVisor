@@ -33,14 +33,14 @@ class ShaderGroupView: NSTableCellView {
             enableButton.isHidden = false
             disclosureButton.isHidden = true
             enableButton.state = shader.get(key: group.key!) != 0 ? .on : .off
-            // subLabel = ...
+            subLabel.stringValue = "\(group.key!) (\(group.children.count))"
         }
 
         if expandable {
 
             enableButton.isHidden = true
             disclosureButton.isHidden = false
-            // subLabel = ...
+            subLabel.stringValue = " \(group.children.count)"
         }
     }
 
@@ -91,7 +91,7 @@ class ShaderSettingView: NSTableCellView {
 
             let enableKey = shaderSetting.enableKey
             let enabled = enableKey == nil ? true : shader.get(key: enableKey!) != 0
-            let active = !shader.isHidden(key: shaderSetting.key)
+            let active = !shaderSetting.hidden // !shader.isHidden(key: shaderSetting.key)
 
             optionLabel.stringValue = shaderSetting.name
             subLabel.stringValue = shaderSetting.key
