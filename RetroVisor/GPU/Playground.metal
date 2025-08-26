@@ -91,47 +91,8 @@ namespace playground {
     }
 
     //
-    // Geometry helpers
+    // RGB to YUV/YIQ converter
     //
-
-    /*
-     // Fast Padé approximation for the Minkowski norm (|u|^n + |v|^n)^(1/n)
-     inline float minkowski(float2 uv, float n)
-     {
-     float2 a = abs(uv);
-     float m = max(a.x, a.y);
-     if (m == 0.0f) return 0.0f;
-
-     float l = min(a.x, a.y);
-     float t = l / m;
-
-     // s = t^n  (use fast log2/exp2; clamp to avoid log2(0))
-     float s = fast::exp2(n * fast::log2(max(t, 1e-8f)));
-
-     float invn = 1.0f / n;
-     float A = 0.5f * (1.0f + invn); // (n+1)/(2n)
-     float B = 0.5f * (1.0f - invn); // (n-1)/(2n)
-
-     float g = (1.0f + A * s) / (1.0f + B * s);
-     return m * g;
-     }
-
-     inline float shapeMask(float2 pos, float2 dotSize, constant PlaygroundUniforms& uniforms)
-     {
-     // Normalize position into [-1..1] range relative to dotSize
-     float2 uv = pos / dotSize;
-
-     // Compute the distance via the Minkowski norm (1 = Manhattan, 2 = Euclidean)
-     float len = minkowski(uv, uniforms.SHAPE);
-
-     // Blur the edge
-     if (len > (1.0 - uniforms.FEATHER)) {
-     return smoothstep(1.0 + uniforms.FEATHER, 1.0 - uniforms.FEATHER, len);
-     } else {
-     return 1.0;
-     }
-     }
-     */
 
     kernel void colorSpace(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                            texture2d<half, access::write>  outTex    [[ texture(1) ]],
@@ -139,23 +100,22 @@ namespace playground {
                            sampler                         sam       [[ sampler(0) ]],
                            uint2                           gid       [[ thread_position_in_grid ]])
     {
-        // if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) return;
-
         // Get size of output texture
-        const float2 rect = float2(outTex.get_width(), outTex.get_height());
+        const Coord2 rect = float2(outTex.get_width(), outTex.get_height());
 
         // Normalize gid to 0..1 in rect
-        float2 uv = (float2(gid) + 0.5) / rect;
+        Coord2 uv = (Coord2(gid) + 0.5) / rect;
 
         // Read pixel
-        float3 rgb = float3(inTex.sample(sam, uv).rgb);
+        Color3 rgb = Color3(inTex.sample(sam, uv).rgb);
 
         // Split components
-        float3 ycc = u.PAL == 1 ? RGB2YUV(rgb) : RGB2YIQ(rgb);
+        Color3 ycc = u.PAL == 1 ? RGB2YUV(rgb) : RGB2YIQ(rgb);
 
-        outTex.write(half4(half3(ycc), 1.0), gid);
+        outTex.write(Color4(ycc, 1.0), gid);
     }
 
+    /*
     inline float3 brightPass(float3 color, float luma, float threshold, float intensity) {
 
         // Keep only if brighter than threshold
@@ -164,7 +124,8 @@ namespace playground {
         // Scale the bright part
         return color * mask * intensity;
     }
-
+    */
+    
     kernel void shadowMask(texture2d<half, access::sample> input     [[ texture(0) ]],
                            texture2d<half, access::write>  output    [[ texture(1) ]],
                            constant PlaygroundUniforms     &u        [[ buffer(0)  ]],
@@ -181,21 +142,17 @@ namespace playground {
         float luminance = srcColor.x;
 
         // Set up the dot lattice
-        float2 cellSize = float2(u.GRID_WIDTH, u.GRID_HEIGHT);
+        float2 cellSize = float2(u.SHADOW_GRID_WIDTH, u.SHADOW_GRID_HEIGHT);
         float2 pixelCoord = float2(gid);
         float2 gridCoord = floor(pixelCoord / cellSize);
         float2 gridCenter = (gridCoord + 0.5) * cellSize;
 
         // Normalized distance to nearest dot center (in pixels)
-        float2 d = (pixelCoord - gridCenter) / cellSize; //  / float2(u.MAX_DOT_WIDTH, u.MAX_DOT_HEIGHT);
-        // d = max(d, float2(u.MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT));
+        float2 d = (pixelCoord - gridCenter) / cellSize; //  / float2(u.SHADOW_MAX_DOT_WIDTH, u.SHADOW_MAX_DOT_HEIGHT);
         float dist = length(d);
 
         // --- Radius depends on luminance ---
-        // float2 minWH = float2(u.MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT)
-        // float2 maxWH = float2(u.MAX_DOT_WIDTH, u.MAX_DOT_HEIGHT)
-        // float radius = mix(u.MIN_DOT_WIDTH, u.MAX_DOT_WIDTH, pow(luminance, u.GLOW));
-        float radius = mix(u.MIN_DOT_WIDTH, 1.0, pow(luminance, u.GLOW));
+        float radius = mix(u.SHADOW_MIN_DOT_WIDTH, 1.0, pow(luminance, u.GLOW));
 
         // --- Dot falloff ---
         // Smoothstep makes soft edges, bigger for bright pixels
@@ -386,7 +343,7 @@ namespace playground {
          // half4 color = inTex.sample(sam, uv);
 
          // Find the dot cell we are in
-         uint2 maskSpacing = uint2(uint(u.GRID_WIDTH), uint(u.GRID_HEIGHT));
+         uint2 maskSpacing = uint2(uint(u.SHADOW_GRID_WIDTH), uint(u.SHADOW_GRID_HEIGHT));
 
          // uint2 cell = gid / maskSpacing;
          float2 center = float2(uint2(gid / maskSpacing) * maskSpacing) + float2(maskSpacing) * 0.5;
@@ -401,8 +358,8 @@ namespace playground {
          // weight = weight; // 0.25 * weightL + 0.5 * weight + 0.25 * weightR;
 
          // Scale dot size based on weight
-         float2 minDotSize = float2(u.MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT);
-         float2 maxDotSize = float2(u.MAX_DOT_WIDTH, u.MAX_DOT_HEIGHT);
+         float2 minDotSize = float2(u.SHADOW_MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT);
+         float2 maxDotSize = float2(u.SHADOW_MAX_DOT_WIDTH, u.SHADOW_MAX_DOT_HEIGHT);
 
          float2 scaledRDotSize = mix(minDotSize, maxDotSize, weight.r);
          float2 scaledRDotSizeL = mix(minDotSize, maxDotSize, weightL.r);

@@ -10,32 +10,15 @@
 import MetalKit
 import MetalPerformanceShaders
 
-class ShaderSettingGroup {
-
-    let title: String
-    let key: String?
-    var children: [ShaderSetting]
-
-    var view: ShaderGroupView?
-
-    var count: Int { children.filter { $0.hidden == false }.count }
-
-    init(title: String, key: String? = nil, _ children: [ShaderSetting]) {
-
-        self.title = title
-        self.key = key
-        self.children = children
-    }
-}
-
 class ShaderSetting {
 
+    // Setting name
     let name: String
 
-    // Primary key for the value of this option
+    // Primary key for the value of this setting
     let key: String
 
-    // Secondary key if the option has an additional enable switch
+    // Secondary key if the setting has an additional enable switch
     let enableKey: String?
 
     // Parameters for numeric arguments
@@ -69,10 +52,36 @@ class ShaderSetting {
     }
 }
 
+class ShaderSettingGroup {
+
+    // Setting group name
+    let title: String
+
+    // Enable key for this setting
+    let key: String?
+
+    // All settings in this group
+    var children: [ShaderSetting]
+
+    // The NSTableCellView associated with this group
+    var view: ShaderGroupView?
+
+    var count: Int { children.filter { $0.hidden == false }.count }
+
+    init(title: String, key: String? = nil, _ children: [ShaderSetting]) {
+
+        self.title = title
+        self.key = key
+        self.children = children
+    }
+}
+
 @MainActor
 class Shader : Loggable {
 
     static var device: MTLDevice { MTLCreateSystemDefaultDevice()! }
+    // static var bilinear: Shader = BilinearShader()
+    // static var lanczos: Shader = LanczosShader()
 
     // Enables debug output to the console
     let logging: Bool = false
@@ -110,7 +119,7 @@ class Shader : Loggable {
     func set(key: String, item: Int) { set(key: key, value: Float(item)) }
 
     func setHidden(key: String, value: Bool) {
-        if var setting = findSetting(key: key) { setting.hidden = value }
+        if let setting = findSetting(key: key) { setting.hidden = value }
     }
 }
 

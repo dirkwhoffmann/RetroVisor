@@ -89,14 +89,12 @@ struct PlaygroundUniforms {
     uint  SHADOW_ENABLE;
     float BRIGHTNESS;
     float GLOW;
-    float GRID_WIDTH;
-    float GRID_HEIGHT;
-    float MIN_DOT_WIDTH;
-    float MAX_DOT_WIDTH;
-    float MIN_DOT_HEIGHT;
-    float MAX_DOT_HEIGHT;
-    float SHAPE;
-    float FEATHER;
+    float SHADOW_GRID_WIDTH;
+    float SHADOW_GRID_HEIGHT;
+    float SHADOW_MIN_DOT_WIDTH;
+    float SHADOW_MAX_DOT_WIDTH;
+    float SHADOW_MAX_DOT_HEIGHT;
+    float SHADOW_FEATHER;
 
     // Dot mask
     uint  DOTMASK_ENABLE;

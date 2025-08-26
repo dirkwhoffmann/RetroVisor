@@ -27,26 +27,15 @@ struct PlaygroundUniforms {
     var BLOOM_RADIUS_X: Float
     var BLOOM_RADIUS_Y: Float
 
-    /*
-    var SCANLINE_ENABLE: Int32
-    var SCANLINE_BRIGHTNESS: Float
-    var SCANLINE_WEIGHT1: Float
-    var SCANLINE_WEIGHT2: Float
-    var SCANLINE_WEIGHT3: Float
-    var SCANLINE_WEIGHT4: Float
-    */
-
     var SHADOW_ENABLE: Float
     var BRIGHTNESS: Float
     var GLOW: Float
-    var GRID_WIDTH: Float
-    var GRID_HEIGHT: Float
-    var MIN_DOT_WIDTH: Float
-    var MAX_DOT_WIDTH: Float
-    var MIN_DOT_HEIGHT: Float
-    var MAX_DOT_HEIGHT: Float
-    var SHAPE: Float
-    var FEATHER: Float
+    var SHADOW_GRID_WIDTH: Float
+    var SHADOW_GRID_HEIGHT: Float
+    var SHADOW_MIN_DOT_WIDTH: Float
+    var SHADOW_MAX_DOT_WIDTH: Float
+    var SHADOW_MAX_DOT_HEIGHT: Float
+    var SHADOW_FEATHER: Float
 
     var DOTMASK_ENABLE: Int32
     var DOTMASK: Int32
@@ -83,14 +72,12 @@ struct PlaygroundUniforms {
         SHADOW_ENABLE: 1,
         BRIGHTNESS: 1,
         GLOW: 1,
-        GRID_WIDTH: 5,
-        GRID_HEIGHT: 8,
-        MIN_DOT_WIDTH: 0.1,
-        MAX_DOT_WIDTH: 0.9,
-        MIN_DOT_HEIGHT: 0.1,
-        MAX_DOT_HEIGHT: 0.9,
-        SHAPE: 2.0,
-        FEATHER: 0.2,
+        SHADOW_GRID_WIDTH: 5,
+        SHADOW_GRID_HEIGHT: 8,
+        SHADOW_MIN_DOT_WIDTH: 0.1,
+        SHADOW_MAX_DOT_WIDTH: 0.9,
+        SHADOW_MAX_DOT_HEIGHT: 0.9,
+        SHADOW_FEATHER: 0.2,
 
         DOTMASK_ENABLE: 1,
         DOTMASK: 0,
@@ -267,60 +254,42 @@ final class PlaygroundShader: Shader {
 
                 ShaderSetting(
                     name: "Grid Width",
-                    key: "GRID_WIDTH",
+                    key: "SHADOW_GRID_WIDTH",
                     range: 1.0...60.0,
                     step: 1.0
                 ),
 
                 ShaderSetting(
                     name: "Grid Height",
-                    key: "GRID_HEIGHT",
+                    key: "SHADOW_GRID_HEIGHT",
                     range: 1.0...60.0,
                     step: 1.0
                 ),
 
                 ShaderSetting(
                     name: "Maximal Dot Width",
-                    key: "MAX_DOT_WIDTH",
+                    key: "SHADOW_MAX_DOT_WIDTH",
                     range: 0.0...1.0,
                     step: 0.01
                 ),
 
-                /*
-                 ShaderSetting(
-                 name: "Minimal Dot Height",
-                 key: "MIN_DOT_HEIGHT",
-                 range: 0.0...1.0,
-                 step: 0.01
-                 ),
-                 */
-
                 ShaderSetting(
                     name: "Maximal Dot Height",
-                    key: "MAX_DOT_HEIGHT",
+                    key: "SHADOW_MAX_DOT_HEIGHT",
                     range: 0.0...1.0,
                     step: 0.01
                 ),
 
                 ShaderSetting(
                     name: "Minimal Dot Size",
-                    key: "MIN_DOT_WIDTH",
+                    key: "SHADOW_MIN_DOT_WIDTH",
                     range: 0.0...1.0,
                     step: 0.01
                 ),
 
-                /*
-                ShaderSetting(
-                    name: "Phospor Shape",
-                    key: "SHAPE",
-                    range: 1.0...10.0,
-                    step: 0.01
-                ),
-                */
-
                 ShaderSetting(
                     name: "Phosphor Feather",
-                    key: "FEATHER",
+                    key: "SHADOW_FEATHER",
                     range: 0.0...3.0,
                     step: 0.01
                 )
@@ -411,14 +380,12 @@ final class PlaygroundShader: Shader {
         case "SHADOW_ENABLE": return uniforms.SHADOW_ENABLE
         case "BRIGHTNESS": return uniforms.BRIGHTNESS
         case "GLOW": return uniforms.GLOW
-        case "GRID_WIDTH": return uniforms.GRID_WIDTH
-        case "GRID_HEIGHT": return uniforms.GRID_HEIGHT
-        case "MIN_DOT_WIDTH": return uniforms.MIN_DOT_WIDTH
-        case "MAX_DOT_WIDTH": return uniforms.MAX_DOT_WIDTH
-        case "MIN_DOT_HEIGHT": return uniforms.MIN_DOT_HEIGHT
-        case "MAX_DOT_HEIGHT": return uniforms.MAX_DOT_HEIGHT
-        case "SHAPE": return uniforms.SHAPE
-        case "FEATHER": return uniforms.FEATHER
+        case "SHADOW_GRID_WIDTH": return uniforms.SHADOW_GRID_WIDTH
+        case "SHADOW_GRID_HEIGHT": return uniforms.SHADOW_GRID_HEIGHT
+        case "SHADOW_MIN_DOT_WIDTH": return uniforms.SHADOW_MIN_DOT_WIDTH
+        case "SHADOW_MAX_DOT_WIDTH": return uniforms.SHADOW_MAX_DOT_WIDTH
+        case "SHADOW_MAX_DOT_HEIGHT": return uniforms.SHADOW_MAX_DOT_HEIGHT
+        case "SHADOW_FEATHER": return uniforms.SHADOW_FEATHER
 
         case "DOTMASK_ENABLE": return Float(uniforms.DOTMASK_ENABLE)
         case "DOTMASK": return Float(uniforms.DOTMASK)
@@ -460,14 +427,12 @@ final class PlaygroundShader: Shader {
         case "SHADOW_ENABLE": uniforms.SHADOW_ENABLE = value
         case "BRIGHTNESS": uniforms.BRIGHTNESS = value
         case "GLOW": uniforms.GLOW = value
-        case "GRID_WIDTH": uniforms.GRID_WIDTH = value
-        case "GRID_HEIGHT": uniforms.GRID_HEIGHT = value
-        case "MIN_DOT_WIDTH": uniforms.MIN_DOT_WIDTH = value
-        case "MAX_DOT_WIDTH": uniforms.MAX_DOT_WIDTH = value
-        case "MIN_DOT_HEIGHT": uniforms.MIN_DOT_HEIGHT = value
-        case "MAX_DOT_HEIGHT": uniforms.MAX_DOT_HEIGHT = value
-        case "SHAPE": uniforms.SHAPE = value
-        case "FEATHER": uniforms.FEATHER = value
+        case "SHADOW_GRID_WIDTH": uniforms.SHADOW_GRID_WIDTH = value
+        case "SHADOW_GRID_HEIGHT": uniforms.SHADOW_GRID_HEIGHT = value
+        case "SHADOW_MIN_DOT_WIDTH": uniforms.SHADOW_MIN_DOT_WIDTH = value
+        case "SHADOW_MAX_DOT_WIDTH": uniforms.SHADOW_MAX_DOT_WIDTH = value
+        case "SHADOW_MAX_DOT_HEIGHT": uniforms.SHADOW_MAX_DOT_HEIGHT = value
+        case "SHADOW_FEATHER": uniforms.SHADOW_FEATHER = value
 
         case "DOTMASK_ENABLE": uniforms.DOTMASK_ENABLE = Int32(value)
         case "DOTMASK": uniforms.DOTMASK = Int32(value)
@@ -572,7 +537,7 @@ final class PlaygroundShader: Shader {
                                options: &uniforms,
                                length: MemoryLayout<PlaygroundUniforms>.stride)
 
-        let shadowFilter = MPSImageGaussianBlur(device: ycc.device, sigma: uniforms.FEATHER)
+        let shadowFilter = MPSImageGaussianBlur(device: ycc.device, sigma: uniforms.SHADOW_FEATHER)
         shadowFilter.encode(commandBuffer: commandBuffer, inPlaceTexture: &shadow)
 
         //
