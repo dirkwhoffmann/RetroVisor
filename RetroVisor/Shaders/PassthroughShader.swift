@@ -150,14 +150,12 @@ final class PassthroughShader: Shader {
         }
     }
 
-    override func isGrayedOut(key: String) -> Bool {
+    override func isHidden(key: String) -> Bool {
 
         switch key {
 
-        case "BLUR_RADIUS_X":
-            return uniforms.BLUR_ENABLE == 0
         case "BLUR_RADIUS_Y":
-            return uniforms.BLUR_ENABLE == 0 || Int32(get(key: "BLUR_FILTER")) == BlurFilterType.gaussian.rawValue
+            return Int32(get(key: "BLUR_FILTER")) == BlurFilterType.gaussian.rawValue
 
         default:
             return false

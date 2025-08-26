@@ -11,14 +11,51 @@ import Cocoa
 
 class MyOutlineView : NSOutlineView {
 
+    var groups: [ShaderSettingGroup] {
+
+        var result: [ShaderSettingGroup] = []
+        if let ds = self.dataSource {
+            let count = ds.outlineView?(self, numberOfChildrenOfItem: parent) ?? 0
+            for i in 0..<count {
+                if let child = ds.outlineView?(self, child: i, ofItem: parent) {
+                    if let group = child as? ShaderSettingGroup {
+                        result.append(group)
+                    }
+                }
+            }
+        }
+        return result
+    }
+
+    /*
+    func rowView(for group: ShaderSettingGroup) -> NSTableRowView? {
+
+        let r = row(forItem: group)
+        let rv = rowView(atRow: row(forItem: group), makeIfNecessary: false)
+        return rv
+    }
+
+    func cellView(for group: ShaderSettingGroup) -> ShaderGroupCell? {
+
+        let rowView = rowView(for: group)!
+        for column in 0..<numberOfColumns {
+            if let cellView = rowView.view(atColumn: column) as? ShaderGroupCell {
+                return cellView
+            }
+        }
+        return nil // rowView(for: group)?.view(atColumn: 0) as? ShaderGroupCell
+    }
+    */
+
     override func frameOfOutlineCell(atRow row: Int) -> NSRect {
+
         return .zero
     }
 }
 
 class ShaderPreferencesViewController: NSViewController {
 
-    @IBOutlet weak var outlineView: NSOutlineView!
+    @IBOutlet weak var outlineView: MyOutlineView!
     @IBOutlet weak var shaderSelector: NSPopUpButton!
 
     var shader: Shader { return ShaderLibrary.shared.currentShader }
@@ -30,9 +67,8 @@ class ShaderPreferencesViewController: NSViewController {
         outlineView.delegate = self
         outlineView.dataSource = self
         outlineView.indentationPerLevel = 0
-
         outlineView.intercellSpacing = NSSize(width: 0, height: 2)
-        outlineView.gridColor = .controlBackgroundColor // windowBackgroundColor
+        outlineView.gridColor = .controlAccentColor.withAlphaComponent(0.25) // .controlBackgroundColor // windowBackgroundColor
         outlineView.gridStyleMask = [.solidHorizontalGridLineMask]
 
         // Add all available shaders to the shader selector popup
@@ -46,31 +82,25 @@ class ShaderPreferencesViewController: NSViewController {
             item.tag = shader.id ?? 0
             shaderSelector.menu?.addItem(item)
         }
-        shaderSelector.selectItem(at: 0)
 
-        refresh()
+        shaderSelector.selectItem(withTag: shader.id ?? 0)
+        outlineView.reloadData()
+
+        for group in outlineView.groups {
+            
+            if group.key == nil || shader.get(key: group.key!) != 0 {
+                outlineView.expandItem(group)
+            } else {
+                outlineView.collapseItem(group)
+            }
+        }
     }
 
     func refresh() {
 
-        shaderSelector.selectItem(withTag: shader.id ?? 0) // Int(app.crtUniforms.ENABLE))
+        shaderSelector.selectItem(withTag: shader.id ?? 0)
         outlineView.reloadData()
     }
-
-    /*
-    func numberOfRows(in tableView: NSTableView) -> Int {
-
-        return shader.settings.count
-    }
-
-    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        guard let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "settingsCell"), owner: self) as? ShaderSettingCell else { return nil }
-
-        cell.shaderSetting = shader.settings[0].children[row]
-        cell.value = shader.get(key: shader.settings[0].children[row].key)
-        return cell
-    }
-    */
 
     @IBAction func shaderSelectAction(_ sender: NSPopUpButton) {
 
@@ -103,7 +133,8 @@ extension ShaderPreferencesViewController: NSOutlineViewDataSource {
     func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
 
         if let group = item as? ShaderSettingGroup {
-            return group.children.count
+            // return group.children.count
+            return group.children.filter { !shader.isHidden(key: $0.key) }.count
         } else {
             return shader.settings.count
         }
@@ -121,7 +152,8 @@ extension ShaderPreferencesViewController: NSOutlineViewDataSource {
     func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
 
         if let group = item as? ShaderSettingGroup {
-            return group.children[index]
+            // return group.children[index]
+            return group.children.filter { !shader.isHidden(key: $0.key) }[index]
         } else {
             return shader.settings[index]
         }
@@ -134,20 +166,39 @@ extension ShaderPreferencesViewController: NSOutlineViewDelegate {
 
         if let group = item as? ShaderSettingGroup {
 
-            let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("GroupCell"), owner: self) as! ShaderGroupCell
-            cell.label.stringValue = group.title
-            cell.shaderSettingGroup = group
-            cell.refresh()
+            let id = NSUserInterfaceItemIdentifier("GroupCell")
+            let cell = outlineView.makeView(withIdentifier: id, owner: self) as! ShaderGroupView
+            cell.setup(with: group)
+            cell.updateIcon(expanded: outlineView.isItemExpanded(item))
+            group.view = cell
             return cell
 
         } else if let row = item as? ShaderSetting {
 
-            guard let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "RowCell"), owner: self) as? ShaderSettingCell else { return nil }
-
+            let id = NSUserInterfaceItemIdentifier(rawValue: "RowCell")
+            let cell = outlineView.makeView(withIdentifier: id, owner: self) as! ShaderSettingView
             cell.shaderSetting = row
-            // cell.value = shader.get(key: shader.settings[0].children[row].key)
             return cell
+
+        } else {
+
+            return nil
         }
-        return nil
+    }
+
+    func outlineViewItemDidExpand(_ notification: Notification) {
+
+        guard let item = notification.userInfo?["NSObject"] else { return }
+        if let cell = item as? ShaderSettingGroup {
+            cell.view?.updateIcon(expanded: true)
+        }
+    }
+
+    func outlineViewItemDidCollapse(_ notification: Notification) {
+
+        guard let item = notification.userInfo?["NSObject"] else { return }
+        if let cell = item as? ShaderSettingGroup {
+            cell.view?.updateIcon(expanded: false)
+        }
     }
 }

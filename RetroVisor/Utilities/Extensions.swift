@@ -52,6 +52,27 @@ extension NSWindow {
     }
 }
 
+extension NSImage {
+
+    static func sfSymbol(name: String, size: CGFloat, weight: NSFont.Weight = .regular) -> NSImage? {
+
+        let config = NSImage.SymbolConfiguration(pointSize: size, weight: weight)
+
+        return NSImage(systemSymbolName: name,
+                       accessibilityDescription: name)?.withSymbolConfiguration(config)
+    }
+
+    static func chevronDown(size: CGFloat = 14, weight: NSFont.Weight = .regular) -> NSImage? {
+
+        return sfSymbol(name: "chevron.down", size: size, weight: weight)
+    }
+
+    static func chevronRight(size: CGFloat = 14, weight: NSFont.Weight = .regular) -> NSImage? {
+
+        return sfSymbol(name: "chevron.right", size: size, weight: weight)
+    }
+}
+
 extension Dictionary where Key == String {
 
     var prettify: String {

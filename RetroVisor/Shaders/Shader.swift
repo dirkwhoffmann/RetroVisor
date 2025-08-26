@@ -14,12 +14,16 @@ class ShaderSettingGroup {
 
     let title: String
     let key: String?
+    let expand: Bool?
     var children: [ShaderSetting]
 
-    init(title: String, key: String? = nil, _ children: [ShaderSetting]) {
+    var view: ShaderGroupView?
+
+    init(title: String, key: String? = nil, expand: Bool? = nil, _ children: [ShaderSetting]) {
 
         self.title = title
         self.key = key
+        self.expand = expand
         self.children = children
     }
 }
@@ -28,8 +32,11 @@ struct ShaderSetting {
 
     let name: String
 
-    let enableKey: String?
+    // Primary key for the value of this option
     let key: String
+
+    // Secondary key if the option has an additional enable switch
+    let enableKey: String?
 
     // Parameters for numeric arguments
     let range: ClosedRange<Double>?
@@ -41,13 +48,9 @@ struct ShaderSetting {
     // Optional help string
     let help: String?
 
-    // Indicates if the setting can be disabled
-    /*
-    var optional: Bool {
-        enableKey != nil
-    }
-    */
-    
+    // Indicates if this options should be hidden from the user
+    // var isHidden = false
+
     var formatString: String {
         return step < 0.1 ? "%.2f" : step < 1.0 ? "%.1f" : "%.0f"
     }
@@ -101,8 +104,8 @@ class Shader : Loggable {
     func set(key: String, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
     func set(key: String, item: Int) { set(key: key, value: Float(item)) }
 
-    // Indicates whether a shader option should be grayed out in the settings
-    func isGrayedOut(key: String) -> Bool { return false }
+    // Indicates whether a shader option should be hidden from the user
+    func isHidden(key: String) -> Bool { return false }
 }
 
 class ScaleShader<F: MPSImageScale> : Shader {

@@ -44,7 +44,7 @@
 		50BA965F2E3F6AA1006BA8DF /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 50BA965E2E3F6AA1006BA8DF /* Credits.rtf */; };
 		50BA96642E3FF0B3006BA8DF /* CrtEasy.metal in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96632E3FF0B3006BA8DF /* CrtEasy.metal */; };
 		50BA96662E3FF178006BA8DF /* ShaderTypes.metal in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96652E3FF176006BA8DF /* ShaderTypes.metal */; };
-		50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */; };
+		50BA966D2E40C3CB006BA8DF /* ShaderTableCellViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA966C2E40C3CB006BA8DF /* ShaderTableCellViews.swift */; };
 		50DE5B842E4CDB08002C07EC /* Loggable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DE5B832E4CDB02002C07EC /* Loggable.swift */; };
 		50DE5B862E4DA04B002C07EC /* Overlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DE5B852E4DA045002C07EC /* Overlay.swift */; };
 		50DE5B882E4E0666002C07EC /* IconBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DE5B872E4E065D002C07EC /* IconBar.swift */; };
@@ -90,7 +90,7 @@
 		50BA965E2E3F6AA1006BA8DF /* Credits.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		50BA96632E3FF0B3006BA8DF /* CrtEasy.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = CrtEasy.metal; sourceTree = "<group>"; };
 		50BA96652E3FF176006BA8DF /* ShaderTypes.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ShaderTypes.metal; sourceTree = "<group>"; };
-		50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderSettingCell.swift; sourceTree = "<group>"; };
+		50BA966C2E40C3CB006BA8DF /* ShaderTableCellViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderTableCellViews.swift; sourceTree = "<group>"; };
 		50DE5B832E4CDB02002C07EC /* Loggable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Loggable.swift; sourceTree = "<group>"; };
 		50DE5B852E4DA045002C07EC /* Overlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Overlay.swift; sourceTree = "<group>"; };
 		50DE5B872E4E065D002C07EC /* IconBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconBar.swift; sourceTree = "<group>"; };
@@ -132,7 +132,7 @@
 				503FCC242E4868D400EF49DA /* GeneralPreferencesViewController.swift */,
 				503FCC282E48F2C600EF49DA /* ShaderPreferencesViewController.swift */,
 				503FCC2A2E48F2D800EF49DA /* RecorderPreferencesViewController.swift */,
-				50BA966C2E40C3CB006BA8DF /* ShaderSettingCell.swift */,
+				50BA966C2E40C3CB006BA8DF /* ShaderTableCellViews.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -303,7 +303,7 @@
 				503FCC2D2E48F5A300EF49DA /* Recorder.swift in Sources */,
 				50BA96592E3C80F5006BA8DF /* TrackingWindow.swift in Sources */,
 				50DE5B842E4CDB08002C07EC /* Loggable.swift in Sources */,
-				50BA966D2E40C3CB006BA8DF /* ShaderSettingCell.swift in Sources */,
+				50BA966D2E40C3CB006BA8DF /* ShaderTableCellViews.swift in Sources */,
 				50292D942E471A330084CFE3 /* PermissionWindowController.swift in Sources */,
 				503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */,
 				506936582E4F49340037984F /* PlaygroundShader.swift in Sources */,

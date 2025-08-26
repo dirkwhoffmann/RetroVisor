@@ -9,16 +9,46 @@
 
 import Cocoa
 
-class ShaderGroupCell: NSTableCellView {
+class ShaderGroupView: NSTableCellView {
 
     @IBOutlet weak var controller: ShaderPreferencesViewController!
     @IBOutlet weak var disclosureButton: NSButton!
     @IBOutlet weak var enableButton: NSButton!
     @IBOutlet weak var label: NSTextField!
+    @IBOutlet weak var subLabel: NSTextField!
 
-    var shaderSettingGroup: ShaderSettingGroup!
+    var group: ShaderSettingGroup!
 
     var shader: Shader { controller.shader }
+    var clickable: Bool { group.key != nil }
+    var expandable: Bool { group.key == nil }
+
+    func setup(with group: ShaderSettingGroup) {
+
+        self.group = group
+        label.stringValue = group.title
+
+        if clickable {
+
+            enableButton.isHidden = false
+            disclosureButton.isHidden = true
+            enableButton.state = shader.get(key: group.key!) != 0 ? .on : .off
+            // subLabel = ...
+        }
+
+        if expandable {
+
+            enableButton.isHidden = true
+            disclosureButton.isHidden = false
+            // subLabel = ...
+        }
+    }
+
+    func updateIcon(expanded: Bool) {
+
+        disclosureButton.state = expanded ? .on : .off
+        disclosureButton.image = expanded ? .chevronDown() : .chevronRight()
+    }
 
     override func draw(_ dirtyRect: NSRect) {
 
@@ -29,19 +59,17 @@ class ShaderGroupCell: NSTableCellView {
 
     @IBAction func disclosureAction(_ sender: NSButton) {
 
-        print("disclosureAction \(sender.state)")
-
         var expanded = false {
             didSet {
                 if expanded {
-                    controller.outlineView.expandItem(shaderSettingGroup)
+                    controller.outlineView.expandItem(group)
                 } else {
-                    controller.outlineView.collapseItem(shaderSettingGroup)
+                    controller.outlineView.collapseItem(group)
                 }
             }
         }
 
-        if let key = shaderSettingGroup.key {
+        if let key = group.key {
             shader.set(key: key, enable: sender.state == .on)
         }
         expanded = sender.state == .on
@@ -54,25 +82,11 @@ class ShaderGroupCell: NSTableCellView {
         print("enableAction \(sender.state)")
         refresh()
     }
-     */
+    */
 
     func refresh() {
 
-        var disclosureIcon: NSImage? {
-            if controller.outlineView.isItemExpanded(shaderSettingGroup) {
-                return NSImage(systemSymbolName: "chevron.down",
-                               accessibilityDescription: "Collapse")?
-                    .withSymbolConfiguration(config)
-            } else {
-                return NSImage(systemSymbolName: "chevron.right",
-                               accessibilityDescription: "Expand")?
-                    .withSymbolConfiguration(config)
-            }
-        }
-
-        let config = NSImage.SymbolConfiguration(pointSize: 18, weight: .bold)
-
-        let clickable = shaderSettingGroup.key != nil
+        let clickable = group.key != nil
         let expandable = !clickable
 
         enableButton.isHidden = !clickable
@@ -80,18 +94,18 @@ class ShaderGroupCell: NSTableCellView {
 
         if clickable {
 
-            let enabled = shader.get(key: shaderSettingGroup.key!) != 0
+            let enabled = shader.get(key: group.key!) != 0
             enableButton.state = enabled ? .on : .off
         }
 
         if expandable {
 
-            disclosureButton.image = disclosureIcon
+            // disclosureButton.image = disclosureIcon
         }
     }
 }
 
-class ShaderSettingCell: NSTableCellView {
+class ShaderSettingView: NSTableCellView {
 
     @IBOutlet weak var controller: ShaderPreferencesViewController!
     @IBOutlet weak var optionImage: NSImageView!
@@ -112,7 +126,7 @@ class ShaderSettingCell: NSTableCellView {
 
             let enableKey = shaderSetting.enableKey
             let enabled = enableKey == nil ? true : shader.get(key: enableKey!) != 0
-            let active = !shader.isGrayedOut(key: shaderSetting.key)
+            let active = !shader.isHidden(key: shaderSetting.key)
 
             optionLabel.stringValue = shaderSetting.name
             subLabel.stringValue = shaderSetting.key

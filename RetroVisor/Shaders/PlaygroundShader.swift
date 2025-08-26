@@ -482,7 +482,7 @@ final class PlaygroundShader: Shader {
         }
     }
 
-    override func isGrayedOut(key: String) -> Bool {
+    override func isHidden(key: String) -> Bool {
 
         return false
     }

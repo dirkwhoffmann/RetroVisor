@@ -965,7 +965,7 @@ Gw
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView identifier="GroupCell" id="cJo-c0-E6g" customClass="ShaderGroupCell" customModule="RetroVisor" customModuleProvider="target">
+                                                        <tableCellView identifier="GroupCell" id="cJo-c0-E6g" customClass="ShaderGroupView" customModule="RetroVisor" customModuleProvider="target">
                                                             <rect key="frame" x="8" y="0.0" width="581" height="42"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
@@ -1013,7 +1013,7 @@ Gw
                                                                 <outlet property="label" destination="flA-tZ-9cP" id="2jA-hN-VKN"/>
                                                             </connections>
                                                         </tableCellView>
-                                                        <tableCellView identifier="RowCell" id="GCQ-XS-bvI" customClass="ShaderSettingCell" customModule="RetroVisor" customModuleProvider="target">
+                                                        <tableCellView identifier="RowCell" id="GCQ-XS-bvI" customClass="ShaderSettingView" customModule="RetroVisor" customModuleProvider="target">
                                                             <rect key="frame" x="8" y="42" width="581" height="56"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
