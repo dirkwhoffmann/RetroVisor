@@ -986,7 +986,7 @@ Gw
                                                                         <font key="font" metaFont="system"/>
                                                                     </buttonCell>
                                                                     <connections>
-                                                                        <action selector="disclosureAction:" target="cJo-c0-E6g" id="NXF-ka-L9k"/>
+                                                                        <action selector="enableAction:" target="cJo-c0-E6g" id="NXF-ka-L9k"/>
                                                                     </connections>
                                                                 </button>
                                                                 <imageView hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ccq-BU-lFG">
@@ -1002,7 +1002,7 @@ Gw
                                                                         <font key="font" metaFont="system"/>
                                                                     </buttonCell>
                                                                     <connections>
-                                                                        <action selector="disclosureAction:" target="cJo-c0-E6g" id="TvG-cI-QgD"/>
+                                                                        <action selector="enableAction:" target="cJo-c0-E6g" id="TvG-cI-QgD"/>
                                                                     </connections>
                                                                 </button>
                                                             </subviews>

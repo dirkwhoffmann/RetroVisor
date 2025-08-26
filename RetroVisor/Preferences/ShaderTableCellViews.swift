@@ -57,50 +57,15 @@ class ShaderGroupView: NSTableCellView {
         super.draw(dirtyRect)
     }
 
-    @IBAction func disclosureAction(_ sender: NSButton) {
-
-        var expanded = false {
-            didSet {
-                if expanded {
-                    controller.outlineView.expandItem(group)
-                } else {
-                    controller.outlineView.collapseItem(group)
-                }
-            }
-        }
+    @IBAction func enableAction(_ sender: NSButton) {
 
         if let key = group.key {
             shader.set(key: key, enable: sender.state == .on)
         }
-        expanded = sender.state == .on
-        refresh()
-    }
-
-    /*
-    @IBAction func enableAction(_ sender: NSButton) {
-
-        print("enableAction \(sender.state)")
-        refresh()
-    }
-    */
-
-    func refresh() {
-
-        let clickable = group.key != nil
-        let expandable = !clickable
-
-        enableButton.isHidden = !clickable
-        disclosureButton.isHidden = !expandable
-
-        if clickable {
-
-            let enabled = shader.get(key: group.key!) != 0
-            enableButton.state = enabled ? .on : .off
-        }
-
-        if expandable {
-
-            // disclosureButton.image = disclosureIcon
+        if sender.state == .on {
+            controller.outlineView.expandItem(group)
+        } else {
+            controller.outlineView.collapseItem(group)
         }
     }
 }

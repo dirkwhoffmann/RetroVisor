@@ -98,3 +98,13 @@ extension Dictionary where Key == String {
         return format(self, level: 0)
     }
 }
+
+/*
+extension NSOutlineView {
+
+    func expandItem(_ item: Any?, state: Bool) {
+
+        if state { expandItem(item) } else { collapseItem(item) }
+    }
+}
+*/
