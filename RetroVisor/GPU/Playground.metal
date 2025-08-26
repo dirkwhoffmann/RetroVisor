@@ -125,15 +125,15 @@ namespace playground {
         return color * mask * intensity;
     }
     */
-    
+
     kernel void shadowMask(texture2d<half, access::sample> input     [[ texture(0) ]],
                            texture2d<half, access::write>  output    [[ texture(1) ]],
                            constant PlaygroundUniforms     &u        [[ buffer(0)  ]],
                            sampler                         sam       [[ sampler(0) ]],
                            uint2                           gid       [[ thread_position_in_grid ]])
     {
-        uint2 size = uint2(output.get_width(), output.get_height());
-        Coord2 uv = (float2(gid) + 0.5) / float2(size);
+        // uint2 size = uint2(output.get_width(), output.get_height());
+        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(output.get_width(), output.get_height());
 
         // Sample original color
         Color4 srcColor = input.sample(sam, uv, level(3));
@@ -148,7 +148,7 @@ namespace playground {
         float2 gridCenter = (gridCoord + 0.5) * cellSize;
 
         // Normalized distance to nearest dot center (in pixels)
-        float2 d = (pixelCoord - gridCenter) / cellSize; //  / float2(u.SHADOW_MAX_DOT_WIDTH, u.SHADOW_MAX_DOT_HEIGHT);
+        float2 d = (pixelCoord - gridCenter) / cellSize;
         float dist = length(d);
 
         // --- Radius depends on luminance ---
@@ -231,15 +231,13 @@ namespace playground {
 
         half4 color = half4(half3(rgb), 1.0);
 
-        /*
-         if (u.DOTMASK_ENABLE) {
+        if (u.DOTMASK_ENABLE) {
 
-         half4 dotColor = dotMask.read(gid);
-         half4 gain = min(color, 1 - color) * dotColor;
-         half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
-         color += gain - loose;
-         }
-         */
+            half4 dotColor = dotMask.read(gid);
+            half4 gain = min(color, 1 - color) * dotColor;
+            half4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
+            color += gain - loose;
+        }
 
         outTex.write(color, gid);
 
@@ -247,24 +245,26 @@ namespace playground {
         // Brightness pass
         //
 
-        // if (u.BLOOM_ENABLE) {
+        if (u.BLOOM_ENABLE) {
 
-        // Compute luminance
-        float Y = dot(rgb, float3(0.299, 0.587, 0.114));
+            // Compute luminance
+            float Y = dot(rgb, float3(0.299, 0.587, 0.114));
 
-        // Keep only if brighter than threshold
-        half3 mask = half3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(Y)));
+            // Keep only if brighter than threshold
+            half3 mask = half3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(Y)));
 
-        // Scale the bright part
-        brightTex.write(half4(color.rgb * mask * u.BLOOM_INTENSITY, 1.0), gid);
-        // }
+            // Scale the bright part
+            brightTex.write(half4(color.rgb * mask * u.BLOOM_INTENSITY, 1.0), gid);
+        }
     }
 
+    /*
     half4 scanline(half4 x, float weight) {
 
         return pow(x, exp(4*(weight - 0.5)));
     }
-
+    */
+    
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                     texture2d<half, access::sample> shadow    [[ texture(1) ]],
                     texture2d<half, access::sample> dotMask   [[ texture(2) ]],
