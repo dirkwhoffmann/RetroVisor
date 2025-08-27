@@ -62,6 +62,7 @@ struct CrtUniforms {
 struct PlaygroundUniforms {
 
     float INPUT_TEX_SCALE;
+    float OUTPUT_TEX_SCALE;
     uint  RESAMPLE_FILTER;
 
     // Chroma phase

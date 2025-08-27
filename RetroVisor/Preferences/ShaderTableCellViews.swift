@@ -163,7 +163,8 @@ class ShaderSettingView: NSTableCellView {
 
             valueSlider.floatValue = value
             valueStepper.floatValue = value
-            valueLabel.stringValue = String(format: shaderSetting.formatString, value)
+            // valueLabel.stringValue = String(format: shaderSetting.formatString, value)
+            valueLabel.stringValue = value.formatted(min: 1, max: 3)
         }
 
         if !valuePopup.isHidden {
@@ -176,6 +177,7 @@ class ShaderSettingView: NSTableCellView {
 
         let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
+        print("\(sender.floatValue)  \(round(sender.floatValue)) \(shaderSetting.step)")
         shader.set(key: subLabel.stringValue, value: rounded)
         value = shader.get(key: subLabel.stringValue)
     }

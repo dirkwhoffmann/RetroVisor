@@ -371,18 +371,19 @@ final class PlaygroundShader: Shader {
 
         switch key {
 
-        case "INPUT_TEX_SCALE": return uniforms.INPUT_TEX_SCALE
-        case "OUTPUT_TEX_SCALE": return uniforms.OUTPUT_TEX_SCALE
+        case "INPUT_TEX_SCALE":     return uniforms.INPUT_TEX_SCALE
+        case "OUTPUT_TEX_SCALE":    return uniforms.OUTPUT_TEX_SCALE
+        case "RESAMPLE_FILTER":     return Float(uniforms.RESAMPLE_FILTER.rawValue)
+            
+        case "PAL":                 return Float(uniforms.PAL)
+        case "CHROMA_RADIUS":       return uniforms.CHROMA_RADIUS
 
-        case "PAL": return Float(uniforms.PAL)
-        case "CHROMA_RADIUS": return uniforms.CHROMA_RADIUS
-
-        case "BLOOM_ENABLE": return Float(uniforms.BLOOM_ENABLE)
-        case "BLOOM_FILTER": return Float(uniforms.BLOOM_FILTER.rawValue)
-        case "BLOOM_THRESHOLD": return uniforms.BLOOM_THRESHOLD
-        case "BLOOM_INTENSITY": return uniforms.BLOOM_INTENSITY
-        case "BLOOM_RADIUS_X": return uniforms.BLOOM_RADIUS_X
-        case "BLOOM_RADIUS_Y": return uniforms.BLOOM_RADIUS_Y
+        case "BLOOM_ENABLE":        return Float(uniforms.BLOOM_ENABLE)
+        case "BLOOM_FILTER":        return Float(uniforms.BLOOM_FILTER.rawValue)
+        case "BLOOM_THRESHOLD":     return uniforms.BLOOM_THRESHOLD
+        case "BLOOM_INTENSITY":     return uniforms.BLOOM_INTENSITY
+        case "BLOOM_RADIUS_X":      return uniforms.BLOOM_RADIUS_X
+        case "BLOOM_RADIUS_Y":      return uniforms.BLOOM_RADIUS_Y
 
             /*
         case "SCANLINE_ENABLE": return Float(uniforms.SCANLINE_ENABLE)
@@ -393,27 +394,28 @@ final class PlaygroundShader: Shader {
         case "SCANLINE_WEIGHT4": return uniforms.SCANLINE_WEIGHT4
              */
 
-        case "SHADOW_ENABLE": return uniforms.SHADOW_ENABLE
-        case "BRIGHTNESS": return uniforms.BRIGHTNESS
-        case "GLOW": return uniforms.GLOW
-        case "SHADOW_GRID_WIDTH": return uniforms.SHADOW_GRID_WIDTH
-        case "SHADOW_GRID_HEIGHT": return uniforms.SHADOW_GRID_HEIGHT
+        case "SHADOW_ENABLE":       return uniforms.SHADOW_ENABLE
+        case "BRIGHTNESS":          return uniforms.BRIGHTNESS
+        case "GLOW":                return uniforms.GLOW
+        case "SHADOW_GRID_WIDTH":   return uniforms.SHADOW_GRID_WIDTH
+        case "SHADOW_GRID_HEIGHT":  return uniforms.SHADOW_GRID_HEIGHT
         case "SHADOW_MIN_DOT_WIDTH": return uniforms.SHADOW_MIN_DOT_WIDTH
         case "SHADOW_MAX_DOT_WIDTH": return uniforms.SHADOW_MAX_DOT_WIDTH
         case "SHADOW_MAX_DOT_HEIGHT": return uniforms.SHADOW_MAX_DOT_HEIGHT
-        case "SHADOW_FEATHER": return uniforms.SHADOW_FEATHER
+        case "SHADOW_FEATHER":      return uniforms.SHADOW_FEATHER
 
-        case "DOTMASK_ENABLE": return Float(uniforms.DOTMASK_ENABLE)
-        case "DOTMASK": return Float(uniforms.DOTMASK)
-        case "DOTMASK_BRIGHTNESS": return uniforms.DOTMASK_BRIGHTNESS
+        case "DOTMASK_ENABLE":      return Float(uniforms.DOTMASK_ENABLE)
+        case "DOTMASK":             return Float(uniforms.DOTMASK)
+        case "DOTMASK_BRIGHTNESS":  return uniforms.DOTMASK_BRIGHTNESS
 
-        case "DEBUG_ENABLE": return Float(uniforms.DEBUG_ENABLE)
-        case "DEBUG_TEXTURE": return Float(uniforms.DEBUG_TEXTURE)
-        case "DEBUG_SLIDER": return uniforms.DEBUG_SLIDER
+        case "DEBUG_ENABLE":        return Float(uniforms.DEBUG_ENABLE)
+        case "DEBUG_TEXTURE":       return Float(uniforms.DEBUG_TEXTURE)
+        case "DEBUG_SLIDER":        return uniforms.DEBUG_SLIDER
 
         default:
             NSSound.beep()
-            return 0
+            fatalError()
+            // return 0
         }
     }
 
@@ -421,18 +423,19 @@ final class PlaygroundShader: Shader {
 
         switch key {
 
-        case "INPUT_TEX_SCALE":  uniforms.INPUT_TEX_SCALE = value
-        case "OUTPUT_TEX_SCALE": uniforms.OUTPUT_TEX_SCALE = value
+        case "INPUT_TEX_SCALE":     uniforms.INPUT_TEX_SCALE = value
+        case "OUTPUT_TEX_SCALE":    uniforms.OUTPUT_TEX_SCALE = value
+        case "RESAMPLE_FILTER":     uniforms.RESAMPLE_FILTER = ResampleFilterType(value)!
 
-        case "PAL":              uniforms.PAL = Int32(value)
-        case "CHROMA_RADIUS":    uniforms.CHROMA_RADIUS = value
+        case "PAL":                 uniforms.PAL = Int32(value)
+        case "CHROMA_RADIUS":       uniforms.CHROMA_RADIUS = value
 
-        case "BLOOM_ENABLE":     uniforms.BLOOM_ENABLE = Int32(value)
-        case "BLOOM_FILTER":     uniforms.BLOOM_FILTER = BlurFilterType(rawValue: Int32(value))!
-        case "BLOOM_THRESHOLD":  uniforms.BLOOM_THRESHOLD = value
-        case "BLOOM_INTENSITY":  uniforms.BLOOM_INTENSITY = value
-        case "BLOOM_RADIUS_X":   uniforms.BLOOM_RADIUS_X = value
-        case "BLOOM_RADIUS_Y":   uniforms.BLOOM_RADIUS_Y = value
+        case "BLOOM_ENABLE":        uniforms.BLOOM_ENABLE = Int32(value)
+        case "BLOOM_FILTER":        uniforms.BLOOM_FILTER = BlurFilterType(rawValue: Int32(value))!
+        case "BLOOM_THRESHOLD":     uniforms.BLOOM_THRESHOLD = value
+        case "BLOOM_INTENSITY":     uniforms.BLOOM_INTENSITY = value
+        case "BLOOM_RADIUS_X":      uniforms.BLOOM_RADIUS_X = value
+        case "BLOOM_RADIUS_Y":      uniforms.BLOOM_RADIUS_Y = value
 
             /*
         case "SCANLINE_ENABLE": uniforms.SCANLINE_ENABLE = Int32(value)
@@ -443,26 +446,27 @@ final class PlaygroundShader: Shader {
         case "SCANLINE_WEIGHT4": uniforms.SCANLINE_WEIGHT4 = value
              */
             
-        case "SHADOW_ENABLE":    uniforms.SHADOW_ENABLE = value
-        case "BRIGHTNESS":       uniforms.BRIGHTNESS = value
-        case "GLOW":             uniforms.GLOW = value
-        case "SHADOW_GRID_WIDTH": uniforms.SHADOW_GRID_WIDTH = value
-        case "SHADOW_GRID_HEIGHT": uniforms.SHADOW_GRID_HEIGHT = value
-        case "SHADOW_MIN_DOT_WIDTH": uniforms.SHADOW_MIN_DOT_WIDTH = value
-        case "SHADOW_MAX_DOT_WIDTH": uniforms.SHADOW_MAX_DOT_WIDTH = value
-        case "SHADOW_MAX_DOT_HEIGHT": uniforms.SHADOW_MAX_DOT_HEIGHT = value
-        case "SHADOW_FEATHER": uniforms.SHADOW_FEATHER = value
+        case "SHADOW_ENABLE":       uniforms.SHADOW_ENABLE = value
+        case "BRIGHTNESS":          uniforms.BRIGHTNESS = value
+        case "GLOW":                uniforms.GLOW = value
+        case "SHADOW_GRID_WIDTH":   uniforms.SHADOW_GRID_WIDTH = value
+        case "SHADOW_GRID_HEIGHT":  uniforms.SHADOW_GRID_HEIGHT = value
+        case "SHADOW_MIN_DOT_WIDTH":    uniforms.SHADOW_MIN_DOT_WIDTH = value
+        case "SHADOW_MAX_DOT_WIDTH":    uniforms.SHADOW_MAX_DOT_WIDTH = value
+        case "SHADOW_MAX_DOT_HEIGHT":   uniforms.SHADOW_MAX_DOT_HEIGHT = value
+        case "SHADOW_FEATHER":      uniforms.SHADOW_FEATHER = value
 
-        case "DOTMASK_ENABLE": uniforms.DOTMASK_ENABLE = Int32(value)
-        case "DOTMASK": uniforms.DOTMASK = Int32(value)
-        case "DOTMASK_BRIGHTNESS": uniforms.DOTMASK_BRIGHTNESS = value
+        case "DOTMASK_ENABLE":      uniforms.DOTMASK_ENABLE = Int32(value)
+        case "DOTMASK":             uniforms.DOTMASK = Int32(value)
+        case "DOTMASK_BRIGHTNESS":  uniforms.DOTMASK_BRIGHTNESS = value
 
-        case "DEBUG_ENABLE": uniforms.DEBUG_ENABLE = Int32(value)
-        case "DEBUG_TEXTURE": uniforms.DEBUG_TEXTURE = Int32(value)
-        case "DEBUG_SLIDER": uniforms.DEBUG_SLIDER = value
+        case "DEBUG_ENABLE":        uniforms.DEBUG_ENABLE = Int32(value)
+        case "DEBUG_TEXTURE":       uniforms.DEBUG_TEXTURE = Int32(value)
+        case "DEBUG_SLIDER":        uniforms.DEBUG_SLIDER = value
 
         default:
             NSSound.beep()
+            fatalError()
         }
     }
 

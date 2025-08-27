@@ -30,6 +30,25 @@ extension UInt32 {
     init(r: UInt8, g: UInt8, b: UInt8) { self.init(rgba: (r, g, b)) }
 }
 
+extension Float {
+
+    func formatted(min: Int, max: Int) -> String {
+
+        var s = String(format: "%.0\(max)f", self)
+
+        // Trim trailing zeros, but leave at least min digits
+        if let dotIndex = s.firstIndex(of: ".") {
+            var fracEnd = s.index(before: s.endIndex)
+            while fracEnd > dotIndex && s[fracEnd] == "0" && s.distance(from: dotIndex, to: fracEnd) > min {
+                fracEnd = s.index(before: fracEnd)
+            }
+            s = String(s[...fracEnd])
+        }
+
+        return s
+    }
+}
+
 extension CGRect {
 
     static var unity = CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0)

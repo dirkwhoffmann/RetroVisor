@@ -264,7 +264,7 @@ namespace playground {
         return pow(x, exp(4*(weight - 0.5)));
     }
     */
-    
+
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                     texture2d<half, access::sample> shadow    [[ texture(1) ]],
                     texture2d<half, access::sample> dotMask   [[ texture(2) ]],
@@ -414,11 +414,11 @@ namespace playground {
                       uint2                           gid       [[ thread_position_in_grid ]])
     {
         // Normalize gid to 0..1 in output texture
-        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(final.get_width(), final.get_height());;
+        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(final.get_width(), final.get_height());
 
         if (gid.x >= u.DEBUG_SLIDER * final.get_width()) {
 
-            half4 color;
+            Color4 color;
 
             switch(u.DEBUG_TEXTURE) {
 
@@ -481,6 +481,7 @@ namespace playground {
                     color = bloomTex.sample(sam, uv);
                     break;
             }
+            
             final.write(color, gid);
             return;
         }
