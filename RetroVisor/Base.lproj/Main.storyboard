@@ -1066,6 +1066,9 @@ Gw
                                                                     <rect key="frame" x="496" y="13" width="19" height="28"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                                     <stepperCell key="cell" continuous="YES" alignment="left" maxValue="100" id="cTT-dv-cfC"/>
+                                                                    <connections>
+                                                                        <action selector="stepperAction:" target="GCQ-XS-bvI" id="06S-Rk-4Xf"/>
+                                                                    </connections>
                                                                 </stepper>
                                                                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Cav-jP-BDS">
                                                                     <rect key="frame" x="335" y="18" width="18" height="18"/>

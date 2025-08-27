@@ -15,7 +15,8 @@ final class PassthroughShader: Shader {
 
     struct Uniforms {
 
-        var INPUT_PIXEL_SIZE: Int32
+        var INPUT_TEX_SCALE: Float
+        var OUTPUT_TEX_SCALE: Float
 
         var BLUR_ENABLE: Int32
         var BLUR_FILTER: BlurFilterType
@@ -28,7 +29,8 @@ final class PassthroughShader: Shader {
 
         static let defaults = Uniforms(
 
-            INPUT_PIXEL_SIZE: 1,
+            INPUT_TEX_SCALE: 0.5,
+            OUTPUT_TEX_SCALE: 2.0,
 
             BLUR_ENABLE: 0,
             BLUR_FILTER: .box,
@@ -59,23 +61,32 @@ final class PassthroughShader: Shader {
 
         settings = [
 
-            ShaderSettingGroup(title: "General", [
+            ShaderSettingGroup(title: "Textures", [
 
                 ShaderSetting(
-                    name: "Input Pixel Size",
-                    key: "INPUT_PIXEL_SIZE",
-                    range: 1...16,
-                    step: 1
+                    name: "Input Downscaling Factor",
+                    key: "INPUT_TEX_SCALE",
+                    range: 0.125...1.0,
+                    step: 0.125
                 ),
 
+                /*
+                ShaderSetting(
+                    name: "Output Upscaling Factor",
+                    key: "OUTPUT_TEX_SCALE",
+                    range: 1.0...2.0,
+                    step: 0.125
+                ),
+                */
+                
                 ShaderSetting(
                     name: "Resampler",
                     key: "RESAMPLE_FILTER",
                     values: [("BILINEAR", 0), ("LANCZOS", 1)]
                 ),
-                ]),
+            ]),
 
-            ShaderSettingGroup(title: "Blur Settings", key: "BLUR_ENABLE", [
+            ShaderSettingGroup(title: "Filter", key: "BLUR_ENABLE", [
 
                 ShaderSetting(
                     name: "Blur Filter",
@@ -118,12 +129,14 @@ final class PassthroughShader: Shader {
 
         switch key {
 
-        case "INPUT_PIXEL_SIZE":    return Float(uniforms.INPUT_PIXEL_SIZE)
+        case "INPUT_TEX_SCALE":     return Float(uniforms.INPUT_TEX_SCALE)
+        case "OUTPUT_TEX_SCALE":    return Float(uniforms.OUTPUT_TEX_SCALE)
+        case "RESAMPLE_FILTER":     return Float(uniforms.RESAMPLE_FILTER.rawValue)
+
         case "BLUR_ENABLE":         return Float(uniforms.BLUR_ENABLE)
         case "BLUR_FILTER":         return Float(uniforms.BLUR_FILTER.rawValue)
         case "BLUR_RADIUS_X":       return Float(uniforms.BLUR_RADIUS_X)
         case "BLUR_RADIUS_Y":       return Float(uniforms.BLUR_RADIUS_Y)
-        case "RESAMPLE_FILTER":     return Float(uniforms.RESAMPLE_FILTER.rawValue)
         case "RESAMPLE_SCALE_X":    return Float(uniforms.RESAMPLE_SCALE_X)
         case "RESAMPLE_SCALE_Y":    return Float(uniforms.RESAMPLE_SCALE_Y)
 
@@ -136,12 +149,14 @@ final class PassthroughShader: Shader {
 
         switch key {
 
-        case "INPUT_PIXEL_SIZE":    uniforms.INPUT_PIXEL_SIZE = Int32(value)
+        case "RESAMPLE_FILTER":     uniforms.RESAMPLE_FILTER = ResampleFilterType(value)!
+        case "INPUT_TEX_SCALE":     uniforms.INPUT_TEX_SCALE = value
+        case "OUTPUT_TEX_SCALE":    uniforms.OUTPUT_TEX_SCALE = value
+
         case "BLUR_ENABLE":         uniforms.BLUR_ENABLE = Int32(value)
-        case "BLUR_FILTER":         uniforms.BLUR_FILTER = BlurFilterType(rawValue: Int32(value))!
+        case "BLUR_FILTER":         uniforms.BLUR_FILTER = BlurFilterType(value)!
         case "BLUR_RADIUS_X":       uniforms.BLUR_RADIUS_X = value
         case "BLUR_RADIUS_Y":       uniforms.BLUR_RADIUS_Y = value
-        case "RESAMPLE_FILTER":     uniforms.RESAMPLE_FILTER = ResampleFilterType(rawValue: Int32(value))!
         case "RESAMPLE_SCALE_X":    uniforms.RESAMPLE_SCALE_X = value
         case "RESAMPLE_SCALE_Y":    uniforms.RESAMPLE_SCALE_Y = value
 
@@ -150,13 +165,13 @@ final class PassthroughShader: Shader {
         }
 
         setHidden(key: "BLUR_RADIUS_Y",
-                  value: Int32(get(key: "BLUR_FILTER")) == BlurFilterType.gaussian.rawValue)
+                  value: get(key: "BLUR_FILTER") == BlurFilterType.gaussian.floatValue)
     }
 
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
-        let srcW = output.width / Int(uniforms.INPUT_PIXEL_SIZE)
-        let srcH = output.height / Int(uniforms.INPUT_PIXEL_SIZE)
+        let srcW = Int(Float(output.width) * uniforms.INPUT_TEX_SCALE)
+        let srcH = Int(Float(output.height) * uniforms.INPUT_TEX_SCALE)
 
         if src?.width != srcW || src?.height != srcH {
 

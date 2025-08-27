@@ -34,9 +34,7 @@ class ShaderSetting {
     // Indicates if this options should be hidden from the user
     var hidden = false
 
-    var formatString: String {
-        return step < 0.1 ? "%.2f" : step < 1.0 ? "%.1f" : "%.0f"
-    }
+    var formatString: String { "%.3g" }
 
     init(name: String, enableKey: String? = nil, key: String,
          range: ClosedRange<Double>? = nil, step: Float = 0.01,

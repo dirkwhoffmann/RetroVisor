@@ -14,6 +14,8 @@ enum ResampleFilterType: Int32 {
 
     case bilinear = 0
     case lanczos = 1
+
+    init?(_ rawValue: Float) { self.init(rawValue: Int32(rawValue)) }
 }
 
 @MainActor
@@ -57,6 +59,9 @@ enum BlurFilterType: Int32 {
     case tent = 1
     case gaussian = 2
     case median = 3
+
+    init?(_ rawValue: Float) { self.init(rawValue: Int32(rawValue)) }
+    var floatValue: Float { return Float(self.rawValue) }
 }
 
 @MainActor

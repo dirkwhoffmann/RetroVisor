@@ -279,8 +279,8 @@ final class CRTEasyShader: Shader {
 
     func updateTextures(in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
 
-        let inpWidth = output.width // / Int(uniforms.INPUT_PIXEL_SIZE)
-        let inpHeight = output.height // / Int(uniforms.INPUT_PIXEL_SIZE)
+        let inpWidth = output.width // * uniforms.INPUT_TEX_SCALE
+        let inpHeight = output.height // * uniforms.INPUT_TEX_SCALE
 
         if src?.width != inpWidth || src?.height != inpHeight {
 

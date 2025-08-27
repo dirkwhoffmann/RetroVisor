@@ -14,7 +14,8 @@ import MetalPerformanceShaders
 
 struct PlaygroundUniforms {
 
-    var INPUT_PIXEL_SIZE: Float
+    var INPUT_TEX_SCALE: Float
+    var OUTPUT_TEX_SCALE: Float
     var RESAMPLE_FILTER: ResampleFilterType
     
     var PAL: Int32
@@ -47,7 +48,8 @@ struct PlaygroundUniforms {
 
     static let defaults = PlaygroundUniforms(
 
-        INPUT_PIXEL_SIZE: 1,
+        INPUT_TEX_SCALE: 0.5,
+        OUTPUT_TEX_SCALE: 2.0,
         RESAMPLE_FILTER: .bilinear,
 
         PAL: 0,
@@ -145,13 +147,20 @@ final class PlaygroundShader: Shader {
 
         settings = [
 
-            ShaderSettingGroup(title: "General Settings", [
+            ShaderSettingGroup(title: "Textures", [
 
                 ShaderSetting(
-                    name: "Input Pixel Size",
-                    key: "INPUT_PIXEL_SIZE",
-                    range: 1...16,
-                    step: 1
+                    name: "Input Downscaling Factor",
+                    key: "INPUT_TEX_SCALE",
+                    range: 0.125...1.0,
+                    step: 0.125
+                ),
+
+                ShaderSetting(
+                    name: "Output Upscaling Factor",
+                    key: "OUTPUT_TEX_SCALE",
+                    range: 1.0...2.0,
+                    step: 0.125
                 ),
 
                 ShaderSetting(
@@ -159,6 +168,10 @@ final class PlaygroundShader: Shader {
                     key: "RESAMPLE_FILTER",
                     values: [("BILINEAR", 0), ("LANCZOS", 1)]
                 ),
+
+            ]),
+
+            ShaderSettingGroup(title: "Chroma Effects", [
 
                 ShaderSetting(
                     name: "Video Standard",
@@ -174,7 +187,7 @@ final class PlaygroundShader: Shader {
                 ),
             ]),
 
-            ShaderSettingGroup(title: "Bloom Settings", key: "BLOOM_ENABLE", [
+            ShaderSettingGroup(title: "Blooming", key: "BLOOM_ENABLE", [
 
                 ShaderSetting(
                     name: "Bloom Filter",
@@ -295,7 +308,7 @@ final class PlaygroundShader: Shader {
                 )
             ]),
 
-            ShaderSettingGroup(title: "Dot Mask Settings", key: "DOTMASK_ENABLE", [
+            ShaderSettingGroup(title: "Dot Mask", key: "DOTMASK_ENABLE", [
 
                 ShaderSetting(
                     name: "Dotmask",
@@ -327,7 +340,7 @@ final class PlaygroundShader: Shader {
                 ),
             ]),
 
-            ShaderSettingGroup(title: "Debug Settings", key: "DEBUG_ENABLE", [
+            ShaderSettingGroup(title: "Debugging", key: "DEBUG_ENABLE", [
 
                 ShaderSetting(
                     name: "Debug",
@@ -357,8 +370,11 @@ final class PlaygroundShader: Shader {
     override func get(key: String) -> Float {
 
         switch key {
+
+        case "INPUT_TEX_SCALE": return uniforms.INPUT_TEX_SCALE
+        case "OUTPUT_TEX_SCALE": return uniforms.OUTPUT_TEX_SCALE
+
         case "PAL": return Float(uniforms.PAL)
-        case "INPUT_PIXEL_SIZE": return uniforms.INPUT_PIXEL_SIZE
         case "CHROMA_RADIUS": return uniforms.CHROMA_RADIUS
 
         case "BLOOM_ENABLE": return Float(uniforms.BLOOM_ENABLE)
@@ -404,16 +420,19 @@ final class PlaygroundShader: Shader {
     override func set(key: String, value: Float) {
 
         switch key {
-        case "PAL": uniforms.PAL = Int32(value)
-        case "INPUT_PIXEL_SIZE": uniforms.INPUT_PIXEL_SIZE = value
-        case "CHROMA_RADIUS": uniforms.CHROMA_RADIUS = value
 
-        case "BLOOM_ENABLE": uniforms.BLOOM_ENABLE = Int32(value)
-        case "BLOOM_FILTER": uniforms.BLOOM_FILTER = BlurFilterType(rawValue: Int32(value))!
-        case "BLOOM_THRESHOLD": uniforms.BLOOM_THRESHOLD = value
-        case "BLOOM_INTENSITY": uniforms.BLOOM_INTENSITY = value
-        case "BLOOM_RADIUS_X": uniforms.BLOOM_RADIUS_X = value
-        case "BLOOM_RADIUS_Y": uniforms.BLOOM_RADIUS_Y = value
+        case "INPUT_TEX_SCALE":  uniforms.INPUT_TEX_SCALE = value
+        case "OUTPUT_TEX_SCALE": uniforms.OUTPUT_TEX_SCALE = value
+
+        case "PAL":              uniforms.PAL = Int32(value)
+        case "CHROMA_RADIUS":    uniforms.CHROMA_RADIUS = value
+
+        case "BLOOM_ENABLE":     uniforms.BLOOM_ENABLE = Int32(value)
+        case "BLOOM_FILTER":     uniforms.BLOOM_FILTER = BlurFilterType(rawValue: Int32(value))!
+        case "BLOOM_THRESHOLD":  uniforms.BLOOM_THRESHOLD = value
+        case "BLOOM_INTENSITY":  uniforms.BLOOM_INTENSITY = value
+        case "BLOOM_RADIUS_X":   uniforms.BLOOM_RADIUS_X = value
+        case "BLOOM_RADIUS_Y":   uniforms.BLOOM_RADIUS_Y = value
 
             /*
         case "SCANLINE_ENABLE": uniforms.SCANLINE_ENABLE = Int32(value)
@@ -424,9 +443,9 @@ final class PlaygroundShader: Shader {
         case "SCANLINE_WEIGHT4": uniforms.SCANLINE_WEIGHT4 = value
              */
             
-        case "SHADOW_ENABLE": uniforms.SHADOW_ENABLE = value
-        case "BRIGHTNESS": uniforms.BRIGHTNESS = value
-        case "GLOW": uniforms.GLOW = value
+        case "SHADOW_ENABLE":    uniforms.SHADOW_ENABLE = value
+        case "BRIGHTNESS":       uniforms.BRIGHTNESS = value
+        case "GLOW":             uniforms.GLOW = value
         case "SHADOW_GRID_WIDTH": uniforms.SHADOW_GRID_WIDTH = value
         case "SHADOW_GRID_HEIGHT": uniforms.SHADOW_GRID_HEIGHT = value
         case "SHADOW_MIN_DOT_WIDTH": uniforms.SHADOW_MIN_DOT_WIDTH = value
@@ -462,12 +481,12 @@ final class PlaygroundShader: Shader {
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
         // Size of the downscaled input texture
-        let inpWidth = output.width / Int(uniforms.INPUT_PIXEL_SIZE)
-        let inpHeight = output.height / Int(uniforms.INPUT_PIXEL_SIZE)
+        let inpWidth = Int(Float(output.width) * uniforms.INPUT_TEX_SCALE)
+        let inpHeight = Int(Float(output.height) * uniforms.INPUT_TEX_SCALE)
 
-        // Size of the upscaled CRT texture
-        let crtWidth = 2 * output.width
-        let crtHeight = 2 * output.height
+        // Internal texture size
+        let crtWidth = Int(Float(output.width) * uniforms.OUTPUT_TEX_SCALE)
+        let crtHeight = Int(Float(output.height) * uniforms.OUTPUT_TEX_SCALE)
 
         // Update intermediate textures
         if ycc?.width != inpWidth || ycc?.height != inpHeight {
@@ -477,12 +496,12 @@ final class PlaygroundShader: Shader {
             bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
             rgb = output.makeTexture(width: inpWidth, height: inpHeight)
-            shadow = output.makeTexture(width: inpWidth, height: inpHeight)
             dotmask = output.makeTexture(width: inpWidth, height: inpHeight)
         }
 
         if crt?.width != crtWidth || crt?.height != crtHeight {
 
+            shadow = output.makeTexture(width: inpWidth, height: inpHeight)
             crt = output.makeTexture(width: crtWidth, height: crtHeight)
         }
     }
