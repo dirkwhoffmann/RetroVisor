@@ -135,31 +135,57 @@ namespace playground {
         // uint2 size = uint2(output.get_width(), output.get_height());
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(output.get_width(), output.get_height());
 
+        uint2 gridSize = uint2(int(u.SHADOW_GRID_WIDTH * u.OUTPUT_TEX_SCALE),
+                               int(u.SHADOW_GRID_HEIGHT * u.OUTPUT_TEX_SCALE));
+
+
         // Sample original color
         Color4 srcColor = input.sample(sam, uv, level(3));
 
         // Get the luminance
         float luminance = srcColor.x;
 
+        /*
         // Set up the dot lattice
-        float2 cellSize = float2(u.SHADOW_GRID_WIDTH, u.SHADOW_GRID_HEIGHT);
+        float2 cellSize = float2(u.SHADOW_GRID_WIDTH * u.OUTPUT_TEX_SCALE,
+                                 u.SHADOW_GRID_HEIGHT * u.OUTPUT_TEX_SCALE);
         float2 pixelCoord = float2(gid);
         float2 gridCoord = floor(pixelCoord / cellSize);
         float2 gridCenter = (gridCoord + 0.5) * cellSize;
+        */
+
+        // Normalize gid relative to its grid cell
+        float2 nrmgid = float2(gid % gridSize) / float2(gridSize.x - 1, gridSize.y - 1);
+
+        // Center at (0,0)
+        nrmgid -= float2(0.5, 0.5);
+
+        // Limit the dot size
+        nrmgid = nrmgid / float2(u.SHADOW_DOT_WIDTH, u.SHADOW_DOT_HEIGHT);
+
+        // Reduce dot size with luminance
+        // nrmgid = nrmgid / float2(1.0, 1.0 - (1.0 - luminance) * (1.0 - u.SHADOW_DOT_WEIGHT));
+        nrmgid = nrmgid / float2(1.0, smoothstep(0.0, 1.0 - u.SHADOW_DOT_WEIGHT, luminance));
+
+        float dist = length(nrmgid);
 
         // Normalized distance to nearest dot center (in pixels)
-        float2 d = (pixelCoord - gridCenter) / cellSize;
-        float dist = length(d);
+        // float2 d = (pixelCoord - gridCenter) / cellSize;
+        // float dist = length(d);
 
-        // --- Radius depends on luminance ---
-        float radius = mix(u.SHADOW_MIN_DOT_WIDTH, 1.0, pow(luminance, u.GLOW));
+        // Compute radius based on luminance
+        // float radius = mix(u.SHADOW_DOT_WEIGHT, u.SHADOW_DOT_WIDTH, pow(luminance, u.GLOW));
+        float radius = dist;
 
         // --- Dot falloff ---
         // Smoothstep makes soft edges, bigger for bright pixels
-        float spot = smoothstep(radius, radius * 0.5, dist);
+        // float spot = smoothstep(radius, radius * 0.5, dist);
+        float offset = 0; // luminance * u.SHADOW_DOT_WEIGHT;
+        float offset2 = 0; // (1.0 - luminance) * u.SHADOW_DOT_WEIGHT;
+        float spot = smoothstep(1.0 - offset2, offset, radius);
 
         // Scale final brightness by luminance
-        half3 finalColor = half3(spot); //  srcColor * spot;
+        Color3 finalColor = Color3(spot); //  srcColor * spot;
 
         // return float4(finalColor, 1.0);
 
@@ -358,8 +384,8 @@ namespace playground {
          // weight = weight; // 0.25 * weightL + 0.5 * weight + 0.25 * weightR;
 
          // Scale dot size based on weight
-         float2 minDotSize = float2(u.SHADOW_MIN_DOT_WIDTH, u.MIN_DOT_HEIGHT);
-         float2 maxDotSize = float2(u.SHADOW_MAX_DOT_WIDTH, u.SHADOW_MAX_DOT_HEIGHT);
+         float2 minDotSize = float2(u.SHADOW_DOT_WEIGHT, u.MIN_DOT_HEIGHT);
+         float2 maxDotSize = float2(u.SHADOW_DOT_WIDTH, u.SHADOW_DOT_HEIGHT);
 
          float2 scaledRDotSize = mix(minDotSize, maxDotSize, weight.r);
          float2 scaledRDotSizeL = mix(minDotSize, maxDotSize, weightL.r);
