@@ -187,3 +187,12 @@ class DebugFilter: Kernel {
         self.init(name: "playground::debug", sampler: sampler)
     }
 }
+
+class HSVFilter: Kernel {
+
+    convenience init?(sampler: MTLSamplerState) {
+
+        self.init(name: "hsv::hsv", sampler: sampler)
+    }
+}
+

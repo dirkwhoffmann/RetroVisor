@@ -24,6 +24,8 @@
 		503FCC352E4B85BD00EF49DA /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC342E4B85B900EF49DA /* Settings.swift */; };
 		504F539A2E59BC6600C5291F /* FilterLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504F53992E59BC5A00C5291F /* FilterLibrary.swift */; };
 		504F539E2E5AE05800C5291F /* DotMaskLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504F539D2E5AE04F00C5291F /* DotMaskLibrary.swift */; };
+		504F53A02E6173D000C5291F /* HSVShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504F539F2E6173C300C5291F /* HSVShader.swift */; };
+		504F53A22E6179BB00C5291F /* HSV.metal in Sources */ = {isa = PBXBuildFile; fileRef = 504F53A12E6179AE00C5291F /* HSV.metal */; };
 		5069364D2E4EFD2D0037984F /* Shader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069364C2E4EFD2B0037984F /* Shader.swift */; };
 		506936502E4EFF160037984F /* CrtEasyShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */; };
 		506936522E4F0E590037984F /* ShaderLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936512E4F0E540037984F /* ShaderLibrary.swift */; };
@@ -68,6 +70,8 @@
 		503FCC342E4B85B900EF49DA /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		504F53992E59BC5A00C5291F /* FilterLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterLibrary.swift; sourceTree = "<group>"; };
 		504F539D2E5AE04F00C5291F /* DotMaskLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DotMaskLibrary.swift; sourceTree = "<group>"; };
+		504F539F2E6173C300C5291F /* HSVShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HSVShader.swift; sourceTree = "<group>"; };
+		504F53A12E6179AE00C5291F /* HSV.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = HSV.metal; sourceTree = "<group>"; };
 		5069364C2E4EFD2B0037984F /* Shader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shader.swift; sourceTree = "<group>"; };
 		5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrtEasyShader.swift; sourceTree = "<group>"; };
 		506936512E4F0E540037984F /* ShaderLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderLibrary.swift; sourceTree = "<group>"; };
@@ -157,6 +161,7 @@
 				506936512E4F0E540037984F /* ShaderLibrary.swift */,
 				5069364C2E4EFD2B0037984F /* Shader.swift */,
 				506936532E4F2FDB0037984F /* PassthroughShader.swift */,
+				504F539F2E6173C300C5291F /* HSVShader.swift */,
 				5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */,
 				506936572E4F49220037984F /* PlaygroundShader.swift */,
 			);
@@ -215,6 +220,7 @@
 				50BA96652E3FF176006BA8DF /* ShaderTypes.metal */,
 				50BA964D2E3C80D6006BA8DF /* Shaders.metal */,
 				50BA96632E3FF0B3006BA8DF /* CrtEasy.metal */,
+				504F53A12E6179AE00C5291F /* HSV.metal */,
 				506936592E4F49C40037984F /* Playground.metal */,
 			);
 			path = GPU;
@@ -315,6 +321,7 @@
 				503FCC212E48688600EF49DA /* SidebarViewController.swift in Sources */,
 				50079E6E2E4331F5005BC5FD /* Menu.swift in Sources */,
 				50BA965B2E3D4865006BA8DF /* Animated.swift in Sources */,
+				504F53A22E6179BB00C5291F /* HSV.metal in Sources */,
 				50292D902E4685E10084CFE3 /* MetalView.swift in Sources */,
 				5069365A2E4F49CA0037984F /* Playground.metal in Sources */,
 				503FCC292E48F2D200EF49DA /* ShaderPreferencesViewController.swift in Sources */,
@@ -332,6 +339,7 @@
 				50BA96532E3C80D6006BA8DF /* Streamer.swift in Sources */,
 				50DE5B882E4E0666002C07EC /* IconBar.swift in Sources */,
 				50BA96542E3C80D6006BA8DF /* Shaders.metal in Sources */,
+				504F53A02E6173D000C5291F /* HSVShader.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
