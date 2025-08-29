@@ -36,7 +36,7 @@ namespace hsv {
     // Color space helpers
     //
 
-    #define USE_OPTIMIZED_HSV   1   // set to 0 for readable version
+    #define USE_OPTIMIZED_HSV   0   // set to 0 for readable version
 
 #if USE_OPTIMIZED_HSV
 
