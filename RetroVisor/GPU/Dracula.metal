@@ -20,6 +20,8 @@ typedef half4   Color4;
 
 namespace dracula {
 
+    constant constexpr float M_PI = 3.14159265358979323846264338327950288;
+
     struct Uniforms {
 
         float INPUT_TEX_SCALE;
@@ -155,16 +157,18 @@ namespace dracula {
 
     kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
                         texture2d<half, access::write>  output    [[ texture(1) ]],
+                        constant Uniforms               &u        [[ buffer(0)  ]],
                         sampler                         sam       [[ sampler(0) ]],
                         uint2                           gid       [[ thread_position_in_grid ]])
     {
-        // uint2 inSize = (input.get_width(), input.get_height());
-        uint2 gridSize = (input.get_width(), input.get_height());
-        // uint2 mgid = gid % gridSize;
+        // float width = float(int(u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE));
+        float sample = gid.x * 2 * M_PI / (u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE);
+        Color r = 0.5 + 0.5 * sin(sample);
+        Color g = 0.5 + 0.5 * sin(sample + u.DOTMASK_SHIFT);
+        Color b = 0.5 + 0.5 * sin(sample + 2 * u.DOTMASK_SHIFT);
 
-        float2 uv = (float2(gid % gridSize) + 0.5) / float2(gridSize);
-
-        half4 color = input.sample(sam, uv);
+        Color4 color = Color4(r, g, b, 1.0);
+        
         output.write(color, gid);
     }
 
@@ -256,8 +260,8 @@ namespace dracula {
         // Normalize gid to 0..1 in output texture
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(outTex.get_width(), outTex.get_height());
 
-        // Read image
-        half4 color = inTex.sample(sam, uv);
+        // Read dotmask
+        Color4 color = dotMask.sample(sam, uv);
 
         /*
          uint line = gid.y % 4;
@@ -273,6 +277,7 @@ namespace dracula {
          }
          */
 
+        /*
         // Apply dot mask effect
         if (u.DOTMASK_ENABLE) {
 
@@ -292,7 +297,8 @@ namespace dracula {
             Color4 bloom = bloomTex.sample(sam, uv);
             color = saturate(color + bloom);
         }
-
+        */
+        
         outTex.write(color, gid);
         return;
     }

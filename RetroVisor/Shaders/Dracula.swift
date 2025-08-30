@@ -56,11 +56,11 @@ final class DraculaShader: Shader {
             BLOOM_RADIUS_X: 5,
             BLOOM_RADIUS_Y: 3,
             
-            DOTMASK_ENABLE: 0,
-            DOTMASK_TYPE: 0,
-            DOTMASK_WIDTH: 0.0,
-            DOTMASK_SHIFT: 0.0,
-            DOTMASK_WEIGHT: 0.0,
+            DOTMASK_ENABLE: 1,
+            DOTMASK_TYPE: 1,
+            DOTMASK_WIDTH: 3,
+            DOTMASK_SHIFT: 1.0,
+            DOTMASK_WEIGHT: 1.0,
             DOTMASK_BRIGHTNESS: 0.5,
             
             DEBUG_ENABLE: 0,
@@ -71,6 +71,7 @@ final class DraculaShader: Shader {
 
     var splitKernel: Kernel!
     var chromaKernel: Kernel!
+    var dotMaskKernel: Kernel!
     var crtKernel: Kernel!
     var debugKernel: Kernel!
 
@@ -195,10 +196,31 @@ final class DraculaShader: Shader {
             ShaderSettingGroup(title: "Dot Mask", key: "DOTMASK_ENABLE", [
 
                 ShaderSetting(
-                    name: "Dotmask",
-                    key: "DOTMASK",
+                    name: "Dotmask Type",
+                    key: "DOTMASK_TYPE",
                     range: 0...4,
                     step: 1.0
+                ),
+
+                ShaderSetting(
+                    name: "Dotmask Width",
+                    key: "DOTMASK_WIDTH",
+                    range: 3.0...15.0,
+                    step: 1.0
+                ),
+
+                ShaderSetting(
+                    name: "Dotmask Width",
+                    key: "DOTMASK_WEIGHT",
+                    range: 0.0...1.0,
+                    step: 0.01
+                ),
+
+                ShaderSetting(
+                    name: "Dotmask Shift",
+                    key: "DOTMASK_SHIFT",
+                    range: 0.0...6.0,
+                    step: 0.01
                 ),
 
                 ShaderSetting(
@@ -206,22 +228,7 @@ final class DraculaShader: Shader {
                     key: "DOTMASK_BRIGHTNESS",
                     range: 0...1,
                     step: 0.01
-                ),
-
-                ShaderSetting(
-                    name: "Brightness",
-                    key: "BRIGHTNESS",
-                    range: 0.0...2.0,
-                    step: 0.01
-                ),
-
-
-                ShaderSetting(
-                    name: "Glow",
-                    key: "GLOW",
-                    range: 0.0...2.0,
-                    step: 0.01
-                ),
+                )
             ]),
 
             ShaderSettingGroup(title: "Debugging", key: "DEBUG_ENABLE", [
@@ -252,6 +259,7 @@ final class DraculaShader: Shader {
 
     override func get(key: String) -> Float {
 
+        print("key: \(key)")
         switch key {
 
         case "INPUT_TEX_SCALE":     return uniforms.INPUT_TEX_SCALE
@@ -270,9 +278,9 @@ final class DraculaShader: Shader {
 
         case "DOTMASK_ENABLE":      return Float(uniforms.DOTMASK_ENABLE)
         case "DOTMASK_TYPE":        return Float(uniforms.DOTMASK_TYPE)
-        case "DOTMASK_WIDTH":       return Float(uniforms.DOTMASK_WIDTH)
-        case "DOTMASK_SHIFT":       return Float(uniforms.DOTMASK_SHIFT)
-        case "DOTMASK_WEIGHT":      return Float(uniforms.DOTMASK_WEIGHT)
+        case "DOTMASK_WIDTH":       return uniforms.DOTMASK_WIDTH
+        case "DOTMASK_SHIFT":       return uniforms.DOTMASK_SHIFT
+        case "DOTMASK_WEIGHT":      return uniforms.DOTMASK_WEIGHT
         case "DOTMASK_BRIGHTNESS":  return uniforms.DOTMASK_BRIGHTNESS
 
         case "DEBUG_ENABLE":        return Float(uniforms.DEBUG_ENABLE)
@@ -325,6 +333,7 @@ final class DraculaShader: Shader {
 
         super.activate()
         splitKernel = ColorSpaceFilter(sampler: ShaderLibrary.linear)
+        dotMaskKernel = DotMaskFilter(sampler: ShaderLibrary.linear)
         crtKernel = CrtFilter(sampler: ShaderLibrary.mipmapLinear)
         chromaKernel = CompositeFilter(sampler: ShaderLibrary.linear)
         debugKernel = DebugFilter(sampler: ShaderLibrary.mipmapLinear)
@@ -350,11 +359,11 @@ final class DraculaShader: Shader {
             bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
             rgb = output.makeTexture(width: inpWidth, height: inpHeight)
-            dotmask = output.makeTexture(width: inpWidth, height: inpHeight)
         }
 
         if crt?.width != crtWidth || crt?.height != crtHeight {
 
+            dotmask = output.makeTexture(width: inpWidth, height: inpHeight)
             crt = output.makeTexture(width: crtWidth, height: crtHeight)
         }
     }
@@ -387,14 +396,22 @@ final class DraculaShader: Shader {
         // Pass 3: Apply chroma effects
         //
 
+        /*
         let descriptor = DotMaskDescriptor(type: Int(uniforms.DOTMASK_TYPE),
                                            brightness: uniforms.DOTMASK_BRIGHTNESS,
                                            blur: 1.0)
-
+        */
+        
+        /*
         dotMaskLibrary.create(commandBuffer: commandBuffer,
                               descriptor: descriptor,
                               texture: &dotmask)
-
+        */
+        dotMaskKernel.apply(commandBuffer: commandBuffer,
+                            textures: [ycc, dotmask],
+                            options: &uniforms,
+                            length: MemoryLayout<Uniforms>.stride)
+        
         chromaKernel.apply(commandBuffer: commandBuffer,
                            textures: [ycc, dotmask, rgb, bri],
                            options: &uniforms,
