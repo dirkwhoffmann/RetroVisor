@@ -24,6 +24,7 @@ namespace dracula {
 
     struct Uniforms {
 
+        // Texture dimensions
         float INPUT_TEX_SCALE;
         float OUTPUT_TEX_SCALE;
         uint  RESAMPLE_FILTER;
@@ -48,6 +49,13 @@ namespace dracula {
         float DOTMASK_WEIGHT;
         float DOTMASK_BRIGHTESS;
 
+        // Scanlines
+        uint  SCANLINES_ENABLE;
+        float SCANLINE_DISTANCE;
+        float SCANLINE_WEIGHT;
+        float SCANLINE_BRIGHTNESS;
+        
+        // Debugging
         uint  DEBUG_ENABLE;
         uint  DEBUG_TEXTURE;
         float DEBUG_SLIDER;
@@ -248,6 +256,19 @@ namespace dracula {
     }
     */
 
+    inline half3 scanlineWeight(uint2 pixel, uint height, float weight, float brightness, float bloom) {
+        
+        // Calculate distance to nearest scanline
+        float dy = ((float(pixel.y % height) / float(height - 1)) - 0.5);
+     
+        // Calculate scanline weight
+        float scanlineWeight = max(1.0 - dy * dy * 24 * weight, brightness);
+        
+        // Apply bloom effect an return
+        half3 result = scanlineWeight * bloom;
+        return result;
+    }
+    
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                     texture2d<half, access::sample> dotMask   [[ texture(1) ]],
                     texture2d<half, access::sample> bloomTex  [[ texture(2) ]],
@@ -264,6 +285,17 @@ namespace dracula {
         // Read dotmask
         Color4 color = dotMask.sample(sam, uv);
 
+        // Apply scanline effect (if emulation type matches)
+        if (u.SCANLINES_ENABLE) {
+            
+            color.rgb *= scanlineWeight(gid,
+                                        u.SCANLINE_DISTANCE,
+                                        u.SCANLINE_WEIGHT,
+                                        u.SCANLINE_BRIGHTNESS,
+                                        1.0);
+        }
+
+        
         /*
          uint line = gid.y % 4;
 

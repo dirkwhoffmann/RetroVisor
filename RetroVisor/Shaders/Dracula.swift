@@ -36,6 +36,11 @@ final class DraculaShader: Shader {
         var DOTMASK_WEIGHT: Float
         var DOTMASK_BRIGHTNESS: Float
         
+        var SCANLINES_ENABLE: Int32
+        var SCANLINE_DISTANCE: Float
+        var SCANLINE_WEIGHT: Float
+        var SCANLINE_BRIGHTNESS: Float
+                                        
         var DEBUG_ENABLE: Int32
         var DEBUG_TEXTURE: Int32
         var DEBUG_SLIDER: Float
@@ -63,6 +68,11 @@ final class DraculaShader: Shader {
             DOTMASK_WEIGHT: 1.0,
             DOTMASK_BRIGHTNESS: 0.5,
             
+            SCANLINES_ENABLE: 0,
+            SCANLINE_DISTANCE: 6.0,
+            SCANLINE_WEIGHT: 0.2,
+            SCANLINE_BRIGHTNESS: 0.5,
+                
             DEBUG_ENABLE: 0,
             DEBUG_TEXTURE: 1,
             DEBUG_SLIDER: 0.0
@@ -193,6 +203,30 @@ final class DraculaShader: Shader {
                 ),
             ]),
 
+            ShaderSettingGroup(title: "Scanlines", key: "SCANLINES_ENABLE", [
+
+                ShaderSetting(
+                    name: "Scanline Distance",
+                    key: "SCANLINE_DISTANCE",
+                    range: 0...10,
+                    step: 1
+                ),
+
+                ShaderSetting(
+                    name: "Scanline Weight",
+                    key: "SCANLINE_WEIGHT",
+                    range: 0.0...1.0,
+                    step: 0.01
+                ),
+
+                ShaderSetting(
+                    name: "Scanline Brightness",
+                    key: "SCANLINE_BRIGHTNESS",
+                    range: 0.0...1.0,
+                    step: 0.01
+                ),
+            ]),
+                
             ShaderSettingGroup(title: "Dot Mask", key: "DOTMASK_ENABLE", [
 
                 ShaderSetting(
@@ -283,6 +317,11 @@ final class DraculaShader: Shader {
         case "DOTMASK_WEIGHT":      return uniforms.DOTMASK_WEIGHT
         case "DOTMASK_BRIGHTNESS":  return uniforms.DOTMASK_BRIGHTNESS
 
+        case "SCANLINES_ENABLE":    return Float(uniforms.SCANLINES_ENABLE)
+        case "SCANLINE_DISTANCE":   return uniforms.SCANLINE_DISTANCE
+        case "SCANLINE_WEIGHT":     return uniforms.SCANLINE_WEIGHT
+        case "SCANLINE_BRIGHTNESS": return uniforms.SCANLINE_BRIGHTNESS
+            
         case "DEBUG_ENABLE":        return Float(uniforms.DEBUG_ENABLE)
         case "DEBUG_TEXTURE":       return Float(uniforms.DEBUG_TEXTURE)
         case "DEBUG_SLIDER":        return uniforms.DEBUG_SLIDER
@@ -318,6 +357,11 @@ final class DraculaShader: Shader {
         case "DOTMASK_SHIFT":       uniforms.DOTMASK_SHIFT = value
         case "DOTMASK_WEIGHT":      uniforms.DOTMASK_WEIGHT = value
         case "DOTMASK_BRIGHTNESS":  uniforms.DOTMASK_BRIGHTNESS = value
+
+        case "SCANLINES_ENABLE":    uniforms.SCANLINES_ENABLE = Int32(value)
+        case "SCANLINE_DISTANCE":   uniforms.SCANLINE_DISTANCE = value
+        case "SCANLINE_WEIGHT":     uniforms.SCANLINE_WEIGHT = value
+        case "SCANLINE_BRIGHTNESS": uniforms.SCANLINE_BRIGHTNESS = value
 
         case "DEBUG_ENABLE":        uniforms.DEBUG_ENABLE = Int32(value)
         case "DEBUG_TEXTURE":       uniforms.DEBUG_TEXTURE = Int32(value)
