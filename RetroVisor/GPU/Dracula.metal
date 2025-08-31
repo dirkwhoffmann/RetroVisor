@@ -166,8 +166,9 @@ namespace dracula {
         Color r = 0.5 + 0.5 * sin(sample);
         Color g = 0.5 + 0.5 * sin(sample + u.DOTMASK_SHIFT);
         Color b = 0.5 + 0.5 * sin(sample + 2 * u.DOTMASK_SHIFT);
-
+        
         Color4 color = Color4(r, g, b, 1.0);
+        color = mix(color, Color4(1.0,1.0,1.0,1.0), u.DOTMASK_BRIGHTESS);
         
         output.write(color, gid);
     }
