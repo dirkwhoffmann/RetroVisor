@@ -95,6 +95,7 @@ struct PlaygroundUniforms {
     float SHADOW_DOT_WIDTH;
     float SHADOW_DOT_HEIGHT;
     float SHADOW_DOT_WEIGHT;
+    float SHADOW_DOT_GLOW;
     float SHADOW_FEATHER;
 
     // Dot mask

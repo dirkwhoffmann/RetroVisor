@@ -36,6 +36,7 @@ struct PlaygroundUniforms {
     var SHADOW_DOT_WIDTH: Float
     var SHADOW_DOT_HEIGHT: Float
     var SHADOW_DOT_WEIGHT: Float
+    var SHADOW_DOT_GLOW: Float
     var SHADOW_FEATHER: Float
 
     var DOTMASK_ENABLE: Int32
@@ -78,16 +79,17 @@ struct PlaygroundUniforms {
         SHADOW_GRID_HEIGHT: 8,
         SHADOW_DOT_WIDTH: 0.9,
         SHADOW_DOT_HEIGHT: 0.9,
-        SHADOW_DOT_WEIGHT: 0.1,
+        SHADOW_DOT_WEIGHT: 0.5,
+        SHADOW_DOT_GLOW: 1.0,
         SHADOW_FEATHER: 0.2,
 
         DOTMASK_ENABLE: 0,
         DOTMASK: 0,
         DOTMASK_BRIGHTNESS: 0.5,
 
-        DEBUG_ENABLE: 0,
-        DEBUG_TEXTURE: 1,
-        DEBUG_SLIDER: 0.0
+        DEBUG_ENABLE: 1,
+        DEBUG_TEXTURE: 9,
+        DEBUG_SLIDER: 0.5
     )
 }
 
@@ -294,9 +296,16 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Minimal Dot Size",
+                    name: "Weight",
                     key: "SHADOW_DOT_WEIGHT",
-                    range: 0.0...1.0,
+                    range: 0.0...2.0,
+                    step: 0.01
+                ),
+
+                ShaderSetting(
+                    name: "Glow",
+                    key: "SHADOW_DOT_GLOW",
+                    range: 0.05...5.0,
                     step: 0.01
                 ),
 
@@ -330,7 +339,6 @@ final class PlaygroundShader: Shader {
                     range: 0.0...2.0,
                     step: 0.01
                 ),
-
 
                 ShaderSetting(
                     name: "Glow",
@@ -399,9 +407,10 @@ final class PlaygroundShader: Shader {
         case "GLOW":                return uniforms.GLOW
         case "SHADOW_GRID_WIDTH":   return uniforms.SHADOW_GRID_WIDTH
         case "SHADOW_GRID_HEIGHT":  return uniforms.SHADOW_GRID_HEIGHT
-        case "SHADOW_DOT_WEIGHT": return uniforms.SHADOW_DOT_WEIGHT
-        case "SHADOW_DOT_WIDTH": return uniforms.SHADOW_DOT_WIDTH
-        case "SHADOW_DOT_HEIGHT": return uniforms.SHADOW_DOT_HEIGHT
+        case "SHADOW_DOT_WIDTH":    return uniforms.SHADOW_DOT_WIDTH
+        case "SHADOW_DOT_HEIGHT":   return uniforms.SHADOW_DOT_HEIGHT
+        case "SHADOW_DOT_WEIGHT":   return uniforms.SHADOW_DOT_WEIGHT
+        case "SHADOW_DOT_GLOW":     return uniforms.SHADOW_DOT_GLOW
         case "SHADOW_FEATHER":      return uniforms.SHADOW_FEATHER
 
         case "DOTMASK_ENABLE":      return Float(uniforms.DOTMASK_ENABLE)
@@ -451,9 +460,10 @@ final class PlaygroundShader: Shader {
         case "GLOW":                uniforms.GLOW = value
         case "SHADOW_GRID_WIDTH":   uniforms.SHADOW_GRID_WIDTH = value
         case "SHADOW_GRID_HEIGHT":  uniforms.SHADOW_GRID_HEIGHT = value
-        case "SHADOW_DOT_WEIGHT":    uniforms.SHADOW_DOT_WEIGHT = value
         case "SHADOW_DOT_WIDTH":    uniforms.SHADOW_DOT_WIDTH = value
         case "SHADOW_DOT_HEIGHT":   uniforms.SHADOW_DOT_HEIGHT = value
+        case "SHADOW_DOT_WEIGHT":   uniforms.SHADOW_DOT_WEIGHT = value
+        case "SHADOW_DOT_GLOW":     uniforms.SHADOW_DOT_GLOW = value
         case "SHADOW_FEATHER":      uniforms.SHADOW_FEATHER = value
 
         case "DOTMASK_ENABLE":      uniforms.DOTMASK_ENABLE = Int32(value)

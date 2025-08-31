@@ -163,9 +163,10 @@ namespace playground {
         // Limit the dot size
         nrmgid = nrmgid / float2(u.SHADOW_DOT_WIDTH, u.SHADOW_DOT_HEIGHT);
 
-        // Reduce dot size with luminance
+        // Modify dot size w.r.t. luminance
         // nrmgid = nrmgid / float2(1.0, 1.0 - (1.0 - luminance) * (1.0 - u.SHADOW_DOT_WEIGHT));
-        nrmgid = nrmgid / float2(1.0, smoothstep(0.0, 1.0 - u.SHADOW_DOT_WEIGHT, luminance));
+        // nrmgid = nrmgid / (1.0 + (1.0 - pow(luminance, u.SHADOW_DOT_GLOW)) * u.SHADOW_DOT_WEIGHT); // /
+        nrmgid = nrmgid / (1.0 + (pow(luminance, 1 / (u.SHADOW_DOT_GLOW))) * u.SHADOW_DOT_WEIGHT); // / float2(1.0, smoothstep(0.0, 1.0 - u.SHADOW_DOT_WEIGHT, luminance));
 
         float dist = length(nrmgid);
 
@@ -313,10 +314,11 @@ namespace playground {
         // Read image
         half4 color = inTex.sample(sam, uv);
 
-        // Read shadow mask
-        half4 shadowColor = shadow.sample(sam, uv);
+        // Apply shadow mask effect
+        if (u.SHADOW_ENABLE) {
 
-        color *= shadowColor;
+            color *= shadow.sample(sam, uv);
+        }
 
         /*
          uint line = gid.y % 4;
