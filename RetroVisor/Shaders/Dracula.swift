@@ -62,7 +62,7 @@ final class DraculaShader: Shader {
             BLOOM_RADIUS_Y: 3,
             
             DOTMASK_ENABLE: 1,
-            DOTMASK_TYPE: 1,
+            DOTMASK_TYPE: 2,
             DOTMASK_WIDTH: 3,
             DOTMASK_SHIFT: 2.1,
             DOTMASK_WEIGHT: 1.0,
@@ -232,8 +232,9 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Type",
                     key: "DOTMASK_TYPE",
-                    range: 0...4,
-                    step: 1.0
+                    values: [ ("Add", 0),
+                              ("Blend", 1),
+                              ("Shift", 2) ]
                 ),
 
                 ShaderSetting(
@@ -244,7 +245,7 @@ final class DraculaShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Dotmask Width",
+                    name: "Dotmask Weight",
                     key: "DOTMASK_WEIGHT",
                     range: 0.0...1.0,
                     step: 0.01

@@ -336,7 +336,7 @@ final class PlaygroundShader: Shader {
                 ShaderSetting(
                     name: "Brightness",
                     key: "BRIGHTNESS",
-                    range: 0.0...2.0,
+                    range: 0.0...10.0,
                     step: 0.01
                 ),
 

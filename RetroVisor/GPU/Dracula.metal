@@ -127,6 +127,29 @@ namespace dracula {
         return half3(YUV2RGB(float3(yuv)));
     }
 
+    inline Color3 RGB2HSV(Color3 c) {
+        
+        Color4 K = Color4(0.0, -1.0/3.0, 2.0/3.0, -1.0);
+        Color4 p = (c.g < c.b) ? Color4(c.bg, K.wz) : Color4(c.gb, K.xy);
+        Color4 q = (c.r < p.x) ? Color4(p.xyw, c.r) : Color4(c.r, p.yzx);
+
+        float d = q.x - min(q.w, q.y);
+        float e = 1.0e-10;
+
+        float h = abs(q.z + (q.w - q.y) / (6.0 * d + e));
+        float s = d / (q.x + e);
+        float v = q.x;
+
+        return Color3(h, s, v);
+    }
+    
+    Color3 HSV2RGB(Color3 c) {
+        
+        Color4 K = Color4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
+        Color3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+    }
+
     //
     // RGB to YUV/YIQ converter
     //
@@ -163,6 +186,38 @@ namespace dracula {
     }
     */
 
+    // x: phase in radians (0..2π for one period)
+    // k: smoothness/spikiness (>0, higher = sharper spike)
+    // width: fraction of the period occupied by the spike (0..1)
+    float spikeTanhWidth(float x, float k, float width) {
+        // normalize phase to [0,1)
+        float p = fmod(x, 2.0f * M_PI) / (2.0f * M_PI);
+
+        // remap phase so spike is centered at 0.5
+        float d = (p - 0.5) / (0.5 * width); // normalized distance from spike center
+        d = clamp(d, -1.0, 1.0);
+
+        // apply tanh shaping
+        float t = tanh(k * (1.0 - abs(d))); // 1-|d| gives peak at center, falls off to edges
+        t /= tanh(k);                        // normalize to 0..1
+
+        return t; // already 0..1
+    }
+    
+    float dotMaskWeight(float val, float brightness, float weight) {
+        
+        val = fmod(val, 2*M_PI);
+        
+        float scale = pow(brightness, weight);
+        if (val >= M_PI) {
+            return scale + (1 - scale) * smoothstep(2*M_PI, M_PI + M_PI * brightness, val);
+        } else {
+            return scale + (1 - scale) * smoothstep(0, M_PI - M_PI * brightness, val);
+        }
+        //return pow(abs(sin(val + shift)), exp);
+        //return 0; // tanh(exp * abs(sin(val + shift)));
+    }
+    
     kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
                         texture2d<half, access::write>  output    [[ texture(1) ]],
                         constant Uniforms               &u        [[ buffer(0)  ]],
@@ -171,12 +226,19 @@ namespace dracula {
     {
         // float width = float(int(u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE));
         float sample = gid.x * 2 * M_PI / (u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE);
-        Color r = 0.5 + 0.5 * sin(sample);
-        Color g = 0.5 + 0.5 * sin(sample + u.DOTMASK_SHIFT);
-        Color b = 0.5 + 0.5 * sin(sample + 2 * u.DOTMASK_SHIFT);
+        // float sample = gid.x * 2 * M_PI / (10 * u.OUTPUT_TEX_SCALE);
         
+        Color r = dotMaskWeight(sample, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT); //  0.5 + 0.5 * sin(sample);
+        Color g = dotMaskWeight(sample + u.DOTMASK_SHIFT, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT); // 0.5 + 0.5 * sin(sample + u.DOTMASK_SHIFT);
+        Color b = dotMaskWeight(sample + 2 * u.DOTMASK_SHIFT, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT); // 0.5 + 0.5 * sin(sample + 2 * u.DOTMASK_SHIFT);
+        
+        /*
+        Color r = spikeTanhWidth(sample, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
+        Color g = spikeTanhWidth(sample + u.DOTMASK_SHIFT, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
+        Color b = spikeTanhWidth(sample + 2.0 * u.DOTMASK_SHIFT, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
+        */
         Color4 color = Color4(r, g, b, 1.0);
-        color = mix(color, Color4(1.0,1.0,1.0,1.0), u.DOTMASK_BRIGHTESS);
+        //color = mix(color, Color4(1.0,1.0,1.0,1.0), u.DOTMASK_BRIGHTESS);
         
         output.write(color, gid);
     }
@@ -269,6 +331,16 @@ namespace dracula {
         return result;
     }
     
+    inline float wrap01(float x) { return x - floor(x); }           // like fract()
+    inline float wrapSigned(float x) { return x - floor(x + 0.5f); } // to [-0.5, 0.5)
+
+    // Shortest-arc interpolation on the hue circle (h in [0,1))
+    inline float hue_lerp(float h0, float h1, float t)
+    {
+        float d = wrapSigned(h1 - h0);    // now d is in [-0.5, 0.5]
+        return wrap01(h0 + t * d);
+    }
+    
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                     texture2d<half, access::sample> dotMask   [[ texture(1) ]],
                     texture2d<half, access::sample> bloomTex  [[ texture(2) ]],
@@ -283,18 +355,7 @@ namespace dracula {
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(outTex.get_width(), outTex.get_height());
 
         // Read dotmask
-        Color4 color = dotMask.sample(sam, uv);
-
-        // Apply scanline effect (if emulation type matches)
-        if (u.SCANLINES_ENABLE) {
-            
-            color.rgb *= scanlineWeight(gid,
-                                        u.SCANLINE_DISTANCE,
-                                        u.SCANLINE_WEIGHT,
-                                        u.SCANLINE_BRIGHTNESS,
-                                        1.0);
-        }
-
+        Color4 color = inTex.sample(sam, uv);
         
         /*
          uint line = gid.y % 4;
@@ -310,27 +371,64 @@ namespace dracula {
          }
          */
 
-        /*
         // Apply dot mask effect
         if (u.DOTMASK_ENABLE) {
 
+            Color4 mask = dotMask.sample(sam, uv); // dotMask.read(gid);
+            
+            // REMOVE ASAP
+            outTex.write(mask, gid);
+            return;
+            
+            if (u.DOTMASK_TYPE == 0) {
+                
+                // Multiply
+                color = color * mask;
+                // color *= u.DOTMASK_BRIGHTESS;
+                
+            } else if (u.DOTMASK_TYPE == 1) {
+                
+                // Blend
+                color = mix(color, color * mask, u.DOTMASK_WEIGHT);
+                
+            } else {
+                
+                // Convert to HSV
+                Color3 hsv = RGB2HSV(color.rgb);
+                Color3 maskHSV = RGB2HSV(mask.rgb);
+
+                // Mix the hues (circular interpolation is best)
+                float mixAmount = u.DOTMASK_BRIGHTESS; // 0 = no effect, 1 = full mask hue
+                hsv.x = hue_lerp(hsv.x, maskHSV.x, mixAmount); // hue
+                // keep hsv.y (saturation) and hsv.z (value) unchanged
+
+                // Convert back
+                color = Color4(HSV2RGB(hsv), 1.0);
+            }
+            
             // Normalize gid to 0..1 in output texture
             // Coord2 uv = (Coord2(gid) + 0.5) / Coord2(outTex.get_width(), outTex.get_height());
-            
-            Color4 dotColor = dotMask.read(gid);
-            Color4 gain = min(color, 1 - color) * dotColor;
-            Color4 loose = min(color, 1 - color) * 0.5 * (1 - dotColor);
-            color += gain - loose;
         }
 
         // Apply bloom effect
-
+        /*
         if (u.BLOOM_ENABLE) {
 
             Color4 bloom = bloomTex.sample(sam, uv);
             color = saturate(color + bloom);
         }
         */
+        
+        // Apply scanline effect (if emulation type matches)
+        if (u.SCANLINES_ENABLE) {
+            
+            color.rgb *= scanlineWeight(gid,
+                                        u.SCANLINE_DISTANCE,
+                                        u.SCANLINE_WEIGHT,
+                                        u.SCANLINE_BRIGHTNESS,
+                                        1.0);
+        }
+
         
         outTex.write(color, gid);
         return;
