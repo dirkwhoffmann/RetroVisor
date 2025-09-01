@@ -31,6 +31,8 @@ namespace dracula {
 
         // Chroma phase
         uint  PAL;
+        float GAMMA_INPUT;
+        float GAMMA_OUTPUT;
         float CHROMA_RADIUS;
 
         // Bloom effect
@@ -155,24 +157,25 @@ namespace dracula {
     //
 
     kernel void colorSpace(texture2d<half, access::sample> inTex     [[ texture(0) ]],
-                           texture2d<half, access::write>  outTex    [[ texture(1) ]],
+                           texture2d<half, access::write>  linTex    [[ texture(1) ]],
+                           texture2d<half, access::write>  yccTex    [[ texture(2) ]],
                            constant Uniforms               &u        [[ buffer(0)  ]],
                            sampler                         sam       [[ sampler(0) ]],
                            uint2                           gid       [[ thread_position_in_grid ]])
     {
-        // Get size of output texture
-        const Coord2 rect = float2(outTex.get_width(), outTex.get_height());
+        // Get size of output textures
+        const Coord2 rect = float2(linTex.get_width(), linTex.get_height());
 
         // Normalize gid to 0..1 in rect
         Coord2 uv = (Coord2(gid) + 0.5) / rect;
 
         // Read pixel
-        Color3 rgb = Color3(inTex.sample(sam, uv).rgb);
-
+        Color3 rgb = pow(Color3(inTex.sample(sam, uv).rgb), Color3(u.GAMMA_INPUT));
+        linTex.write(Color4(rgb, 1.0), gid);
+        
         // Split components
         Color3 ycc = u.PAL == 1 ? RGB2YUV(rgb) : RGB2YIQ(rgb);
-
-        outTex.write(Color4(ycc, 1.0), gid);
+        yccTex.write(Color4(ycc, 1.0), gid);
     }
 
     /*
@@ -208,11 +211,11 @@ namespace dracula {
         
         val = fmod(val, 2*M_PI);
         
-        float scale = pow(brightness, weight);
+        // float scale = pow(brightness, weight);
         if (val >= M_PI) {
-            return scale + (1 - scale) * smoothstep(2*M_PI, M_PI + M_PI * brightness, val);
+            return brightness + (1 - brightness) * smoothstep(2*M_PI, M_PI + M_PI * weight, val);
         } else {
-            return scale + (1 - scale) * smoothstep(0, M_PI - M_PI * brightness, val);
+            return brightness + (1 - brightness) * smoothstep(0, M_PI - M_PI * weight, val);
         }
         //return pow(abs(sin(val + shift)), exp);
         //return 0; // tanh(exp * abs(sin(val + shift)));
@@ -226,12 +229,11 @@ namespace dracula {
     {
         // float width = float(int(u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE));
         float sample = gid.x * 2 * M_PI / (u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE);
-        // float sample = gid.x * 2 * M_PI / (10 * u.OUTPUT_TEX_SCALE);
         
-        Color r = dotMaskWeight(sample, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT); //  0.5 + 0.5 * sin(sample);
-        Color g = dotMaskWeight(sample + u.DOTMASK_SHIFT, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT); // 0.5 + 0.5 * sin(sample + u.DOTMASK_SHIFT);
-        Color b = dotMaskWeight(sample + 2 * u.DOTMASK_SHIFT, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT); // 0.5 + 0.5 * sin(sample + 2 * u.DOTMASK_SHIFT);
-        
+        Color r = dotMaskWeight(sample, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT);
+        Color g = dotMaskWeight(sample + u.DOTMASK_SHIFT, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT);
+        Color b = dotMaskWeight(sample + 2 * u.DOTMASK_SHIFT, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT);
+    
         /*
         Color r = spikeTanhWidth(sample, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
         Color g = spikeTanhWidth(sample + u.DOTMASK_SHIFT, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
@@ -377,8 +379,8 @@ namespace dracula {
             Color4 mask = dotMask.sample(sam, uv); // dotMask.read(gid);
             
             // REMOVE ASAP
-            outTex.write(mask, gid);
-            return;
+            //outTex.write(mask, gid);
+            //return;
             
             if (u.DOTMASK_TYPE == 0) {
                 
@@ -429,8 +431,7 @@ namespace dracula {
                                         1.0);
         }
 
-        
-        outTex.write(color, gid);
+        outTex.write(pow(color, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
         return;
     }
 

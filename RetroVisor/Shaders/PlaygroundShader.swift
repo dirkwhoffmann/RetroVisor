@@ -19,6 +19,8 @@ struct PlaygroundUniforms {
     var RESAMPLE_FILTER: ResampleFilterType
     
     var PAL: Int32
+    var GAMMA_INPUT: Float
+    var GAMMA_OUTPUT: Float
     var CHROMA_RADIUS: Float
 
     var BLOOM_ENABLE: Int32
@@ -54,6 +56,8 @@ struct PlaygroundUniforms {
         RESAMPLE_FILTER: .bilinear,
 
         PAL: 0,
+        GAMMA_INPUT: 2.2,
+        GAMMA_OUTPUT: 2.2,
         CHROMA_RADIUS: 1.3,
 
         BLOOM_ENABLE: 0,
@@ -179,6 +183,20 @@ final class PlaygroundShader: Shader {
                     name: "Video Standard",
                     key: "PAL",
                     values: [("PAL", 1), ("NTSC", 0)]
+                ),
+
+                ShaderSetting(
+                    name: "Gamma Input",
+                    key: "GAMMA_INPUT",
+                    range: 0.1...5.0,
+                    step: 0.1
+                ),
+
+                ShaderSetting(
+                    name: "Gamma Output",
+                    key: "GAMMA_OUTPUT",
+                    range: 0.1...5.0,
+                    step: 0.1
                 ),
 
                 ShaderSetting(
@@ -384,6 +402,8 @@ final class PlaygroundShader: Shader {
         case "RESAMPLE_FILTER":     return Float(uniforms.RESAMPLE_FILTER.rawValue)
             
         case "PAL":                 return Float(uniforms.PAL)
+        case "GAMMA_INPUT":         return uniforms.GAMMA_INPUT
+        case "GAMMA_OUTPUT":        return uniforms.GAMMA_OUTPUT
         case "CHROMA_RADIUS":       return uniforms.CHROMA_RADIUS
 
         case "BLOOM_ENABLE":        return Float(uniforms.BLOOM_ENABLE)
@@ -437,6 +457,8 @@ final class PlaygroundShader: Shader {
         case "RESAMPLE_FILTER":     uniforms.RESAMPLE_FILTER = ResampleFilterType(value)!
 
         case "PAL":                 uniforms.PAL = Int32(value)
+        case "GAMMA_INPUT":         uniforms.GAMMA_INPUT = value
+        case "GAMMA_OUTPUT":        uniforms.GAMMA_OUTPUT = value
         case "CHROMA_RADIUS":       uniforms.CHROMA_RADIUS = value
 
         case "BLOOM_ENABLE":        uniforms.BLOOM_ENABLE = Int32(value)

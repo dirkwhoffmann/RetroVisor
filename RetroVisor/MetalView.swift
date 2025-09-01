@@ -103,7 +103,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         enableSetNeedsDisplay = true
         framebufferOnly = false
         clearColor = MTLClearColorMake(0, 0, 0, 1)
-
+        colorPixelFormat = .bgra8Unorm
         initMetal()
 
         // Enable the magnification gesture

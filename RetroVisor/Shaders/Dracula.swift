@@ -20,6 +20,8 @@ final class DraculaShader: Shader {
         var RESAMPLE_FILTER: ResampleFilterType
         
         var PAL: Int32
+        var GAMMA_INPUT: Float
+        var GAMMA_OUTPUT: Float
         var CHROMA_RADIUS: Float
         
         var BLOOM_ENABLE: Int32
@@ -52,6 +54,8 @@ final class DraculaShader: Shader {
             RESAMPLE_FILTER: .bilinear,
             
             PAL: 0,
+            GAMMA_INPUT: 2.2,
+            GAMMA_OUTPUT: 2.2,
             CHROMA_RADIUS: 1.3,
             
             BLOOM_ENABLE: 0,
@@ -90,7 +94,8 @@ final class DraculaShader: Shader {
     // Result of pass 1: Downscaled input texture
     var src: MTLTexture!
 
-    // Result of pass 2: Texture in YUV/YIQ space
+    // Result of pass 2: Texture in linear RGB and YUV/YIQ space
+    var lin: MTLTexture!
     var ycc: MTLTexture!
 
     // Result of pass 3: Textures with composite effects applied
@@ -158,6 +163,20 @@ final class DraculaShader: Shader {
                     values: [("PAL", 1), ("NTSC", 0)]
                 ),
 
+                ShaderSetting(
+                    name: "Gamma Input",
+                    key: "GAMMA_INPUT",
+                    range: 0.1...5.0,
+                    step: 0.1
+                ),
+
+                ShaderSetting(
+                    name: "Gamma Output",
+                    key: "GAMMA_OUTPUT",
+                    range: 0.1...5.0,
+                    step: 0.1
+                ),
+                
                 ShaderSetting(
                     name: "Chroma Radius",
                     key: "CHROMA_RADIUS",
@@ -302,6 +321,8 @@ final class DraculaShader: Shader {
         case "RESAMPLE_FILTER":     return Float(uniforms.RESAMPLE_FILTER.rawValue)
             
         case "PAL":                 return Float(uniforms.PAL)
+        case "GAMMA_INPUT":         return uniforms.GAMMA_INPUT
+        case "GAMMA_OUTPUT":        return uniforms.GAMMA_OUTPUT
         case "CHROMA_RADIUS":       return uniforms.CHROMA_RADIUS
 
         case "BLOOM_ENABLE":        return Float(uniforms.BLOOM_ENABLE)
@@ -343,6 +364,8 @@ final class DraculaShader: Shader {
         case "RESAMPLE_FILTER":     uniforms.RESAMPLE_FILTER = ResampleFilterType(value)!
 
         case "PAL":                 uniforms.PAL = Int32(value)
+        case "GAMMA_INPUT":         uniforms.GAMMA_INPUT = value
+        case "GAMMA_OUTPUT":        uniforms.GAMMA_OUTPUT = value
         case "CHROMA_RADIUS":       uniforms.CHROMA_RADIUS = value
 
         case "BLOOM_ENABLE":        uniforms.BLOOM_ENABLE = Int32(value)
@@ -400,6 +423,7 @@ final class DraculaShader: Shader {
         if ycc?.width != inpWidth || ycc?.height != inpHeight {
 
             src = output.makeTexture(width: inpWidth, height: inpHeight)
+            lin = output.makeTexture(width: inpWidth, height: inpHeight)
             ycc = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
             bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
@@ -430,7 +454,7 @@ final class DraculaShader: Shader {
         //
 
         splitKernel.apply(commandBuffer: commandBuffer,
-                          textures: [src, ycc],
+                          textures: [src, lin, ycc],
                           options: &uniforms,
                           length: MemoryLayout<Uniforms>.stride)
 
@@ -476,7 +500,7 @@ final class DraculaShader: Shader {
         //
 
         crtKernel.apply(commandBuffer: commandBuffer,
-                        textures: [rgb, dotmask, blm, output],
+                        textures: [lin, dotmask, blm, output],
                         options: &uniforms,
                         length: MemoryLayout<Uniforms>.stride)
 

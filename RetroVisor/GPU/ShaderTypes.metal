@@ -67,6 +67,8 @@ struct PlaygroundUniforms {
 
     // Chroma phase
     uint  PAL;
+    float GAMMA_INPUT;
+    float GAMMA_OUTPUT;
     float CHROMA_RADIUS;
 
     // Bloom effect
