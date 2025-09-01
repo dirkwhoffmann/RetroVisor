@@ -207,8 +207,38 @@ namespace dracula {
         return t; // already 0..1
     }
     
-    float dotMaskWeight(float val, float brightness, float weight) {
+    float dotMaskWeight(uint2 gid, float2 shift, constant Uniforms &u) {
         
+        // Normalize gid relative to its grid cell
+        uint2 gridSize = uint2(uint(u.DOTMASK_WIDTH), uint(u.DOTMASK_WIDTH));
+        float2 sgid = float2(gid) + shift * u.DOTMASK_WIDTH;
+        float2 nrmgid = fmod(sgid, float2(gridSize)) / float2(gridSize.x - 1, gridSize.y - 1);
+
+        // Center at (0,0)
+        nrmgid -= float2(0.5, 0.5);
+
+        // Modulate the dot size
+        // nrmgid = nrmgid / float2(u.SHADOW_DOT_WIDTH, u.SHADOW_DOT_HEIGHT);
+        float dist2 = nrmgid.x * nrmgid.x; //  dot(nrmgid, nrmgid);
+        
+        // shift *= u.DOTMASK_WIDTH;
+        // gid += (shift * u.DOTMASK_WIDTH);
+        /*
+        uint2 maskSpacing = uint2(uint(u.DOTMASK_WIDTH), uint(u.DOTMASK_WIDTH));
+        float2 center = float2(uint2(gid / maskSpacing) * maskSpacing) + float2(maskSpacing) * 0.5;
+        float2 nrmgid = float2(gid) / u.DOTMASK_WIDTH;
+        float2 nrmcenter = center / u.DOTMASK_WIDTH;
+        nrmcenter += shift;
+        float2 diff = nrmgid - nrmcenter;
+        // float2 diff = nrmgid - nrmcenter;
+        float  dist2 = dot(diff, diff);      // squared distance
+        */
+        float  sigma = 3 * u.DOTMASK_WEIGHT;                  // tweak for spread
+        float  weight = exp(-dist2 / (2.0 * sigma * sigma));
+        // weight = length(diff);
+        return weight;
+
+        /*
         val = fmod(val, 2*M_PI);
         
         // float scale = pow(brightness, weight);
@@ -217,8 +247,7 @@ namespace dracula {
         } else {
             return brightness + (1 - brightness) * smoothstep(0, M_PI - M_PI * weight, val);
         }
-        //return pow(abs(sin(val + shift)), exp);
-        //return 0; // tanh(exp * abs(sin(val + shift)));
+        */
     }
     
     kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
@@ -228,11 +257,11 @@ namespace dracula {
                         uint2                           gid       [[ thread_position_in_grid ]])
     {
         // float width = float(int(u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE));
-        float sample = gid.x * 2 * M_PI / (u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE);
+        // float sample = gid.x * 2 * M_PI / (u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE);
         
-        Color r = dotMaskWeight(sample, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT);
-        Color g = dotMaskWeight(sample + u.DOTMASK_SHIFT, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT);
-        Color b = dotMaskWeight(sample + 2 * u.DOTMASK_SHIFT, u.DOTMASK_BRIGHTESS, u.DOTMASK_WEIGHT);
+        Color r = dotMaskWeight(gid, float2(0, 0), u);
+        Color g = dotMaskWeight(gid, float2(u.DOTMASK_SHIFT, 0), u);
+        Color b = dotMaskWeight(gid, float2(2 * u.DOTMASK_SHIFT, 0), u);
     
         /*
         Color r = spikeTanhWidth(sample, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
@@ -240,8 +269,7 @@ namespace dracula {
         Color b = spikeTanhWidth(sample + 2.0 * u.DOTMASK_SHIFT, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
         */
         Color4 color = Color4(r, g, b, 1.0);
-        //color = mix(color, Color4(1.0,1.0,1.0,1.0), u.DOTMASK_BRIGHTESS);
-        
+        // Color4 color = Color4(r, 0.0, 0.0, 1.0);
         output.write(color, gid);
     }
 
@@ -379,8 +407,8 @@ namespace dracula {
             Color4 mask = dotMask.sample(sam, uv); // dotMask.read(gid);
             
             // REMOVE ASAP
-            //outTex.write(mask, gid);
-            //return;
+            outTex.write(mask, gid);
+            return;
             
             if (u.DOTMASK_TYPE == 0) {
                 

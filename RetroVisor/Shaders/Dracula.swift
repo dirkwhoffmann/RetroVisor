@@ -68,7 +68,7 @@ final class DraculaShader: Shader {
             DOTMASK_ENABLE: 1,
             DOTMASK_TYPE: 2,
             DOTMASK_WIDTH: 3,
-            DOTMASK_SHIFT: 2.1,
+            DOTMASK_SHIFT: 0.3,
             DOTMASK_WEIGHT: 1.0,
             DOTMASK_BRIGHTNESS: 0.5,
             
@@ -273,7 +273,7 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Shift",
                     key: "DOTMASK_SHIFT",
-                    range: 0.0...6.3,
+                    range: 0.0...1.0,
                     step: 0.01
                 ),
 
