@@ -57,7 +57,16 @@ namespace dracula {
         // Scanlines
         uint  SCANLINES_ENABLE;
         float SCANLINE_DISTANCE;
-        float SCANLINE_WEIGHT;
+        float SCANLINE_SHARPNESS;
+        float SCANLINE_BLOOM;
+        float SCANLINE_WEIGHT1;
+        float SCANLINE_WEIGHT2;
+        float SCANLINE_WEIGHT3;
+        float SCANLINE_WEIGHT4;
+        float SCANLINE_WEIGHT5;
+        float SCANLINE_WEIGHT6;
+        float SCANLINE_WEIGHT7;
+        float SCANLINE_WEIGHT8;
         float SCANLINE_BRIGHTNESS;
         
         // Debugging
@@ -376,13 +385,12 @@ namespace dracula {
         }
     }
 
-    /*
     half4 scanline(half4 x, float weight) {
-
-        return pow(x, exp(4*(weight - 0.5)));
+        
+        return pow(x, pow(mix(0.8, 1.2, weight), 8));
     }
-    */
 
+    /*
     inline half3 scanlineWeight(uint2 pixel, uint height, float weight, float brightness, float bloom) {
         
         // Calculate distance to nearest scanline
@@ -395,6 +403,7 @@ namespace dracula {
         half3 result = scanlineWeight * bloom;
         return result;
     }
+    */
     
     inline float wrap01(float x) { return x - floor(x); }           // like fract()
     inline float wrapSigned(float x) { return x - floor(x + 0.5f); } // to [-0.5, 0.5)
@@ -407,9 +416,10 @@ namespace dracula {
     }
     
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
-                    texture2d<half, access::sample> dotMask   [[ texture(1) ]],
-                    texture2d<half, access::sample> bloomTex  [[ texture(2) ]],
-                    texture2d<half, access::write>  outTex    [[ texture(3) ]],
+                    texture2d<half, access::sample> ycc       [[ texture(1) ]],
+                    texture2d<half, access::sample> dotMask   [[ texture(2) ]],
+                    texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
+                    texture2d<half, access::write>  outTex    [[ texture(4) ]],
                     constant Uniforms               &u        [[ buffer(0)  ]],
                     sampler                         sam       [[ sampler(0) ]],
                     uint2                           gid       [[ thread_position_in_grid ]])
@@ -442,8 +452,8 @@ namespace dracula {
             Color4 mask = dotMask.sample(sam, uv); // dotMask.read(gid);
             
             // REMOVE ASAP
-            outTex.write(mask, gid);
-            return;
+            // outTex.write(mask, gid);
+            // return;
             
             if (u.DOTMASK_TYPE == 0) {
                 
@@ -487,11 +497,37 @@ namespace dracula {
         // Apply scanline effect (if emulation type matches)
         if (u.SCANLINES_ENABLE) {
             
+            uint line = gid.y % uint(u.SCANLINE_DISTANCE);
+            
+            Color4 col = inTex.sample(sam, uv);
+            Color4 col2 = inTex.sample(sam, uv, level(u.SCANLINE_SHARPNESS));
+            col = mix(col, col2, u.SCANLINE_BLOOM);
+            
+            if (line == 0) {
+                color = scanline(col, u.SCANLINE_WEIGHT1);
+            } else if (line == 1) {
+                color = scanline(col, u.SCANLINE_WEIGHT2);
+            } else if (line == 2) {
+                color = scanline(col, u.SCANLINE_WEIGHT3);
+            } else if (line == 3) {
+                color = scanline(col, u.SCANLINE_WEIGHT4);
+            } else if (line == 4) {
+                color = scanline(col, u.SCANLINE_WEIGHT5);
+            } else if (line == 5) {
+                color = scanline(col, u.SCANLINE_WEIGHT6);
+            } else if (line == 6) {
+                color = scanline(col, u.SCANLINE_WEIGHT7);
+            } else if (line == 7) {
+                color = scanline(col, u.SCANLINE_WEIGHT8);
+            } 
+
+            /*
             color.rgb *= scanlineWeight(gid,
                                         u.SCANLINE_DISTANCE,
-                                        u.SCANLINE_WEIGHT,
+                                        u.SCANLINE_WEIGHT1,
                                         u.SCANLINE_BRIGHTNESS,
                                         1.0);
+            */
         }
 
         outTex.write(pow(color, Color4(1.0 / u.GAMMA_OUTPUT)), gid);

@@ -85,6 +85,10 @@ struct PlaygroundUniforms {
     float SCANLINE_WEIGHT2;
     float SCANLINE_WEIGHT3;
     float SCANLINE_WEIGHT4;
+    float SCANLINE_WEIGHT5;
+    float SCANLINE_WEIGHT6;
+    float SCANLINE_WEIGHT7;
+    float SCANLINE_WEIGHT8;
 
     // Shadow mask
     uint  SHADOW_ENABLE;

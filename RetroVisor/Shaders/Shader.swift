@@ -119,14 +119,6 @@ class Group {
         self.enable = enable
         self.children = children
     }
-    
-    /*
-    var enabled: Bool {
-        
-        get { enable?.get() != 0 }
-        set { enable?.set(newValue ? 1 : 0) }
-    }
-    */
 }
 
 @MainActor

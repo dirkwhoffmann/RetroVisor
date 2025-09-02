@@ -43,7 +43,16 @@ final class DraculaShader: Shader {
         
         var SCANLINES_ENABLE: Int32
         var SCANLINE_DISTANCE: Float
-        var SCANLINE_WEIGHT: Float
+        var SCANLINE_SHARPNESS: Float
+        var SCANLINE_BLOOM: Float
+        var SCANLINE_WEIGHT1: Float
+        var SCANLINE_WEIGHT2: Float
+        var SCANLINE_WEIGHT3: Float
+        var SCANLINE_WEIGHT4: Float
+        var SCANLINE_WEIGHT5: Float
+        var SCANLINE_WEIGHT6: Float
+        var SCANLINE_WEIGHT7: Float
+        var SCANLINE_WEIGHT8: Float
         var SCANLINE_BRIGHTNESS: Float
         
         var DEBUG_ENABLE: Int32
@@ -52,7 +61,7 @@ final class DraculaShader: Shader {
         
         static let defaults = Uniforms(
             
-            INPUT_TEX_SCALE: 0.5,
+            INPUT_TEX_SCALE: 1.0,
             OUTPUT_TEX_SCALE: 2.0,
             RESAMPLE_FILTER: ResampleFilterType.bilinear.rawValue,
             
@@ -68,7 +77,7 @@ final class DraculaShader: Shader {
             BLOOM_RADIUS_X: 5,
             BLOOM_RADIUS_Y: 3,
             
-            DOTMASK_ENABLE: 1,
+            DOTMASK_ENABLE: 0,
             DOTMASK_TYPE: 2,
             DOTMASK_WIDTH: 3,
             DOTMASK_SHIFT: 0.3,
@@ -79,8 +88,17 @@ final class DraculaShader: Shader {
             DOTMASK_SATURATION: 0.8,
             
             SCANLINES_ENABLE: 0,
-            SCANLINE_DISTANCE: 6.0,
-            SCANLINE_WEIGHT: 0.2,
+            SCANLINE_DISTANCE: 4.0,
+            SCANLINE_SHARPNESS: 1.0,
+            SCANLINE_BLOOM: 0.5,
+            SCANLINE_WEIGHT1: 0.5,
+            SCANLINE_WEIGHT2: 0.5,
+            SCANLINE_WEIGHT3: 0.5,
+            SCANLINE_WEIGHT4: 0.5,
+            SCANLINE_WEIGHT5: 0.5,
+            SCANLINE_WEIGHT6: 0.5,
+            SCANLINE_WEIGHT7: 0.5,
+            SCANLINE_WEIGHT8: 0.5,
             SCANLINE_BRIGHTNESS: 0.5,
             
             DEBUG_ENABLE: 0,
@@ -267,22 +285,103 @@ final class DraculaShader: Shader {
                     
                     ShaderSetting(
                         name: "Scanline Distance",
-                        range: 0...10, step: 1,
+                        range: 1...8, step: 1,
                         value: Binding(
                             key: "SCANLINE_DISTANCE",
                             get: { [unowned self] in self.uniforms.SCANLINE_DISTANCE },
                             set: { [unowned self] in self.uniforms.SCANLINE_DISTANCE = $0 }),
                     ),
-                    
+
                     ShaderSetting(
-                        name: "Scanline Weight",
+                        name: "Scanline Sharpness",
+                        range: 0...4.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_SHARPNESS",
+                            get: { [unowned self] in self.uniforms.SCANLINE_SHARPNESS },
+                            set: { [unowned self] in self.uniforms.SCANLINE_SHARPNESS = $0 }),
+                    ),
+
+                    ShaderSetting(
+                        name: "Scanline Bloom",
+                        range: 0...1, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_BLOOM",
+                            get: { [unowned self] in self.uniforms.SCANLINE_BLOOM },
+                            set: { [unowned self] in self.uniforms.SCANLINE_BLOOM = $0 }),
+                    ),
+
+                    ShaderSetting(
+                        name: "Scanline Weight 1",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
-                            key: "SCANLINE_WEIGHT",
-                            get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT },
-                            set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT = $0 }),
+                            key: "SCANLINE_WEIGHT1",
+                            get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT1 },
+                            set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT1 = $0 }),
                     ),
-                    
+
+                    ShaderSetting(
+                        name: "Scanline Weight 2",
+                        range: 0.0...1.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_WEIGHT2",
+                            get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT2 },
+                            set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT2 = $0 }),
+                    ),
+
+                    ShaderSetting(
+                        name: "Scanline Weight 3",
+                        range: 0.0...1.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_WEIGHT3",
+                            get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT3 },
+                            set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT3 = $0 }),
+                    ),
+
+                    ShaderSetting(
+                        name: "Scanline Weight 4",
+                        range: 0.0...1.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_WEIGHT4",
+                            get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT4 },
+                            set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT4 = $0 }),
+                    ),
+
+                    ShaderSetting(
+                        name: "Scanline Weight 5",
+                        range: 0.1...1.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_WEIGHT5",
+                            get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT5 },
+                            set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT5 = $0 }),
+                    ),
+
+                    ShaderSetting(
+                        name: "Scanline Weight 6",
+                        range: 0.1...1.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_WEIGHT6",
+                            get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT6 },
+                            set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT6 = $0 }),
+                    ),
+
+                    ShaderSetting(
+                        name: "Scanline Weight 7",
+                        range: 0.1...1.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_WEIGHT7",
+                            get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT7 },
+                            set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT7 = $0 }),
+                    ),
+
+                    ShaderSetting(
+                        name: "Scanline Weight 8",
+                        range: 0.1...1.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_WEIGHT8",
+                            get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT8 },
+                            set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT8 = $0 }),
+                    ),
+
                     ShaderSetting(
                         name: "Scanline Brightness",
                         range: 0.0...1.0, step: 0.01,
@@ -433,7 +532,7 @@ final class DraculaShader: Shader {
         if ycc?.width != inpWidth || ycc?.height != inpHeight {
             
             src = output.makeTexture(width: inpWidth, height: inpHeight)
-            lin = output.makeTexture(width: inpWidth, height: inpHeight)
+            lin = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
             ycc = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
             bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
@@ -469,7 +568,8 @@ final class DraculaShader: Shader {
                           length: MemoryLayout<Uniforms>.stride)
         
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
-        
+        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &lin)
+
         //
         //
         // Pass 3: Apply chroma effects
@@ -510,7 +610,7 @@ final class DraculaShader: Shader {
         //
         
         crtKernel.apply(commandBuffer: commandBuffer,
-                        textures: [lin, dotmask, blm, output],
+                        textures: [lin, ycc, dotmask, blm, output],
                         options: &uniforms,
                         length: MemoryLayout<Uniforms>.stride)
         

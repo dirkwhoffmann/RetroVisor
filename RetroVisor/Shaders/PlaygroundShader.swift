@@ -36,7 +36,11 @@ struct PlaygroundUniforms {
     var SCANLINE_WEIGHT2: Float
     var SCANLINE_WEIGHT3: Float
     var SCANLINE_WEIGHT4: Float
-    
+    var SCANLINE_WEIGHT5: Float
+    var SCANLINE_WEIGHT6: Float
+    var SCANLINE_WEIGHT7: Float
+    var SCANLINE_WEIGHT8: Float
+
     var SHADOW_ENABLE: Int32
     var BRIGHTNESS: Float
     var GLOW: Float
@@ -80,6 +84,10 @@ struct PlaygroundUniforms {
         SCANLINE_WEIGHT2: 0.5,
         SCANLINE_WEIGHT3: 0.5,
         SCANLINE_WEIGHT4: 0.5,
+        SCANLINE_WEIGHT5: 0.5,
+        SCANLINE_WEIGHT6: 0.5,
+        SCANLINE_WEIGHT7: 0.5,
+        SCANLINE_WEIGHT8: 0.5,
 
         SHADOW_ENABLE: 1,
         BRIGHTNESS: 1,
@@ -329,6 +337,42 @@ final class PlaygroundShader: Shader {
                         key: "SCANLINE_WEIGHT4",
                         get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT4 },
                         set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT4 = $0 }),
+                ),
+
+                ShaderSetting(
+                    name: "Scanline Weight 5",
+                    range: 0.1...1.0, step: 0.01,
+                    value: Binding(
+                        key: "SCANLINE_WEIGHT5",
+                        get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT5 },
+                        set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT5 = $0 }),
+                ),
+
+                ShaderSetting(
+                    name: "Scanline Weight 6",
+                    range: 0.1...1.0, step: 0.01,
+                    value: Binding(
+                        key: "SCANLINE_WEIGHT6",
+                        get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT6 },
+                        set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT6 = $0 }),
+                ),
+
+                ShaderSetting(
+                    name: "Scanline Weight 7",
+                    range: 0.1...1.0, step: 0.01,
+                    value: Binding(
+                        key: "SCANLINE_WEIGHT7",
+                        get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT7 },
+                        set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT7 = $0 }),
+                ),
+
+                ShaderSetting(
+                    name: "Scanline Weight 8",
+                    range: 0.1...1.0, step: 0.01,
+                    value: Binding(
+                        key: "SCANLINE_WEIGHT8",
+                        get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT8 },
+                        set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT8 = $0 }),
                 ),
             ]),
             

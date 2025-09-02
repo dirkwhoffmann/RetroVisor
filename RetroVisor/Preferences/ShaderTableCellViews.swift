@@ -21,7 +21,7 @@ class ShaderGroupView: NSTableCellView {
 
     var shader: Shader { controller.shader }
     var clickable: Bool { group.enable != nil }
-    var expandable: Bool { group.enable != nil }
+    var expandable: Bool { group.enable == nil }
 
     func setup(with group: Group) {
 
