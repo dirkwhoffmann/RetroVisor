@@ -79,14 +79,12 @@ struct PlaygroundUniforms {
     float BLOOM_RADIUS_X;
     float BLOOM_RADIUS_Y;
 
-    /*
     uint  SCANLINE_ENABLE;
     float SCANLINE_BRIGHTNESS;
     float SCANLINE_WEIGHT1;
     float SCANLINE_WEIGHT2;
     float SCANLINE_WEIGHT3;
     float SCANLINE_WEIGHT4;
-     */
 
     // Shadow mask
     uint  SHADOW_ENABLE;
@@ -103,7 +101,7 @@ struct PlaygroundUniforms {
     // Dot mask
     uint  DOTMASK_ENABLE;
     uint  DOTMASK;
-    float DOTMASK_BRIGHTESS;
+    float DOTMASK_BRIGHTNESS;
 
     uint  DEBUG_ENABLE;
     uint  DEBUG_TEXTURE;

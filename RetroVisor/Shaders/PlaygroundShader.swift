@@ -30,6 +30,13 @@ struct PlaygroundUniforms {
     var BLOOM_RADIUS_X: Float
     var BLOOM_RADIUS_Y: Float
 
+    var SCANLINE_ENABLE: Int32
+    var SCANLINE_BRIGHTNESS: Float
+    var SCANLINE_WEIGHT1: Float
+    var SCANLINE_WEIGHT2: Float
+    var SCANLINE_WEIGHT3: Float
+    var SCANLINE_WEIGHT4: Float
+    
     var SHADOW_ENABLE: Float
     var BRIGHTNESS: Float
     var GLOW: Float
@@ -67,14 +74,12 @@ struct PlaygroundUniforms {
         BLOOM_RADIUS_X: 5,
         BLOOM_RADIUS_Y: 3,
 
-        /*
         SCANLINE_ENABLE: 0,
         SCANLINE_BRIGHTNESS: 1.0,
         SCANLINE_WEIGHT1: 0.5,
         SCANLINE_WEIGHT2: 0.5,
         SCANLINE_WEIGHT3: 0.5,
         SCANLINE_WEIGHT4: 0.5,
-        */
 
         SHADOW_ENABLE: 1,
         BRIGHTNESS: 1,
@@ -243,10 +248,12 @@ final class PlaygroundShader: Shader {
                     step: 1.0
                 ),
 
-                /*
+            ]),
+
+            ShaderSettingGroup(title: "Scanlines", key: "SCANLINE_ENABLE", [
+                
                  ShaderSetting(
                  name: "Scanline Brightness",
-                 enableKey: "SCANLINE_ENABLE",
                  key: "SCANLINE_BRIGHTNESS",
                  range: 0.0...2.0,
                  step: 0.01
@@ -279,8 +286,6 @@ final class PlaygroundShader: Shader {
                  range: 0.1...1.0,
                  step: 0.01
                  ),
-                 */
-
             ]),
 
             ShaderSettingGroup(title: "Shadow Mask", key: "SHADOW_ENABLE", [
@@ -393,7 +398,7 @@ final class PlaygroundShader: Shader {
          ]
     }
 
-    override func get(key: String) -> Float {
+    override func get(key: String, index: Int = 0) -> Float {
 
         switch key {
 
@@ -413,14 +418,12 @@ final class PlaygroundShader: Shader {
         case "BLOOM_RADIUS_X":      return uniforms.BLOOM_RADIUS_X
         case "BLOOM_RADIUS_Y":      return uniforms.BLOOM_RADIUS_Y
 
-            /*
         case "SCANLINE_ENABLE": return Float(uniforms.SCANLINE_ENABLE)
         case "SCANLINE_BRIGHTNESS": return uniforms.SCANLINE_BRIGHTNESS
         case "SCANLINE_WEIGHT1": return uniforms.SCANLINE_WEIGHT1
         case "SCANLINE_WEIGHT2": return uniforms.SCANLINE_WEIGHT2
         case "SCANLINE_WEIGHT3": return uniforms.SCANLINE_WEIGHT3
         case "SCANLINE_WEIGHT4": return uniforms.SCANLINE_WEIGHT4
-             */
 
         case "SHADOW_ENABLE":       return uniforms.SHADOW_ENABLE
         case "BRIGHTNESS":          return uniforms.BRIGHTNESS
@@ -448,7 +451,7 @@ final class PlaygroundShader: Shader {
         }
     }
 
-    override func set(key: String, value: Float) {
+    override func set(key: String, index: Int = 0, value: Float) {
 
         switch key {
 
@@ -468,14 +471,12 @@ final class PlaygroundShader: Shader {
         case "BLOOM_RADIUS_X":      uniforms.BLOOM_RADIUS_X = value
         case "BLOOM_RADIUS_Y":      uniforms.BLOOM_RADIUS_Y = value
 
-            /*
         case "SCANLINE_ENABLE": uniforms.SCANLINE_ENABLE = Int32(value)
         case "SCANLINE_BRIGHTNESS": uniforms.SCANLINE_BRIGHTNESS = value
         case "SCANLINE_WEIGHT1": uniforms.SCANLINE_WEIGHT1 = value
         case "SCANLINE_WEIGHT2": uniforms.SCANLINE_WEIGHT2 = value
         case "SCANLINE_WEIGHT3": uniforms.SCANLINE_WEIGHT3 = value
         case "SCANLINE_WEIGHT4": uniforms.SCANLINE_WEIGHT4 = value
-             */
             
         case "SHADOW_ENABLE":       uniforms.SHADOW_ENABLE = value
         case "BRIGHTNESS":          uniforms.BRIGHTNESS = value

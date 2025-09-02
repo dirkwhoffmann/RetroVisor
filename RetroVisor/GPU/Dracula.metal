@@ -49,7 +49,10 @@ namespace dracula {
         float DOTMASK_WIDTH;
         float DOTMASK_SHIFT;
         float DOTMASK_WEIGHT;
-        float DOTMASK_BRIGHTESS;
+        float DOTMASK_WEIGHT2;
+        float DOTMASK_BRIGHTNESS;
+        float DOTMASK_BRIGHTNESS2;
+        float DOTMASK_SATURATION;
 
         // Scanlines
         uint  SCANLINES_ENABLE;
@@ -209,9 +212,13 @@ namespace dracula {
     
     float dotMaskWeight(uint2 gid, float2 shift, constant Uniforms &u) {
         
-        // Normalize gid relative to its grid cell
+        // Setup the grid cell
         uint2 gridSize = uint2(uint(u.DOTMASK_WIDTH), uint(u.DOTMASK_WIDTH));
+
+        // Shift gid
         float2 sgid = float2(gid) + shift * u.DOTMASK_WIDTH;
+
+        // Normalize gid relative to its grid cell
         float2 nrmgid = fmod(sgid, float2(gridSize)) / float2(gridSize.x - 1, gridSize.y - 1);
 
         // Center at (0,0)
@@ -219,23 +226,32 @@ namespace dracula {
 
         // Modulate the dot size
         // nrmgid = nrmgid / float2(u.SHADOW_DOT_WIDTH, u.SHADOW_DOT_HEIGHT);
-        float dist2 = nrmgid.x * nrmgid.x; //  dot(nrmgid, nrmgid);
+
+        // Compute distance to the center
+        //float dist = max(1.0, (abs(nrmgid.x) - u.DOTMASK_BRIGHTNESS2));
+        float length = max(0.0, (abs(nrmgid.x) - u.DOTMASK_BRIGHTNESS2));
+        float dist2 = length * length; // nrmgid.x * nrmgid.x; //   dot(nrmgid, nrmgid);
         
-        // shift *= u.DOTMASK_WIDTH;
-        // gid += (shift * u.DOTMASK_WIDTH);
-        /*
-        uint2 maskSpacing = uint2(uint(u.DOTMASK_WIDTH), uint(u.DOTMASK_WIDTH));
-        float2 center = float2(uint2(gid / maskSpacing) * maskSpacing) + float2(maskSpacing) * 0.5;
-        float2 nrmgid = float2(gid) / u.DOTMASK_WIDTH;
-        float2 nrmcenter = center / u.DOTMASK_WIDTH;
-        nrmcenter += shift;
-        float2 diff = nrmgid - nrmcenter;
-        // float2 diff = nrmgid - nrmcenter;
-        float  dist2 = dot(diff, diff);      // squared distance
-        */
-        float  sigma = 3 * u.DOTMASK_WEIGHT;                  // tweak for spread
-        float  weight = exp(-dist2 / (2.0 * sigma * sigma));
+        // float weight = smoothstep(1.0, u.DOTMASK_BRIGHTNESS, dist);
+        // weight = u.DOTMASK_BRIGHTNESS2 + (1 - u.DOTMASK_BRIGHTNESS2) * weight;
+        //float weight = smoothstep(u.DOTMASK_BRIGHTNESS2, u.DOTMASK_BRIGHTNESS, dist);
+
+        
+        float sigma1 = u.DOTMASK_WEIGHT;                  // tweak for spread
+        float sigma2 = u.DOTMASK_WEIGHT2;                  // tweak for spread
+        // float  weight = exp(-dist2 / (2.0 * sigma * sigma));
         // weight = length(diff);
+
+        float w1 = exp(-dist2 / (2.0 * sigma1 * sigma1)); // sharp core
+        float w2 = exp(-dist2 / (2.0 * sigma2 * sigma2)); // wide halo
+        float weight = u.DOTMASK_BRIGHTNESS * w1 + u.DOTMASK_BRIGHTNESS2 * w2; // a >> b
+        // float weight = u.DOTMASK_BRIGHTNESS * w1;
+        // weight = pow(weight, u.DOTMASK_BRIGHTNESS2);
+        //float weight = w1;
+        
+        //weight = tanh(2*pow(cos(M_PI * length), u.DOTMASK_WEIGHT));
+        //weight = u.DOTMASK_BRIGHTNESS + (1 - u.DOTMASK_BRIGHTNESS) * weight;
+         
         return weight;
 
         /*
@@ -268,9 +284,28 @@ namespace dracula {
         Color g = spikeTanhWidth(sample + u.DOTMASK_SHIFT, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
         Color b = spikeTanhWidth(sample + 2.0 * u.DOTMASK_SHIFT, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
         */
-        Color4 color = Color4(r, g, b, 1.0);
+        
+        // https://de.m.wikipedia.org/wiki/Farbvalenz
+        /*
+        Color3 R = Color3(0.64,0.33,0.03) / 0.64;
+        Color3 G = Color3(0.30,0.60,0.10) / 0.60;
+        Color3 B = Color3(0.15,0.06,0.79) / 0.79;
+        */
+        Color3 R = Color3(1.0,0.0,0.0);
+        Color3 G = Color3(0.0,1.0,0.0);
+        Color3 B = Color3(0.0,0.0,1.0);
+
+        Color3 color = r * R + g * G + b * B;
+        
+        // Color luminance = dot(color, Color3(0.299, 0.587, 0.114)); // Rec.601
+        // Color3 final = mix(Color3(luminance), color, u.DOTMASK_SATURATION);
+        // float sat = u.DOTMASK_SATURATION;
+        // Color3 final = r * Color3(1.0, sat, sat) + g * Color3(sat, 1.0, sat) + b * Color3(sat, sat, 1.0);
+        Color3 hsv = RGB2HSV(color);
+        hsv.y *= u.DOTMASK_SATURATION;
+        Color3 final = HSV2RGB(hsv);
         // Color4 color = Color4(r, 0.0, 0.0, 1.0);
-        output.write(color, gid);
+        output.write(Color4(final, 1.0), gid);
     }
 
     kernel void composite(texture2d<half, access::sample> ycc       [[ texture(0) ]],
@@ -414,7 +449,7 @@ namespace dracula {
                 
                 // Multiply
                 color = color * mask;
-                // color *= u.DOTMASK_BRIGHTESS;
+                // color *= u.DOTMASK_BRIGHTNESS;
                 
             } else if (u.DOTMASK_TYPE == 1) {
                 
@@ -428,7 +463,7 @@ namespace dracula {
                 Color3 maskHSV = RGB2HSV(mask.rgb);
 
                 // Mix the hues (circular interpolation is best)
-                float mixAmount = u.DOTMASK_BRIGHTESS; // 0 = no effect, 1 = full mask hue
+                float mixAmount = u.DOTMASK_BRIGHTNESS; // 0 = no effect, 1 = full mask hue
                 hsv.x = hue_lerp(hsv.x, maskHSV.x, mixAmount); // hue
                 // keep hsv.y (saturation) and hsv.z (value) unchanged
 

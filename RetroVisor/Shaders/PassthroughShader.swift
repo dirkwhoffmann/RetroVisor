@@ -125,7 +125,7 @@ final class PassthroughShader: Shader {
         ]
     }
 
-    override func get(key: String) -> Float {
+    override func get(key: String, index: Int = 0) -> Float {
 
         switch key {
 
@@ -145,7 +145,7 @@ final class PassthroughShader: Shader {
         }
     }
 
-    override func set(key: String, value: Float) {
+    override func set(key: String, index: Int = 0, value: Float) {
 
         switch key {
 

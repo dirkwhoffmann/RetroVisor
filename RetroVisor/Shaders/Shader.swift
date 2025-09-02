@@ -18,6 +18,9 @@ class ShaderSetting {
     // Primary key for the value of this setting
     let key: String
 
+    // Optional index for keys that represent array elements
+    let index: Int
+    
     // Secondary key if the setting has an additional enable switch
     let enableKey: String?
 
@@ -36,12 +39,13 @@ class ShaderSetting {
 
     var formatString: String { "%.3g" }
 
-    init(name: String, enableKey: String? = nil, key: String,
+    init(name: String, enableKey: String? = nil, key: String, index: Int = 0,
          range: ClosedRange<Double>? = nil, step: Float = 0.01,
          values: [(String,Int)]? = nil, help: String? = nil) {
 
         self.name = name
         self.key = key
+        self.index = index
         self.enableKey = enableKey
         self.range = range
         self.step = step
@@ -111,10 +115,10 @@ class Shader : Loggable {
     }
 
     // Get or sets the value of a shader option
-    func get(key: String) -> Float { NSSound.beep(); return 0 }
-    func set(key: String, value: Float) { NSSound.beep() }
-    func set(key: String, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
-    func set(key: String, item: Int) { set(key: key, value: Float(item)) }
+    func get(key: String, index: Int = 0) -> Float { NSSound.beep(); return 0 }
+    func set(key: String, index: Int = 0, value: Float) { NSSound.beep() }
+    func set(key: String, index: Int = 0, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
+    func set(key: String, index: Int = 0, item: Int) { set(key: key, value: Float(item)) }
 
     func setHidden(key: String, value: Bool) {
         if let setting = findSetting(key: key) { setting.hidden = value }

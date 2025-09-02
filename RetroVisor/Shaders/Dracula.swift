@@ -36,8 +36,11 @@ final class DraculaShader: Shader {
         var DOTMASK_WIDTH: Float
         var DOTMASK_SHIFT: Float
         var DOTMASK_WEIGHT: Float
+        var DOTMASK_WEIGHT2: Float
         var DOTMASK_BRIGHTNESS: Float
-        
+        var DOTMASK_BRIGHTNESS2: Float
+        var DOTMASK_SATURATION: Float
+
         var SCANLINES_ENABLE: Int32
         var SCANLINE_DISTANCE: Float
         var SCANLINE_WEIGHT: Float
@@ -69,8 +72,11 @@ final class DraculaShader: Shader {
             DOTMASK_TYPE: 2,
             DOTMASK_WIDTH: 3,
             DOTMASK_SHIFT: 0.3,
-            DOTMASK_WEIGHT: 1.0,
+            DOTMASK_WEIGHT: 0.8,
+            DOTMASK_WEIGHT2: 0.2,
             DOTMASK_BRIGHTNESS: 0.5,
+            DOTMASK_BRIGHTNESS2: 0.5,
+            DOTMASK_SATURATION: 0.8,
             
             SCANLINES_ENABLE: 0,
             SCANLINE_DISTANCE: 6.0,
@@ -266,7 +272,14 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Weight",
                     key: "DOTMASK_WEIGHT",
-                    range: 0.0...1.0,
+                    range: 0.0...2.0,
+                    step: 0.01
+                ),
+
+                ShaderSetting(
+                    name: "Dotmask Weight 2",
+                    key: "DOTMASK_WEIGHT2",
+                    range: 0.0...2.0,
                     step: 0.01
                 ),
 
@@ -280,6 +293,20 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Brightness",
                     key: "DOTMASK_BRIGHTNESS",
+                    range: 0...1,
+                    step: 0.01
+                ),
+                
+                ShaderSetting(
+                    name: "Dotmask Brightness 2",
+                    key: "DOTMASK_BRIGHTNESS2",
+                    range: 0...5,
+                    step: 0.01
+                ),
+                
+                ShaderSetting(
+                    name: "Dotmask Saturation",
+                    key: "DOTMASK_SATURATION",
                     range: 0...1,
                     step: 0.01
                 )
@@ -311,7 +338,7 @@ final class DraculaShader: Shader {
          ]
     }
 
-    override func get(key: String) -> Float {
+    override func get(key: String, index: Int = 0) -> Float {
 
         print("key: \(key)")
         switch key {
@@ -337,7 +364,10 @@ final class DraculaShader: Shader {
         case "DOTMASK_WIDTH":       return uniforms.DOTMASK_WIDTH
         case "DOTMASK_SHIFT":       return uniforms.DOTMASK_SHIFT
         case "DOTMASK_WEIGHT":      return uniforms.DOTMASK_WEIGHT
+        case "DOTMASK_WEIGHT2":     return uniforms.DOTMASK_WEIGHT2
         case "DOTMASK_BRIGHTNESS":  return uniforms.DOTMASK_BRIGHTNESS
+        case "DOTMASK_BRIGHTNESS2": return uniforms.DOTMASK_BRIGHTNESS2
+        case "DOTMASK_SATURATION":  return uniforms.DOTMASK_SATURATION
 
         case "SCANLINES_ENABLE":    return Float(uniforms.SCANLINES_ENABLE)
         case "SCANLINE_DISTANCE":   return uniforms.SCANLINE_DISTANCE
@@ -355,7 +385,7 @@ final class DraculaShader: Shader {
         }
     }
 
-    override func set(key: String, value: Float) {
+    override func set(key: String, index: Int = 0, value: Float) {
 
         switch key {
 
@@ -380,7 +410,10 @@ final class DraculaShader: Shader {
         case "DOTMASK_WIDTH":       uniforms.DOTMASK_WIDTH = value
         case "DOTMASK_SHIFT":       uniforms.DOTMASK_SHIFT = value
         case "DOTMASK_WEIGHT":      uniforms.DOTMASK_WEIGHT = value
+        case "DOTMASK_WEIGHT2":     uniforms.DOTMASK_WEIGHT2 = value
         case "DOTMASK_BRIGHTNESS":  uniforms.DOTMASK_BRIGHTNESS = value
+        case "DOTMASK_BRIGHTNESS2": uniforms.DOTMASK_BRIGHTNESS2 = value
+        case "DOTMASK_SATURATION":  uniforms.DOTMASK_SATURATION = value
 
         case "SCANLINES_ENABLE":    uniforms.SCANLINES_ENABLE = Int32(value)
         case "SCANLINE_DISTANCE":   uniforms.SCANLINE_DISTANCE = value

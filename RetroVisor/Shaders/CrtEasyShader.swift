@@ -216,7 +216,7 @@ final class CRTEasyShader: Shader {
         ]
     }
 
-    override func get(key: String) -> Float {
+    override func get(key: String, index: Int = 0) -> Float {
 
         switch key {
         case "BRIGHT_BOOST": return crtUniforms.BRIGHT_BOOST
@@ -244,7 +244,7 @@ final class CRTEasyShader: Shader {
         }
     }
 
-    override func set(key: String, value: Float) {
+    override func set(key: String, index: Int = 0, value: Float) {
 
         switch key {
         case "BRIGHT_BOOST": crtUniforms.BRIGHT_BOOST = value

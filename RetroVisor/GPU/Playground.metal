@@ -290,12 +290,10 @@ namespace playground {
         }
     }
 
-    /*
     half4 scanline(half4 x, float weight) {
 
         return pow(x, exp(4*(weight - 0.5)));
     }
-    */
 
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                     texture2d<half, access::sample> shadow    [[ texture(1) ]],
@@ -320,19 +318,19 @@ namespace playground {
             color *= shadow.sample(sam, uv);
         }
 
-        /*
-         uint line = gid.y % 4;
-
-         if (line == 0) {
-         color = scanline(color, u.SCANLINE_WEIGHT1);
-         } else if (line == 1) {
-         color = scanline(color, u.SCANLINE_WEIGHT2);
-         } else if (line == 2) {
-         color = scanline(color, u.SCANLINE_WEIGHT3);
-         } else if (line == 3) {
-         color = scanline(color, u.SCANLINE_WEIGHT4);
-         }
-         */
+        if (u.SCANLINE_ENABLE) {
+            uint line = gid.y % 4;
+            
+            if (line == 0) {
+                color = scanline(color, u.SCANLINE_WEIGHT1);
+            } else if (line == 1) {
+                color = scanline(color, u.SCANLINE_WEIGHT2);
+            } else if (line == 2) {
+                color = scanline(color, u.SCANLINE_WEIGHT3);
+            } else if (line == 3) {
+                color = scanline(color, u.SCANLINE_WEIGHT4);
+            }
+        }
 
         // Apply dot mask effect
         if (u.DOTMASK_ENABLE) {
