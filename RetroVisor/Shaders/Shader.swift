@@ -12,11 +12,13 @@ import MetalPerformanceShaders
 
 struct Binding<T> {
     
+    let key: String
     let get: () -> T
     let set: (T) -> Void
 
-    init(get: @escaping () -> T, set: @escaping (T) -> Void) {
+    init(key: String, get: @escaping () -> T, set: @escaping (T) -> Void) {
         
+        self.key = key
         self.get = get
         self.set = set
     }
@@ -26,12 +28,6 @@ class ShaderSetting {
 
     // Setting name
     let name: String
-
-    // Primary key for the value of this setting
-    let key: String
-    
-    // Secondary key if the setting has an additional enable switch
-    let enableKey: String?
 
     // Parameters for numeric arguments
     let range: ClosedRange<Double>?
@@ -46,32 +42,25 @@ class ShaderSetting {
     // Indicates if this options should be hidden from the user
     var hidden = false
 
-    private let enable: Binding<Bool>?
-    private let value: Binding<Float>?
-    /*
-    private let getEnable: (() -> Bool)?
-    private let setEnable: ((Bool) -> Void)?
-    private let getter: (() -> Float)?
-    private let setter: ((Float) -> Void)?
-    */
+    // Binding for the enable key (optional)
+    let enable: Binding<Bool>?
+
+    // Binding for the value key (mandatory)
+    let value: Binding<Float>
     
     var formatString: String { "%.3g" }
 
     init(name: String,
-         enableKey: String? = nil,
-         enable: Binding<Bool>? = nil,
-         key: String,
-         value: Binding<Float>,
          range: ClosedRange<Double>? = nil,
          step: Float = 0.01,
          values: [(String,Int)]? = nil,
+         enable: Binding<Bool>? = nil,
+         value: Binding<Float>,
          help: String? = nil
         ) {
 
         self.name = name
-        self.enableKey = enableKey
         self.enable = enable
-        self.key = key
         self.value = value
         self.range = range
         self.step = step
@@ -79,14 +68,22 @@ class ShaderSetting {
         self.help = help
     }
     
-    var enabled: Bool? {
-        get { enable?.get() }
-        set { if let newValue = newValue { enable?.set(newValue) } }
+    var enabled: Bool {
+        
+        get { enable?.get() ?? true }
+        set { enable?.set(newValue) }
     }
 
     var floatValue: Float {
-        get { value?.get() ?? 0 }
-        set { value?.set(newValue) }
+        
+        get { value.get() }
+        set { value.set(newValue) }
+    }
+    
+    var intValue: Int {
+        
+        get { Int(value.get()) }
+        set { value.set(Float(newValue)) }
     }
 }
 
@@ -157,37 +154,32 @@ class Shader : Loggable {
     }
 
     // Looks up the shader setting with a given name
+    /*
     func findSetting(key: String) -> ShaderSetting? {
         return settings.flatMap { $0.children }.first { $0.key == key }
     }
-
-    // Get or sets the value of a shader option
-    func get(key: String) -> Float { // DEPRECATED
+    */
     
-        if let setting = findSetting(key: key) {
-            return setting.floatValue
-        } else {
-            print("Invalid key: \(key)")
-            fatalError()
-        }
+    // Get or sets the value of a shader option
+    /*
+    func get(key: String) -> Float { // DEPRECATED
+
+        fatalError()
     }
         
     func set(key: String, value: Float) { // DEPRECATED
         
-        if let setting = findSetting(key: key) {
-            setting.floatValue = value
-        } else {
-            print("Invalid key: \(key)")
-            fatalError()
-        }
+        fatalError()
     }
     
     func set(key: String, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
     func set(key: String, item: Int) { set(key: key, value: Float(item)) }
-
+     */
+    /*
     func setHidden(key: String, value: Bool) {
         if let setting = findSetting(key: key) { setting.hidden = value }
     }
+    */
 }
 
 class ScaleShader<F: MPSImageScale> : Shader {

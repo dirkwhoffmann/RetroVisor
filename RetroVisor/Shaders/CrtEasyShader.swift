@@ -71,182 +71,164 @@ final class CRTEasyShader: Shader {
                 
                 ShaderSetting(
                     name: "Brightness Boost",
-                    key: "BRIGHT_BOOST",
+                    range: 0.0...2.0, step: 0.01,
                     value: Binding(
+                        key: "BRIGHT_BOOST",
                         get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
                         set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
-                    range: 0.0...2.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Horizontal Sharpness",
-                    key: "SHARPNESS_H",
+                    range: 0.0...1.0, step: 0.05,
                     value: Binding(
+                        key: "SHARPNESS_H",
                         get: { [unowned self] in self.uniforms.SHARPNESS_H },
                         set: { [unowned self] in self.uniforms.SHARPNESS_H = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.05
                 ),
                 
                 ShaderSetting(
                     name: "Vertical Sharpness",
-                    key: "SHARPNESS_V",
+                    range: 0.0...1.0, step: 0.05,
                     value: Binding(
+                        key: "SHARPNESS_V",
                         get: { [unowned self] in self.uniforms.SHARPNESS_V },
                         set: { [unowned self] in self.uniforms.SHARPNESS_V = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.05
                 ),
                 
                 ShaderSetting(
                     name: "Dilation",
-                    key: "DILATION",
+                    range: 0.0...1.0, step: 0.05,
                     value: Binding(
+                        key: "DILATION",
                         get: { [unowned self] in self.uniforms.DILATION },
                         set: { [unowned self] in self.uniforms.DILATION = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.05
                 ),
                 
                 ShaderSetting(
                     name: "Gamma Input",
-                    key: "GAMMA_INPUT",
+                    range: 0.1...5.0, step: 0.1,
                     value: Binding(
+                        key: "GAMMA_INPUT",
                         get: { [unowned self] in self.uniforms.GAMMA_INPUT },
                         set: { [unowned self] in self.uniforms.GAMMA_INPUT = $0 }),
-                    range: 0.1...5.0,
-                    step: 0.1
                 ),
                 
                 ShaderSetting(
                     name: "Gamma Output",
-                    key: "GAMMA_OUTPUT",
+                    range: 0.1...5.0, step: 0.1,
                     value: Binding(
+                        key: "GAMMA_OUTPUT",
                         get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
                         set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 }),
-                    range: 0.1...5.0,
-                    step: 0.1
                 ),
                 
                 ShaderSetting(
                     name: "Dot Mask Strength",
-                    key: "MASK_STRENGTH",
+                    range: 0.0...1.0, step: 0.01,
                     value: Binding(
+                        key: "MASK_STRENGTH",
                         get: { [unowned self] in self.uniforms.MASK_STRENGTH },
                         set: { [unowned self] in self.uniforms.MASK_STRENGTH = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Dot Mask Width",
-                    key: "MASK_DOT_WIDTH",
+                    range: 1.0...100.0, step: 1.0,
                     value: Binding(
+                        key: "MASK_DOT_WIDTH",
                         get: { [unowned self] in self.uniforms.MASK_DOT_WIDTH },
                         set: { [unowned self] in self.uniforms.MASK_DOT_WIDTH = $0 }),
-                    range: 1.0...100.0,
-                    step: 1.0
                 ),
                 
                 ShaderSetting(
                     name: "Dot Mask Height",
-                    key: "MASK_DOT_HEIGHT",
+                    range: 1.0...100.0, step: 1.0,
                     value: Binding(
+                        key: "MASK_DOT_HEIGHT",
                         get: { [unowned self] in self.uniforms.MASK_DOT_HEIGHT },
                         set: { [unowned self] in self.uniforms.MASK_DOT_HEIGHT = $0 }),
-                    range: 1.0...100.0,
-                    step: 1.0
                 ),
                 
                 ShaderSetting(
                     name: "Dot Mask Stagger",
-                    key: "MASK_STAGGER",
+                    range: 0.0...100.0, step: 1.0,
                     value: Binding(
+                        key: "MASK_STAGGER",
                         get: { [unowned self] in self.uniforms.MASK_STAGGER },
                         set: { [unowned self] in self.uniforms.MASK_STAGGER = $0 }),
-                    range: 0.0...100.0,
-                    step: 1.0
                 ),
                 
                 ShaderSetting(
                     name: "Dot Mask Size",
-                    key: "MASK_SIZE",
+                    range: 1.0...100.0, step: 1.0,
                     value: Binding(
+                        key: "MASK_SIZE",
                         get: { [unowned self] in self.uniforms.MASK_SIZE },
                         set: { [unowned self] in self.uniforms.MASK_SIZE = $0 }),
-                    range: 1.0...100.0,
-                    step: 1.0
                 ),
                 
                 ShaderSetting(
                     name: "Scanline Strength",
-                    key: "SCANLINE_STRENGTH",
+                    range: 0.0...1.0, step: 0.05,
                     value: Binding(
+                        key: "SCANLINE_STRENGTH",
                         get: { [unowned self] in self.uniforms.SCANLINE_STRENGTH },
                         set: { [unowned self] in self.uniforms.SCANLINE_STRENGTH = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.05
                 ),
                 
                 ShaderSetting(
                     name: "Scanline Minimum Beam Width",
-                    key: "SCANLINE_BEAM_WIDTH_MIN",
+                    range: 0.5...5.0, step: 0.5,
                     value: Binding(
+                        key: "SCANLINE_BEAM_WIDTH_MIN",
                         get: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MIN },
                         set: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MIN = $0 }),
-                    range: 0.5...5.0,
-                    step: 0.5
                 ),
                 
                 ShaderSetting(
                     name: "Scanline Maximum Beam Width",
-                    key: "SCANLINE_BEAM_WIDTH_MAX",
+                    range: 0.5...5.0, step: 0.5,
                     value: Binding(
+                        key: "SCANLINE_BEAM_WIDTH_MAX",
                         get: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MAX },
                         set: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MAX = $0 }),
-                    range: 0.5...5.0,
-                    step: 0.5
                 ),
                 
                 ShaderSetting(
                     name: "Scanline Minimum Brightness",
-                    key: "SCANLINE_BEAM_WIDTH_MAX",
+                    range: 0.0...1.0, step: 0.05,
                     value: Binding(
+                        key: "SCANLINE_BEAM_WIDTH_MAX",
                         get: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MAX },
                         set: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MAX = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.05
                 ),
                 
                 ShaderSetting(
                     name: "Scanline Maximum Brightness",
-                    key: "SCANLINE_BRIGHT_MAX",
+                    range: 0.0...1.0, step: 0.05,
                     value: Binding(
+                        key: "SCANLINE_BRIGHT_MAX",
                         get: { [unowned self] in self.uniforms.SCANLINE_BRIGHT_MAX },
                         set: { [unowned self] in self.uniforms.SCANLINE_BRIGHT_MAX = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.05
                 ),
                 
                 ShaderSetting(
                     name: "Scanline Cutoff",
-                    key: "SCANLINE_CUTOFF",
+                    range: 1.0...1000.0, step: 1.0,
                     value: Binding(
+                        key: "SCANLINE_CUTOFF",
                         get: { [unowned self] in self.uniforms.SCANLINE_CUTOFF },
                         set: { [unowned self] in self.uniforms.SCANLINE_CUTOFF = $0 }),
-                    range: 1.0...1000.0,
-                    step: 1.0
                 ),
                 
                 ShaderSetting(
                     name: "Lanczos Filter",
-                    key: "ENABLE_LANCZOS",
+                    range: nil, step: 1.0,
                     value: Binding(
+                        key: "ENABLE_LANCZOS",
                         get: { [unowned self] in Float(self.uniforms.ENABLE_LANCZOS) },
                         set: { [unowned self] in self.uniforms.ENABLE_LANCZOS = Int32($0) }),
-                    range: nil,
-                    step: 1.0
                 ),
             ])
         ]

@@ -98,13 +98,13 @@ class ShaderSettingView: NSTableCellView {
         didSet {
 
             // let enableKey = shaderSetting.enableKey
-            let enabled = shaderSetting.enabled == true //  enableKey == nil ? true : shader.get(key: enableKey!) != 0
+            let enabled = shaderSetting.enabled //  enableKey == nil ? true : shader.get(key: enableKey!) != 0
             let active = !shaderSetting.hidden // !shader.isHidden(key: shaderSetting.key)
 
             optionLabel.stringValue = shaderSetting.name
-            subLabel.stringValue = shaderSetting.key
+            subLabel.stringValue = shaderSetting.value.key
             helpButtom.isHidden = shaderSetting.help == nil
-            optCeckbox.isHidden = shaderSetting.enabled == nil //  shaderSetting.enableKey == nil
+            optCeckbox.isHidden = shaderSetting.enable == nil //  shaderSetting.enableKey == nil
 
             optionLabel.textColor = active ? .textColor : .disabledControlTextColor
             subLabel.textColor = active ? .textColor : .disabledControlTextColor
@@ -155,19 +155,17 @@ class ShaderSettingView: NSTableCellView {
 
     func update() {
 
-        let value = shader.get(key: shaderSetting.key)
+        let value = shaderSetting.floatValue //  shader.get(key: shaderSetting.key)
 
         if !optCeckbox.isHidden {
 
-            let enabled = shader.get(key: shaderSetting.enableKey!) != 0
-            optCeckbox.state = enabled ? .on : .off;
+            optCeckbox.state = shaderSetting.enabled ? .on : .off;
         }
 
         if !valueSlider.isHidden {
 
             valueSlider.floatValue = value
             valueStepper.floatValue = value
-            // valueLabel.stringValue = String(format: shaderSetting.formatString, value)
             valueLabel.stringValue = value.formatted(min: 1, max: 3)
         }
 
@@ -181,9 +179,11 @@ class ShaderSettingView: NSTableCellView {
 
         let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
-        print("\(sender.floatValue)  \(round(sender.floatValue)) \(shaderSetting.step)")
-        shader.set(key: subLabel.stringValue, value: rounded)
-        value = shader.get(key: subLabel.stringValue)
+        // print("\(sender.floatValue)  \(round(sender.floatValue)) \(shaderSetting.step)")
+        shaderSetting.floatValue = rounded
+        value = shaderSetting.floatValue
+//        shader.set(key: subLabel.stringValue, value: rounded)
+//        value = shader.get(key: subLabel.stringValue)
     }
 
     @IBAction func stepperAction(_ sender: NSControl) {
@@ -193,16 +193,17 @@ class ShaderSettingView: NSTableCellView {
 
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
-        shader.set(key: shaderSetting.key, value: Float(sender.selectedTag()))
+        // shader.set(key: shaderSetting.key, value: Float(sender.selectedTag()))
+        shaderSetting.intValue = sender.selectedTag()
         update();
         controller.outlineView.reloadData()
     }
 
     @IBAction func enableAction(_ sender: NSButton) {
 
-        if let enableKey = shaderSetting.enableKey {
+        if let enableKey = shaderSetting.enable?.key {
 
-            shader.set(key: enableKey, enable: sender.state == .on)
+            shaderSetting.enabled = sender.state == .on
             update();
             controller.outlineView.reloadData()
         }

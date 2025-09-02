@@ -162,31 +162,29 @@ final class PlaygroundShader: Shader {
                 
                 ShaderSetting(
                     name: "Input Downscaling Factor",
-                    key: "INPUT_TEX_SCALE",
+                    range: 0.125...1.0, step: 0.125,
                     value: Binding(
+                        key: "INPUT_TEX_SCALE",
                         get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
                         set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 }),
-                    range: 0.125...1.0,
-                    step: 0.125
                 ),
                 
                 ShaderSetting(
                     name: "Output Upscaling Factor",
-                    key: "OUTPUT_TEX_SCALE",
+                    range: 1.0...2.0, step: 0.125,
                     value: Binding(
+                        key: "OUTPUT_TEX_SCALE",
                         get: { [unowned self] in self.uniforms.OUTPUT_TEX_SCALE },
                         set: { [unowned self] in self.uniforms.OUTPUT_TEX_SCALE = $0 }),
-                    range: 1.0...2.0,
-                    step: 0.125
                 ),
                 
                 ShaderSetting(
                     name: "Resampler",
-                    key: "RESAMPLE_FILTER",
+                    values: [("BILINEAR", 0), ("LANCZOS", 1)],
                     value: Binding(
+                        key: "RESAMPLE_FILTER",
                         get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
                         set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) }),
-                    values: [("BILINEAR", 0), ("LANCZOS", 1)]
                 ),
             ]),
 
@@ -194,41 +192,38 @@ final class PlaygroundShader: Shader {
 
                 ShaderSetting(
                     name: "Video Standard",
-                    key: "PAL",
+                    values: [("PAL", 1), ("NTSC", 0)],
                     value: Binding(
-                    get: { [unowned self] in Float(self.uniforms.PAL) },
-                    set: { [unowned self] in self.uniforms.PAL = Int32($0) }),
-                    values: [("PAL", 1), ("NTSC", 0)]
+                        key: "PAL",
+                        get: { [unowned self] in Float(self.uniforms.PAL) },
+                        set: { [unowned self] in self.uniforms.PAL = Int32($0) }),
                 ),
 
                 ShaderSetting(
                     name: "Gamma Input",
-                    key: "GAMMA_INPUT",
+                    range: 0.1...5.0, step: 0.1,
                     value: Binding(
+                        key: "GAMMA_INPUT",
                     get: { [unowned self] in self.uniforms.GAMMA_INPUT },
                     set: { [unowned self] in self.uniforms.GAMMA_INPUT = $0 }),
-                    range: 0.1...5.0,
-                    step: 0.1
                 ),
 
                 ShaderSetting(
                     name: "Gamma Output",
-                    key: "GAMMA_OUTPUT",
+                    range: 0.1...5.0, step: 0.1,
                     value: Binding(
+                        key: "GAMMA_OUTPUT",
                     get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
                     set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 }),
-                    range: 0.1...5.0,
-                    step: 0.1
                 ),
 
                 ShaderSetting(
                     name: "Chroma Radius",
-                    key: "CHROMA_RADIUS",
+                    range: 1...10, step: 1,
                     value: Binding(
+                        key: "CHROMA_RADIUS",
                     get: { [unowned self] in self.uniforms.CHROMA_RADIUS },
                     set: { [unowned self] in self.uniforms.CHROMA_RADIUS = $0 }),
-                    range: 1...10,
-                    step: 1
                 ),
             ]),
 
@@ -236,51 +231,47 @@ final class PlaygroundShader: Shader {
 
                 ShaderSetting(
                     name: "Bloom Filter",
-                    key: "BLOOM_FILTER",
+                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                     value: Binding(
+                        key: "BLOOM_FILTER",
                     get: { [unowned self] in Float(self.uniforms.BLOOM_FILTER) },
                     set: { [unowned self] in self.uniforms.BLOOM_FILTER = Int32($0) }),
-                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
                 ),
 
                 ShaderSetting(
                     name: "Bloom Threshold",
-                    key: "BLOOM_THRESHOLD",
+                    range: 0.0...1.0, step: 0.01,
                     value: Binding(
+                        key: "BLOOM_THRESHOLD",
                     get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD },
                     set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.01
                 ),
 
                 ShaderSetting(
                     name: "Bloom Intensity",
-                    key: "BLOOM_INTENSITY",
+                    range: 0.1...2.0, step: 0.01,
                     value: Binding(
+                        key: "BLOOM_INTENSITY",
                     get: { [unowned self] in self.uniforms.BLOOM_INTENSITY },
                     set: { [unowned self] in self.uniforms.BLOOM_INTENSITY = $0 }),
-                    range: 0.1...2.0,
-                    step: 0.01
                 ),
 
                 ShaderSetting(
                     name: "Bloom Radius X",
-                    key: "BLOOM_RADIUS_X",
+                    range: 0.0...30.0, step: 1.0,
                     value: Binding(
+                        key: "BLOOM_RADIUS_X",
                     get: { [unowned self] in self.uniforms.BLOOM_RADIUS_X },
                     set: { [unowned self] in self.uniforms.BLOOM_RADIUS_X = $0 }),
-                    range: 0.0...30.0,
-                    step: 1.0
                 ),
 
                 ShaderSetting(
                     name: "Bloom Radius Y",
-                    key: "BLOOM_RADIUS_Y",
+                    range: 0.0...30.0, step: 1.0,
                     value: Binding(
+                        key: "BLOOM_RADIUS_Y",
                     get: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y },
                     set: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y = $0 }),
-                    range: 0.0...30.0,
-                    step: 1.0
                 ),
 
             ]),
@@ -289,52 +280,47 @@ final class PlaygroundShader: Shader {
                 
                 ShaderSetting(
                     name: "Scanline Brightness",
-                    key: "SCANLINE_BRIGHTNESS",
+                    range: 0.0...2.0, step: 0.01,
                     value: Binding(
+                        key: "SCANLINE_BRIGHTNESS",
                         get: { [unowned self] in self.uniforms.SCANLINE_BRIGHTNESS },
                         set: { [unowned self] in self.uniforms.SCANLINE_BRIGHTNESS = $0 }),
-                    range: 0.0...2.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Scanline Weight 1",
-                    key: "SCANLINE_WEIGHT1",
+                    range: 0.1...1.0, step: 0.01,
                     value: Binding(
+                        key: "SCANLINE_WEIGHT1",
                         get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT1 },
                         set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT1 = $0 }),
-                    range: 0.1...1.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Scanline Weight 2",
-                    key: "SCANLINE_WEIGHT2",
+                    range: 0.1...1.0, step: 0.01,
                     value: Binding(
+                        key: "SCANLINE_WEIGHT2",
                         get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT2 },
                         set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT2 = $0 }),
-                    range: 0.1...1.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Scanline Weight 3",
-                    key: "SCANLINE_WEIGHT3",
+                    range: 0.1...1.0, step: 0.01,
                     value: Binding(
+                        key: "SCANLINE_WEIGHT3",
                         get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT3 },
                         set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT3 = $0 }),
-                    range: 0.1...1.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Scanline Weight 4",
-                    key: "SCANLINE_WEIGHT4",
+                    range: 0.1...1.0, step: 0.01,
                     value: Binding(
+                        key: "SCANLINE_WEIGHT4",
                         get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT4 },
                         set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT4 = $0 }),
-                    range: 0.1...1.0,
-                    step: 0.01
                 ),
             ]),
             
@@ -342,72 +328,65 @@ final class PlaygroundShader: Shader {
                 
                 ShaderSetting(
                     name: "Grid Width",
-                    key: "SHADOW_GRID_WIDTH",
+                    range: 1.0...60.0, step: 1.0,
                     value: Binding(
+                        key: "SHADOW_GRID_WIDTH",
                         get: { [unowned self] in self.uniforms.SHADOW_GRID_WIDTH },
                         set: { [unowned self] in self.uniforms.SHADOW_GRID_WIDTH = $0 }),
-                    range: 1.0...60.0,
-                    step: 1.0
                 ),
                 
                 ShaderSetting(
                     name: "Grid Height",
-                    key: "SHADOW_GRID_HEIGHT",
+                    range: 1.0...60.0, step: 1.0,
                     value: Binding(
+                        key: "SHADOW_GRID_HEIGHT",
                         get: { [unowned self] in self.uniforms.SHADOW_GRID_HEIGHT },
                         set: { [unowned self] in self.uniforms.SHADOW_GRID_HEIGHT = $0 }),
-                    range: 1.0...60.0,
-                    step: 1.0
                 ),
                 
                 ShaderSetting(
                     name: "Maximal Dot Width",
-                    key: "SHADOW_DOT_WIDTH",
+                    range: 0.0...1.0, step: 0.01,
                     value: Binding(
+                        key: "SHADOW_DOT_WIDTH",
                         get: { [unowned self] in self.uniforms.SHADOW_DOT_WIDTH },
                         set: { [unowned self] in self.uniforms.SHADOW_DOT_WIDTH = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Maximal Dot Height",
-                    key: "SHADOW_DOT_HEIGHT",
+                    range: 0.0...1.0, step: 0.01,
                     value: Binding(
+                        key: "SHADOW_DOT_HEIGHT",
                         get: { [unowned self] in self.uniforms.SHADOW_DOT_HEIGHT },
                         set: { [unowned self] in self.uniforms.SHADOW_DOT_HEIGHT = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Weight",
-                    key: "SHADOW_DOT_WEIGHT",
+                    range: 0.0...2.0, step: 0.01,
                     value: Binding(
+                        key: "SHADOW_DOT_WEIGHT",
                         get: { [unowned self] in self.uniforms.SHADOW_DOT_WEIGHT },
                         set: { [unowned self] in self.uniforms.SHADOW_DOT_WEIGHT = $0 }),
-                    range: 0.0...2.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Glow",
-                    key: "SHADOW_DOT_GLOW",
+                    range: 0.05...5.0, step: 0.01,
                     value: Binding(
+                        key: "SHADOW_DOT_GLOW",
                         get: { [unowned self] in self.uniforms.SHADOW_DOT_GLOW },
                         set: { [unowned self] in self.uniforms.SHADOW_DOT_GLOW = $0 }),
-                    range: 0.05...5.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Phosphor Feather",
-                    key: "SHADOW_FEATHER",
+                    range: 0.0...3.0, step: 0.01,
                     value: Binding(
+                        key: "SHADOW_FEATHER",
                         get: { [unowned self] in self.uniforms.SHADOW_FEATHER },
                         set: { [unowned self] in self.uniforms.SHADOW_FEATHER = $0 }),
-                    range: 0.0...3.0,
-                    step: 0.01
                 )
             ]),
             
@@ -415,42 +394,38 @@ final class PlaygroundShader: Shader {
                 
                 ShaderSetting(
                     name: "Dotmask",
-                    key: "DOTMASK",
+                    range: 0...4, step: 1.0,
                     value: Binding(
+                        key: "DOTMASK",
                         get: { [unowned self] in Float(self.uniforms.DOTMASK) },
                         set: { [unowned self] in self.uniforms.DOTMASK = Int32($0) }),
-                    range: 0...4,
-                    step: 1.0
                 ),
                 
                 ShaderSetting(
                     name: "Dotmask Brightness",
-                    key: "DOTMASK_BRIGHTNESS",
+                    range: 0...1, step: 0.01,
                     value: Binding(
+                        key: "DOTMASK_BRIGHTNESS",
                         get: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS },
                         set: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS = $0 }),
-                    range: 0...1,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Brightness",
-                    key: "BRIGHTNESS",
+                    range: 0.0...10.0, step: 0.01,
                     value: Binding(
+                        key: "BRIGHTNESS",
                         get: { [unowned self] in self.uniforms.BRIGHTNESS },
                         set: { [unowned self] in self.uniforms.BRIGHTNESS = $0 }),
-                    range: 0.0...10.0,
-                    step: 0.01
                 ),
                 
                 ShaderSetting(
                     name: "Glow",
-                    key: "GLOW",
+                    range: 0.0...2.0, step: 0.01,
                     value: Binding(
+                        key: "GLOW",
                         get: { [unowned self] in self.uniforms.GLOW },
                         set: { [unowned self] in self.uniforms.GLOW = $0 }),
-                    range: 0.0...2.0,
-                    step: 0.01
                 ),
             ]),
             
@@ -458,10 +433,6 @@ final class PlaygroundShader: Shader {
                 
                 ShaderSetting(
                     name: "Debug",
-                    key: "DEBUG_TEXTURE",
-                    value: Binding(
-                        get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE) },
-                        set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) }),
                     values: [ ("Ycc", 1),
                               ("Ycc (Mipmap 1)", 2),
                               ("Ycc (Mipmap 2)", 3),
@@ -471,17 +442,20 @@ final class PlaygroundShader: Shader {
                               ("Chroma U/I", 7),
                               ("Chroma V/Q", 8),
                               ("Shadow texture", 9),
-                              ("Bloom texture", 10) ]
+                              ("Bloom texture", 10) ],
+                    value: Binding(
+                        key: "DEBUG_TEXTURE",
+                        get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE) },
+                        set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) }),
                 ),
-                
+
                 ShaderSetting(
                     name: "Debug Slider",
-                    key: "DEBUG_SLIDER",
+                    range: 0.0...1.0, step: 0.01,
                     value: Binding(
+                        key: "DEBUG_SLIDER",
                         get: { [unowned self] in self.uniforms.DEBUG_SLIDER },
                         set: { [unowned self] in self.uniforms.DEBUG_SLIDER = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.01
                 )
             ]),
         ]

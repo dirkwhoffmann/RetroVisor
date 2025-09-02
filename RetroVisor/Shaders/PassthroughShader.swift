@@ -65,21 +65,21 @@ final class PassthroughShader: Shader {
 
                 ShaderSetting(
                     name: "Input Downscaling Factor",
-                    key: "INPUT_TEX_SCALE",
-                    value: Binding(
-                        get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
-                        set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 }),
                     range: 0.125...1.0,
                     step: 0.125,
+                    value: Binding(
+                        key: "INPUT_TEX_SCALE",
+                        get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
+                        set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 }),
                 ),
                 
                 ShaderSetting(
                     name: "Resampler",
-                    key: "RESAMPLE_FILTER",
+                    values: [("BILINEAR", 0), ("LANCZOS", 1)],
                     value: Binding(
+                        key: "RESAMPLE_FILTER",
                         get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
                         set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) }),
-                    values: [("BILINEAR", 0), ("LANCZOS", 1)],
                 ),
             ]),
 
@@ -90,80 +90,54 @@ final class PassthroughShader: Shader {
 
                 ShaderSetting(
                     name: "Blur Filter",
-                    key: "BLUR_FILTER",
+                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                     value: Binding(
+                        key: "BLUR_FILTER",
                         get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
                         set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) }),
-                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                 ),
 
                 ShaderSetting(
                     name: "Blur width",
-                    key: "BLUR_RADIUS_X",
+                    range: 0.1...20.0,
+                    step: 0.1,
                     value: Binding(
+                        key: "BLUR_RADIUS_X",
                         get: { [unowned self] in self.uniforms.BLUR_RADIUS_X },
                         set: { [unowned self] in self.uniforms.BLUR_RADIUS_X = $0 }),
-                    range: 0.1...20.0,
-                    step: 0.1
                 ),
 
                 ShaderSetting(
                     name: "Blur height",
-                    key: "BLUR_RADIUS_Y",
+                    range: 0.1...20.0,
+                    step: 0.1,
                     value: Binding(
+                        key: "BLUR_RADIUS_Y",
                         get: { [unowned self] in self.uniforms.BLUR_RADIUS_Y },
                         set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 }),
-                    range: 0.1...20.0,
-                    step: 0.1
                 ),
 
                 ShaderSetting(
                     name: "Scale X",
-                    key: "RESAMPLE_SCALE_X",
+                    range: 0.1...1.0,
+                    step: 0.01,
                     value: Binding(
+                        key: "RESAMPLE_SCALE_X",
                         get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X },
                         set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X = $0 }),
-                    range: 0.1...1.0,
-                    step: 0.01
                 ),
 
                 ShaderSetting(
                     name: "Scale Y",
-                    key: "RESAMPLE_SCALE_Y",
+                    range: 0.1...1.0,
+                    step: 0.01,
                     value: Binding(
+                        key: "RESAMPLE_SCALE_Y",
                         get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y },
                         set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y = $0 }),
-                    range: 0.1...1.0,
-                    step: 0.01
                 )
             ])
         ]
-    }
-
-    override func set(key: String, value: Float) {
-        
-        super.set(key: key, value: value)
-        /*
-        switch key {
-
-        case "RESAMPLE_FILTER":     uniforms.RESAMPLE_FILTER = ResampleFilterType(value)!
-        case "INPUT_TEX_SCALE":     uniforms.INPUT_TEX_SCALE = value
-        case "OUTPUT_TEX_SCALE":    uniforms.OUTPUT_TEX_SCALE = value
-
-        case "BLUR_ENABLE":         uniforms.BLUR_ENABLE = Int32(value)
-        case "BLUR_FILTER":         uniforms.BLUR_FILTER = BlurFilterType(value)!
-        case "BLUR_RADIUS_X":       uniforms.BLUR_RADIUS_X = value
-        case "BLUR_RADIUS_Y":       uniforms.BLUR_RADIUS_Y = value
-        case "RESAMPLE_SCALE_X":    uniforms.RESAMPLE_SCALE_X = value
-        case "RESAMPLE_SCALE_Y":    uniforms.RESAMPLE_SCALE_Y = value
-
-        default:
-            super.set(key: key, value: value)
-        }
-        */
-        
-        setHidden(key: "BLUR_RADIUS_Y",
-                  value: get(key: "BLUR_FILTER") == BlurFilterType.gaussian.floatValue)
     }
 
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {

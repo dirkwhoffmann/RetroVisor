@@ -58,83 +58,47 @@ final class HSVShader: Shader {
 
                 ShaderSetting(
                     name: "Hue",
-                    enableKey: "H_ENABLE",
+                    range: 0.0...1.0,
+                    step: 0.01,
                     enable: Binding(
+                        key: "H_ENABLE",
                         get: { [unowned self] in Bool(self.uniforms.H_ENABLE) },
                         set: { [unowned self] in self.uniforms.H_ENABLE = Int32($0) }),
-                    key: "H_VALUE",
                     value: Binding(
+                        key: "H_VALUE",
                         get: { [unowned self] in self.uniforms.H_VALUE },
                         set: { [unowned self] in self.uniforms.H_VALUE = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.01
                 ),
 
                 ShaderSetting(
                     name: "Saturation",
-                    enableKey: "S_ENABLE",
+                    range: 0.0...1.0,
+                    step: 0.01,
                     enable: Binding(
+                        key: "S_ENABLE",
                         get: { [unowned self] in Bool(self.uniforms.S_ENABLE) },
                         set: { [unowned self] in self.uniforms.S_ENABLE = Int32($0) }),
-                    key: "S_VALUE",
                     value: Binding(
+                        key: "S_VALUE",
                         get: { [unowned self] in self.uniforms.S_VALUE },
                         set: { [unowned self] in self.uniforms.S_VALUE = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.01
                 ),
 
                 ShaderSetting(
                     name: "Value",
-                    enableKey: "V_ENABLE",
+                    range: 0.0...1.0,
+                    step: 0.01,
                     enable: Binding(
+                        key: "V_ENABLE",
                         get: { [unowned self] in Bool(self.uniforms.V_ENABLE) },
                         set: { [unowned self] in self.uniforms.V_ENABLE = Int32($0) }),
-                    key: "V_VALUE",
                     value: Binding(
+                        key: "V_VALUE",
                         get: { [unowned self] in self.uniforms.V_VALUE },
                         set: { [unowned self] in self.uniforms.V_VALUE = $0 }),
-                    range: 0.0...1.0,
-                    step: 0.01
                 ),
             ]),
         ]
-    }
-
-    override func get(key: String) -> Float {
-
-        switch key {
-
-        case "H_ENABLE":    return Float(uniforms.H_ENABLE)
-        case "H_VALUE":     return Float(uniforms.H_VALUE)
-
-        case "S_ENABLE":    return Float(uniforms.S_ENABLE)
-        case "S_VALUE":     return Float(uniforms.S_VALUE)
-
-        case "V_ENABLE":    return Float(uniforms.V_ENABLE)
-        case "V_VALUE":     return Float(uniforms.V_VALUE)
-
-        default:
-            return super.get(key: key)
-        }
-    }
-
-    override func set(key: String, value: Float) {
-
-        switch key {
-
-        case "H_ENABLE":    uniforms.H_ENABLE = Int32(value)
-        case "H_VALUE":     uniforms.H_VALUE = value
-
-        case "S_ENABLE":    uniforms.S_ENABLE = Int32(value)
-        case "S_VALUE":     uniforms.S_VALUE = value
-
-        case "V_ENABLE":    uniforms.V_ENABLE = Int32(value)
-        case "V_VALUE":     uniforms.V_VALUE = value
-
-        default:
-            super.set(key: key, value: value)
-        }
     }
 
     override func activate() {
