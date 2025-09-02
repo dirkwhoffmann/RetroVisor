@@ -19,11 +19,11 @@ final class PassthroughShader: Shader {
         var OUTPUT_TEX_SCALE: Float
 
         var BLUR_ENABLE: Int32
-        var BLUR_FILTER: BlurFilterType
+        var BLUR_FILTER: Int32
         var BLUR_RADIUS_X: Float
         var BLUR_RADIUS_Y: Float
 
-        var RESAMPLE_FILTER: ResampleFilterType
+        var RESAMPLE_FILTER: Int32
         var RESAMPLE_SCALE_X: Float
         var RESAMPLE_SCALE_Y: Float
 
@@ -33,11 +33,11 @@ final class PassthroughShader: Shader {
             OUTPUT_TEX_SCALE: 2.0,
 
             BLUR_ENABLE: 0,
-            BLUR_FILTER: .box,
+            BLUR_FILTER: BlurFilterType.box.rawValue,
             BLUR_RADIUS_X: 1.0,
             BLUR_RADIUS_Y: 1.0,
 
-            RESAMPLE_FILTER: .bilinear,
+            RESAMPLE_FILTER: ResampleFilterType.bilinear.rawValue,
             RESAMPLE_SCALE_X: 1.0,
             RESAMPLE_SCALE_Y: 1.0
         )
@@ -66,8 +66,9 @@ final class PassthroughShader: Shader {
                 ShaderSetting(
                     name: "Input Downscaling Factor",
                     key: "INPUT_TEX_SCALE",
-                    get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
-                    set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
+                        set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 }),
                     range: 0.125...1.0,
                     step: 0.125,
                 ),
@@ -75,8 +76,9 @@ final class PassthroughShader: Shader {
                 ShaderSetting(
                     name: "Resampler",
                     key: "RESAMPLE_FILTER",
-                    get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER.rawValue) },
-                    set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = ResampleFilterType($0)! },
+                    value: Binding(
+                        get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
+                        set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) }),
                     values: [("BILINEAR", 0), ("LANCZOS", 1)],
                 ),
             ]),
@@ -89,16 +91,18 @@ final class PassthroughShader: Shader {
                 ShaderSetting(
                     name: "Blur Filter",
                     key: "BLUR_FILTER",
-                    get: { [unowned self] in self.uniforms.BLUR_FILTER.floatValue },
-                    set: { [unowned self] in self.uniforms.BLUR_FILTER = BlurFilterType($0)! },
+                    value: Binding(
+                        get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
+                        set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) }),
                     values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                 ),
 
                 ShaderSetting(
                     name: "Blur width",
                     key: "BLUR_RADIUS_X",
-                    get: { [unowned self] in self.uniforms.BLUR_RADIUS_X },
-                    set: { [unowned self] in self.uniforms.BLUR_RADIUS_X = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.BLUR_RADIUS_X },
+                        set: { [unowned self] in self.uniforms.BLUR_RADIUS_X = $0 }),
                     range: 0.1...20.0,
                     step: 0.1
                 ),
@@ -106,8 +110,9 @@ final class PassthroughShader: Shader {
                 ShaderSetting(
                     name: "Blur height",
                     key: "BLUR_RADIUS_Y",
-                    get: { [unowned self] in self.uniforms.BLUR_RADIUS_Y },
-                    set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.BLUR_RADIUS_Y },
+                        set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 }),
                     range: 0.1...20.0,
                     step: 0.1
                 ),
@@ -115,8 +120,9 @@ final class PassthroughShader: Shader {
                 ShaderSetting(
                     name: "Scale X",
                     key: "RESAMPLE_SCALE_X",
-                    get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X },
-                    set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X },
+                        set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X = $0 }),
                     range: 0.1...1.0,
                     step: 0.01
                 ),
@@ -124,8 +130,9 @@ final class PassthroughShader: Shader {
                 ShaderSetting(
                     name: "Scale Y",
                     key: "RESAMPLE_SCALE_Y",
-                    get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y },
-                    set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y },
+                        set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y = $0 }),
                     range: 0.1...1.0,
                     step: 0.01
                 )
@@ -133,28 +140,6 @@ final class PassthroughShader: Shader {
         ]
     }
 
-    /*
-    override func get(key: String) -> Float {
-
-        switch key {
-
-        case "INPUT_TEX_SCALE":     return Float(uniforms.INPUT_TEX_SCALE)
-        case "OUTPUT_TEX_SCALE":    return Float(uniforms.OUTPUT_TEX_SCALE)
-        case "RESAMPLE_FILTER":     return Float(uniforms.RESAMPLE_FILTER.rawValue)
-
-        case "BLUR_ENABLE":         return Float(uniforms.BLUR_ENABLE)
-        case "BLUR_FILTER":         return Float(uniforms.BLUR_FILTER.rawValue)
-        case "BLUR_RADIUS_X":       return Float(uniforms.BLUR_RADIUS_X)
-        case "BLUR_RADIUS_Y":       return Float(uniforms.BLUR_RADIUS_Y)
-        case "RESAMPLE_SCALE_X":    return Float(uniforms.RESAMPLE_SCALE_X)
-        case "RESAMPLE_SCALE_Y":    return Float(uniforms.RESAMPLE_SCALE_Y)
-
-        default:
-            return super.get(key: key)
-        }
-    }
-    */
-    
     override func set(key: String, value: Float) {
         
         super.set(key: key, value: value)
@@ -200,13 +185,13 @@ final class PassthroughShader: Shader {
         updateTextures(in: input, out: output)
 
         // Rescale to the source texture size
-        resampler.type = uniforms.RESAMPLE_FILTER
+        resampler.type = ResampleFilterType(rawValue: uniforms.RESAMPLE_FILTER)!
         resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
 
         if uniforms.BLUR_ENABLE != 0 {
 
             // Blur the source texture
-            blurFilter.blurType = uniforms.BLUR_FILTER
+            blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
             blurFilter.resampleX = uniforms.RESAMPLE_SCALE_X
             blurFilter.resampleY = uniforms.RESAMPLE_SCALE_Y
             blurFilter.blurWidth = uniforms.BLUR_RADIUS_X

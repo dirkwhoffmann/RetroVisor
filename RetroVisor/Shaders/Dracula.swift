@@ -138,59 +138,65 @@ final class DraculaShader: Shader {
         settings = [
 
             ShaderSettingGroup(title: "Textures", [
-
+                
                 ShaderSetting(
                     name: "Input Downscaling Factor",
                     key: "INPUT_TEX_SCALE",
-                    get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
-                    set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
+                        set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 }),
                     range: 0.125...1.0,
                     step: 0.125
                 ),
-
+                
                 ShaderSetting(
                     name: "Output Upscaling Factor",
                     key: "OUTPUT_TEX_SCALE",
-                    get: { [unowned self] in self.uniforms.OUTPUT_TEX_SCALE },
-                    set: { [unowned self] in self.uniforms.OUTPUT_TEX_SCALE = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.OUTPUT_TEX_SCALE },
+                        set: { [unowned self] in self.uniforms.OUTPUT_TEX_SCALE = $0 }),
                     range: 1.0...2.0,
                     step: 0.125
                 ),
-
+                
                 ShaderSetting(
                     name: "Resampler",
                     key: "RESAMPLE_FILTER",
-                    get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
-                    set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) },
+                    value: Binding(
+                        get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
+                        set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) }),
                     values: [("BILINEAR", 0), ("LANCZOS", 1)]
                 ),
-
+                
             ]),
-
+            
             ShaderSettingGroup(title: "Chroma Effects", [
-
+                
                 ShaderSetting(
                     name: "Video Standard",
                     key: "PAL",
-                    get: { [unowned self] in Float(self.uniforms.PAL) },
-                    set: { [unowned self] in self.uniforms.PAL = Int32($0) },
+                    value: Binding(
+                        get: { [unowned self] in Float(self.uniforms.PAL) },
+                        set: { [unowned self] in self.uniforms.PAL = Int32($0) }),
                     values: [("PAL", 1), ("NTSC", 0)]
                 ),
-
+                
                 ShaderSetting(
                     name: "Gamma Input",
                     key: "GAMMA_INPUT",
-                    get: { [unowned self] in self.uniforms.GAMMA_INPUT },
-                    set: { [unowned self] in self.uniforms.GAMMA_INPUT = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.GAMMA_INPUT },
+                        set: { [unowned self] in self.uniforms.GAMMA_INPUT = $0 }),
                     range: 0.1...5.0,
                     step: 0.1
                 ),
-
+                
                 ShaderSetting(
                     name: "Gamma Output",
                     key: "GAMMA_OUTPUT",
-                    get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
-                    set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
+                        set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 }),
                     range: 0.1...5.0,
                     step: 0.1
                 ),
@@ -198,143 +204,158 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Chroma Radius",
                     key: "CHROMA_RADIUS",
-                    get: { [unowned self] in self.uniforms.CHROMA_RADIUS },
-                    set: { [unowned self] in self.uniforms.CHROMA_RADIUS = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.CHROMA_RADIUS },
+                        set: { [unowned self] in self.uniforms.CHROMA_RADIUS = $0 }),
                     range: 1...10,
                     step: 1
                 ),
             ]),
-
+            
             ShaderSettingGroup(title: "Blooming", key: "BLOOM_ENABLE", [
-
+                
                 ShaderSetting(
                     name: "Bloom Filter",
                     key: "BLOOM_FILTER",
-                    get: { [unowned self] in Float(self.uniforms.BLOOM_FILTER) },
-                    set: { [unowned self] in self.uniforms.BLOOM_FILTER = Int32($0) },
+                    value: Binding(
+                        get: { [unowned self] in Float(self.uniforms.BLOOM_FILTER) },
+                        set: { [unowned self] in self.uniforms.BLOOM_FILTER = Int32($0) }),
                     values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
                 ),
-
+                
                 ShaderSetting(
                     name: "Bloom Threshold",
                     key: "BLOOM_THRESHOLD",
-                    get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD },
-                    set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD },
+                        set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD = $0 }),
                     range: 0.0...1.0,
                     step: 0.01
                 ),
-
+                
                 ShaderSetting(
                     name: "Bloom Intensity",
                     key: "BLOOM_INTENSITY",
-                    get: { [unowned self] in self.uniforms.BLOOM_INTENSITY },
-                    set: { [unowned self] in self.uniforms.BLOOM_INTENSITY = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.BLOOM_INTENSITY },
+                        set: { [unowned self] in self.uniforms.BLOOM_INTENSITY = $0 }),
                     range: 0.1...2.0,
                     step: 0.01
                 ),
-
+                
                 ShaderSetting(
                     name: "Bloom Radius X",
                     key: "BLOOM_RADIUS_X",
-                    get: { [unowned self] in self.uniforms.BLOOM_RADIUS_X },
-                    set: { [unowned self] in self.uniforms.BLOOM_RADIUS_X = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.BLOOM_RADIUS_X },
+                        set: { [unowned self] in self.uniforms.BLOOM_RADIUS_X = $0 }),
                     range: 0.0...30.0,
                     step: 1.0
                 ),
-
+                
                 ShaderSetting(
                     name: "Bloom Radius Y",
                     key: "BLOOM_RADIUS_Y",
-                    get: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y },
-                    set: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y },
+                        set: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y = $0 }),
                     range: 0.0...30.0,
                     step: 1.0
                 ),
             ]),
-
+            
             ShaderSettingGroup(title: "Scanlines", key: "SCANLINES_ENABLE", [
-
+                
                 ShaderSetting(
                     name: "Scanline Distance",
                     key: "SCANLINE_DISTANCE",
-                    get: { [unowned self] in self.uniforms.SCANLINE_DISTANCE },
-                    set: { [unowned self] in self.uniforms.SCANLINE_DISTANCE = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.SCANLINE_DISTANCE },
+                        set: { [unowned self] in self.uniforms.SCANLINE_DISTANCE = $0 }),
                     range: 0...10,
                     step: 1
                 ),
-
+                
                 ShaderSetting(
                     name: "Scanline Weight",
                     key: "SCANLINE_WEIGHT",
-                    get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT },
-                    set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT },
+                        set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT = $0 }),
                     range: 0.0...1.0,
                     step: 0.01
                 ),
-
+                
                 ShaderSetting(
                     name: "Scanline Brightness",
                     key: "SCANLINE_BRIGHTNESS",
-                    get: { [unowned self] in self.uniforms.SCANLINE_BRIGHTNESS },
-                    set: { [unowned self] in self.uniforms.SCANLINE_BRIGHTNESS = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.SCANLINE_BRIGHTNESS },
+                        set: { [unowned self] in self.uniforms.SCANLINE_BRIGHTNESS = $0 }),
                     range: 0.0...1.0,
                     step: 0.01
                 ),
             ]),
-                
+            
             ShaderSettingGroup(title: "Dot Mask", key: "DOTMASK_ENABLE", [
-
+                
                 ShaderSetting(
                     name: "Dotmask Type",
                     key: "DOTMASK_TYPE",
-                    get: { [unowned self] in Float(self.uniforms.DOTMASK_TYPE) },
-                    set: { [unowned self] in self.uniforms.DOTMASK_TYPE = Int32($0) },
+                    value: Binding(
+                        get: { [unowned self] in Float(self.uniforms.DOTMASK_TYPE) },
+                        set: { [unowned self] in self.uniforms.DOTMASK_TYPE = Int32($0) }),
                     values: [ ("Add", 0),
                               ("Blend", 1),
                               ("Shift", 2) ]
                 ),
-
+                
                 ShaderSetting(
                     name: "Dotmask Width",
                     key: "DOTMASK_WIDTH",
-                    get: { [unowned self] in self.uniforms.DOTMASK_WIDTH },
-                    set: { [unowned self] in self.uniforms.DOTMASK_WIDTH = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.DOTMASK_WIDTH },
+                        set: { [unowned self] in self.uniforms.DOTMASK_WIDTH = $0 }),
                     range: 3.0...15.0,
                     step: 1.0
                 ),
-
+                
                 ShaderSetting(
                     name: "Dotmask Weight",
                     key: "DOTMASK_WEIGHT",
-                    get: { [unowned self] in self.uniforms.DOTMASK_WEIGHT },
-                    set: { [unowned self] in self.uniforms.DOTMASK_WEIGHT = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.DOTMASK_WEIGHT },
+                        set: { [unowned self] in self.uniforms.DOTMASK_WEIGHT = $0 }),
                     range: 0.0...2.0,
                     step: 0.01
                 ),
-
+                
                 ShaderSetting(
                     name: "Dotmask Weight 2",
                     key: "DOTMASK_WEIGHT2",
-                    get: { [unowned self] in self.uniforms.DOTMASK_WEIGHT2 },
-                    set: { [unowned self] in self.uniforms.DOTMASK_WEIGHT2 = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.DOTMASK_WEIGHT2 },
+                        set: { [unowned self] in self.uniforms.DOTMASK_WEIGHT2 = $0 }),
                     range: 0.0...2.0,
                     step: 0.01
                 ),
-
+                
                 ShaderSetting(
                     name: "Dotmask Shift",
                     key: "DOTMASK_SHIFT",
-                    get: { [unowned self] in self.uniforms.DOTMASK_SHIFT },
-                    set: { [unowned self] in self.uniforms.DOTMASK_SHIFT = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.DOTMASK_SHIFT },
+                        set: { [unowned self] in self.uniforms.DOTMASK_SHIFT = $0 }),
                     range: 0.0...1.0,
                     step: 0.01
                 ),
-
+                
                 ShaderSetting(
                     name: "Dotmask Brightness",
                     key: "DOTMASK_BRIGHTNESS",
-                    get: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS },
-                    set: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS },
+                        set: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS = $0 }),
                     range: 0...1,
                     step: 0.01
                 ),
@@ -342,8 +363,9 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Brightness 2",
                     key: "DOTMASK_BRIGHTNESS2",
-                    get: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS2 },
-                    set: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS2 = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS2 },
+                        set: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS2 = $0 }),
                     range: 0...5,
                     step: 0.01
                 ),
@@ -351,20 +373,22 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Saturation",
                     key: "DOTMASK_SATURATION",
-                    get: { [unowned self] in self.uniforms.DOTMASK_SATURATION },
-                    set: { [unowned self] in self.uniforms.DOTMASK_SATURATION = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.DOTMASK_SATURATION },
+                        set: { [unowned self] in self.uniforms.DOTMASK_SATURATION = $0 }),
                     range: 0...1,
                     step: 0.01
                 )
             ]),
-
+            
             ShaderSettingGroup(title: "Debugging", key: "DEBUG_ENABLE", [
-
+                
                 ShaderSetting(
                     name: "Debug",
                     key: "DEBUG_TEXTURE",
-                    get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE) },
-                    set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) },
+                    value: Binding(
+                        get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE) },
+                        set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) }),
                     values: [ ("Ycc", 1),
                               ("Ycc (Mipmap 1)", 2),
                               ("Ycc (Mipmap 2)", 3),
@@ -375,12 +399,13 @@ final class DraculaShader: Shader {
                               ("Chroma V/Q", 8),
                               ("Bloom texture", 10) ]
                 ),
-
+                
                 ShaderSetting(
                     name: "Debug Slider",
                     key: "DEBUG_SLIDER",
-                    get: { [unowned self] in self.uniforms.DEBUG_SLIDER },
-                    set: { [unowned self] in self.uniforms.DEBUG_SLIDER = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.DEBUG_SLIDER },
+                        set: { [unowned self] in self.uniforms.DEBUG_SLIDER = $0 }),
                     range: 0.0...1.0,
                     step: 0.01
                 )

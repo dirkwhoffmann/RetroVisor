@@ -10,6 +10,18 @@
 import MetalKit
 import MetalPerformanceShaders
 
+struct Binding<T> {
+    
+    let get: () -> T
+    let set: (T) -> Void
+
+    init(get: @escaping () -> T, set: @escaping (T) -> Void) {
+        
+        self.get = get
+        self.set = set
+    }
+}
+
 class ShaderSetting {
 
     // Setting name
@@ -34,44 +46,47 @@ class ShaderSetting {
     // Indicates if this options should be hidden from the user
     var hidden = false
 
+    private let enable: Binding<Bool>?
+    private let value: Binding<Float>?
+    /*
     private let getEnable: (() -> Bool)?
     private let setEnable: ((Bool) -> Void)?
     private let getter: (() -> Float)?
     private let setter: ((Float) -> Void)?
-        
+    */
+    
     var formatString: String { "%.3g" }
 
     init(name: String,
          enableKey: String? = nil,
-         getEnable: (() -> Bool)? = nil,
-         setEnable: ((Bool) -> Void)? = nil,
+         enable: Binding<Bool>? = nil,
          key: String,
-         get: (() -> Float)? = nil,
-         set: ((Float) -> Void)? = nil,
-         range: ClosedRange<Double>? = nil, step: Float = 0.01,
-         values: [(String,Int)]? = nil, help: String? = nil
+         value: Binding<Float>,
+         range: ClosedRange<Double>? = nil,
+         step: Float = 0.01,
+         values: [(String,Int)]? = nil,
+         help: String? = nil
         ) {
 
         self.name = name
-        self.key = key
         self.enableKey = enableKey
+        self.enable = enable
+        self.key = key
+        self.value = value
         self.range = range
         self.step = step
         self.values = values
         self.help = help
-        self.getEnable = getEnable
-        self.setEnable = setEnable
-        self.getter = get
-        self.setter = set
     }
     
     var enabled: Bool? {
-        get { getEnable?() ?? nil }
-        set { setEnable?(newValue ?? false) }
+        get { enable?.get() }
+        set { if let newValue = newValue { enable?.set(newValue) } }
     }
-    var value: Float {
-        get { getter?() ?? 0 }
-        set { setter?(newValue) }
+
+    var floatValue: Float {
+        get { value?.get() ?? 0 }
+        set { value?.set(newValue) }
     }
 }
 
@@ -150,7 +165,7 @@ class Shader : Loggable {
     func get(key: String) -> Float { // DEPRECATED
     
         if let setting = findSetting(key: key) {
-            return setting.value
+            return setting.floatValue
         } else {
             print("Invalid key: \(key)")
             fatalError()
@@ -160,7 +175,7 @@ class Shader : Loggable {
     func set(key: String, value: Float) { // DEPRECATED
         
         if let setting = findSetting(key: key) {
-            setting.value = value
+            setting.floatValue = value
         } else {
             print("Invalid key: \(key)")
             fatalError()

@@ -59,11 +59,13 @@ final class HSVShader: Shader {
                 ShaderSetting(
                     name: "Hue",
                     enableKey: "H_ENABLE",
-                    getEnable: { [unowned self] in Bool(self.uniforms.H_ENABLE) },
-                    setEnable: { [unowned self] in self.uniforms.H_ENABLE = Int32($0) },
+                    enable: Binding(
+                        get: { [unowned self] in Bool(self.uniforms.H_ENABLE) },
+                        set: { [unowned self] in self.uniforms.H_ENABLE = Int32($0) }),
                     key: "H_VALUE",
-                    get: { [unowned self] in self.uniforms.H_VALUE },
-                    set: { [unowned self] in self.uniforms.H_VALUE = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.H_VALUE },
+                        set: { [unowned self] in self.uniforms.H_VALUE = $0 }),
                     range: 0.0...1.0,
                     step: 0.01
                 ),
@@ -71,11 +73,13 @@ final class HSVShader: Shader {
                 ShaderSetting(
                     name: "Saturation",
                     enableKey: "S_ENABLE",
-                    getEnable: { [unowned self] in Bool(self.uniforms.S_ENABLE) },
-                    setEnable: { [unowned self] in self.uniforms.S_ENABLE = Int32($0) },
+                    enable: Binding(
+                        get: { [unowned self] in Bool(self.uniforms.S_ENABLE) },
+                        set: { [unowned self] in self.uniforms.S_ENABLE = Int32($0) }),
                     key: "S_VALUE",
-                    get: { [unowned self] in self.uniforms.S_VALUE },
-                    set: { [unowned self] in self.uniforms.S_VALUE = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.S_VALUE },
+                        set: { [unowned self] in self.uniforms.S_VALUE = $0 }),
                     range: 0.0...1.0,
                     step: 0.01
                 ),
@@ -83,11 +87,13 @@ final class HSVShader: Shader {
                 ShaderSetting(
                     name: "Value",
                     enableKey: "V_ENABLE",
-                    getEnable: { [unowned self] in Bool(self.uniforms.V_ENABLE) },
-                    setEnable: { [unowned self] in self.uniforms.V_ENABLE = Int32($0) },
+                    enable: Binding(
+                        get: { [unowned self] in Bool(self.uniforms.V_ENABLE) },
+                        set: { [unowned self] in self.uniforms.V_ENABLE = Int32($0) }),
                     key: "V_VALUE",
-                    get: { [unowned self] in self.uniforms.V_VALUE },
-                    set: { [unowned self] in self.uniforms.V_VALUE = $0 },
+                    value: Binding(
+                        get: { [unowned self] in self.uniforms.V_VALUE },
+                        set: { [unowned self] in self.uniforms.V_VALUE = $0 }),
                     range: 0.0...1.0,
                     step: 0.01
                 ),
