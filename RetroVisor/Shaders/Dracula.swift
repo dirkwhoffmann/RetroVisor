@@ -338,7 +338,7 @@ final class DraculaShader: Shader {
          ]
     }
 
-    override func get(key: String, index: Int = 0) -> Float {
+    override func get(key: String) -> Float {
 
         print("key: \(key)")
         switch key {
@@ -385,7 +385,7 @@ final class DraculaShader: Shader {
         }
     }
 
-    override func set(key: String, index: Int = 0, value: Float) {
+    override func set(key: String, value: Float) {
 
         switch key {
 

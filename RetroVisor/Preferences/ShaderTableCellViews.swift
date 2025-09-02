@@ -35,7 +35,8 @@ class ShaderGroupView: NSTableCellView {
 
             enableButton.isHidden = false
             disclosureButton.isHidden = true
-            enableButton.state = shader.get(key: group.key!) != 0 ? .on : .off
+            // enableButton.state = shader.get(key: group.key!) != 0 ? .on : .off
+            enableButton.state = group.value == 0 ? .off : .on
             subLabel.stringValue = "\(group.key!)"
         }
 
@@ -64,7 +65,8 @@ class ShaderGroupView: NSTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         if let key = group.key {
-            shader.set(key: key, enable: sender.state == .on)
+            // shader.set(key: key, enable: sender.state == .on)
+            group.value = sender.state == .on ? 1 : 0
         }
         if sender.state == .on {
             controller.outlineView.expandItem(group)
@@ -94,7 +96,7 @@ class ShaderSettingView: NSTableCellView {
         didSet {
 
             let enableKey = shaderSetting.enableKey
-            let enabled = enableKey == nil ? true : shader.get(key: enableKey!) != 0
+            // let enabled = enableKey == nil ? true : shader.get(key: enableKey!) != 0
             let active = !shaderSetting.hidden // !shader.isHidden(key: shaderSetting.key)
 
             optionLabel.stringValue = shaderSetting.name

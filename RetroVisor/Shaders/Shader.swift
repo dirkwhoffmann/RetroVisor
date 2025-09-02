@@ -37,11 +37,17 @@ class ShaderSetting {
     // Indicates if this options should be hidden from the user
     var hidden = false
 
+    private let getter: (() -> Float)?
+    private let setter: ((Float) -> Void)?
+    
     var formatString: String { "%.3g" }
 
     init(name: String, enableKey: String? = nil, key: String, index: Int = 0,
          range: ClosedRange<Double>? = nil, step: Float = 0.01,
-         values: [(String,Int)]? = nil, help: String? = nil) {
+         values: [(String,Int)]? = nil, help: String? = nil,
+         get: (() -> Float)? = nil,
+         set: ((Float) -> Void)? = nil
+        ) {
 
         self.name = name
         self.key = key
@@ -51,6 +57,13 @@ class ShaderSetting {
         self.step = step
         self.values = values
         self.help = help
+        self.getter = get
+        self.setter = set
+    }
+    
+    var value: Float {
+        get { getter?() ?? 0 }
+        set { setter?(newValue) }
     }
 }
 
@@ -68,13 +81,26 @@ class ShaderSettingGroup {
     // The NSTableCellView associated with this group
     var view: ShaderGroupView?
 
+    private let getter: (() -> Float)?
+    private let setter: ((Float) -> Void)?
+
     var count: Int { children.filter { $0.hidden == false }.count }
 
-    init(title: String, key: String? = nil, _ children: [ShaderSetting]) {
+    init(title: String, key: String? = nil,
+         get: (() -> Float)? = nil,
+         set: ((Float) -> Void)? = nil,
+         _ children: [ShaderSetting]) {
 
         self.title = title
         self.key = key
         self.children = children
+        self.getter = get
+        self.setter = set
+    }
+    
+    var value: Float {
+        get { getter?() ?? 0 }
+        set { setter?(newValue) }
     }
 }
 
@@ -82,8 +108,6 @@ class ShaderSettingGroup {
 class Shader : Loggable {
 
     static var device: MTLDevice { MTLCreateSystemDefaultDevice()! }
-    // static var bilinear: Shader = BilinearShader()
-    // static var lanczos: Shader = LanczosShader()
 
     // Enables debug output to the console
     let logging: Bool = false
@@ -115,10 +139,28 @@ class Shader : Loggable {
     }
 
     // Get or sets the value of a shader option
-    func get(key: String, index: Int = 0) -> Float { NSSound.beep(); return 0 }
-    func set(key: String, index: Int = 0, value: Float) { NSSound.beep() }
-    func set(key: String, index: Int = 0, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
-    func set(key: String, index: Int = 0, item: Int) { set(key: key, value: Float(item)) }
+    func get(key: String) -> Float { // DEPRECATED
+    
+        if let setting = findSetting(key: key) {
+            return setting.value
+        } else {
+            print("Invalid key: \(key)")
+            fatalError()
+        }
+    }
+        
+    func set(key: String, value: Float) { // DEPRECATED
+        
+        if let setting = findSetting(key: key) {
+            setting.value = value
+        } else {
+            print("Invalid key: \(key)")
+            fatalError()
+        }
+    }
+    
+    func set(key: String, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
+    func set(key: String, item: Int) { set(key: key, value: Float(item)) }
 
     func setHidden(key: String, value: Bool) {
         if let setting = findSetting(key: key) { setting.hidden = value }

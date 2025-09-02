@@ -398,7 +398,7 @@ final class PlaygroundShader: Shader {
          ]
     }
 
-    override func get(key: String, index: Int = 0) -> Float {
+    override func get(key: String) -> Float {
 
         switch key {
 
@@ -451,7 +451,7 @@ final class PlaygroundShader: Shader {
         }
     }
 
-    override func set(key: String, index: Int = 0, value: Float) {
+    override func set(key: String, value: Float) {
 
         switch key {
 

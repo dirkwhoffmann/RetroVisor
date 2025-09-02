@@ -67,65 +67,75 @@ final class PassthroughShader: Shader {
                     name: "Input Downscaling Factor",
                     key: "INPUT_TEX_SCALE",
                     range: 0.125...1.0,
-                    step: 0.125
+                    step: 0.125,
+                    get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
+                    set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 }
                 ),
-
-                /*
-                ShaderSetting(
-                    name: "Output Upscaling Factor",
-                    key: "OUTPUT_TEX_SCALE",
-                    range: 1.0...2.0,
-                    step: 0.125
-                ),
-                */
                 
                 ShaderSetting(
                     name: "Resampler",
                     key: "RESAMPLE_FILTER",
-                    values: [("BILINEAR", 0), ("LANCZOS", 1)]
+                    values: [("BILINEAR", 0), ("LANCZOS", 1)],
+                    get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER.rawValue) },
+                    set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = ResampleFilterType($0)! }
+
                 ),
             ]),
 
-            ShaderSettingGroup(title: "Filter", key: "BLUR_ENABLE", [
+            ShaderSettingGroup(title: "Filter",
+                               key: "BLUR_ENABLE",
+                               get: { [unowned self] in Float(self.uniforms.BLUR_ENABLE) },
+                               set: { [unowned self] in self.uniforms.BLUR_ENABLE = Int32($0) }, [
 
                 ShaderSetting(
                     name: "Blur Filter",
                     key: "BLUR_FILTER",
-                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
+                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
+                    get: { [unowned self] in self.uniforms.BLUR_FILTER.floatValue },
+                    set: { [unowned self] in self.uniforms.BLUR_FILTER = BlurFilterType($0)! }
                 ),
 
                 ShaderSetting(
                     name: "Blur width",
                     key: "BLUR_RADIUS_X",
                     range: 0.1...20.0,
-                    step: 0.1
+                    step: 0.1,
+                    get: { [unowned self] in self.uniforms.BLUR_RADIUS_X },
+                    set: { [unowned self] in self.uniforms.BLUR_RADIUS_X = $0 }
                 ),
 
                 ShaderSetting(
                     name: "Blur height",
                     key: "BLUR_RADIUS_Y",
                     range: 0.1...20.0,
-                    step: 0.1
+                    step: 0.1,
+                    get: { [unowned self] in self.uniforms.BLUR_RADIUS_Y },
+                    set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 }
                 ),
 
                 ShaderSetting(
                     name: "Scale X",
                     key: "RESAMPLE_SCALE_X",
                     range: 0.1...1.0,
-                    step: 0.01
+                    step: 0.01,
+                    get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X },
+                    set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X = $0 }
                 ),
 
                 ShaderSetting(
                     name: "Scale Y",
                     key: "RESAMPLE_SCALE_Y",
                     range: 0.1...1.0,
-                    step: 0.01
+                    step: 0.01,
+                    get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y },
+                    set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y = $0 }
                 )
             ])
         ]
     }
 
-    override func get(key: String, index: Int = 0) -> Float {
+    /*
+    override func get(key: String) -> Float {
 
         switch key {
 
@@ -144,9 +154,12 @@ final class PassthroughShader: Shader {
             return super.get(key: key)
         }
     }
-
-    override func set(key: String, index: Int = 0, value: Float) {
-
+    */
+    
+    override func set(key: String, value: Float) {
+        
+        super.set(key: key, value: value)
+        /*
         switch key {
 
         case "RESAMPLE_FILTER":     uniforms.RESAMPLE_FILTER = ResampleFilterType(value)!
@@ -163,7 +176,8 @@ final class PassthroughShader: Shader {
         default:
             super.set(key: key, value: value)
         }
-
+        */
+        
         setHidden(key: "BLUR_RADIUS_Y",
                   value: get(key: "BLUR_FILTER") == BlurFilterType.gaussian.floatValue)
     }
