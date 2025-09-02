@@ -9,6 +9,18 @@
 
 import AppKit
 
+extension Bool {
+
+    init(_ value: Int32) { self = value > 0 }
+    var floatValue: Float { self ? 1.0 : 0.0 }
+}
+
+extension Int32 {
+    
+    init(_ value: Bool) { self = value ? 1 : 0 }
+    var boolValue: Bool { self > 0 }
+}
+
 extension UInt32 {
 
     init(rgba: (UInt8, UInt8, UInt8, UInt8)) {
@@ -32,6 +44,8 @@ extension UInt32 {
 
 extension Float {
 
+    var boolValue: Bool { self == 0.0 ? true : false }
+    
     func formatted(min: Int, max: Int) -> String {
 
         var s = String(format: "%.0\(max)f", self)

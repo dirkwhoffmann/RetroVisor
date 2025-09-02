@@ -17,7 +17,7 @@ final class DraculaShader: Shader {
         
         var INPUT_TEX_SCALE: Float
         var OUTPUT_TEX_SCALE: Float
-        var RESAMPLE_FILTER: ResampleFilterType
+        var RESAMPLE_FILTER: Int32
         
         var PAL: Int32
         var GAMMA_INPUT: Float
@@ -25,7 +25,7 @@ final class DraculaShader: Shader {
         var CHROMA_RADIUS: Float
         
         var BLOOM_ENABLE: Int32
-        var BLOOM_FILTER: BlurFilterType
+        var BLOOM_FILTER: Int32
         var BLOOM_THRESHOLD: Float
         var BLOOM_INTENSITY: Float
         var BLOOM_RADIUS_X: Float
@@ -54,7 +54,7 @@ final class DraculaShader: Shader {
             
             INPUT_TEX_SCALE: 0.5,
             OUTPUT_TEX_SCALE: 2.0,
-            RESAMPLE_FILTER: .bilinear,
+            RESAMPLE_FILTER: ResampleFilterType.bilinear.rawValue,
             
             PAL: 0,
             GAMMA_INPUT: 2.2,
@@ -62,7 +62,7 @@ final class DraculaShader: Shader {
             CHROMA_RADIUS: 1.3,
             
             BLOOM_ENABLE: 0,
-            BLOOM_FILTER: .box,
+            BLOOM_FILTER: BlurFilterType.box.rawValue,
             BLOOM_THRESHOLD: 0.7,
             BLOOM_INTENSITY: 1.0,
             BLOOM_RADIUS_X: 5,
@@ -142,6 +142,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Input Downscaling Factor",
                     key: "INPUT_TEX_SCALE",
+                    get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
+                    set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 },
                     range: 0.125...1.0,
                     step: 0.125
                 ),
@@ -149,6 +151,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Output Upscaling Factor",
                     key: "OUTPUT_TEX_SCALE",
+                    get: { [unowned self] in self.uniforms.OUTPUT_TEX_SCALE },
+                    set: { [unowned self] in self.uniforms.OUTPUT_TEX_SCALE = $0 },
                     range: 1.0...2.0,
                     step: 0.125
                 ),
@@ -156,6 +160,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Resampler",
                     key: "RESAMPLE_FILTER",
+                    get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
+                    set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) },
                     values: [("BILINEAR", 0), ("LANCZOS", 1)]
                 ),
 
@@ -166,12 +172,16 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Video Standard",
                     key: "PAL",
+                    get: { [unowned self] in Float(self.uniforms.PAL) },
+                    set: { [unowned self] in self.uniforms.PAL = Int32($0) },
                     values: [("PAL", 1), ("NTSC", 0)]
                 ),
 
                 ShaderSetting(
                     name: "Gamma Input",
                     key: "GAMMA_INPUT",
+                    get: { [unowned self] in self.uniforms.GAMMA_INPUT },
+                    set: { [unowned self] in self.uniforms.GAMMA_INPUT = $0 },
                     range: 0.1...5.0,
                     step: 0.1
                 ),
@@ -179,6 +189,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Gamma Output",
                     key: "GAMMA_OUTPUT",
+                    get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
+                    set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 },
                     range: 0.1...5.0,
                     step: 0.1
                 ),
@@ -186,6 +198,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Chroma Radius",
                     key: "CHROMA_RADIUS",
+                    get: { [unowned self] in self.uniforms.CHROMA_RADIUS },
+                    set: { [unowned self] in self.uniforms.CHROMA_RADIUS = $0 },
                     range: 1...10,
                     step: 1
                 ),
@@ -196,12 +210,16 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Bloom Filter",
                     key: "BLOOM_FILTER",
+                    get: { [unowned self] in Float(self.uniforms.BLOOM_FILTER) },
+                    set: { [unowned self] in self.uniforms.BLOOM_FILTER = Int32($0) },
                     values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)]
                 ),
 
                 ShaderSetting(
                     name: "Bloom Threshold",
                     key: "BLOOM_THRESHOLD",
+                    get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD },
+                    set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD = $0 },
                     range: 0.0...1.0,
                     step: 0.01
                 ),
@@ -209,6 +227,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Bloom Intensity",
                     key: "BLOOM_INTENSITY",
+                    get: { [unowned self] in self.uniforms.BLOOM_INTENSITY },
+                    set: { [unowned self] in self.uniforms.BLOOM_INTENSITY = $0 },
                     range: 0.1...2.0,
                     step: 0.01
                 ),
@@ -216,6 +236,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Bloom Radius X",
                     key: "BLOOM_RADIUS_X",
+                    get: { [unowned self] in self.uniforms.BLOOM_RADIUS_X },
+                    set: { [unowned self] in self.uniforms.BLOOM_RADIUS_X = $0 },
                     range: 0.0...30.0,
                     step: 1.0
                 ),
@@ -223,6 +245,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Bloom Radius Y",
                     key: "BLOOM_RADIUS_Y",
+                    get: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y },
+                    set: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y = $0 },
                     range: 0.0...30.0,
                     step: 1.0
                 ),
@@ -233,6 +257,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Scanline Distance",
                     key: "SCANLINE_DISTANCE",
+                    get: { [unowned self] in self.uniforms.SCANLINE_DISTANCE },
+                    set: { [unowned self] in self.uniforms.SCANLINE_DISTANCE = $0 },
                     range: 0...10,
                     step: 1
                 ),
@@ -240,6 +266,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Scanline Weight",
                     key: "SCANLINE_WEIGHT",
+                    get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT },
+                    set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT = $0 },
                     range: 0.0...1.0,
                     step: 0.01
                 ),
@@ -247,6 +275,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Scanline Brightness",
                     key: "SCANLINE_BRIGHTNESS",
+                    get: { [unowned self] in self.uniforms.SCANLINE_BRIGHTNESS },
+                    set: { [unowned self] in self.uniforms.SCANLINE_BRIGHTNESS = $0 },
                     range: 0.0...1.0,
                     step: 0.01
                 ),
@@ -257,6 +287,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Type",
                     key: "DOTMASK_TYPE",
+                    get: { [unowned self] in Float(self.uniforms.DOTMASK_TYPE) },
+                    set: { [unowned self] in self.uniforms.DOTMASK_TYPE = Int32($0) },
                     values: [ ("Add", 0),
                               ("Blend", 1),
                               ("Shift", 2) ]
@@ -265,6 +297,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Width",
                     key: "DOTMASK_WIDTH",
+                    get: { [unowned self] in self.uniforms.DOTMASK_WIDTH },
+                    set: { [unowned self] in self.uniforms.DOTMASK_WIDTH = $0 },
                     range: 3.0...15.0,
                     step: 1.0
                 ),
@@ -272,6 +306,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Weight",
                     key: "DOTMASK_WEIGHT",
+                    get: { [unowned self] in self.uniforms.DOTMASK_WEIGHT },
+                    set: { [unowned self] in self.uniforms.DOTMASK_WEIGHT = $0 },
                     range: 0.0...2.0,
                     step: 0.01
                 ),
@@ -279,6 +315,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Weight 2",
                     key: "DOTMASK_WEIGHT2",
+                    get: { [unowned self] in self.uniforms.DOTMASK_WEIGHT2 },
+                    set: { [unowned self] in self.uniforms.DOTMASK_WEIGHT2 = $0 },
                     range: 0.0...2.0,
                     step: 0.01
                 ),
@@ -286,6 +324,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Shift",
                     key: "DOTMASK_SHIFT",
+                    get: { [unowned self] in self.uniforms.DOTMASK_SHIFT },
+                    set: { [unowned self] in self.uniforms.DOTMASK_SHIFT = $0 },
                     range: 0.0...1.0,
                     step: 0.01
                 ),
@@ -293,6 +333,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Brightness",
                     key: "DOTMASK_BRIGHTNESS",
+                    get: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS },
+                    set: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS = $0 },
                     range: 0...1,
                     step: 0.01
                 ),
@@ -300,6 +342,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Brightness 2",
                     key: "DOTMASK_BRIGHTNESS2",
+                    get: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS2 },
+                    set: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS2 = $0 },
                     range: 0...5,
                     step: 0.01
                 ),
@@ -307,6 +351,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Dotmask Saturation",
                     key: "DOTMASK_SATURATION",
+                    get: { [unowned self] in self.uniforms.DOTMASK_SATURATION },
+                    set: { [unowned self] in self.uniforms.DOTMASK_SATURATION = $0 },
                     range: 0...1,
                     step: 0.01
                 )
@@ -317,6 +363,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Debug",
                     key: "DEBUG_TEXTURE",
+                    get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE) },
+                    set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) },
                     values: [ ("Ycc", 1),
                               ("Ycc (Mipmap 1)", 2),
                               ("Ycc (Mipmap 2)", 3),
@@ -331,6 +379,8 @@ final class DraculaShader: Shader {
                 ShaderSetting(
                     name: "Debug Slider",
                     key: "DEBUG_SLIDER",
+                    get: { [unowned self] in self.uniforms.DEBUG_SLIDER },
+                    set: { [unowned self] in self.uniforms.DEBUG_SLIDER = $0 },
                     range: 0.0...1.0,
                     step: 0.01
                 )
@@ -345,7 +395,7 @@ final class DraculaShader: Shader {
 
         case "INPUT_TEX_SCALE":     return uniforms.INPUT_TEX_SCALE
         case "OUTPUT_TEX_SCALE":    return uniforms.OUTPUT_TEX_SCALE
-        case "RESAMPLE_FILTER":     return Float(uniforms.RESAMPLE_FILTER.rawValue)
+        case "RESAMPLE_FILTER":     return Float(uniforms.RESAMPLE_FILTER)
             
         case "PAL":                 return Float(uniforms.PAL)
         case "GAMMA_INPUT":         return uniforms.GAMMA_INPUT
@@ -353,7 +403,7 @@ final class DraculaShader: Shader {
         case "CHROMA_RADIUS":       return uniforms.CHROMA_RADIUS
 
         case "BLOOM_ENABLE":        return Float(uniforms.BLOOM_ENABLE)
-        case "BLOOM_FILTER":        return Float(uniforms.BLOOM_FILTER.rawValue)
+        case "BLOOM_FILTER":        return Float(uniforms.BLOOM_FILTER)
         case "BLOOM_THRESHOLD":     return uniforms.BLOOM_THRESHOLD
         case "BLOOM_INTENSITY":     return uniforms.BLOOM_INTENSITY
         case "BLOOM_RADIUS_X":      return uniforms.BLOOM_RADIUS_X
@@ -391,7 +441,7 @@ final class DraculaShader: Shader {
 
         case "INPUT_TEX_SCALE":     uniforms.INPUT_TEX_SCALE = value
         case "OUTPUT_TEX_SCALE":    uniforms.OUTPUT_TEX_SCALE = value
-        case "RESAMPLE_FILTER":     uniforms.RESAMPLE_FILTER = ResampleFilterType(value)!
+        case "RESAMPLE_FILTER":     uniforms.RESAMPLE_FILTER = Int32(value)
 
         case "PAL":                 uniforms.PAL = Int32(value)
         case "GAMMA_INPUT":         uniforms.GAMMA_INPUT = value
@@ -399,7 +449,7 @@ final class DraculaShader: Shader {
         case "CHROMA_RADIUS":       uniforms.CHROMA_RADIUS = value
 
         case "BLOOM_ENABLE":        uniforms.BLOOM_ENABLE = Int32(value)
-        case "BLOOM_FILTER":        uniforms.BLOOM_FILTER = BlurFilterType(rawValue: Int32(value))!
+        case "BLOOM_FILTER":        uniforms.BLOOM_FILTER = Int32(value)
         case "BLOOM_THRESHOLD":     uniforms.BLOOM_THRESHOLD = value
         case "BLOOM_INTENSITY":     uniforms.BLOOM_INTENSITY = value
         case "BLOOM_RADIUS_X":      uniforms.BLOOM_RADIUS_X = value
@@ -479,7 +529,7 @@ final class DraculaShader: Shader {
         // Pass 1: Crop and downsample the input area
         //
 
-        resampler.type = uniforms.RESAMPLE_FILTER
+        resampler.type = ResampleFilterType(rawValue: uniforms.RESAMPLE_FILTER)!
         resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
 
         //
@@ -523,7 +573,7 @@ final class DraculaShader: Shader {
         // Pass 4: Create the bloom texture
         //
 
-        blurFilter.blurType = uniforms.BLOOM_FILTER
+        blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLOOM_FILTER)!
         blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
         blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
         blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)

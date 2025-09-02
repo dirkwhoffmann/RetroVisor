@@ -64,10 +64,12 @@ class ShaderGroupView: NSTableCellView {
 
     @IBAction func enableAction(_ sender: NSButton) {
 
-        if let key = group.key {
-            // shader.set(key: key, enable: sender.state == .on)
-            group.value = sender.state == .on ? 1 : 0
+        group.value = sender.state == .on ? 1 : 0
+        /*
+        if group.key != nil {
+            shader.set(key: key, enable: sender.state == .on)
         }
+        */
         if sender.state == .on {
             controller.outlineView.expandItem(group)
         } else {
@@ -95,14 +97,14 @@ class ShaderSettingView: NSTableCellView {
 
         didSet {
 
-            let enableKey = shaderSetting.enableKey
-            // let enabled = enableKey == nil ? true : shader.get(key: enableKey!) != 0
+            // let enableKey = shaderSetting.enableKey
+            let enabled = shaderSetting.enabled == true //  enableKey == nil ? true : shader.get(key: enableKey!) != 0
             let active = !shaderSetting.hidden // !shader.isHidden(key: shaderSetting.key)
 
             optionLabel.stringValue = shaderSetting.name
             subLabel.stringValue = shaderSetting.key
             helpButtom.isHidden = shaderSetting.help == nil
-            optCeckbox.isHidden = shaderSetting.enableKey == nil
+            optCeckbox.isHidden = shaderSetting.enabled == nil //  shaderSetting.enableKey == nil
 
             optionLabel.textColor = active ? .textColor : .disabledControlTextColor
             subLabel.textColor = active ? .textColor : .disabledControlTextColor

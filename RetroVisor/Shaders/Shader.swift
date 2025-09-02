@@ -17,9 +17,6 @@ class ShaderSetting {
 
     // Primary key for the value of this setting
     let key: String
-
-    // Optional index for keys that represent array elements
-    let index: Int
     
     // Secondary key if the setting has an additional enable switch
     let enableKey: String?
@@ -37,30 +34,41 @@ class ShaderSetting {
     // Indicates if this options should be hidden from the user
     var hidden = false
 
+    private let getEnable: (() -> Bool)?
+    private let setEnable: ((Bool) -> Void)?
     private let getter: (() -> Float)?
     private let setter: ((Float) -> Void)?
-    
+        
     var formatString: String { "%.3g" }
 
-    init(name: String, enableKey: String? = nil, key: String, index: Int = 0,
-         range: ClosedRange<Double>? = nil, step: Float = 0.01,
-         values: [(String,Int)]? = nil, help: String? = nil,
+    init(name: String,
+         enableKey: String? = nil,
+         getEnable: (() -> Bool)? = nil,
+         setEnable: ((Bool) -> Void)? = nil,
+         key: String,
          get: (() -> Float)? = nil,
-         set: ((Float) -> Void)? = nil
+         set: ((Float) -> Void)? = nil,
+         range: ClosedRange<Double>? = nil, step: Float = 0.01,
+         values: [(String,Int)]? = nil, help: String? = nil
         ) {
 
         self.name = name
         self.key = key
-        self.index = index
         self.enableKey = enableKey
         self.range = range
         self.step = step
         self.values = values
         self.help = help
+        self.getEnable = getEnable
+        self.setEnable = setEnable
         self.getter = get
         self.setter = set
     }
     
+    var enabled: Bool? {
+        get { getEnable?() ?? nil }
+        set { setEnable?(newValue ?? false) }
+    }
     var value: Float {
         get { getter?() ?? 0 }
         set { setter?(newValue) }

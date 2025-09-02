@@ -66,19 +66,18 @@ final class PassthroughShader: Shader {
                 ShaderSetting(
                     name: "Input Downscaling Factor",
                     key: "INPUT_TEX_SCALE",
+                    get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
+                    set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 },
                     range: 0.125...1.0,
                     step: 0.125,
-                    get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
-                    set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 }
                 ),
                 
                 ShaderSetting(
                     name: "Resampler",
                     key: "RESAMPLE_FILTER",
-                    values: [("BILINEAR", 0), ("LANCZOS", 1)],
                     get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER.rawValue) },
-                    set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = ResampleFilterType($0)! }
-
+                    set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = ResampleFilterType($0)! },
+                    values: [("BILINEAR", 0), ("LANCZOS", 1)],
                 ),
             ]),
 
@@ -90,45 +89,45 @@ final class PassthroughShader: Shader {
                 ShaderSetting(
                     name: "Blur Filter",
                     key: "BLUR_FILTER",
-                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                     get: { [unowned self] in self.uniforms.BLUR_FILTER.floatValue },
-                    set: { [unowned self] in self.uniforms.BLUR_FILTER = BlurFilterType($0)! }
+                    set: { [unowned self] in self.uniforms.BLUR_FILTER = BlurFilterType($0)! },
+                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                 ),
 
                 ShaderSetting(
                     name: "Blur width",
                     key: "BLUR_RADIUS_X",
-                    range: 0.1...20.0,
-                    step: 0.1,
                     get: { [unowned self] in self.uniforms.BLUR_RADIUS_X },
-                    set: { [unowned self] in self.uniforms.BLUR_RADIUS_X = $0 }
+                    set: { [unowned self] in self.uniforms.BLUR_RADIUS_X = $0 },
+                    range: 0.1...20.0,
+                    step: 0.1
                 ),
 
                 ShaderSetting(
                     name: "Blur height",
                     key: "BLUR_RADIUS_Y",
-                    range: 0.1...20.0,
-                    step: 0.1,
                     get: { [unowned self] in self.uniforms.BLUR_RADIUS_Y },
-                    set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 }
+                    set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 },
+                    range: 0.1...20.0,
+                    step: 0.1
                 ),
 
                 ShaderSetting(
                     name: "Scale X",
                     key: "RESAMPLE_SCALE_X",
-                    range: 0.1...1.0,
-                    step: 0.01,
                     get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X },
-                    set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X = $0 }
+                    set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X = $0 },
+                    range: 0.1...1.0,
+                    step: 0.01
                 ),
 
                 ShaderSetting(
                     name: "Scale Y",
                     key: "RESAMPLE_SCALE_Y",
-                    range: 0.1...1.0,
-                    step: 0.01,
                     get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y },
-                    set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y = $0 }
+                    set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y = $0 },
+                    range: 0.1...1.0,
+                    step: 0.01
                 )
             ])
         ]

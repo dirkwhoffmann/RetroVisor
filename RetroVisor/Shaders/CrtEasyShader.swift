@@ -56,7 +56,7 @@ struct CrtUniforms {
 final class CRTEasyShader: Shader {
 
     var kernel: Kernel!
-    var crtUniforms: CrtUniforms = .defaults
+    var uniforms: CrtUniforms = .defaults
 
     // Input texture passed to the CRTEasy kernel
     var src: MTLTexture!
@@ -72,171 +72,190 @@ final class CRTEasyShader: Shader {
                 ShaderSetting(
                     name: "Brightness Boost",
                     key: "BRIGHT_BOOST",
+                    get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
+                    set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 },
                     range: 0.0...2.0,
-                    step: 0.01,
-                    help: nil
+                    step: 0.01
                 ),
 
                 ShaderSetting(
                     name: "Horizontal Sharpness",
                     key: "SHARPNESS_H",
+                    get: { [unowned self] in self.uniforms.SHARPNESS_H },
+                    set: { [unowned self] in self.uniforms.SHARPNESS_H = $0 },
                     range: 0.0...1.0,
-                    step: 0.05,
-                    help: nil
+                    step: 0.05
                 ),
 
                 ShaderSetting(
                     name: "Vertical Sharpness",
                     key: "SHARPNESS_V",
+                    get: { [unowned self] in self.uniforms.SHARPNESS_V },
+                    set: { [unowned self] in self.uniforms.SHARPNESS_V = $0 },
                     range: 0.0...1.0,
-                    step: 0.05,
-                    help: nil
+                    step: 0.05
                 ),
 
                 ShaderSetting(
                     name: "Dilation",
                     key: "DILATION",
+                    get: { [unowned self] in self.uniforms.DILATION },
+                    set: { [unowned self] in self.uniforms.DILATION = $0 },
                     range: 0.0...1.0,
-                    step: 0.05,
-                    help: nil
+                    step: 0.05
                 ),
 
                 ShaderSetting(
                     name: "Gamma Input",
                     key: "GAMMA_INPUT",
+                    get: { [unowned self] in self.uniforms.GAMMA_INPUT },
+                    set: { [unowned self] in self.uniforms.GAMMA_INPUT = $0 },
                     range: 0.1...5.0,
-                    step: 0.1,
-                    help: nil
+                    step: 0.1
                 ),
 
                 ShaderSetting(
                     name: "Gamma Output",
                     key: "GAMMA_OUTPUT",
+                    get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
+                    set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 },
                     range: 0.1...5.0,
-                    step: 0.1,
-                    help: nil
+                    step: 0.1
                 ),
 
                 ShaderSetting(
                     name: "Dot Mask Strength",
                     key: "MASK_STRENGTH",
+                    get: { [unowned self] in self.uniforms.MASK_STRENGTH },
+                    set: { [unowned self] in self.uniforms.MASK_STRENGTH = $0 },
                     range: 0.0...1.0,
-                    step: 0.01,
-                    help: nil
+                    step: 0.01
                 ),
 
                 ShaderSetting(
                     name: "Dot Mask Width",
                     key: "MASK_DOT_WIDTH",
+                    get: { [unowned self] in self.uniforms.MASK_DOT_WIDTH },
+                    set: { [unowned self] in self.uniforms.MASK_DOT_WIDTH = $0 },
                     range: 1.0...100.0,
-                    step: 1.0,
-                    help: nil
+                    step: 1.0
                 ),
 
                 ShaderSetting(
                     name: "Dot Mask Height",
                     key: "MASK_DOT_HEIGHT",
+                    get: { [unowned self] in self.uniforms.MASK_DOT_HEIGHT },
+                    set: { [unowned self] in self.uniforms.MASK_DOT_HEIGHT = $0 },
                     range: 1.0...100.0,
-                    step: 1.0,
-                    help: nil
+                    step: 1.0
                 ),
 
                 ShaderSetting(
                     name: "Dot Mask Stagger",
                     key: "MASK_STAGGER",
+                    get: { [unowned self] in self.uniforms.MASK_STAGGER },
+                    set: { [unowned self] in self.uniforms.MASK_STAGGER = $0 },
                     range: 0.0...100.0,
-                    step: 1.0,
-                    help: nil
+                    step: 1.0
                 ),
 
                 ShaderSetting(
                     name: "Dot Mask Size",
                     key: "MASK_SIZE",
+                    get: { [unowned self] in self.uniforms.MASK_SIZE },
+                    set: { [unowned self] in self.uniforms.MASK_SIZE = $0 },
                     range: 1.0...100.0,
-                    step: 1.0,
-                    help: nil
+                    step: 1.0
                 ),
 
                 ShaderSetting(
                     name: "Scanline Strength",
                     key: "SCANLINE_STRENGTH",
+                    get: { [unowned self] in self.uniforms.SCANLINE_STRENGTH },
+                    set: { [unowned self] in self.uniforms.SCANLINE_STRENGTH = $0 },
                     range: 0.0...1.0,
-                    step: 0.05,
-                    help: nil
+                    step: 0.05
                 ),
 
                 ShaderSetting(
                     name: "Scanline Minimum Beam Width",
                     key: "SCANLINE_BEAM_WIDTH_MIN",
+                    get: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MIN },
+                    set: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MIN = $0 },
                     range: 0.5...5.0,
-                    step: 0.5,
-                    help: nil
+                    step: 0.5
                 ),
 
                 ShaderSetting(
                     name: "Scanline Maximum Beam Width",
                     key: "SCANLINE_BEAM_WIDTH_MAX",
+                    get: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MAX },
+                    set: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MAX = $0 },
                     range: 0.5...5.0,
-                    step: 0.5,
-                    help: nil
+                    step: 0.5
                 ),
 
                 ShaderSetting(
                     name: "Scanline Minimum Brightness",
-                    key: "SCANLINE_BRIGHT_MIN",
+                    key: "SCANLINE_BEAM_WIDTH_MAX",
+                    get: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MAX },
+                    set: { [unowned self] in self.uniforms.SCANLINE_BEAM_WIDTH_MAX = $0 },
                     range: 0.0...1.0,
-                    step: 0.05,
-                    help: nil
+                    step: 0.05
                 ),
 
                 ShaderSetting(
                     name: "Scanline Maximum Brightness",
                     key: "SCANLINE_BRIGHT_MAX",
+                    get: { [unowned self] in self.uniforms.SCANLINE_BRIGHT_MAX },
+                    set: { [unowned self] in self.uniforms.SCANLINE_BRIGHT_MAX = $0 },
                     range: 0.0...1.0,
-                    step: 0.05,
-                    help: nil
+                    step: 0.05
                 ),
 
                 ShaderSetting(
                     name: "Scanline Cutoff",
                     key: "SCANLINE_CUTOFF",
+                    get: { [unowned self] in self.uniforms.SCANLINE_CUTOFF },
+                    set: { [unowned self] in self.uniforms.SCANLINE_CUTOFF = $0 },
                     range: 1.0...1000.0,
-                    step: 1.0,
-                    help: nil
+                    step: 1.0
                 ),
 
                 ShaderSetting(
                     name: "Lanczos Filter",
                     key: "ENABLE_LANCZOS",
+                    get: { [unowned self] in Float(self.uniforms.ENABLE_LANCZOS) },
+                    set: { [unowned self] in self.uniforms.ENABLE_LANCZOS = Int32($0) },
                     range: nil,
-                    step: 1.0,
-                    help: nil
+                    step: 1.0
                 ),
             ])
         ]
     }
 
+    /*
     override func get(key: String) -> Float {
 
         switch key {
-        case "BRIGHT_BOOST": return crtUniforms.BRIGHT_BOOST
-        case "DILATION": return crtUniforms.DILATION
-        case "GAMMA_INPUT": return crtUniforms.GAMMA_INPUT
-        case "GAMMA_OUTPUT": return crtUniforms.GAMMA_OUTPUT
-        case "MASK_SIZE": return crtUniforms.MASK_SIZE
-        case "MASK_STAGGER": return crtUniforms.MASK_STAGGER
-        case "MASK_STRENGTH": return crtUniforms.MASK_STRENGTH
-        case "MASK_DOT_WIDTH": return crtUniforms.MASK_DOT_WIDTH
-        case "MASK_DOT_HEIGHT": return crtUniforms.MASK_DOT_HEIGHT
-        case "SCANLINE_BEAM_WIDTH_MAX": return crtUniforms.SCANLINE_BEAM_WIDTH_MAX
-        case "SCANLINE_BEAM_WIDTH_MIN": return crtUniforms.SCANLINE_BEAM_WIDTH_MIN
-        case "SCANLINE_BRIGHT_MAX": return crtUniforms.SCANLINE_BRIGHT_MAX
-        case "SCANLINE_BRIGHT_MIN": return crtUniforms.SCANLINE_BRIGHT_MIN
-        case "SCANLINE_CUTOFF": return crtUniforms.SCANLINE_CUTOFF
-        case "SCANLINE_STRENGTH": return crtUniforms.SCANLINE_STRENGTH
-        case "SHARPNESS_H": return crtUniforms.SHARPNESS_H
-        case "SHARPNESS_V": return crtUniforms.SHARPNESS_V
-        case "ENABLE_LANCZOS": return Float(crtUniforms.ENABLE_LANCZOS)
+        case "BRIGHT_BOOST": return uniforms.BRIGHT_BOOST
+        case "DILATION": return uniforms.DILATION
+        case "GAMMA_INPUT": return uniforms.GAMMA_INPUT
+        case "GAMMA_OUTPUT": return uniforms.GAMMA_OUTPUT
+        case "MASK_SIZE": return uniforms.MASK_SIZE
+        case "MASK_STAGGER": return uniforms.MASK_STAGGER
+        case "MASK_STRENGTH": return uniforms.MASK_STRENGTH
+        case "MASK_DOT_WIDTH": return uniforms.MASK_DOT_WIDTH
+        case "MASK_DOT_HEIGHT": return uniforms.MASK_DOT_HEIGHT
+        case "SCANLINE_BEAM_WIDTH_MAX": return uniforms.SCANLINE_BEAM_WIDTH_MAX
+        case "SCANLINE_BEAM_WIDTH_MIN": return uniforms.SCANLINE_BEAM_WIDTH_MIN
+        case "SCANLINE_BRIGHT_MAX": return uniforms.SCANLINE_BRIGHT_MAX
+        case "SCANLINE_BRIGHT_MIN": return uniforms.SCANLINE_BRIGHT_MIN
+        case "SCANLINE_CUTOFF": return uniforms.SCANLINE_CUTOFF
+        case "SCANLINE_STRENGTH": return uniforms.SCANLINE_STRENGTH
+        case "SHARPNESS_H": return uniforms.SHARPNESS_H
+        case "SHARPNESS_V": return uniforms.SHARPNESS_V
+        case "ENABLE_LANCZOS": return Float(uniforms.ENABLE_LANCZOS)
 
         default:
             NSSound.beep()
@@ -247,30 +266,31 @@ final class CRTEasyShader: Shader {
     override func set(key: String, value: Float) {
 
         switch key {
-        case "BRIGHT_BOOST": crtUniforms.BRIGHT_BOOST = value
-        case "DILATION": crtUniforms.DILATION = value
-        case "GAMMA_INPUT": crtUniforms.GAMMA_INPUT = value
-        case "GAMMA_OUTPUT": crtUniforms.GAMMA_OUTPUT = value
-        case "MASK_SIZE": crtUniforms.MASK_SIZE = value
-        case "MASK_STAGGER": crtUniforms.MASK_STAGGER = value
-        case "MASK_STRENGTH": crtUniforms.MASK_STRENGTH = value
-        case "MASK_DOT_WIDTH": crtUniforms.MASK_DOT_WIDTH = value
-        case "MASK_DOT_HEIGHT": crtUniforms.MASK_DOT_HEIGHT = value
-        case "SCANLINE_BEAM_WIDTH_MAX": crtUniforms.SCANLINE_BEAM_WIDTH_MAX = value
-        case "SCANLINE_BEAM_WIDTH_MIN": crtUniforms.SCANLINE_BEAM_WIDTH_MIN = value
-        case "SCANLINE_BRIGHT_MAX": crtUniforms.SCANLINE_BRIGHT_MAX = value
-        case "SCANLINE_BRIGHT_MIN": crtUniforms.SCANLINE_BRIGHT_MIN = value
-        case "SCANLINE_CUTOFF": crtUniforms.SCANLINE_CUTOFF = value
-        case "SCANLINE_STRENGTH": crtUniforms.SCANLINE_STRENGTH = value
-        case "SHARPNESS_H": crtUniforms.SHARPNESS_H = value
-        case "SHARPNESS_V": crtUniforms.SHARPNESS_V = value
-        case "ENABLE_LANCZOS": crtUniforms.ENABLE_LANCZOS = Int32(value)
+        case "BRIGHT_BOOST": uniforms.BRIGHT_BOOST = value
+        case "DILATION": uniforms.DILATION = value
+        case "GAMMA_INPUT": uniforms.GAMMA_INPUT = value
+        case "GAMMA_OUTPUT": uniforms.GAMMA_OUTPUT = value
+        case "MASK_SIZE": uniforms.MASK_SIZE = value
+        case "MASK_STAGGER": uniforms.MASK_STAGGER = value
+        case "MASK_STRENGTH": uniforms.MASK_STRENGTH = value
+        case "MASK_DOT_WIDTH": uniforms.MASK_DOT_WIDTH = value
+        case "MASK_DOT_HEIGHT": uniforms.MASK_DOT_HEIGHT = value
+        case "SCANLINE_BEAM_WIDTH_MAX": uniforms.SCANLINE_BEAM_WIDTH_MAX = value
+        case "SCANLINE_BEAM_WIDTH_MIN": uniforms.SCANLINE_BEAM_WIDTH_MIN = value
+        case "SCANLINE_BRIGHT_MAX": uniforms.SCANLINE_BRIGHT_MAX = value
+        case "SCANLINE_BRIGHT_MIN": uniforms.SCANLINE_BRIGHT_MIN = value
+        case "SCANLINE_CUTOFF": uniforms.SCANLINE_CUTOFF = value
+        case "SCANLINE_STRENGTH": uniforms.SCANLINE_STRENGTH = value
+        case "SHARPNESS_H": uniforms.SHARPNESS_H = value
+        case "SHARPNESS_V": uniforms.SHARPNESS_V = value
+        case "ENABLE_LANCZOS": uniforms.ENABLE_LANCZOS = Int32(value)
 
         default:
             NSSound.beep()
         }
     }
-
+    */
+    
     override func activate() {
 
         super.activate()
@@ -309,7 +329,7 @@ final class CRTEasyShader: Shader {
                      source: src, target: output,
                      options: &app.windowController!.metalView!.uniforms,
                      length: MemoryLayout<Uniforms>.stride,
-                     options2: &crtUniforms,
+                     options2: &uniforms,
                      length2: MemoryLayout<CrtUniforms>.stride)
     }
 }
