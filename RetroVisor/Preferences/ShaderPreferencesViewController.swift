@@ -11,14 +11,14 @@ import Cocoa
 
 class MyOutlineView : NSOutlineView {
 
-    var groups: [ShaderSettingGroup] {
+    var groups: [Group] {
 
-        var result: [ShaderSettingGroup] = []
+        var result: [Group] = []
         if let ds = self.dataSource {
             let count = ds.outlineView?(self, numberOfChildrenOfItem: parent) ?? 0
             for i in 0..<count {
                 if let child = ds.outlineView?(self, child: i, ofItem: parent) {
-                    if let group = child as? ShaderSettingGroup {
+                    if let group = child as? Group {
                         result.append(group)
                     }
                 }
@@ -112,7 +112,7 @@ extension ShaderPreferencesViewController: NSOutlineViewDataSource {
 
     func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
 
-        if let group = item as? ShaderSettingGroup {
+        if let group = item as? Group {
             return group.children.count
             // return group.children.filter { $0.hidden == false }.count
         } else {
@@ -122,16 +122,16 @@ extension ShaderPreferencesViewController: NSOutlineViewDataSource {
 
     func outlineView(_ outlineView: NSOutlineView, heightOfRowByItem item: Any) -> CGFloat {
 
-        return item is ShaderSettingGroup ? 56 : 56
+        return item is Group ? 56 : 56
     }
     func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
 
-        return item is ShaderSettingGroup
+        return item is Group
     }
 
     func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
 
-        if let group = item as? ShaderSettingGroup {
+        if let group = item as? Group {
             return group.children[index]
             // return group.children.filter { $0.hidden == false }[index]
         } else {
@@ -144,7 +144,7 @@ extension ShaderPreferencesViewController: NSOutlineViewDelegate {
 
     func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
 
-        if let group = item as? ShaderSettingGroup {
+        if let group = item as? Group {
 
             let id = NSUserInterfaceItemIdentifier("GroupCell")
             let cell = outlineView.makeView(withIdentifier: id, owner: self) as! ShaderGroupView
@@ -169,7 +169,7 @@ extension ShaderPreferencesViewController: NSOutlineViewDelegate {
     func outlineViewItemDidExpand(_ notification: Notification) {
 
         guard let item = notification.userInfo?["NSObject"] else { return }
-        if let cell = item as? ShaderSettingGroup {
+        if let cell = item as? Group {
             cell.view?.updateIcon(expanded: true)
         }
     }
@@ -177,7 +177,7 @@ extension ShaderPreferencesViewController: NSOutlineViewDelegate {
     func outlineViewItemDidCollapse(_ notification: Notification) {
 
         guard let item = notification.userInfo?["NSObject"] else { return }
-        if let cell = item as? ShaderSettingGroup {
+        if let cell = item as? Group {
             cell.view?.updateIcon(expanded: false)
         }
     }

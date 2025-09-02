@@ -67,7 +67,7 @@ final class CRTEasyShader: Shader {
 
         settings = [
 
-            ShaderSettingGroup(title: "Uniforms", [
+            Group(title: "Uniforms", [
                 
                 ShaderSetting(
                     name: "Brightness Boost",

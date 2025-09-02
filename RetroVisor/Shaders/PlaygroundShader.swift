@@ -158,7 +158,7 @@ final class PlaygroundShader: Shader {
 
         settings = [
 
-            ShaderSettingGroup(title: "Textures", [
+            Group(title: "Textures", [
                 
                 ShaderSetting(
                     name: "Input Downscaling Factor",
@@ -180,7 +180,7 @@ final class PlaygroundShader: Shader {
                 
                 ShaderSetting(
                     name: "Resampler",
-                    values: [("BILINEAR", 0), ("LANCZOS", 1)],
+                    items: [("BILINEAR", 0), ("LANCZOS", 1)],
                     value: Binding(
                         key: "RESAMPLE_FILTER",
                         get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
@@ -188,11 +188,11 @@ final class PlaygroundShader: Shader {
                 ),
             ]),
 
-            ShaderSettingGroup(title: "Chroma Effects", [
+            Group(title: "Chroma Effects", [
 
                 ShaderSetting(
                     name: "Video Standard",
-                    values: [("PAL", 1), ("NTSC", 0)],
+                    items: [("PAL", 1), ("NTSC", 0)],
                     value: Binding(
                         key: "PAL",
                         get: { [unowned self] in Float(self.uniforms.PAL) },
@@ -227,15 +227,15 @@ final class PlaygroundShader: Shader {
                 ),
             ]),
 
-            ShaderSettingGroup(title: "Blooming", enable: Binding(
+            Group(title: "Blooming", enable: Binding(
                 
                 key: "BLOOM_ENABLE",
-                get: { [unowned self] in Bool(self.uniforms.BLOOM_ENABLE) },
+                get: { [unowned self] in Float(self.uniforms.BLOOM_ENABLE) },
                 set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) }), [
                     
                 ShaderSetting(
                     name: "Bloom Filter",
-                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
+                    items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                     value: Binding(
                         key: "BLOOM_FILTER",
                     get: { [unowned self] in Float(self.uniforms.BLOOM_FILTER) },
@@ -280,10 +280,10 @@ final class PlaygroundShader: Shader {
 
             ]),
 
-            ShaderSettingGroup(title: "Scanlines", enable: Binding(
+            Group(title: "Scanlines", enable: Binding(
                 
                 key: "SCANLINE_ENABLE",
-                get: { [unowned self] in Bool(self.uniforms.SCANLINE_ENABLE) },
+                get: { [unowned self] in Float(self.uniforms.SCANLINE_ENABLE) },
                 set: { [unowned self] in self.uniforms.SCANLINE_ENABLE = Int32($0) }), [
                                     
                 ShaderSetting(
@@ -332,10 +332,10 @@ final class PlaygroundShader: Shader {
                 ),
             ]),
             
-            ShaderSettingGroup(title: "Shadow Mask", enable: Binding(
+            Group(title: "Shadow Mask", enable: Binding(
                 
                 key: "SHADOW_ENABLE",
-                get: { [unowned self] in Bool(self.uniforms.SHADOW_ENABLE) },
+                get: { [unowned self] in Float(self.uniforms.SHADOW_ENABLE) },
                 set: { [unowned self] in self.uniforms.SHADOW_ENABLE = Int32($0) }), [
                                     
                 ShaderSetting(
@@ -402,10 +402,10 @@ final class PlaygroundShader: Shader {
                 )
             ]),
             
-            ShaderSettingGroup(title: "Dot Mask", enable: Binding(
+            Group(title: "Dot Mask", enable: Binding(
                 
                 key: "DOTMASK_ENABLE",
-                get: { [unowned self] in Bool(self.uniforms.DOTMASK_ENABLE) },
+                get: { [unowned self] in Float(self.uniforms.DOTMASK_ENABLE) },
                 set: { [unowned self] in self.uniforms.DOTMASK_ENABLE = Int32($0) }), [
                                     
                 ShaderSetting(
@@ -445,30 +445,30 @@ final class PlaygroundShader: Shader {
                 ),
             ]),
             
-            ShaderSettingGroup(title: "Debugging", enable: Binding(
+            Group(title: "Debugging", enable: Binding(
                 
                 key: "DEBUG_ENABLE",
-                get: { [unowned self] in Bool(self.uniforms.DEBUG_ENABLE) },
+                get: { [unowned self] in Float(self.uniforms.DEBUG_ENABLE) },
                 set: { [unowned self] in self.uniforms.DEBUG_ENABLE = Int32($0) }), [
                                     
                 ShaderSetting(
                     name: "Debug",
-                    values: [ ("Ycc", 1),
-                              ("Ycc (Mipmap 1)", 2),
-                              ("Ycc (Mipmap 2)", 3),
-                              ("Ycc (Mipmap 3)", 4),
-                              ("Ycc (Mipmap 4)", 5),
-                              ("Luma", 6),
-                              ("Chroma U/I", 7),
-                              ("Chroma V/Q", 8),
-                              ("Shadow texture", 9),
-                              ("Bloom texture", 10) ],
+                    items: [ ("Ycc", 1),
+                             ("Ycc (Mipmap 1)", 2),
+                             ("Ycc (Mipmap 2)", 3),
+                             ("Ycc (Mipmap 3)", 4),
+                             ("Ycc (Mipmap 4)", 5),
+                             ("Luma", 6),
+                             ("Chroma U/I", 7),
+                             ("Chroma V/Q", 8),
+                             ("Shadow texture", 9),
+                             ("Bloom texture", 10) ],
                     value: Binding(
                         key: "DEBUG_TEXTURE",
                         get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE) },
                         set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) }),
                 ),
-
+                
                 ShaderSetting(
                     name: "Debug Slider",
                     range: 0.0...1.0, step: 0.01,

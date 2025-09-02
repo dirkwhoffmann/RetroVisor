@@ -61,7 +61,7 @@ final class PassthroughShader: Shader {
         
         settings = [
             
-            ShaderSettingGroup(title: "Textures", [
+            Group(title: "Textures", [
                 
                 ShaderSetting(
                     name: "Input Downscaling Factor",
@@ -75,7 +75,7 @@ final class PassthroughShader: Shader {
                 
                 ShaderSetting(
                     name: "Resampler",
-                    values: [("BILINEAR", 0), ("LANCZOS", 1)],
+                    items: [("BILINEAR", 0), ("LANCZOS", 1)],
                     value: Binding(
                         key: "RESAMPLE_FILTER",
                         get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
@@ -83,15 +83,15 @@ final class PassthroughShader: Shader {
                 ),
             ]),
             
-            ShaderSettingGroup(title: "Filter", enable: Binding(
+            Group(title: "Filter", enable: Binding(
                 
                 key: "BLUR_ENABLE",
-                get: { [unowned self] in Bool(self.uniforms.BLUR_ENABLE) },
+                get: { [unowned self] in Float(self.uniforms.BLUR_ENABLE) },
                 set: { [unowned self] in self.uniforms.BLUR_ENABLE = Int32($0) }), [
                     
                     ShaderSetting(
                         name: "Blur Filter",
-                        values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
+                        items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                         value: Binding(
                             key: "BLUR_FILTER",
                             get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },

@@ -137,7 +137,7 @@ final class DraculaShader: Shader {
         
         settings = [
             
-            ShaderSettingGroup(title: "Textures", [
+            Group(title: "Textures", [
                 
                 ShaderSetting(
                     name: "Input Downscaling Factor",
@@ -159,7 +159,7 @@ final class DraculaShader: Shader {
                 
                 ShaderSetting(
                     name: "Resampler",
-                    values: [("BILINEAR", 0), ("LANCZOS", 1)],
+                    items: [("BILINEAR", 0), ("LANCZOS", 1)],
                     value: Binding(
                         key: "RESAMPLE_FILTER",
                         get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
@@ -168,11 +168,11 @@ final class DraculaShader: Shader {
                 
             ]),
             
-            ShaderSettingGroup(title: "Chroma Effects", [
+            Group(title: "Chroma Effects", [
                 
                 ShaderSetting(
                     name: "Video Standard",
-                    values: [("PAL", 1), ("NTSC", 0)],
+                    items: [("PAL", 1), ("NTSC", 0)],
                     value: Binding(
                         key: "PAL",
                         get: { [unowned self] in Float(self.uniforms.PAL) },
@@ -207,15 +207,15 @@ final class DraculaShader: Shader {
                 ),
             ]),
             
-            ShaderSettingGroup(title: "Blooming", enable: Binding(
+            Group(title: "Blooming", enable: Binding(
                 
                 key: "BLOOM_ENABLE",
-                get: { [unowned self] in Bool(self.uniforms.BLOOM_ENABLE) },
+                get: { [unowned self] in Float(self.uniforms.BLOOM_ENABLE) },
                 set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) }), [
                     
                     ShaderSetting(
                         name: "Bloom Filter",
-                        values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
+                        items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                         value: Binding(
                             key: "BLOOM_FILTER",
                             get: { [unowned self] in Float(self.uniforms.BLOOM_FILTER) },
@@ -259,10 +259,10 @@ final class DraculaShader: Shader {
                     ),
                 ]),
             
-            ShaderSettingGroup(title: "Scanlines", enable: Binding(
+            Group(title: "Scanlines", enable: Binding(
                 
                 key: "SCANLINES_ENABLE",
-                get: { [unowned self] in Bool(self.uniforms.SCANLINES_ENABLE) },
+                get: { [unowned self] in Float(self.uniforms.SCANLINES_ENABLE) },
                 set: { [unowned self] in self.uniforms.SCANLINES_ENABLE = Int32($0) }), [
                     
                     ShaderSetting(
@@ -293,15 +293,15 @@ final class DraculaShader: Shader {
                     ),
                 ]),
             
-            ShaderSettingGroup(title: "Dot Mask", enable: Binding(
+            Group(title: "Dot Mask", enable: Binding(
                 
                 key: "DOTMASK_ENABLE",
-                get: { [unowned self] in Bool(self.uniforms.DOTMASK_ENABLE) },
+                get: { [unowned self] in Float(self.uniforms.DOTMASK_ENABLE) },
                 set: { [unowned self] in self.uniforms.DOTMASK_ENABLE = Int32($0) }), [
                     
                     ShaderSetting(
                         name: "Dotmask Type",
-                        values: [ ("Add", 0), ("Blend", 1), ("Shift", 2) ],
+                        items: [ ("Add", 0), ("Blend", 1), ("Shift", 2) ],
                         value: Binding(
                             key: "DOTMASK_TYPE",
                             get: { [unowned self] in Float(self.uniforms.DOTMASK_TYPE) },
@@ -372,15 +372,15 @@ final class DraculaShader: Shader {
                     )
                 ]),
             
-            ShaderSettingGroup(title: "Debugging", enable: Binding(
+            Group(title: "Debugging", enable: Binding(
                 
                 key: "DEBUG_ENABLE",
-                get: { [unowned self] in Bool(self.uniforms.DEBUG_ENABLE) },
+                get: { [unowned self] in Float(self.uniforms.DEBUG_ENABLE) },
                 set: { [unowned self] in self.uniforms.DEBUG_ENABLE = Int32($0) }), [
                     
                     ShaderSetting(
                         name: "Debug",
-                        values: [ ("Ycc", 1),
+                        items: [ ("Ycc", 1),
                                   ("Ycc (Mipmap 1)", 2),
                                   ("Ycc (Mipmap 2)", 3),
                                   ("Ycc (Mipmap 3)", 4),

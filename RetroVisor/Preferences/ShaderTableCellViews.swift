@@ -17,13 +17,13 @@ class ShaderGroupView: NSTableCellView {
     @IBOutlet weak var label: NSTextField!
     @IBOutlet weak var subLabel: NSTextField!
 
-    var group: ShaderSettingGroup!
+    var group: Group!
 
     var shader: Shader { controller.shader }
     var clickable: Bool { group.enable != nil }
     var expandable: Bool { group.enable != nil }
 
-    func setup(with group: ShaderSettingGroup) {
+    func setup(with group: Group) {
 
         self.group = group
         label.stringValue = group.title
@@ -98,7 +98,7 @@ class ShaderSettingView: NSTableCellView {
         didSet {
 
             // let enableKey = shaderSetting.enableKey
-            let enabled = shaderSetting.enabled //  enableKey == nil ? true : shader.get(key: enableKey!) != 0
+            let enabled = shaderSetting.enable?.boolValue != false //  enableKey == nil ? true : shader.get(key: enableKey!) != 0
             let active = !shaderSetting.hidden() // !shader.isHidden(key: shaderSetting.key)
 
             optionLabel.stringValue = shaderSetting.name
@@ -134,7 +134,7 @@ class ShaderSettingView: NSTableCellView {
                 valueStepper.maxValue = Double(range.upperBound)
             }
 
-            if let values = shaderSetting.values {
+            if let values = shaderSetting.items {
 
                 valuePopup.isHidden = false
                 valuePopup.removeAllItems()
@@ -155,11 +155,12 @@ class ShaderSettingView: NSTableCellView {
 
     func update() {
 
-        let value = shaderSetting.floatValue //  shader.get(key: shaderSetting.key)
-
+        let value = shaderSetting.value.floatValue //  shader.get(key: shaderSetting.key)
+        let enable = shaderSetting.enable?.boolValue
+        
         if !optCeckbox.isHidden {
 
-            optCeckbox.state = shaderSetting.enabled ? .on : .off;
+            optCeckbox.state = enable == true ? .on : .off;
         }
 
         if !valueSlider.isHidden {
@@ -180,8 +181,8 @@ class ShaderSettingView: NSTableCellView {
         let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
         // print("\(sender.floatValue)  \(round(sender.floatValue)) \(shaderSetting.step)")
-        shaderSetting.floatValue = rounded
-        value = shaderSetting.floatValue
+        shaderSetting.value.floatValue = rounded
+        value = shaderSetting.value.floatValue
 //        shader.set(key: subLabel.stringValue, value: rounded)
 //        value = shader.get(key: subLabel.stringValue)
     }
@@ -194,19 +195,16 @@ class ShaderSettingView: NSTableCellView {
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
         // shader.set(key: shaderSetting.key, value: Float(sender.selectedTag()))
-        shaderSetting.intValue = sender.selectedTag()
+        shaderSetting.value.intValue = sender.selectedTag()
         update();
         controller.outlineView.reloadData()
     }
 
     @IBAction func enableAction(_ sender: NSButton) {
 
-        if let enableKey = shaderSetting.enable?.key {
-
-            shaderSetting.enabled = sender.state == .on
-            update();
-            controller.outlineView.reloadData()
-        }
+        shaderSetting.enable?.boolValue = sender.state == .on
+        update();
+        controller.outlineView.reloadData()
     }
 
     @IBAction func helpAction(_ sender: NSButton) {

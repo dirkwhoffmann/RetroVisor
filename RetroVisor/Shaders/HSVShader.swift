@@ -54,7 +54,7 @@ final class HSVShader: Shader {
 
         settings = [
 
-            ShaderSettingGroup(title: "Channels", [
+            Group(title: "Channels", [
 
                 ShaderSetting(
                     name: "Hue",
@@ -62,7 +62,7 @@ final class HSVShader: Shader {
                     step: 0.01,
                     enable: Binding(
                         key: "H_ENABLE",
-                        get: { [unowned self] in Bool(self.uniforms.H_ENABLE) },
+                        get: { [unowned self] in Float(self.uniforms.H_ENABLE) },
                         set: { [unowned self] in self.uniforms.H_ENABLE = Int32($0) }),
                     value: Binding(
                         key: "H_VALUE",
@@ -76,7 +76,7 @@ final class HSVShader: Shader {
                     step: 0.01,
                     enable: Binding(
                         key: "S_ENABLE",
-                        get: { [unowned self] in Bool(self.uniforms.S_ENABLE) },
+                        get: { [unowned self] in Float(self.uniforms.S_ENABLE) },
                         set: { [unowned self] in self.uniforms.S_ENABLE = Int32($0) }),
                     value: Binding(
                         key: "S_VALUE",
@@ -90,7 +90,7 @@ final class HSVShader: Shader {
                     step: 0.01,
                     enable: Binding(
                         key: "V_ENABLE",
-                        get: { [unowned self] in Bool(self.uniforms.V_ENABLE) },
+                        get: { [unowned self] in Float(self.uniforms.V_ENABLE) },
                         set: { [unowned self] in self.uniforms.V_ENABLE = Int32($0) }),
                     value: Binding(
                         key: "V_VALUE",

@@ -10,17 +10,41 @@
 import MetalKit
 import MetalPerformanceShaders
 
-struct Binding<T> {
+struct Binding {
     
     let key: String
-    let get: () -> T
-    let set: (T) -> Void
-
-    init(key: String, get: @escaping () -> T, set: @escaping (T) -> Void) {
+    let get: () -> Float
+    let set: (Float) -> Void
+    
+    init(key: String, get: @escaping () -> Float, set: @escaping (Float) -> Void) {
         
         self.key = key
         self.get = get
         self.set = set
+    }
+    
+    var boolValue: Bool {
+        
+        get { get() != 0 }
+        set { set(newValue ? 1 : 0) }
+    }
+
+    var int32Value: Int32 {
+        
+        get { Int32(get()) }
+        set { set(Float(newValue)) }
+    }
+
+    var intValue: Int {
+        
+        get { Int(get()) }
+        set { set(Float(newValue)) }
+    }
+
+    var floatValue: Float {
+        
+        get { get() }
+        set { set(newValue) }
     }
 }
 
@@ -34,7 +58,7 @@ class ShaderSetting {
     let step: Float
 
     // Parameters for enum-like arguments
-    let values: [(String,Int)]?
+    let items: [(String,Int)]?
 
     // Optional help string
     let help: String?
@@ -43,19 +67,19 @@ class ShaderSetting {
     var hidden: () -> Bool = { false }
 
     // Binding for the optional enable key
-    let enable: Binding<Bool>?
+    var enable: Binding?
 
     // Binding for the mandatory value key
-    let value: Binding<Float>
+    var value: Binding
     
     var formatString: String { "%.3g" }
 
     init(name: String,
          range: ClosedRange<Double>? = nil,
          step: Float = 0.01,
-         values: [(String,Int)]? = nil,
-         enable: Binding<Bool>? = nil,
-         value: Binding<Float>,
+         items: [(String,Int)]? = nil,
+         enable: Binding? = nil,
+         value: Binding,
          help: String? = nil,
          hidden: @escaping () -> Bool = { false }
         ) {
@@ -65,15 +89,16 @@ class ShaderSetting {
         self.value = value
         self.range = range
         self.step = step
-        self.values = values
+        self.items = items
         self.help = help
         self.hidden = hidden
     }
     
+    /*
     var enabled: Bool {
         
-        get { enable?.get() ?? true }
-        set { enable?.set(newValue) }
+        get { enable?.get() != 0 }
+        set { enable?.set(newValue ? 1 : 0) }
     }
 
     var floatValue: Float {
@@ -87,21 +112,19 @@ class ShaderSetting {
         get { Int(value.get()) }
         set { value.set(Float(newValue)) }
     }
+    */
 }
 
-class ShaderSettingGroup {
+class Group {
 
     // Setting group name
     let title: String
-
-    // Enable key for this setting
-    // let key: String?
 
     // The NSTableCellView associated with this group
     var view: ShaderGroupView?
 
     // Binding for the enable key (optional)
-    let enable: Binding<Bool>?
+    let enable: Binding?
     
     //private let getter: (() -> Float)?
     // private let setter: ((Float) -> Void)?
@@ -112,7 +135,7 @@ class ShaderSettingGroup {
     var count: Int { children.filter { $0.hidden() == false }.count }
 
     init(title: String,
-         enable: Binding<Bool>? = nil,
+         enable: Binding? = nil,
          // get: (() -> Float)? = nil,
          // set: ((Float) -> Void)? = nil,
          _ children: [ShaderSetting]) {
@@ -127,8 +150,8 @@ class ShaderSettingGroup {
     
     var enabled: Bool {
         
-        get { enable?.get() ?? true }
-        set { enable?.set(newValue) }
+        get { enable?.get() != 0 }
+        set { enable?.set(newValue ? 1 : 0) }
     }
 }
 
@@ -141,7 +164,7 @@ class Shader : Loggable {
     let logging: Bool = false
 
     var name: String = ""
-    var settings: [ShaderSettingGroup] = []
+    var settings: [Group] = []
 
     init(name: String) {
 
