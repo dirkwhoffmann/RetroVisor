@@ -40,7 +40,7 @@ class ShaderSetting {
     let help: String?
 
     // Indicates if this options should be hidden from the user
-    var hidden = false
+    var hidden: () -> Bool = { false }
 
     // Binding for the enable key (optional)
     let enable: Binding<Bool>?
@@ -56,7 +56,8 @@ class ShaderSetting {
          values: [(String,Int)]? = nil,
          enable: Binding<Bool>? = nil,
          value: Binding<Float>,
-         help: String? = nil
+         help: String? = nil,
+         hidden: @escaping () -> Bool = { false }
         ) {
 
         self.name = name
@@ -66,6 +67,7 @@ class ShaderSetting {
         self.step = step
         self.values = values
         self.help = help
+        self.hidden = hidden
     }
     
     var enabled: Bool {
@@ -104,7 +106,7 @@ class ShaderSettingGroup {
     private let getter: (() -> Float)?
     private let setter: ((Float) -> Void)?
 
-    var count: Int { children.filter { $0.hidden == false }.count }
+    var count: Int { children.filter { $0.hidden() == false }.count }
 
     init(title: String, key: String? = nil,
          get: (() -> Float)? = nil,

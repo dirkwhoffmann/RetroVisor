@@ -56,13 +56,13 @@ final class PassthroughShader: Shader {
     var blur: MTLTexture!
 
     init() {
-
+        
         super.init(name: "Passthrough")
-
+        
         settings = [
-
+            
             ShaderSettingGroup(title: "Textures", [
-
+                
                 ShaderSetting(
                     name: "Input Downscaling Factor",
                     range: 0.125...1.0,
@@ -82,39 +82,40 @@ final class PassthroughShader: Shader {
                         set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) }),
                 ),
             ]),
-
+            
             ShaderSettingGroup(title: "Filter",
                                key: "BLUR_ENABLE",
                                get: { [unowned self] in Float(self.uniforms.BLUR_ENABLE) },
                                set: { [unowned self] in self.uniforms.BLUR_ENABLE = Int32($0) }, [
-
-                ShaderSetting(
-                    name: "Blur Filter",
-                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
-                    value: Binding(
-                        key: "BLUR_FILTER",
-                        get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
-                        set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) }),
-                ),
-
-                ShaderSetting(
-                    name: "Blur width",
-                    range: 0.1...20.0,
-                    step: 0.1,
-                    value: Binding(
-                        key: "BLUR_RADIUS_X",
-                        get: { [unowned self] in self.uniforms.BLUR_RADIUS_X },
-                        set: { [unowned self] in self.uniforms.BLUR_RADIUS_X = $0 }),
-                ),
-
-                ShaderSetting(
-                    name: "Blur height",
-                    range: 0.1...20.0,
-                    step: 0.1,
-                    value: Binding(
-                        key: "BLUR_RADIUS_Y",
-                        get: { [unowned self] in self.uniforms.BLUR_RADIUS_Y },
-                        set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 }),
+                                
+                                ShaderSetting(
+                                    name: "Blur Filter",
+                                    values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
+                                    value: Binding(
+                                        key: "BLUR_FILTER",
+                                        get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
+                                        set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) }),
+                                ),
+                                
+                                ShaderSetting(
+                                    name: "Blur width",
+                                    range: 0.1...20.0,
+                                    step: 0.1,
+                                    value: Binding(
+                                        key: "BLUR_RADIUS_X",
+                                        get: { [unowned self] in self.uniforms.BLUR_RADIUS_X },
+                                        set: { [unowned self] in self.uniforms.BLUR_RADIUS_X = $0 }),
+                                ),
+                                
+                                ShaderSetting(
+                                    name: "Blur height",
+                                    range: 0.1...20.0,
+                                    step: 0.1,
+                                    value: Binding(
+                                        key: "BLUR_RADIUS_Y",
+                                        get: { [unowned self] in self.uniforms.BLUR_RADIUS_Y },
+                                        set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 }),
+                                    hidden: {  [unowned self] in self.uniforms.BLUR_FILTER == BlurFilterType.gaussian.rawValue }
                 ),
 
                 ShaderSetting(

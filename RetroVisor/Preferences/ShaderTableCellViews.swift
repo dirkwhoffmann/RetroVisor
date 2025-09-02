@@ -99,7 +99,7 @@ class ShaderSettingView: NSTableCellView {
 
             // let enableKey = shaderSetting.enableKey
             let enabled = shaderSetting.enabled //  enableKey == nil ? true : shader.get(key: enableKey!) != 0
-            let active = !shaderSetting.hidden // !shader.isHidden(key: shaderSetting.key)
+            let active = !shaderSetting.hidden() // !shader.isHidden(key: shaderSetting.key)
 
             optionLabel.stringValue = shaderSetting.name
             subLabel.stringValue = shaderSetting.value.key
