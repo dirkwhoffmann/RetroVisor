@@ -93,26 +93,6 @@ class ShaderSetting {
         self.help = help
         self.hidden = hidden
     }
-    
-    /*
-    var enabled: Bool {
-        
-        get { enable?.get() != 0 }
-        set { enable?.set(newValue ? 1 : 0) }
-    }
-
-    var floatValue: Float {
-        
-        get { value.get() }
-        set { value.set(newValue) }
-    }
-    
-    var intValue: Int {
-        
-        get { Int(value.get()) }
-        set { value.set(Float(newValue)) }
-    }
-    */
 }
 
 class Group {
@@ -124,35 +104,29 @@ class Group {
     var view: ShaderGroupView?
 
     // Binding for the enable key (optional)
-    let enable: Binding?
+    var enable: Binding?
     
-    //private let getter: (() -> Float)?
-    // private let setter: ((Float) -> Void)?
-
     // All settings in this group
     var children: [ShaderSetting]
     
     var count: Int { children.filter { $0.hidden() == false }.count }
-
+    
     init(title: String,
          enable: Binding? = nil,
-         // get: (() -> Float)? = nil,
-         // set: ((Float) -> Void)? = nil,
          _ children: [ShaderSetting]) {
-
+        
         self.title = title
-        // self.key = key
         self.enable = enable
         self.children = children
-        // self.getter = get
-        // self.setter = set
     }
     
+    /*
     var enabled: Bool {
         
         get { enable?.get() != 0 }
         set { enable?.set(newValue ? 1 : 0) }
     }
+    */
 }
 
 @MainActor
@@ -163,7 +137,10 @@ class Shader : Loggable {
     // Enables debug output to the console
     let logging: Bool = false
 
+    // Name of this shader
     var name: String = ""
+    
+    // Shader settings
     var settings: [Group] = []
 
     init(name: String) {
