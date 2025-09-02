@@ -37,7 +37,7 @@ struct PlaygroundUniforms {
     var SCANLINE_WEIGHT3: Float
     var SCANLINE_WEIGHT4: Float
     
-    var SHADOW_ENABLE: Float
+    var SHADOW_ENABLE: Int32
     var BRIGHTNESS: Float
     var GLOW: Float
     var SHADOW_GRID_WIDTH: Float
@@ -227,8 +227,12 @@ final class PlaygroundShader: Shader {
                 ),
             ]),
 
-            ShaderSettingGroup(title: "Blooming", key: "BLOOM_ENABLE", [
-
+            ShaderSettingGroup(title: "Blooming", enable: Binding(
+                
+                key: "BLOOM_ENABLE",
+                get: { [unowned self] in Bool(self.uniforms.BLOOM_ENABLE) },
+                set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) }), [
+                    
                 ShaderSetting(
                     name: "Bloom Filter",
                     values: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
@@ -276,8 +280,12 @@ final class PlaygroundShader: Shader {
 
             ]),
 
-            ShaderSettingGroup(title: "Scanlines", key: "SCANLINE_ENABLE", [
+            ShaderSettingGroup(title: "Scanlines", enable: Binding(
                 
+                key: "SCANLINE_ENABLE",
+                get: { [unowned self] in Bool(self.uniforms.SCANLINE_ENABLE) },
+                set: { [unowned self] in self.uniforms.SCANLINE_ENABLE = Int32($0) }), [
+                                    
                 ShaderSetting(
                     name: "Scanline Brightness",
                     range: 0.0...2.0, step: 0.01,
@@ -324,8 +332,12 @@ final class PlaygroundShader: Shader {
                 ),
             ]),
             
-            ShaderSettingGroup(title: "Shadow Mask", key: "SHADOW_ENABLE", [
+            ShaderSettingGroup(title: "Shadow Mask", enable: Binding(
                 
+                key: "SHADOW_ENABLE",
+                get: { [unowned self] in Bool(self.uniforms.SHADOW_ENABLE) },
+                set: { [unowned self] in self.uniforms.SHADOW_ENABLE = Int32($0) }), [
+                                    
                 ShaderSetting(
                     name: "Grid Width",
                     range: 1.0...60.0, step: 1.0,
@@ -390,8 +402,12 @@ final class PlaygroundShader: Shader {
                 )
             ]),
             
-            ShaderSettingGroup(title: "Dot Mask", key: "DOTMASK_ENABLE", [
+            ShaderSettingGroup(title: "Dot Mask", enable: Binding(
                 
+                key: "DOTMASK_ENABLE",
+                get: { [unowned self] in Bool(self.uniforms.DOTMASK_ENABLE) },
+                set: { [unowned self] in self.uniforms.DOTMASK_ENABLE = Int32($0) }), [
+                                    
                 ShaderSetting(
                     name: "Dotmask",
                     range: 0...4, step: 1.0,
@@ -429,8 +445,12 @@ final class PlaygroundShader: Shader {
                 ),
             ]),
             
-            ShaderSettingGroup(title: "Debugging", key: "DEBUG_ENABLE", [
+            ShaderSettingGroup(title: "Debugging", enable: Binding(
                 
+                key: "DEBUG_ENABLE",
+                get: { [unowned self] in Bool(self.uniforms.DEBUG_ENABLE) },
+                set: { [unowned self] in self.uniforms.DEBUG_ENABLE = Int32($0) }), [
+                                    
                 ShaderSetting(
                     name: "Debug",
                     values: [ ("Ycc", 1),

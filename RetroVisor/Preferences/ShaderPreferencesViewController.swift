@@ -68,7 +68,7 @@ class ShaderPreferencesViewController: NSViewController {
 
         for group in outlineView.groups {
             
-            if group.key == nil || group.value != 0 { // } shader.get(key: group.key!) != 0 {
+            if group.enabled { // } shader.get(key: group.key!) != 0 {
                 outlineView.expandItem(group)
             } else {
                 outlineView.collapseItem(group)

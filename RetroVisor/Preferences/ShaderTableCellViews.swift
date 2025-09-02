@@ -20,8 +20,8 @@ class ShaderGroupView: NSTableCellView {
     var group: ShaderSettingGroup!
 
     var shader: Shader { controller.shader }
-    var clickable: Bool { group.key != nil }
-    var expandable: Bool { group.key == nil }
+    var clickable: Bool { group.enable != nil }
+    var expandable: Bool { group.enable != nil }
 
     func setup(with group: ShaderSettingGroup) {
 
@@ -36,8 +36,8 @@ class ShaderGroupView: NSTableCellView {
             enableButton.isHidden = false
             disclosureButton.isHidden = true
             // enableButton.state = shader.get(key: group.key!) != 0 ? .on : .off
-            enableButton.state = group.value == 0 ? .off : .on
-            subLabel.stringValue = "\(group.key!)"
+            enableButton.state = group.enabled ? .on : .off
+            subLabel.stringValue = "\(group.enable!.key)"
         }
 
         if expandable {
@@ -64,7 +64,7 @@ class ShaderGroupView: NSTableCellView {
 
     @IBAction func enableAction(_ sender: NSButton) {
 
-        group.value = sender.state == .on ? 1 : 0
+        group.enabled = sender.state == .on
         /*
         if group.key != nil {
             shader.set(key: key, enable: sender.state == .on)

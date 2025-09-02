@@ -42,10 +42,10 @@ class ShaderSetting {
     // Indicates if this options should be hidden from the user
     var hidden: () -> Bool = { false }
 
-    // Binding for the enable key (optional)
+    // Binding for the optional enable key
     let enable: Binding<Bool>?
 
-    // Binding for the value key (mandatory)
+    // Binding for the mandatory value key
     let value: Binding<Float>
     
     var formatString: String { "%.3g" }
@@ -95,34 +95,40 @@ class ShaderSettingGroup {
     let title: String
 
     // Enable key for this setting
-    let key: String?
-
-    // All settings in this group
-    var children: [ShaderSetting]
+    // let key: String?
 
     // The NSTableCellView associated with this group
     var view: ShaderGroupView?
 
-    private let getter: (() -> Float)?
-    private let setter: ((Float) -> Void)?
+    // Binding for the enable key (optional)
+    let enable: Binding<Bool>?
+    
+    //private let getter: (() -> Float)?
+    // private let setter: ((Float) -> Void)?
 
+    // All settings in this group
+    var children: [ShaderSetting]
+    
     var count: Int { children.filter { $0.hidden() == false }.count }
 
-    init(title: String, key: String? = nil,
-         get: (() -> Float)? = nil,
-         set: ((Float) -> Void)? = nil,
+    init(title: String,
+         enable: Binding<Bool>? = nil,
+         // get: (() -> Float)? = nil,
+         // set: ((Float) -> Void)? = nil,
          _ children: [ShaderSetting]) {
 
         self.title = title
-        self.key = key
+        // self.key = key
+        self.enable = enable
         self.children = children
-        self.getter = get
-        self.setter = set
+        // self.getter = get
+        // self.setter = set
     }
     
-    var value: Float {
-        get { getter?() ?? 0 }
-        set { setter?(newValue) }
+    var enabled: Bool {
+        
+        get { enable?.get() ?? true }
+        set { enable?.set(newValue) }
     }
 }
 
@@ -154,34 +160,6 @@ class Shader : Loggable {
 
         fatalError("To be implemented by a subclass")
     }
-
-    // Looks up the shader setting with a given name
-    /*
-    func findSetting(key: String) -> ShaderSetting? {
-        return settings.flatMap { $0.children }.first { $0.key == key }
-    }
-    */
-    
-    // Get or sets the value of a shader option
-    /*
-    func get(key: String) -> Float { // DEPRECATED
-
-        fatalError()
-    }
-        
-    func set(key: String, value: Float) { // DEPRECATED
-        
-        fatalError()
-    }
-    
-    func set(key: String, enable: Bool) { set(key: key, value: enable ? 1 : 0) }
-    func set(key: String, item: Int) { set(key: key, value: Float(item)) }
-     */
-    /*
-    func setHidden(key: String, value: Bool) {
-        if let setting = findSetting(key: key) { setting.hidden = value }
-    }
-    */
 }
 
 class ScaleShader<F: MPSImageScale> : Shader {
