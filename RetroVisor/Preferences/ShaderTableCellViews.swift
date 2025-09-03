@@ -9,7 +9,14 @@
 
 import Cocoa
 
-class ShaderGroupView: NSTableCellView {
+class ShaderTableCellView: NSTableCellView {
+    
+    func updateIcon(expanded: Bool) {
+        
+    }
+}
+
+class ShaderGroupView: ShaderTableCellView {
 
     @IBOutlet weak var controller: ShaderPreferencesViewController!
     @IBOutlet weak var disclosureButton: NSButton!
@@ -46,7 +53,7 @@ class ShaderGroupView: NSTableCellView {
         }
     }
 
-    func updateIcon(expanded: Bool) {
+    override func updateIcon(expanded: Bool) {
 
         disclosureButton.state = expanded ? .on : .off
         disclosureButton.image = expanded ? .chevronDown() : .chevronRight()
@@ -72,7 +79,7 @@ class ShaderGroupView: NSTableCellView {
     }
 }
 
-class ShaderSettingView: NSTableCellView {
+class ShaderSettingView: ShaderTableCellView {
 
     @IBOutlet weak var controller: ShaderPreferencesViewController!
     @IBOutlet weak var optionImage: NSImageView!
@@ -95,7 +102,7 @@ class ShaderSettingView: NSTableCellView {
             let enabled = shaderSetting.enabled ?? true
             let active = !shaderSetting.hidden()
 
-            optionLabel.stringValue = shaderSetting.name
+            optionLabel.stringValue = shaderSetting.title
             subLabel.stringValue = shaderSetting.value?.key ?? ""
             helpButtom.isHidden = shaderSetting.help == nil
             optCeckbox.isHidden = shaderSetting.enable == nil

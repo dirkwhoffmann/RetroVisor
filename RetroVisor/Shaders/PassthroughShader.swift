@@ -64,7 +64,7 @@ final class PassthroughShader: Shader {
             Group(title: "Textures", [
                 
                 ShaderSetting(
-                    name: "Input Downscaling Factor",
+                    title: "Input Downscaling Factor",
                     range: 0.125...1.0,
                     step: 0.125,
                     value: Binding(
@@ -74,7 +74,7 @@ final class PassthroughShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Resampler",
+                    title: "Resampler",
                     items: [("BILINEAR", 0), ("LANCZOS", 1)],
                     value: Binding(
                         key: "RESAMPLE_FILTER",
@@ -86,14 +86,14 @@ final class PassthroughShader: Shader {
             Group(title: "Filter",
                   
                   setting: ShaderSetting(
-                    name: "Filter Enable",
+                    title: "Filter Enable",
                     value: Binding(
                         key: "BLUR_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.BLUR_ENABLE) },
                         set: { [unowned self] in self.uniforms.BLUR_ENABLE = Int32($0) })),
                   
                   [ ShaderSetting(
-                    name: "Blur Filter",
+                    title: "Blur Filter",
                     items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                     value: Binding(
                         key: "BLUR_FILTER",
@@ -102,7 +102,7 @@ final class PassthroughShader: Shader {
                   ),
                     
                     ShaderSetting(
-                        name: "Blur width",
+                        title: "Blur width",
                         range: 0.1...20.0,
                         step: 0.1,
                         value: Binding(
@@ -112,7 +112,7 @@ final class PassthroughShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Blur height",
+                        title: "Blur height",
                         range: 0.1...20.0,
                         step: 0.1,
                         value: Binding(
@@ -123,7 +123,7 @@ final class PassthroughShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Scale X",
+                        title: "Scale X",
                         range: 0.1...1.0,
                         step: 0.01,
                         value: Binding(
@@ -133,7 +133,7 @@ final class PassthroughShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Scale Y",
+                        title: "Scale Y",
                         range: 0.1...1.0,
                         step: 0.01,
                         value: Binding(

@@ -63,7 +63,7 @@ final class ColorSplitShader: Shader {
             Group(title: "Color Space", [
 
                 ShaderSetting(
-                    name: "Color Space",
+                    title: "Color Space",
                     items: [("RGB", 0), ("HSV", 1), ("YUV", 2), ("YIQ", 3)],
                     value: Binding(
                         key: "COLOR_SPACE",
@@ -72,7 +72,7 @@ final class ColorSplitShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Splitter",
+                    title: "Splitter",
                     items: [("Channel 1", 0), ("Channel 2", 1), ("Channel 3", 2), ("Recombine", 3)],
                     value: Binding(
                         key: "CHANNEL",
@@ -81,7 +81,7 @@ final class ColorSplitShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Red",
+                    title: "Red",
                     range: 0.0...1.0,
                     step: 0.01,
                     enable: Binding(
@@ -95,7 +95,7 @@ final class ColorSplitShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Green",
+                    title: "Green",
                     range: 0.0...1.0,
                     step: 0.01,
                     enable: Binding(
@@ -109,7 +109,7 @@ final class ColorSplitShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Blue",
+                    title: "Blue",
                     range: 0.0...1.0,
                     step: 0.01,
                     enable: Binding(

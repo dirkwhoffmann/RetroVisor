@@ -22,38 +22,12 @@ struct Binding {
         self.get = get
         self.set = set
     }
-    
-    /*
-    var boolValue: Bool {
-        
-        get { get() != 0 }
-        set { set(newValue ? 1 : 0) }
-    }
-
-    var int32Value: Int32 {
-        
-        get { Int32(get()) }
-        set { set(Float(newValue)) }
-    }
-
-    var intValue: Int {
-        
-        get { Int(get()) }
-        set { set(Float(newValue)) }
-    }
-
-    var floatValue: Float {
-        
-        get { get() }
-        set { set(newValue) }
-    }
-    */
 }
 
 class ShaderSetting {
 
     // Setting name
-    let name: String
+    let title: String
 
     // Parameters for numeric arguments
     let range: ClosedRange<Double>?
@@ -76,7 +50,7 @@ class ShaderSetting {
     
     var formatString: String { "%.3g" }
 
-    init(name: String,
+    init(title: String,
          range: ClosedRange<Double>? = nil,
          step: Float = 0.01,
          items: [(String,Int)]? = nil,
@@ -86,7 +60,7 @@ class ShaderSetting {
          hidden: @escaping () -> Bool = { false }
         ) {
 
-        self.name = name
+        self.title = title
         self.enable = enable
         self.value = value
         self.range = range
@@ -131,7 +105,7 @@ class Group {
     let title: String
 
     // The NSTableCellView associated with this group
-    var view: ShaderGroupView?
+    var view: ShaderTableCellView?
 
     // Binding for the enable key (optional)
     // var enable: Binding?

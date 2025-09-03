@@ -169,7 +169,7 @@ final class PlaygroundShader: Shader {
             Group(title: "Textures", [
                 
                 ShaderSetting(
-                    name: "Input Downscaling Factor",
+                    title: "Input Downscaling Factor",
                     range: 0.125...1.0, step: 0.125,
                     value: Binding(
                         key: "INPUT_TEX_SCALE",
@@ -178,7 +178,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Output Upscaling Factor",
+                    title: "Output Upscaling Factor",
                     range: 1.0...2.0, step: 0.125,
                     value: Binding(
                         key: "OUTPUT_TEX_SCALE",
@@ -187,7 +187,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Resampler",
+                    title: "Resampler",
                     items: [("BILINEAR", 0), ("LANCZOS", 1)],
                     value: Binding(
                         key: "RESAMPLE_FILTER",
@@ -199,7 +199,7 @@ final class PlaygroundShader: Shader {
             Group(title: "Chroma Effects", [
 
                 ShaderSetting(
-                    name: "Video Standard",
+                    title: "Video Standard",
                     items: [("PAL", 1), ("NTSC", 0)],
                     value: Binding(
                         key: "PAL",
@@ -208,7 +208,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Gamma Input",
+                    title: "Gamma Input",
                     range: 0.1...5.0, step: 0.1,
                     value: Binding(
                         key: "GAMMA_INPUT",
@@ -217,7 +217,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Gamma Output",
+                    title: "Gamma Output",
                     range: 0.1...5.0, step: 0.1,
                     value: Binding(
                         key: "GAMMA_OUTPUT",
@@ -226,7 +226,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Chroma Radius",
+                    title: "Chroma Radius",
                     range: 1...10, step: 1,
                     value: Binding(
                         key: "CHROMA_RADIUS",
@@ -238,7 +238,7 @@ final class PlaygroundShader: Shader {
             Group(title: "Blooming",
                   
                   setting: ShaderSetting(
-                    name: "",
+                    title: "",
                     value: Binding(
                         key: "BLOOM_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.BLOOM_ENABLE) },
@@ -246,7 +246,7 @@ final class PlaygroundShader: Shader {
                   [
                                                
                 ShaderSetting(
-                    name: "Bloom Filter",
+                    title: "Bloom Filter",
                     items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                     value: Binding(
                         key: "BLOOM_FILTER",
@@ -255,7 +255,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Bloom Threshold",
+                    title: "Bloom Threshold",
                     range: 0.0...1.0, step: 0.01,
                     value: Binding(
                         key: "BLOOM_THRESHOLD",
@@ -264,7 +264,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Bloom Intensity",
+                    title: "Bloom Intensity",
                     range: 0.1...2.0, step: 0.01,
                     value: Binding(
                         key: "BLOOM_INTENSITY",
@@ -273,7 +273,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Bloom Radius X",
+                    title: "Bloom Radius X",
                     range: 0.0...30.0, step: 1.0,
                     value: Binding(
                         key: "BLOOM_RADIUS_X",
@@ -282,7 +282,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Bloom Radius Y",
+                    title: "Bloom Radius Y",
                     range: 0.0...30.0, step: 1.0,
                     value: Binding(
                         key: "BLOOM_RADIUS_Y",
@@ -295,7 +295,7 @@ final class PlaygroundShader: Shader {
             Group(title: "Scanlines",
                   
                   setting: ShaderSetting(
-                    name: "",
+                    title: "",
                     value: Binding(
                         key: "SCANLINE_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.SCANLINE_ENABLE) },
@@ -303,7 +303,7 @@ final class PlaygroundShader: Shader {
                   [
                                                 
                 ShaderSetting(
-                    name: "Scanline Brightness",
+                    title: "Scanline Brightness",
                     range: 0.0...2.0, step: 0.01,
                     value: Binding(
                         key: "SCANLINE_BRIGHTNESS",
@@ -312,7 +312,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Scanline Weight 1",
+                    title: "Scanline Weight 1",
                     range: 0.1...1.0, step: 0.01,
                     value: Binding(
                         key: "SCANLINE_WEIGHT1",
@@ -321,7 +321,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Scanline Weight 2",
+                    title: "Scanline Weight 2",
                     range: 0.1...1.0, step: 0.01,
                     value: Binding(
                         key: "SCANLINE_WEIGHT2",
@@ -330,7 +330,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Scanline Weight 3",
+                    title: "Scanline Weight 3",
                     range: 0.1...1.0, step: 0.01,
                     value: Binding(
                         key: "SCANLINE_WEIGHT3",
@@ -339,7 +339,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Scanline Weight 4",
+                    title: "Scanline Weight 4",
                     range: 0.1...1.0, step: 0.01,
                     value: Binding(
                         key: "SCANLINE_WEIGHT4",
@@ -348,7 +348,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Scanline Weight 5",
+                    title: "Scanline Weight 5",
                     range: 0.1...1.0, step: 0.01,
                     value: Binding(
                         key: "SCANLINE_WEIGHT5",
@@ -357,7 +357,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Scanline Weight 6",
+                    title: "Scanline Weight 6",
                     range: 0.1...1.0, step: 0.01,
                     value: Binding(
                         key: "SCANLINE_WEIGHT6",
@@ -366,7 +366,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Scanline Weight 7",
+                    title: "Scanline Weight 7",
                     range: 0.1...1.0, step: 0.01,
                     value: Binding(
                         key: "SCANLINE_WEIGHT7",
@@ -375,7 +375,7 @@ final class PlaygroundShader: Shader {
                 ),
 
                 ShaderSetting(
-                    name: "Scanline Weight 8",
+                    title: "Scanline Weight 8",
                     range: 0.1...1.0, step: 0.01,
                     value: Binding(
                         key: "SCANLINE_WEIGHT8",
@@ -387,7 +387,7 @@ final class PlaygroundShader: Shader {
             Group(title: "Shadow Mask",
                   
                   setting: ShaderSetting(
-                    name: "",
+                    title: "",
                     value: Binding(
                         key: "SHADOW_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.SHADOW_ENABLE) },
@@ -395,7 +395,7 @@ final class PlaygroundShader: Shader {
                   [
                                                     
                 ShaderSetting(
-                    name: "Grid Width",
+                    title: "Grid Width",
                     range: 1.0...60.0, step: 1.0,
                     value: Binding(
                         key: "SHADOW_GRID_WIDTH",
@@ -404,7 +404,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Grid Height",
+                    title: "Grid Height",
                     range: 1.0...60.0, step: 1.0,
                     value: Binding(
                         key: "SHADOW_GRID_HEIGHT",
@@ -413,7 +413,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Maximal Dot Width",
+                    title: "Maximal Dot Width",
                     range: 0.0...1.0, step: 0.01,
                     value: Binding(
                         key: "SHADOW_DOT_WIDTH",
@@ -422,7 +422,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Maximal Dot Height",
+                    title: "Maximal Dot Height",
                     range: 0.0...1.0, step: 0.01,
                     value: Binding(
                         key: "SHADOW_DOT_HEIGHT",
@@ -431,7 +431,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Weight",
+                    title: "Weight",
                     range: 0.0...2.0, step: 0.01,
                     value: Binding(
                         key: "SHADOW_DOT_WEIGHT",
@@ -440,7 +440,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Glow",
+                    title: "Glow",
                     range: 0.05...5.0, step: 0.01,
                     value: Binding(
                         key: "SHADOW_DOT_GLOW",
@@ -449,7 +449,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Phosphor Feather",
+                    title: "Phosphor Feather",
                     range: 0.0...3.0, step: 0.01,
                     value: Binding(
                         key: "SHADOW_FEATHER",
@@ -461,7 +461,7 @@ final class PlaygroundShader: Shader {
             Group(title: "Dot Mask",
                   
                   setting: ShaderSetting(
-                    name: "",
+                    title: "",
                     value: Binding(
                         key: "DOTMASK_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.DOTMASK_ENABLE) },
@@ -469,7 +469,7 @@ final class PlaygroundShader: Shader {
                   [
                                                     
                 ShaderSetting(
-                    name: "Dotmask",
+                    title: "Dotmask",
                     range: 0...4, step: 1.0,
                     value: Binding(
                         key: "DOTMASK",
@@ -478,7 +478,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Dotmask Brightness",
+                    title: "Dotmask Brightness",
                     range: 0...1, step: 0.01,
                     value: Binding(
                         key: "DOTMASK_BRIGHTNESS",
@@ -487,7 +487,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Brightness",
+                    title: "Brightness",
                     range: 0.0...10.0, step: 0.01,
                     value: Binding(
                         key: "BRIGHTNESS",
@@ -496,7 +496,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Glow",
+                    title: "Glow",
                     range: 0.0...2.0, step: 0.01,
                     value: Binding(
                         key: "GLOW",
@@ -508,7 +508,7 @@ final class PlaygroundShader: Shader {
             Group(title: "Debugging",
                   
                   setting: ShaderSetting(
-                    name: "",
+                    title: "",
                     value: Binding(
                         key: "DEBUG_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.DEBUG_ENABLE) },
@@ -516,7 +516,7 @@ final class PlaygroundShader: Shader {
                   [
                                                     
                 ShaderSetting(
-                    name: "Debug",
+                    title: "Debug",
                     items: [ ("Ycc", 1),
                              ("Ycc (Mipmap 1)", 2),
                              ("Ycc (Mipmap 2)", 3),
@@ -534,7 +534,7 @@ final class PlaygroundShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Debug Slider",
+                    title: "Debug Slider",
                     range: 0.0...1.0, step: 0.01,
                     value: Binding(
                         key: "DEBUG_SLIDER",

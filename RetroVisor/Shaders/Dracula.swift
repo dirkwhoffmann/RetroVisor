@@ -160,7 +160,7 @@ final class DraculaShader: Shader {
             Group(title: "Textures", [
                 
                 ShaderSetting(
-                    name: "Input Downscaling Factor",
+                    title: "Input Downscaling Factor",
                     range: 0.125...1.0, step: 0.125,
                     value: Binding(
                         key: "INPUT_TEX_SCALE",
@@ -169,7 +169,7 @@ final class DraculaShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Output Upscaling Factor",
+                    title: "Output Upscaling Factor",
                     range: 1.0...2.0, step: 0.125,
                     value: Binding(
                         key: "OUTPUT_TEX_SCALE",
@@ -178,7 +178,7 @@ final class DraculaShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Resampler",
+                    title: "Resampler",
                     items: [("BILINEAR", 0), ("LANCZOS", 1)],
                     value: Binding(
                         key: "RESAMPLE_FILTER",
@@ -191,7 +191,7 @@ final class DraculaShader: Shader {
             Group(title: "Chroma Effects", [
                 
                 ShaderSetting(
-                    name: "Video Standard",
+                    title: "Video Standard",
                     items: [("PAL", 1), ("NTSC", 0)],
                     value: Binding(
                         key: "PAL",
@@ -200,7 +200,7 @@ final class DraculaShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Gamma Input",
+                    title: "Gamma Input",
                     range: 0.1...5.0, step: 0.1,
                     value: Binding(
                         key: "GAMMA_INPUT",
@@ -209,7 +209,7 @@ final class DraculaShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Gamma Output",
+                    title: "Gamma Output",
                     range: 0.1...5.0, step: 0.1,
                     value: Binding(
                         key: "GAMMA_OUTPUT",
@@ -218,7 +218,7 @@ final class DraculaShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Chroma Radius",
+                    title: "Chroma Radius",
                     range: 1...10, step: 1,
                     value: Binding(
                         key: "CHROMA_RADIUS",
@@ -230,14 +230,14 @@ final class DraculaShader: Shader {
             Group(title: "Blooming",
                   
                   setting: ShaderSetting(
-                    name: "Bloom enable",
+                    title: "Bloom enable",
                     enable: Binding(
                         key: "BLOOM_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.BLOOM_ENABLE) },
                         set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) })),
                  
                   [ ShaderSetting(
-                        name: "Bloom Filter",
+                        title: "Bloom Filter",
                         items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                         value: Binding(
                             key: "BLOOM_FILTER",
@@ -246,7 +246,7 @@ final class DraculaShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Bloom Threshold",
+                        title: "Bloom Threshold",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "BLOOM_THRESHOLD",
@@ -255,7 +255,7 @@ final class DraculaShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Bloom Intensity",
+                        title: "Bloom Intensity",
                         range: 0.1...2.0, step: 0.01,
                         value: Binding(
                             key: "BLOOM_INTENSITY",
@@ -264,7 +264,7 @@ final class DraculaShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Bloom Radius X",
+                        title: "Bloom Radius X",
                         range: 0.0...30.0, step: 1.0,
                         value: Binding(
                             key: "BLOOM_RADIUS_X",
@@ -273,7 +273,7 @@ final class DraculaShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Bloom Radius Y",
+                        title: "Bloom Radius Y",
                         range: 0.0...30.0, step: 1.0,
                         value: Binding(
                             key: "BLOOM_RADIUS_Y",
@@ -285,14 +285,14 @@ final class DraculaShader: Shader {
             Group(title: "Scanlines",
                   
                   setting: ShaderSetting(
-                    name: "Scanline Enable",
+                    title: "Scanline Enable",
                     enable: Binding(
                         key: "SCANLINES_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.SCANLINES_ENABLE) },
                         set: { [unowned self] in self.uniforms.SCANLINES_ENABLE = Int32($0) })),
                   [
                     ShaderSetting(
-                        name: "Scanline Distance",
+                        title: "Scanline Distance",
                         range: 1...8, step: 1,
                         value: Binding(
                             key: "SCANLINE_DISTANCE",
@@ -301,7 +301,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Sharpness",
+                        title: "Scanline Sharpness",
                         range: 0...4.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_SHARPNESS",
@@ -310,7 +310,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Bloom",
+                        title: "Scanline Bloom",
                         range: 0...1, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_BLOOM",
@@ -319,7 +319,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Weight 1",
+                        title: "Scanline Weight 1",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_WEIGHT1",
@@ -328,7 +328,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Weight 2",
+                        title: "Scanline Weight 2",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_WEIGHT2",
@@ -337,7 +337,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Weight 3",
+                        title: "Scanline Weight 3",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_WEIGHT3",
@@ -346,7 +346,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Weight 4",
+                        title: "Scanline Weight 4",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_WEIGHT4",
@@ -355,7 +355,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Weight 5",
+                        title: "Scanline Weight 5",
                         range: 0.1...1.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_WEIGHT5",
@@ -364,7 +364,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Weight 6",
+                        title: "Scanline Weight 6",
                         range: 0.1...1.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_WEIGHT6",
@@ -373,7 +373,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Weight 7",
+                        title: "Scanline Weight 7",
                         range: 0.1...1.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_WEIGHT7",
@@ -382,7 +382,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Weight 8",
+                        title: "Scanline Weight 8",
                         range: 0.1...1.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_WEIGHT8",
@@ -391,7 +391,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Scanline Brightness",
+                        title: "Scanline Brightness",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_BRIGHTNESS",
@@ -403,14 +403,14 @@ final class DraculaShader: Shader {
             Group(title: "Dot Mask",
                   
                   setting: ShaderSetting(
-                    name: "",
+                    title: "",
                     enable: Binding(
                         key: "DOTMASK_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.DOTMASK_ENABLE) },
                         set: { [unowned self] in self.uniforms.DOTMASK_ENABLE = Int32($0) })),
                   [
                     ShaderSetting(
-                        name: "Dotmask Type",
+                        title: "Dotmask Type",
                         items: [ ("Add", 0), ("Blend", 1), ("Scale", 2), ("Shift", 3) ],
                         value: Binding(
                             key: "DOTMASK_TYPE",
@@ -419,7 +419,7 @@ final class DraculaShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Dotmask Width",
+                        title: "Dotmask Width",
                         range: 3.0...15.0, step: 1.0,
                         value: Binding(
                             key: "DOTMASK_WIDTH",
@@ -428,7 +428,7 @@ final class DraculaShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Dotmask Weight",
+                        title: "Dotmask Weight",
                         range: 0.01...2.0, step: 0.01,
                         value: Binding(
                             key: "DOTMASK_WEIGHT",
@@ -437,7 +437,7 @@ final class DraculaShader: Shader {
                     ),
                                         
                     ShaderSetting(
-                        name: "Dotmask Shift",
+                        title: "Dotmask Shift",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "DOTMASK_SHIFT",
@@ -446,7 +446,7 @@ final class DraculaShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Dotmask Brightness",
+                        title: "Dotmask Brightness",
                         range: 0...20, step: 0.01,
                         value: Binding(
                             key: "DOTMASK_BRIGHTNESS",
@@ -455,7 +455,7 @@ final class DraculaShader: Shader {
                     ),
                                         
                     ShaderSetting(
-                        name: "Dotmask Blur",
+                        title: "Dotmask Blur",
                         range: 0...4, step: 0.01,
                         value: Binding(
                             key: "DOTMASK_BLUR",
@@ -464,7 +464,7 @@ final class DraculaShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Dotmask Mix",
+                        title: "Dotmask Mix",
                         range: 0...1, step: 0.01,
                         value: Binding(
                             key: "DOTMASK_MIX",
@@ -473,7 +473,7 @@ final class DraculaShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Dotmask Gain",
+                        title: "Dotmask Gain",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "DOTMASK_GAIN",
@@ -482,7 +482,7 @@ final class DraculaShader: Shader {
                     ),
 
                     ShaderSetting(
-                        name: "Dotmask Loose",
+                        title: "Dotmask Loose",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "DOTMASK_LOOSE",
@@ -495,7 +495,7 @@ final class DraculaShader: Shader {
             Group(title: "Debugging",
                   
                   setting: ShaderSetting(
-                    name: "",
+                    title: "",
                     enable: Binding(
                         key: "DEBUG_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.DEBUG_ENABLE) },
@@ -503,7 +503,7 @@ final class DraculaShader: Shader {
                   [
                                 
                     ShaderSetting(
-                        name: "Debug",
+                        title: "Debug",
                         items: [ ("Ycc", 1),
                                   ("Ycc (Mipmap 1)", 2),
                                   ("Ycc (Mipmap 2)", 3),
@@ -521,7 +521,7 @@ final class DraculaShader: Shader {
                     ),
                     
                     ShaderSetting(
-                        name: "Debug Slider",
+                        title: "Debug Slider",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "DEBUG_SLIDER",

@@ -70,7 +70,7 @@ final class CRTEasyShader: Shader {
             Group(title: "Uniforms", [
                 
                 ShaderSetting(
-                    name: "Brightness Boost",
+                    title: "Brightness Boost",
                     range: 0.0...2.0, step: 0.01,
                     value: Binding(
                         key: "BRIGHT_BOOST",
@@ -79,7 +79,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Horizontal Sharpness",
+                    title: "Horizontal Sharpness",
                     range: 0.0...1.0, step: 0.05,
                     value: Binding(
                         key: "SHARPNESS_H",
@@ -88,7 +88,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Vertical Sharpness",
+                    title: "Vertical Sharpness",
                     range: 0.0...1.0, step: 0.05,
                     value: Binding(
                         key: "SHARPNESS_V",
@@ -97,7 +97,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Dilation",
+                    title: "Dilation",
                     range: 0.0...1.0, step: 0.05,
                     value: Binding(
                         key: "DILATION",
@@ -106,7 +106,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Gamma Input",
+                    title: "Gamma Input",
                     range: 0.1...5.0, step: 0.1,
                     value: Binding(
                         key: "GAMMA_INPUT",
@@ -115,7 +115,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Gamma Output",
+                    title: "Gamma Output",
                     range: 0.1...5.0, step: 0.1,
                     value: Binding(
                         key: "GAMMA_OUTPUT",
@@ -124,7 +124,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Dot Mask Strength",
+                    title: "Dot Mask Strength",
                     range: 0.0...1.0, step: 0.01,
                     value: Binding(
                         key: "MASK_STRENGTH",
@@ -133,7 +133,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Dot Mask Width",
+                    title: "Dot Mask Width",
                     range: 1.0...100.0, step: 1.0,
                     value: Binding(
                         key: "MASK_DOT_WIDTH",
@@ -142,7 +142,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Dot Mask Height",
+                    title: "Dot Mask Height",
                     range: 1.0...100.0, step: 1.0,
                     value: Binding(
                         key: "MASK_DOT_HEIGHT",
@@ -151,7 +151,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Dot Mask Stagger",
+                    title: "Dot Mask Stagger",
                     range: 0.0...100.0, step: 1.0,
                     value: Binding(
                         key: "MASK_STAGGER",
@@ -160,7 +160,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Dot Mask Size",
+                    title: "Dot Mask Size",
                     range: 1.0...100.0, step: 1.0,
                     value: Binding(
                         key: "MASK_SIZE",
@@ -169,7 +169,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Scanline Strength",
+                    title: "Scanline Strength",
                     range: 0.0...1.0, step: 0.05,
                     value: Binding(
                         key: "SCANLINE_STRENGTH",
@@ -178,7 +178,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Scanline Minimum Beam Width",
+                    title: "Scanline Minimum Beam Width",
                     range: 0.5...5.0, step: 0.5,
                     value: Binding(
                         key: "SCANLINE_BEAM_WIDTH_MIN",
@@ -187,7 +187,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Scanline Maximum Beam Width",
+                    title: "Scanline Maximum Beam Width",
                     range: 0.5...5.0, step: 0.5,
                     value: Binding(
                         key: "SCANLINE_BEAM_WIDTH_MAX",
@@ -196,7 +196,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Scanline Minimum Brightness",
+                    title: "Scanline Minimum Brightness",
                     range: 0.0...1.0, step: 0.05,
                     value: Binding(
                         key: "SCANLINE_BEAM_WIDTH_MAX",
@@ -205,7 +205,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Scanline Maximum Brightness",
+                    title: "Scanline Maximum Brightness",
                     range: 0.0...1.0, step: 0.05,
                     value: Binding(
                         key: "SCANLINE_BRIGHT_MAX",
@@ -214,7 +214,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Scanline Cutoff",
+                    title: "Scanline Cutoff",
                     range: 1.0...1000.0, step: 1.0,
                     value: Binding(
                         key: "SCANLINE_CUTOFF",
@@ -223,7 +223,7 @@ final class CRTEasyShader: Shader {
                 ),
                 
                 ShaderSetting(
-                    name: "Lanczos Filter",
+                    title: "Lanczos Filter",
                     range: nil, step: 1.0,
                     value: Binding(
                         key: "ENABLE_LANCZOS",
