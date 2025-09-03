@@ -46,6 +46,7 @@ struct Vertex {
 struct Uniforms {
 
     var time: Float
+    var shift: SIMD2<Float>
     var zoom: Float
     var intensity: Float
     var resolution: SIMD2<Float>
@@ -71,6 +72,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var renderPass: MTLRenderPassDescriptor!
 
     var uniforms = Uniforms.init(time: 0.0,
+                                 shift: [0, 0],
                                  zoom: 1.0,
                                  intensity: 0.0,
                                  resolution: [0, 0],
@@ -90,7 +92,19 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var outTexture: MTLTexture?
 
     var time: Float = 0.0
-    var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
+    var shift: SIMD2<Float> = [0, 0] {
+        didSet {
+            shift.x = min(max(shift.x, 0.0), 1.0 - 1.0 / zoom)
+            shift.y = min(max(shift.y, 0.0), 1.0 - 1.0 / zoom)
+        }
+    }
+    var zoom: Float = 1.0 {
+        didSet {
+            zoom = min(max(zoom, 1.0), 16.0)
+        }
+    }
+
+    var center: SIMD2<Float> { [0.5 / zoom + shift.x, 0.5 / zoom + shift.y] }
 
     var intensity = Animated<Float>(0.0)
     var animates: Bool { intensity.current > 0 }
@@ -257,6 +271,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Setup uniforms
         uniforms.time = time
         uniforms.zoom = zoom
+        uniforms.shift = shift
         uniforms.intensity = intensity.current
         uniforms.resolution = [Float(inTexture.width), Float(inTexture.height)]
         uniforms.window = [Float(trackingWindow.liveFrame.width), Float(trackingWindow.liveFrame.height)]
@@ -325,5 +340,15 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {
 
         zoom += Float(recognizer.magnification) * 0.1
+    }
+    
+    override func scrollWheel(with event: NSEvent) {
+        
+        let deltaX = Float(event.scrollingDeltaX) / (2000.0 * zoom)
+        let deltaY = Float(event.scrollingDeltaY) / (2000.0 * zoom)
+    
+        shift = [shift.x - deltaX, shift.y - deltaY]
+        
+        print("Scroll wheel: \(deltaX) \(deltaY)")
     }
 }

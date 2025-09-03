@@ -150,22 +150,32 @@ extension AppDelegate: NSMenuItemValidation {
 
     @IBAction func resetZoom(_ sender: NSMenuItem) {
 
-        if let controller = windowController {
-            controller.metalView?.zoom = 1.0
+        if let metalView = windowController?.metalView {
+
+            metalView.zoom = 1.0
+            metalView.shift = [0, 0];
         }
     }
 
     @IBAction func zoomIn(_ sender: NSMenuItem) {
 
-        if let controller = windowController {
-            controller.metalView?.zoom += 0.5
+        if let metalView = windowController?.metalView {
+            
+            let oldCenter = metalView.center
+            metalView.zoom += 0.5
+            let newCenter = metalView.center
+            metalView.shift += oldCenter - newCenter;
         }
     }
 
     @IBAction func zoomOut(_ sender: NSMenuItem) {
 
-        if let controller = windowController {
-            controller.metalView?.zoom -= 0.5
+        if let metalView = windowController?.metalView {
+            
+            let oldCenter = metalView.center
+            metalView.zoom -= 0.5
+            let newCenter = metalView.center
+            metalView.shift += oldCenter - newCenter;
         }
     }
 }

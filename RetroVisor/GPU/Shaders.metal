@@ -42,9 +42,9 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
                               constant Uniforms& uniforms [[buffer(0)]],
                               sampler sam [[sampler(0)]]) {
 
-    float2 shift = float2(0.5 - 0.5 / uniforms.zoom, 0.5 - 0.5 / uniforms.zoom);
-    float2 uv = in.texCoord / uniforms.zoom + shift;
-    float2 mouse = uniforms.mouse / uniforms.zoom + shift;
+    // float2 shift = float2(0.5 - 0.5 / uniforms.zoom, 0.5 - 0.5 / uniforms.zoom);
+    float2 uv = in.texCoord / uniforms.zoom + uniforms.shift;
+    float2 mouse = uniforms.mouse / uniforms.zoom + uniforms.shift;
 
     if (uniforms.intensity > 0.0) {
 

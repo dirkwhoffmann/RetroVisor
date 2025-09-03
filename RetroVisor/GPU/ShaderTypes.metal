@@ -29,6 +29,7 @@ struct VertexOut {
 struct Uniforms {
 
     float time;
+    float2 shift;
     float zoom;
     float intensity;
     float2 resolution;
