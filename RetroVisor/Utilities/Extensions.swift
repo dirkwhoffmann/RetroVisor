@@ -70,6 +70,11 @@ extension CGRect {
     static var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }
 }
 
+extension NSSize {
+    
+    static var unity = NSSize(width: 1.0, height: 1.0)
+}
+
 extension NSScreen {
 
     static var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }

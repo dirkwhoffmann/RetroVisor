@@ -161,9 +161,9 @@ extension AppDelegate: NSMenuItemValidation {
 
         if let metalView = windowController?.metalView {
             
-            let oldCenter = metalView.center
+            let oldCenter = metalView.map(coord: [0.5,0.5])
             metalView.zoom += 0.5
-            let newCenter = metalView.center
+            let newCenter = metalView.map(coord: [0.5,0.5])
             metalView.shift += oldCenter - newCenter;
         }
     }
@@ -172,9 +172,9 @@ extension AppDelegate: NSMenuItemValidation {
 
         if let metalView = windowController?.metalView {
             
-            let oldCenter = metalView.center
+            let oldCenter = metalView.map(coord: [0.5,0.5])
             metalView.zoom -= 0.5
-            let newCenter = metalView.center
+            let newCenter = metalView.map(coord: [0.5,0.5])
             metalView.shift += oldCenter - newCenter;
         }
     }

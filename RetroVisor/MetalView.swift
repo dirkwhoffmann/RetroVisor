@@ -91,7 +91,12 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     // Final output texture rendered in the effect window
     var outTexture: MTLTexture?
 
+    // Animation parameters
     var time: Float = 0.0
+    var intensity = Animated<Float>(0.0)
+    var animates: Bool { intensity.current > 0 }
+
+    // Zooming and panning
     var shift: SIMD2<Float> = [0, 0] {
         didSet {
             shift.x = min(max(shift.x, 0.0), 1.0 - 1.0 / zoom)
@@ -104,11 +109,18 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         }
     }
 
-    var center: SIMD2<Float> { [0.5 / zoom + shift.x, 0.5 / zoom + shift.y] }
-
-    var intensity = Animated<Float>(0.0)
-    var animates: Bool { intensity.current > 0 }
-
+    // Maps a [0,1]-coordinate to the zoom/shift area
+    func map(coord: SIMD2<Float>, size: NSSize = .unity) -> SIMD2<Float> {
+        
+        let normalized = SIMD2<Float>(coord.x / Float(size.width),
+                                      coord.y / Float(size.height))
+        return normalized / zoom + shift
+    }
+    func map(point: NSPoint, size: NSSize = .unity) -> SIMD2<Float> {
+    
+        return map(coord: [Float(point.x), Float(point.y)], size: size)
+    }
+    
     required init(coder: NSCoder) {
 
         super.init(coder: coder)
@@ -339,7 +351,17 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {
 
+        // Get the current mouse position and flip the y coordinate
+        var location = recognizer.location(in: self)
+        location.y = bounds.height - location.y
+        
+        // Apply the zoom effect
+        let oldLocation = map(point: location, size: bounds.size)
         zoom += Float(recognizer.magnification) * 0.1
+        let newLocation = map(point: location, size: bounds.size)
+
+        // Shift the image such that the mouse points to the same pixel again
+        shift += oldLocation - newLocation
     }
     
     override func scrollWheel(with event: NSEvent) {
