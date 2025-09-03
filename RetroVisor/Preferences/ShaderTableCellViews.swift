@@ -35,8 +35,8 @@ class ShaderGroupView: NSTableCellView {
 
             enableButton.isHidden = false
             disclosureButton.isHidden = true
-            enableButton.state = group.enable?.boolValue == true ? .on : .off
-            subLabel.stringValue = "\(group.enable!.key)"
+            enableButton.state = group.enable?.value.boolValue == true ? .on : .off
+            subLabel.stringValue = "\(group.enable!.value.key)"
         }
 
         if expandable {
@@ -63,7 +63,7 @@ class ShaderGroupView: NSTableCellView {
 
     @IBAction func enableAction(_ sender: NSButton) {
 
-        group.enable?.boolValue = sender.state == .on
+        group.enable?.value.boolValue = sender.state == .on
 
         if sender.state == .on {
             controller.outlineView.expandItem(group)

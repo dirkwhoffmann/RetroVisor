@@ -83,20 +83,23 @@ final class PassthroughShader: Shader {
                 ),
             ]),
             
-            Group(title: "Filter", enable: Binding(
-                
-                key: "BLUR_ENABLE",
-                get: { [unowned self] in Float(self.uniforms.BLUR_ENABLE) },
-                set: { [unowned self] in self.uniforms.BLUR_ENABLE = Int32($0) }), [
-                    
-                    ShaderSetting(
-                        name: "Blur Filter",
-                        items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
-                        value: Binding(
-                            key: "BLUR_FILTER",
-                            get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
-                            set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) }),
-                    ),
+            Group(title: "Filter",
+                  
+                  enable: ShaderSetting(
+                    name: "Filter Enable",
+                    value: Binding(
+                        key: "BLUR_ENABLE",
+                        get: { [unowned self] in Float(self.uniforms.BLUR_ENABLE) },
+                        set: { [unowned self] in self.uniforms.BLUR_ENABLE = Int32($0) })),
+                  
+                  [ ShaderSetting(
+                    name: "Blur Filter",
+                    items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
+                    value: Binding(
+                        key: "BLUR_FILTER",
+                        get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
+                        set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) }),
+                  ),
                     
                     ShaderSetting(
                         name: "Blur width",
@@ -138,7 +141,7 @@ final class PassthroughShader: Shader {
                             get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y },
                             set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y = $0 }),
                     )
-                ])
+                  ])
         ]
     }
     

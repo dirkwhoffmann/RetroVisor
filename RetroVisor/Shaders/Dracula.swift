@@ -227,13 +227,16 @@ final class DraculaShader: Shader {
                 ),
             ]),
             
-            Group(title: "Blooming", enable: Binding(
-                
-                key: "BLOOM_ENABLE",
-                get: { [unowned self] in Float(self.uniforms.BLOOM_ENABLE) },
-                set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) }), [
-                    
-                    ShaderSetting(
+            Group(title: "Blooming",
+                  
+                  enable: ShaderSetting(
+                    name: "Bloom enable",
+                    value: Binding(
+                        key: "BLOOM_ENABLE",
+                        get: { [unowned self] in Float(self.uniforms.BLOOM_ENABLE) },
+                        set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) })),
+                 
+                  [ ShaderSetting(
                         name: "Bloom Filter",
                         items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
                         value: Binding(
@@ -279,12 +282,15 @@ final class DraculaShader: Shader {
                     ),
                 ]),
             
-            Group(title: "Scanlines", enable: Binding(
-                
-                key: "SCANLINES_ENABLE",
-                get: { [unowned self] in Float(self.uniforms.SCANLINES_ENABLE) },
-                set: { [unowned self] in self.uniforms.SCANLINES_ENABLE = Int32($0) }), [
-                    
+            Group(title: "Scanlines",
+                  
+                  enable: ShaderSetting(
+                    name: "Scanline Enable",
+                    value: Binding(
+                        key: "SCANLINES_ENABLE",
+                        get: { [unowned self] in Float(self.uniforms.SCANLINES_ENABLE) },
+                        set: { [unowned self] in self.uniforms.SCANLINES_ENABLE = Int32($0) })),
+                  [
                     ShaderSetting(
                         name: "Scanline Distance",
                         range: 1...8, step: 1,
@@ -394,12 +400,15 @@ final class DraculaShader: Shader {
                     ),
                 ]),
             
-            Group(title: "Dot Mask", enable: Binding(
-                
-                key: "DOTMASK_ENABLE",
-                get: { [unowned self] in Float(self.uniforms.DOTMASK_ENABLE) },
-                set: { [unowned self] in self.uniforms.DOTMASK_ENABLE = Int32($0) }), [
-                    
+            Group(title: "Dot Mask",
+                  
+                  enable: ShaderSetting(
+                    name: "",
+                    value: Binding(
+                        key: "DOTMASK_ENABLE",
+                        get: { [unowned self] in Float(self.uniforms.DOTMASK_ENABLE) },
+                        set: { [unowned self] in self.uniforms.DOTMASK_ENABLE = Int32($0) })),
+                  [
                     ShaderSetting(
                         name: "Dotmask Type",
                         items: [ ("Add", 0), ("Blend", 1), ("Scale", 2), ("Shift", 3) ],
@@ -483,12 +492,16 @@ final class DraculaShader: Shader {
 
                 ]),
             
-            Group(title: "Debugging", enable: Binding(
-                
-                key: "DEBUG_ENABLE",
-                get: { [unowned self] in Float(self.uniforms.DEBUG_ENABLE) },
-                set: { [unowned self] in self.uniforms.DEBUG_ENABLE = Int32($0) }), [
-                    
+            Group(title: "Debugging",
+                  
+                  enable: ShaderSetting(
+                    name: "",
+                    value: Binding(
+                        key: "DEBUG_ENABLE",
+                        get: { [unowned self] in Float(self.uniforms.DEBUG_ENABLE) },
+                        set: { [unowned self] in self.uniforms.DEBUG_ENABLE = Int32($0) })),
+                  [
+                                
                     ShaderSetting(
                         name: "Debug",
                         items: [ ("Ycc", 1),

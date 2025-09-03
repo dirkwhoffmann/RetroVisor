@@ -104,7 +104,10 @@ class Group {
     var view: ShaderGroupView?
 
     // Binding for the enable key (optional)
-    var enable: Binding?
+    // var enable: Binding?
+    
+    // Optional group enable setting
+    var enable: ShaderSetting?
     
     // All settings in this group
     var children: [ShaderSetting]
@@ -112,7 +115,7 @@ class Group {
     var count: Int { children.filter { $0.hidden() == false }.count }
     
     init(title: String,
-         enable: Binding? = nil,
+         enable: ShaderSetting? = nil,
          _ children: [ShaderSetting]) {
         
         self.title = title
