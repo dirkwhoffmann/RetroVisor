@@ -7,8 +7,9 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
-#include <metal_stdlib>
 #include "ShaderTypes.metal"
+#include "MathToolbox.metal"
+#include "ColorToolbox.metal"
 
 using namespace metal;
 
@@ -38,6 +39,7 @@ namespace hsv {
 
     #define USE_OPTIMIZED_HSV   0   // set to 0 for readable version
 
+    /*
 #if USE_OPTIMIZED_HSV
 
     float3 rgb2hsv(float3 c) {
@@ -119,7 +121,8 @@ namespace hsv {
     }
 
 #endif
-
+*/
+    
     kernel void hsv(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                     texture2d<half, access::write>  outTex    [[ texture(1) ]],
                     constant HSVUniforms            &u        [[ buffer(0)  ]],
@@ -136,13 +139,13 @@ namespace hsv {
         Color3 rgb = Color3(inTex.sample(sam, uv).rgb);
 
         // Split components
-        float3 hsv = rgb2hsv(float3(rgb));
+        Color3 hsv = RGB2HSV(Color3(rgb));
 
         if (u.H_ENABLE) hsv.x = u.H_VALUE;
         if (u.S_ENABLE) hsv.y = u.S_VALUE;
         if (u.V_ENABLE) hsv.z = u.V_VALUE;
 
-        rgb = Color3(hsv2rgb(hsv));
+        rgb = HSV2RGB(hsv);
         outTex.write(Color4(rgb, 1.0), gid);
     }
 

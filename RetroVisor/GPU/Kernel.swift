@@ -131,7 +131,7 @@ class CrtEasyKernel: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
 
-        self.init(name: "crtEasy", sampler: sampler)
+        self.init(name: "crteasy::crtEasy", sampler: sampler)
     }
 }
 

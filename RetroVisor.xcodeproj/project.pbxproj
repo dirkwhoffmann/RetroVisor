@@ -83,6 +83,8 @@
 		506936572E4F49220037984F /* PlaygroundShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaygroundShader.swift; sourceTree = "<group>"; };
 		506936592E4F49C40037984F /* Playground.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Playground.metal; sourceTree = "<group>"; };
 		5069365B2E4F76250037984F /* Kernel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kernel.swift; sourceTree = "<group>"; };
+		507ADD342E68770A00BB7E10 /* ColorToolbox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ColorToolbox.metal; sourceTree = "<group>"; };
+		507ADD362E68778900BB7E10 /* MathToolbox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MathToolbox.metal; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		509E84C22E57584100384C75 /* ImageToolbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageToolbox.swift; sourceTree = "<group>"; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -222,6 +224,8 @@
 			isa = PBXGroup;
 			children = (
 				5069365B2E4F76250037984F /* Kernel.swift */,
+				507ADD362E68778900BB7E10 /* MathToolbox.metal */,
+				507ADD342E68770A00BB7E10 /* ColorToolbox.metal */,
 				50BA96652E3FF176006BA8DF /* ShaderTypes.metal */,
 				50BA964D2E3C80D6006BA8DF /* Shaders.metal */,
 				50BA96632E3FF0B3006BA8DF /* CrtEasy.metal */,

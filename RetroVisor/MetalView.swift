@@ -370,7 +370,5 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         let deltaY = Float(event.scrollingDeltaY) / (2000.0 * zoom)
     
         shift = [shift.x - deltaX, shift.y - deltaY]
-        
-        print("Scroll wheel: \(deltaX) \(deltaY)")
     }
 }

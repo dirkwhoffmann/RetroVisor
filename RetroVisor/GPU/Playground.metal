@@ -9,6 +9,8 @@
 
 #include <metal_stdlib>
 #include "ShaderTypes.metal"
+#include "MathToolbox.metal"
+#include "ColorToolbox.metal"
 
 using namespace metal;
 
@@ -16,18 +18,72 @@ using namespace metal;
 // Welcome to Dirk's shader playground
 //
 
-typedef float   Coord;
-typedef float2  Coord2;
-typedef half    Color;
-typedef half3   Color3;
-typedef half4   Color4;
-
 namespace playground {
+    
+    typedef float   Coord;
+    typedef float2  Coord2;
+    typedef half    Color;
+    typedef half3   Color3;
+    typedef half4   Color4;
+    
+    struct PlaygroundUniforms {
+
+        float INPUT_TEX_SCALE;
+        float OUTPUT_TEX_SCALE;
+        uint  RESAMPLE_FILTER;
+
+        // Chroma phase
+        uint  PAL;
+        float GAMMA_INPUT;
+        float GAMMA_OUTPUT;
+        float CHROMA_RADIUS;
+
+        // Bloom effect
+        uint  BLOOM_ENABLE;
+        uint  BLOOM_FILTER;
+        float BLOOM_THRESHOLD;
+        float BLOOM_INTENSITY;
+        float BLOOM_RADIUS_X;
+        float BLOOM_RADIUS_Y;
+
+        uint  SCANLINE_ENABLE;
+        float SCANLINE_BRIGHTNESS;
+        float SCANLINE_WEIGHT1;
+        float SCANLINE_WEIGHT2;
+        float SCANLINE_WEIGHT3;
+        float SCANLINE_WEIGHT4;
+        float SCANLINE_WEIGHT5;
+        float SCANLINE_WEIGHT6;
+        float SCANLINE_WEIGHT7;
+        float SCANLINE_WEIGHT8;
+
+        // Shadow mask
+        uint  SHADOW_ENABLE;
+        float BRIGHTNESS;
+        float GLOW;
+        float SHADOW_GRID_WIDTH;
+        float SHADOW_GRID_HEIGHT;
+        float SHADOW_DOT_WIDTH;
+        float SHADOW_DOT_HEIGHT;
+        float SHADOW_DOT_WEIGHT;
+        float SHADOW_DOT_GLOW;
+        float SHADOW_FEATHER;
+
+        // Dot mask
+        uint  DOTMASK_ENABLE;
+        uint  DOTMASK;
+        float DOTMASK_BRIGHTNESS;
+
+        uint  DEBUG_ENABLE;
+        uint  DEBUG_TEXTURE;
+        float DEBUG_SLIDER;
+    };
 
     //
     // Color space helpers
     //
 
+    /*
     inline float3 RGB2YIQ(float3 rgb) {
 
         // NTSC YIQ (BT.470)
@@ -89,7 +145,8 @@ namespace playground {
 
         return half3(YUV2RGB(float3(yuv)));
     }
-
+    */
+    
     //
     // RGB to YUV/YIQ converter
     //
@@ -245,8 +302,8 @@ namespace playground {
         half vOut = mix(half(yccC.z), maxV, half(smoothstep(0.0, 1.0, 1.0 - distV)));
 
         // Recombine with luma and convert back to RGB
-        float3 combined = float3(yccC.x, uOut, vOut);
-        float3 rgb = u.PAL ? YUV2RGB(combined) : YIQ2RGB(combined);
+        Color3 combined = Color3(yccC.x, uOut, vOut);
+        Color3 rgb = u.PAL ? YUV2RGB(combined) : YIQ2RGB(combined);
 
         // Write pixel
         // outTex.write(half4(half3(rgb), 1.0), gid);
@@ -280,7 +337,7 @@ namespace playground {
         if (u.BLOOM_ENABLE) {
 
             // Compute luminance
-            float Y = dot(rgb, float3(0.299, 0.587, 0.114));
+            Color Y = dot(rgb, Color3(0.299, 0.587, 0.114));
 
             // Keep only if brighter than threshold
             half3 mask = half3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(Y)));

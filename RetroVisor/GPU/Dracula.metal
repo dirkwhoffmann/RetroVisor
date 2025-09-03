@@ -9,18 +9,12 @@
 
 #include <metal_stdlib>
 #include "ShaderTypes.metal"
+#include "ColorToolbox.metal"
+#include "MathToolbox.metal"
 
 using namespace metal;
 
-typedef float   Coord;
-typedef float2  Coord2;
-typedef half    Color;
-typedef half3   Color3;
-typedef half4   Color4;
-
 namespace dracula {
-
-    constant constexpr float M_PI = 3.14159265358979323846264338327950288;
 
     struct Uniforms {
 
@@ -80,6 +74,7 @@ namespace dracula {
     // Color space helpers
     //
 
+    /*
     inline float3 RGB2YIQ(float3 rgb) {
 
         // NTSC YIQ (BT.470)
@@ -164,7 +159,8 @@ namespace dracula {
         Color3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
         return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
     }
-
+    */
+    
     //
     // RGB to YUV/YIQ converter
     //
@@ -350,8 +346,8 @@ namespace dracula {
         half vOut = mix(half(yccC.z), maxV, half(smoothstep(0.0, 1.0, 1.0 - distV)));
 
         // Recombine with luma and convert back to RGB
-        float3 combined = float3(yccC.x, uOut, vOut);
-        float3 rgb = u.PAL ? YUV2RGB(combined) : YIQ2RGB(combined);
+        Color3 combined = Color3(yccC.x, uOut, vOut);
+        Color3 rgb = u.PAL ? YUV2RGB(combined) : YIQ2RGB(combined);
 
         // Write pixel
         // outTex.write(half4(half3(rgb), 1.0), gid);
@@ -371,7 +367,7 @@ namespace dracula {
         if (u.BLOOM_ENABLE) {
 
             // Compute luminance
-            float Y = dot(rgb, float3(0.299, 0.587, 0.114));
+            Color Y = dot(rgb, Color3(0.299, 0.587, 0.114));
 
             // Keep only if brighter than threshold
             half3 mask = half3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(Y)));
