@@ -85,7 +85,7 @@ final class PassthroughShader: Shader {
             
             Group(title: "Filter",
                   
-                  enable: ShaderSetting(
+                  setting: ShaderSetting(
                     name: "Filter Enable",
                     value: Binding(
                         key: "BLUR_ENABLE",

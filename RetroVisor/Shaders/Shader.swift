@@ -23,6 +23,7 @@ struct Binding {
         self.set = set
     }
     
+    /*
     var boolValue: Bool {
         
         get { get() != 0 }
@@ -46,6 +47,7 @@ struct Binding {
         get { get() }
         set { set(newValue) }
     }
+    */
 }
 
 class ShaderSetting {
@@ -66,11 +68,11 @@ class ShaderSetting {
     // Indicates if this options should be hidden from the user
     var hidden: () -> Bool = { false }
 
-    // Binding for the optional enable key
+    // Binding for the enable key
     var enable: Binding?
 
-    // Binding for the mandatory value key
-    var value: Binding
+    // Binding for the value key
+    var value: Binding?
     
     var formatString: String { "%.3g" }
 
@@ -79,7 +81,7 @@ class ShaderSetting {
          step: Float = 0.01,
          items: [(String,Int)]? = nil,
          enable: Binding? = nil,
-         value: Binding,
+         value: Binding? = nil,
          help: String? = nil,
          hidden: @escaping () -> Bool = { false }
         ) {
@@ -92,6 +94,34 @@ class ShaderSetting {
         self.items = items
         self.help = help
         self.hidden = hidden
+    }
+ 
+    var enableKey: String { enable?.key ?? "" }
+    var valueKey: String { value?.key ?? "" }
+
+    var enabled: Bool? {
+        get { enable.map { $0.get() != 0 } }
+        set { newValue.map { enable?.set($0.floatValue) } }
+    }
+                    
+    var boolValue: Bool? {
+        get { value.map { $0.get() != 0 } }
+        set { newValue.map { value?.set($0.floatValue) } }
+    }
+
+    var int32Value: Int32? {
+        get { value.map { Int32($0.get()) } }
+        set { newValue.map { value?.set(Float($0)) } }
+    }
+
+    var intValue: Int? {
+        get { value.map { Int($0.get()) } }
+        set { newValue.map { value?.set(Float($0)) } }
+    }
+
+    var floatValue: Float? {
+        get { value.map { $0.get() } }
+        set { newValue.map { value?.set($0) } }
     }
 }
 
@@ -106,8 +136,8 @@ class Group {
     // Binding for the enable key (optional)
     // var enable: Binding?
     
-    // Optional group enable setting
-    var enable: ShaderSetting?
+    // Optional group setting
+    var setting: ShaderSetting?
     
     // All settings in this group
     var children: [ShaderSetting]
@@ -115,11 +145,11 @@ class Group {
     var count: Int { children.filter { $0.hidden() == false }.count }
     
     init(title: String,
-         enable: ShaderSetting? = nil,
+         setting: ShaderSetting? = nil,
          _ children: [ShaderSetting]) {
         
         self.title = title
-        self.enable = enable
+        self.setting = setting
         self.children = children
     }
 }

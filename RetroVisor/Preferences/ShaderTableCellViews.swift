@@ -20,8 +20,8 @@ class ShaderGroupView: NSTableCellView {
     var group: Group!
 
     var shader: Shader { controller.shader }
-    var clickable: Bool { group.enable != nil }
-    var expandable: Bool { group.enable == nil }
+    // var clickable: Bool { group.setting != nil }
+    // var expandable: Bool { group.setting == nil }
 
     func setup(with group: Group) {
 
@@ -31,15 +31,14 @@ class ShaderGroupView: NSTableCellView {
         let count = group.children.count
         let optString = "\(count) option" + (count > 1 ? "s" : "")
 
-        if clickable {
-
+        if let setting = group.setting {
+            
             enableButton.isHidden = false
             disclosureButton.isHidden = true
-            enableButton.state = group.enable?.value.boolValue == true ? .on : .off
-            subLabel.stringValue = "\(group.enable!.value.key)"
-        }
-
-        if expandable {
+            enableButton.state = setting.enabled != false ? .on : .off
+            subLabel.stringValue = "\(setting.enableKey)"
+            
+        } else {
 
             enableButton.isHidden = true
             disclosureButton.isHidden = false
@@ -63,7 +62,7 @@ class ShaderGroupView: NSTableCellView {
 
     @IBAction func enableAction(_ sender: NSButton) {
 
-        group.enable?.value.boolValue = sender.state == .on
+        group.setting?.enabled = sender.state == .on
 
         if sender.state == .on {
             controller.outlineView.expandItem(group)
@@ -93,11 +92,11 @@ class ShaderSettingView: NSTableCellView {
         didSet {
 
             // let enableKey = shaderSetting.enableKey
-            let enabled = shaderSetting.enable?.boolValue != false
+            let enabled = shaderSetting.enabled ?? true
             let active = !shaderSetting.hidden()
 
             optionLabel.stringValue = shaderSetting.name
-            subLabel.stringValue = shaderSetting.value.key
+            subLabel.stringValue = shaderSetting.value?.key ?? ""
             helpButtom.isHidden = shaderSetting.help == nil
             optCeckbox.isHidden = shaderSetting.enable == nil
 
@@ -150,8 +149,8 @@ class ShaderSettingView: NSTableCellView {
 
     func update() {
 
-        let value = shaderSetting.value.floatValue //  shader.get(key: shaderSetting.key)
-        let enable = shaderSetting.enable?.boolValue
+        let value = shaderSetting.floatValue ?? 0 //  shader.get(key: shaderSetting.key)
+        let enable = shaderSetting.enabled
         
         if !optCeckbox.isHidden {
 
@@ -175,8 +174,8 @@ class ShaderSettingView: NSTableCellView {
 
         let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
-        shaderSetting.value.floatValue = rounded
-        value = shaderSetting.value.floatValue
+        shaderSetting.floatValue = rounded
+        value = shaderSetting.floatValue
     }
 
     @IBAction func stepperAction(_ sender: NSControl) {
@@ -186,14 +185,14 @@ class ShaderSettingView: NSTableCellView {
 
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
-        shaderSetting.value.intValue = sender.selectedTag()
+        shaderSetting.intValue = sender.selectedTag()
         update();
         controller.outlineView.reloadData()
     }
 
     @IBAction func enableAction(_ sender: NSButton) {
 
-        shaderSetting.enable?.boolValue = sender.state == .on
+        shaderSetting.enabled = sender.state == .on
         update();
         controller.outlineView.reloadData()
     }

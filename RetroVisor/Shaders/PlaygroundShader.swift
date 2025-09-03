@@ -237,7 +237,7 @@ final class PlaygroundShader: Shader {
 
             Group(title: "Blooming",
                   
-                  enable: ShaderSetting(
+                  setting: ShaderSetting(
                     name: "",
                     value: Binding(
                         key: "BLOOM_ENABLE",
@@ -294,7 +294,7 @@ final class PlaygroundShader: Shader {
 
             Group(title: "Scanlines",
                   
-                  enable: ShaderSetting(
+                  setting: ShaderSetting(
                     name: "",
                     value: Binding(
                         key: "SCANLINE_ENABLE",
@@ -386,7 +386,7 @@ final class PlaygroundShader: Shader {
             
             Group(title: "Shadow Mask",
                   
-                  enable: ShaderSetting(
+                  setting: ShaderSetting(
                     name: "",
                     value: Binding(
                         key: "SHADOW_ENABLE",
@@ -460,7 +460,7 @@ final class PlaygroundShader: Shader {
             
             Group(title: "Dot Mask",
                   
-                  enable: ShaderSetting(
+                  setting: ShaderSetting(
                     name: "",
                     value: Binding(
                         key: "DOTMASK_ENABLE",
@@ -507,7 +507,7 @@ final class PlaygroundShader: Shader {
             
             Group(title: "Debugging",
                   
-                  enable: ShaderSetting(
+                  setting: ShaderSetting(
                     name: "",
                     value: Binding(
                         key: "DEBUG_ENABLE",

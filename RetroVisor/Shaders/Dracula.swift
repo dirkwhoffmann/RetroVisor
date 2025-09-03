@@ -229,9 +229,9 @@ final class DraculaShader: Shader {
             
             Group(title: "Blooming",
                   
-                  enable: ShaderSetting(
+                  setting: ShaderSetting(
                     name: "Bloom enable",
-                    value: Binding(
+                    enable: Binding(
                         key: "BLOOM_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.BLOOM_ENABLE) },
                         set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) })),
@@ -284,9 +284,9 @@ final class DraculaShader: Shader {
             
             Group(title: "Scanlines",
                   
-                  enable: ShaderSetting(
+                  setting: ShaderSetting(
                     name: "Scanline Enable",
-                    value: Binding(
+                    enable: Binding(
                         key: "SCANLINES_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.SCANLINES_ENABLE) },
                         set: { [unowned self] in self.uniforms.SCANLINES_ENABLE = Int32($0) })),
@@ -402,9 +402,9 @@ final class DraculaShader: Shader {
             
             Group(title: "Dot Mask",
                   
-                  enable: ShaderSetting(
+                  setting: ShaderSetting(
                     name: "",
-                    value: Binding(
+                    enable: Binding(
                         key: "DOTMASK_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.DOTMASK_ENABLE) },
                         set: { [unowned self] in self.uniforms.DOTMASK_ENABLE = Int32($0) })),
@@ -494,9 +494,9 @@ final class DraculaShader: Shader {
             
             Group(title: "Debugging",
                   
-                  enable: ShaderSetting(
+                  setting: ShaderSetting(
                     name: "",
-                    value: Binding(
+                    enable: Binding(
                         key: "DEBUG_ENABLE",
                         get: { [unowned self] in Float(self.uniforms.DEBUG_ENABLE) },
                         set: { [unowned self] in self.uniforms.DEBUG_ENABLE = Int32($0) })),
