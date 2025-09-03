@@ -15,4 +15,9 @@ typedef float2  Coord2;
 
 constant constexpr float M_PI = 3.14159265358979323846264338327950288;
 
+template<typename T>
+inline T sigmoid(T x, float k) {
+    return 1.0 / (1.0 + exp(-k * (x - 0.5)));
+}
+
 #endif

@@ -104,4 +104,5 @@ inline Color4 YUV2RGB(Color4 yuva) {
     return Color4(YUV2RGB(Color3(yuva)), yuva.a);
 }
 
+
 #endif

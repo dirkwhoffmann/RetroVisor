@@ -79,74 +79,7 @@ namespace playground {
         float DEBUG_SLIDER;
     };
 
-    //
-    // Color space helpers
-    //
-
-    /*
-    inline float3 RGB2YIQ(float3 rgb) {
-
-        // NTSC YIQ (BT.470)
-        return float3(
-                      dot(rgb, float3(0.299,  0.587,  0.114)),   // Y
-                      dot(rgb, float3(0.596, -0.274, -0.322)),   // I
-                      dot(rgb, float3(0.211, -0.523,  0.312))    // Q
-                      );
-    }
-
-    inline half3 RGB2YIQ(half3 rgb) {
-
-        return half3(RGB2YIQ(float3(rgb)));
-    }
-
-    inline float3 YIQ2RGB(float3 yiq) {
-
-        float Y = yiq.x, I = yiq.y, Q = yiq.z;
-        float3 rgb = float3(
-                            Y + 0.956 * I + 0.621 * Q,
-                            Y - 0.272 * I - 0.647 * Q,
-                            Y - 1.106 * I + 1.703 * Q
-                            );
-        return clamp(rgb, 0.0, 1.0);
-    }
-
-    inline half3 YIQ2RGB(half3 yiq) {
-
-        return half3(YIQ2RGB(float3(yiq)));
-    }
-
-    inline float3 RGB2YUV(float3 rgb) {
-
-        // PAL-ish YUV (BT.601)
-        return float3(
-                      dot(rgb, float3(0.299,     0.587,    0.114)),   // Y
-                      dot(rgb, float3(-0.14713, -0.28886,  0.436)),   // U
-                      dot(rgb, float3(0.615,    -0.51499, -0.10001))  // V
-                      );
-    }
-
-    inline half3 RGB2YUV(half3 rgb) {
-
-        return half3(RGB2YUV(float3(rgb)));
-    }
-
-    inline float3 YUV2RGB(float3 yuv) {
-
-        float Y = yuv.x, U = yuv.y, V = yuv.z;
-        float3 rgb = float3(
-                            Y + 1.13983 * V,
-                            Y - 0.39465 * U - 0.58060 * V,
-                            Y + 2.03211 * U
-                            );
-        return clamp(rgb, 0.0, 1.0);
-    }
-
-    inline half3 YUV2RGB(half3 yuv) {
-
-        return half3(YUV2RGB(float3(yuv)));
-    }
-    */
-    
+ 
     //
     // RGB to YUV/YIQ converter
     //

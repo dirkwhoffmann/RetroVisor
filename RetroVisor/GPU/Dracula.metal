@@ -71,97 +71,6 @@ namespace dracula {
     };
     
     //
-    // Color space helpers
-    //
-
-    /*
-    inline float3 RGB2YIQ(float3 rgb) {
-
-        // NTSC YIQ (BT.470)
-        return float3(
-                      dot(rgb, float3(0.299,  0.587,  0.114)),   // Y
-                      dot(rgb, float3(0.596, -0.274, -0.322)),   // I
-                      dot(rgb, float3(0.211, -0.523,  0.312))    // Q
-                      );
-    }
-
-    inline half3 RGB2YIQ(half3 rgb) {
-
-        return half3(RGB2YIQ(float3(rgb)));
-    }
-
-    inline float3 YIQ2RGB(float3 yiq) {
-
-        float Y = yiq.x, I = yiq.y, Q = yiq.z;
-        float3 rgb = float3(
-                            Y + 0.956 * I + 0.621 * Q,
-                            Y - 0.272 * I - 0.647 * Q,
-                            Y - 1.106 * I + 1.703 * Q
-                            );
-        return clamp(rgb, 0.0, 1.0);
-    }
-
-    inline half3 YIQ2RGB(half3 yiq) {
-
-        return half3(YIQ2RGB(float3(yiq)));
-    }
-
-    inline float3 RGB2YUV(float3 rgb) {
-
-        // PAL-ish YUV (BT.601)
-        return float3(
-                      dot(rgb, float3(0.299,     0.587,    0.114)),   // Y
-                      dot(rgb, float3(-0.14713, -0.28886,  0.436)),   // U
-                      dot(rgb, float3(0.615,    -0.51499, -0.10001))  // V
-                      );
-    }
-
-    inline half3 RGB2YUV(half3 rgb) {
-
-        return half3(RGB2YUV(float3(rgb)));
-    }
-
-    inline float3 YUV2RGB(float3 yuv) {
-
-        float Y = yuv.x, U = yuv.y, V = yuv.z;
-        float3 rgb = float3(
-                            Y + 1.13983 * V,
-                            Y - 0.39465 * U - 0.58060 * V,
-                            Y + 2.03211 * U
-                            );
-        return clamp(rgb, 0.0, 1.0);
-    }
-
-    inline half3 YUV2RGB(half3 yuv) {
-
-        return half3(YUV2RGB(float3(yuv)));
-    }
-
-    inline Color3 RGB2HSV(Color3 c) {
-        
-        Color4 K = Color4(0.0, -1.0/3.0, 2.0/3.0, -1.0);
-        Color4 p = (c.g < c.b) ? Color4(c.bg, K.wz) : Color4(c.gb, K.xy);
-        Color4 q = (c.r < p.x) ? Color4(p.xyw, c.r) : Color4(c.r, p.yzx);
-
-        float d = q.x - min(q.w, q.y);
-        float e = 1.0e-10;
-
-        float h = abs(q.z + (q.w - q.y) / (6.0 * d + e));
-        float s = d / (q.x + e);
-        float v = q.x;
-
-        return Color3(h, s, v);
-    }
-    
-    Color3 HSV2RGB(Color3 c) {
-        
-        Color4 K = Color4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
-        Color3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-    }
-    */
-    
-    //
     // RGB to YUV/YIQ converter
     //
 
@@ -197,82 +106,29 @@ namespace dracula {
         return color * mask * intensity;
     }
     */
-
-    // x: phase in radians (0..2π for one period)
-    // k: smoothness/spikiness (>0, higher = sharper spike)
-    // width: fraction of the period occupied by the spike (0..1)
-    float spikeTanhWidth(float x, float k, float width) {
-        // normalize phase to [0,1)
-        float p = fmod(x, 2.0f * M_PI) / (2.0f * M_PI);
-
-        // remap phase so spike is centered at 0.5
-        float d = (p - 0.5) / (0.5 * width); // normalized distance from spike center
-        d = clamp(d, -1.0, 1.0);
-
-        // apply tanh shaping
-        float t = tanh(k * (1.0 - abs(d))); // 1-|d| gives peak at center, falls off to edges
-        t /= tanh(k);                        // normalize to 0..1
-
-        return t; // already 0..1
-    }
     
-    Color3 sigmoid(Color3 x, float k) {
-        return 1.0 / (1.0 + exp(-k * (x - 0.5)));
-    }
-
-    float dotMaskWeight(uint2 gid, float2 shift, constant Uniforms &u) {
+    float dotMaskWeight(uint2 gid, Coord2 shift, constant Uniforms &u) {
         
         // Setup the grid cell
         uint2 gridSize = uint2(uint(u.DOTMASK_WIDTH), uint(u.DOTMASK_WIDTH));
+        uint2 gridRange = uint2(gridSize.x - 1, gridSize.y - 1);
 
         // Shift gid
-        gid += uint2(shift * u.DOTMASK_WIDTH);
-        
-        float2 sgid = float2(gid); //  + float2(uint2(shift * u.DOTMASK_WIDTH));
+        Coord2 shiftedGid = Coord2(gid + uint2(shift * u.DOTMASK_WIDTH));
 
-        // Normalize gid relative to its grid cell
-        float2 nrmgid = fmod(sgid, float2(gridSize)) / float2(gridSize.x - 1, gridSize.y - 1);
+        // Normalize gid relative to the surrounding grid cell
+        Coord2 nrmgid = fmod(shiftedGid, Coord2(gridSize)) / Coord2(gridRange);
 
-        // Shift the center to (0,0)
-        nrmgid -= float2(0.5, 0.5);
-
-        // Modulate the dot size
-        // nrmgid = nrmgid / float2(u.SHADOW_DOT_WIDTH, u.SHADOW_DOT_HEIGHT);
+        // Make (0,0) the new center coordinate
+        nrmgid -= Coord2(0.5, 0.5);
 
         // Compute distance to the center
-        //float dist = max(1.0, (abs(nrmgid.x) - u.DOTMASK_BRIGHTNESS2));
-        float length = max(0.0, (abs(nrmgid.x)));
-        // float dist2 = length * length;
+        Coord length = max(0.0, (abs(nrmgid.x)));
         
-        // float weight = smoothstep(1.0, u.DOTMASK_BRIGHTNESS, dist);
-        // weight = u.DOTMASK_BRIGHTNESS2 + (1 - u.DOTMASK_BRIGHTNESS2) * weight;
-        // float weight = smoothstep(u.DOTMASK_WEIGHT + u.DOTMASK_WEIGHT2, u.DOTMASK_WEIGHT, length);
+        // Translate distance to a weight
         float weight = smoothstep(u.DOTMASK_WEIGHT, 0.0, length);
-
-            /*
-        float sigma1 = u.DOTMASK_WEIGHT;                  // tweak for spread
-        float sigma2 = u.DOTMASK_WEIGHT2;                  // tweak for spread
-
-        float w1 = exp(-dist2 / (2.0 * sigma1 * sigma1)); // sharp core
-        float w2 = exp(-dist2 / (2.0 * sigma2 * sigma2)); // wide halo
-        float weight = u.DOTMASK_BRIGHTNESS * w1 + u.DOTMASK_BRIGHTNESS2 * w2; // a >> b
-             */
-        
-        //weight = tanh(2*pow(cos(M_PI * length), u.DOTMASK_WEIGHT));
-        //weight = u.DOTMASK_BRIGHTNESS + (1 - u.DOTMASK_BRIGHTNESS) * weight;
          
         return weight;
-
-        /*
-        val = fmod(val, 2*M_PI);
-        
-        // float scale = pow(brightness, weight);
-        if (val >= M_PI) {
-            return brightness + (1 - brightness) * smoothstep(2*M_PI, M_PI + M_PI * weight, val);
-        } else {
-            return brightness + (1 - brightness) * smoothstep(0, M_PI - M_PI * weight, val);
-        }
-        */
     }
     
     kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
@@ -281,32 +137,11 @@ namespace dracula {
                         sampler                         sam       [[ sampler(0) ]],
                         uint2                           gid       [[ thread_position_in_grid ]])
     {
-        // float width = float(int(u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE));
-        // float sample = gid.x * 2 * M_PI / (u.DOTMASK_WIDTH * u.OUTPUT_TEX_SCALE);
-        
-        Color r = dotMaskWeight(gid, float2(0, 0), u);
-        Color g = dotMaskWeight(gid, float2(u.DOTMASK_SHIFT, 0), u);
-        Color b = dotMaskWeight(gid, float2(2 * u.DOTMASK_SHIFT, 0), u);
-    
-        /*
-        Color r = spikeTanhWidth(sample, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
-        Color g = spikeTanhWidth(sample + u.DOTMASK_SHIFT, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
-        Color b = spikeTanhWidth(sample + 2.0 * u.DOTMASK_SHIFT, u.DOTMASK_WEIGHT, u.DOTMASK_WIDTH / 10.0);
-        */
-        
-        // https://de.m.wikipedia.org/wiki/Farbvalenz
-        /*
-        Color3 R = Color3(0.64,0.33,0.03) / 0.64;
-        Color3 G = Color3(0.30,0.60,0.10) / 0.60;
-        Color3 B = Color3(0.15,0.06,0.79) / 0.79;
-        */
-        Color3 R = Color3(1.0,0.0,0.0);
-        Color3 G = Color3(0.0,1.0,0.0);
-        Color3 B = Color3(0.0,0.0,1.0);
-
-        Color3 color = r * R + g * G + b * B;
-        
-        output.write(Color4(color, 1.0), gid);
+        Color r = dotMaskWeight(gid, Coord2(0, 0), u);
+        Color g = dotMaskWeight(gid, Coord2(u.DOTMASK_SHIFT, 0), u);
+        Color b = dotMaskWeight(gid, Coord2(2 * u.DOTMASK_SHIFT, 0), u);
+            
+        output.write(Color4(r, g, b, 1.0), gid);
     }
 
     kernel void composite(texture2d<half, access::sample> ycc       [[ texture(0) ]],
@@ -322,18 +157,18 @@ namespace dracula {
         if (gid.x >= W || gid.y >= H) return;
 
         // Read pixel
-        half4 yccC = ycc.read(gid);
+        Color4 yccC = ycc.read(gid);
 
         // Search the maximum chroma value in surrounding pixels
         int radius = u.CHROMA_RADIUS;
-        half maxU = yccC.y, maxV = yccC.z;
+        Color maxU = yccC.y, maxV = yccC.z;
         int maxDxU = 0, maxDxV = 0;
 
         for (int dx = -radius; dx <= radius; dx++) {
 
             if (dx == 0) continue;
             int x = clamp(int(gid.x) + dx, 0, int(W - 1));
-            half4 sample = ycc.read(uint2(x, gid.y));
+            Color4 sample = ycc.read(uint2(x, gid.y));
 
             if (sample.y > maxU) { maxU = sample.y; maxDxU = abs(dx); }
             if (sample.z > maxV) { maxV = sample.z; maxDxV = abs(dx); }
@@ -342,8 +177,8 @@ namespace dracula {
         // Interpolation weights based on distance
         float distU = float(maxDxU) / float(max(1, radius));
         float distV = float(maxDxV) / float(max(1, radius));
-        half uOut = mix(half(yccC.y), maxU, half(smoothstep(0.0, 1.0, 1.0 - distU)));
-        half vOut = mix(half(yccC.z), maxV, half(smoothstep(0.0, 1.0, 1.0 - distV)));
+        Color uOut = mix(yccC.y, maxU, Color(smoothstep(0.0, 1.0, 1.0 - distU)));
+        Color vOut = mix(yccC.z, maxV, Color(smoothstep(0.0, 1.0, 1.0 - distV)));
 
         // Recombine with luma and convert back to RGB
         Color3 combined = Color3(yccC.x, uOut, vOut);
