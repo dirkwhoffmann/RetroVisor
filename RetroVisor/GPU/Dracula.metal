@@ -49,10 +49,11 @@ namespace dracula {
         float DOTMASK_WIDTH;
         float DOTMASK_SHIFT;
         float DOTMASK_WEIGHT;
-        float DOTMASK_WEIGHT2;
         float DOTMASK_BRIGHTNESS;
-        float DOTMASK_BRIGHTNESS2;
-        float DOTMASK_SATURATION;
+        float DOTMASK_BLUR;
+        float DOTMASK_MIX;
+        float DOTMASK_GAIN;
+        float DOTMASK_LOOSE;
 
         // Scanlines
         uint  SCANLINES_ENABLE;
@@ -219,18 +220,24 @@ namespace dracula {
         return t; // already 0..1
     }
     
+    Color3 sigmoid(Color3 x, float k) {
+        return 1.0 / (1.0 + exp(-k * (x - 0.5)));
+    }
+
     float dotMaskWeight(uint2 gid, float2 shift, constant Uniforms &u) {
         
         // Setup the grid cell
         uint2 gridSize = uint2(uint(u.DOTMASK_WIDTH), uint(u.DOTMASK_WIDTH));
 
         // Shift gid
-        float2 sgid = float2(gid) + shift * u.DOTMASK_WIDTH;
+        gid += uint2(shift * u.DOTMASK_WIDTH);
+        
+        float2 sgid = float2(gid); //  + float2(uint2(shift * u.DOTMASK_WIDTH));
 
         // Normalize gid relative to its grid cell
         float2 nrmgid = fmod(sgid, float2(gridSize)) / float2(gridSize.x - 1, gridSize.y - 1);
 
-        // Center at (0,0)
+        // Shift the center to (0,0)
         nrmgid -= float2(0.5, 0.5);
 
         // Modulate the dot size
@@ -238,25 +245,22 @@ namespace dracula {
 
         // Compute distance to the center
         //float dist = max(1.0, (abs(nrmgid.x) - u.DOTMASK_BRIGHTNESS2));
-        float length = max(0.0, (abs(nrmgid.x) - u.DOTMASK_BRIGHTNESS2));
-        float dist2 = length * length; // nrmgid.x * nrmgid.x; //   dot(nrmgid, nrmgid);
+        float length = max(0.0, (abs(nrmgid.x)));
+        // float dist2 = length * length;
         
         // float weight = smoothstep(1.0, u.DOTMASK_BRIGHTNESS, dist);
         // weight = u.DOTMASK_BRIGHTNESS2 + (1 - u.DOTMASK_BRIGHTNESS2) * weight;
-        //float weight = smoothstep(u.DOTMASK_BRIGHTNESS2, u.DOTMASK_BRIGHTNESS, dist);
+        // float weight = smoothstep(u.DOTMASK_WEIGHT + u.DOTMASK_WEIGHT2, u.DOTMASK_WEIGHT, length);
+        float weight = smoothstep(u.DOTMASK_WEIGHT, 0.0, length);
 
-        
+            /*
         float sigma1 = u.DOTMASK_WEIGHT;                  // tweak for spread
         float sigma2 = u.DOTMASK_WEIGHT2;                  // tweak for spread
-        // float  weight = exp(-dist2 / (2.0 * sigma * sigma));
-        // weight = length(diff);
 
         float w1 = exp(-dist2 / (2.0 * sigma1 * sigma1)); // sharp core
         float w2 = exp(-dist2 / (2.0 * sigma2 * sigma2)); // wide halo
         float weight = u.DOTMASK_BRIGHTNESS * w1 + u.DOTMASK_BRIGHTNESS2 * w2; // a >> b
-        // float weight = u.DOTMASK_BRIGHTNESS * w1;
-        // weight = pow(weight, u.DOTMASK_BRIGHTNESS2);
-        //float weight = w1;
+             */
         
         //weight = tanh(2*pow(cos(M_PI * length), u.DOTMASK_WEIGHT));
         //weight = u.DOTMASK_BRIGHTNESS + (1 - u.DOTMASK_BRIGHTNESS) * weight;
@@ -306,15 +310,7 @@ namespace dracula {
 
         Color3 color = r * R + g * G + b * B;
         
-        // Color luminance = dot(color, Color3(0.299, 0.587, 0.114)); // Rec.601
-        // Color3 final = mix(Color3(luminance), color, u.DOTMASK_SATURATION);
-        // float sat = u.DOTMASK_SATURATION;
-        // Color3 final = r * Color3(1.0, sat, sat) + g * Color3(sat, 1.0, sat) + b * Color3(sat, sat, 1.0);
-        Color3 hsv = RGB2HSV(color);
-        hsv.y *= u.DOTMASK_SATURATION;
-        Color3 final = HSV2RGB(hsv);
-        // Color4 color = Color4(r, 0.0, 0.0, 1.0);
-        output.write(Color4(final, 1.0), gid);
+        output.write(Color4(color, 1.0), gid);
     }
 
     kernel void composite(texture2d<half, access::sample> ycc       [[ texture(0) ]],
@@ -414,6 +410,14 @@ namespace dracula {
         float d = wrapSigned(h1 - h0);    // now d is in [-0.5, 0.5]
         return wrap01(h0 + t * d);
     }
+
+    inline float hue_shift(float h0, float h1, float t)
+    {
+        if (abs(h0 - h1) > 0.5) {
+            h1 += h1 < h0 ? 0.5 : -0.5;
+        }
+        return h0 + t * (h1 - h0);
+    }
     
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                     texture2d<half, access::sample> ycc       [[ texture(1) ]],
@@ -429,7 +433,7 @@ namespace dracula {
         // Normalize gid to 0..1 in output texture
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(outTex.get_width(), outTex.get_height());
 
-        // Read dotmask
+        // Read image pixel
         Color4 color = inTex.sample(sam, uv);
         
         /*
@@ -445,45 +449,6 @@ namespace dracula {
          color = scanline(color, u.SCANLINE_WEIGHT4);
          }
          */
-
-        // Apply dot mask effect
-        if (u.DOTMASK_ENABLE) {
-
-            Color4 mask = dotMask.sample(sam, uv); // dotMask.read(gid);
-            
-            // REMOVE ASAP
-            // outTex.write(mask, gid);
-            // return;
-            
-            if (u.DOTMASK_TYPE == 0) {
-                
-                // Multiply
-                color = color * mask;
-                // color *= u.DOTMASK_BRIGHTNESS;
-                
-            } else if (u.DOTMASK_TYPE == 1) {
-                
-                // Blend
-                color = mix(color, color * mask, u.DOTMASK_WEIGHT);
-                
-            } else {
-                
-                // Convert to HSV
-                Color3 hsv = RGB2HSV(color.rgb);
-                Color3 maskHSV = RGB2HSV(mask.rgb);
-
-                // Mix the hues (circular interpolation is best)
-                float mixAmount = u.DOTMASK_BRIGHTNESS; // 0 = no effect, 1 = full mask hue
-                hsv.x = hue_lerp(hsv.x, maskHSV.x, mixAmount); // hue
-                // keep hsv.y (saturation) and hsv.z (value) unchanged
-
-                // Convert back
-                color = Color4(HSV2RGB(hsv), 1.0);
-            }
-            
-            // Normalize gid to 0..1 in output texture
-            // Coord2 uv = (Coord2(gid) + 0.5) / Coord2(outTex.get_width(), outTex.get_height());
-        }
 
         // Apply bloom effect
         /*
@@ -519,16 +484,85 @@ namespace dracula {
                 color = scanline(col, u.SCANLINE_WEIGHT7);
             } else if (line == 7) {
                 color = scanline(col, u.SCANLINE_WEIGHT8);
-            } 
-
+            }
+            
+            // uint column = gid.x % 4;
+            // Color4 colcol = color;
+            
             /*
-            color.rgb *= scanlineWeight(gid,
-                                        u.SCANLINE_DISTANCE,
-                                        u.SCANLINE_WEIGHT1,
-                                        u.SCANLINE_BRIGHTNESS,
-                                        1.0);
+            if (column == 0) {
+                colcol = scanline(col, u.SCANLINE_WEIGHT1);
+            } else if (column == 1) {
+                colcol = scanline(col, u.SCANLINE_WEIGHT2);
+            } else if (column == 2) {
+                colcol = scanline(col, u.SCANLINE_WEIGHT3);
+            } else if (column == 3) {
+                colcol = scanline(col, u.SCANLINE_WEIGHT4);
+            } else if (column == 4) {
+                colcol = scanline(col, u.SCANLINE_WEIGHT5);
+            } else if (column == 5) {
+                colcol = scanline(col, u.SCANLINE_WEIGHT6);
+            } else if (column == 6) {
+                colcol = scanline(col, u.SCANLINE_WEIGHT7);
+            } else if (column == 7) {
+                colcol = scanline(col, u.SCANLINE_WEIGHT8);
+            }
             */
+            // if (column == 0) color *= 0.2;
+            
+            // color = mix(color, colcol, 0.5);
         }
+
+        // Apply dot mask effect
+        if (u.DOTMASK_ENABLE) {
+
+            Color4 mask = dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
+            // mask += dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
+            // mask = Color4(sigmoid(mask.rgb, u.DOTMASK_BRIGHTNESS), 1.0);
+
+            
+            // REMOVE ASAP
+            //outTex.write(mask, gid);
+            // return;
+            
+            if (u.DOTMASK_TYPE == 0) {
+                
+                // Multiply
+                color = color * (u.DOTMASK_MIX * mask + (1 - u.DOTMASK_MIX));
+                // color *= u.DOTMASK_BRIGHTNESS;
+                
+            } else if (u.DOTMASK_TYPE == 1) {
+                
+                // Blend
+                color = mix(color, mask, u.DOTMASK_MIX);
+                
+            } else if (u.DOTMASK_TYPE == 2) {
+                
+                Color4 gain = min(color, 1 - color) * mask;
+                Color4 loose = min(color, 1 - color) * 0.5 * (1 - mask);
+                color += u.DOTMASK_GAIN * gain - u.DOTMASK_LOOSE * loose;
+     
+            } else {
+                
+                // Convert to HSV
+                Color3 hsv = RGB2HSV(color.rgb);
+                Color3 maskHSV = RGB2HSV(mask.rgb);
+
+                // Mix the hues (circular interpolation is best)
+                float mixAmount = u.DOTMASK_MIX; // 0 = no effect, 1 = full mask hue
+                hsv.x = hue_shift(hsv.x, maskHSV.x, mixAmount); // hue
+                // keep hsv.y (saturation) and hsv.z (value) unchanged
+
+                // Convert back
+                color = Color4(HSV2RGB(hsv), 1.0);
+                
+                // color = Color4(HSV2RGB(Color3(maskHSV.x,1.0,1.0)), 1.0);
+            }
+            
+            // Normalize gid to 0..1 in output texture
+            // Coord2 uv = (Coord2(gid) + 0.5) / Coord2(outTex.get_width(), outTex.get_height());
+        }
+
 
         outTex.write(pow(color, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
         return;
@@ -598,6 +632,10 @@ namespace dracula {
                     color = ycc.sample(sam, uv);
                     color = Color4(1.0, 0.0, color.z, color.w);
                     color = Color4(u.PAL ? YUV2RGB(color.xyz) : YIQ2RGB(color.xyz), 1.0);
+                    break;
+
+                case 9:
+                    color = dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
                     break;
                     
                 default:

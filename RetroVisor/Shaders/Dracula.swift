@@ -36,11 +36,12 @@ final class DraculaShader: Shader {
         var DOTMASK_WIDTH: Float
         var DOTMASK_SHIFT: Float
         var DOTMASK_WEIGHT: Float
-        var DOTMASK_WEIGHT2: Float
         var DOTMASK_BRIGHTNESS: Float
-        var DOTMASK_BRIGHTNESS2: Float
-        var DOTMASK_SATURATION: Float
-        
+        var DOTMASK_BLUR: Float
+        var DOTMASK_MIX: Float
+        var DOTMASK_GAIN: Float
+        var DOTMASK_LOOSE: Float
+
         var SCANLINES_ENABLE: Int32
         var SCANLINE_DISTANCE: Float
         var SCANLINE_SHARPNESS: Float
@@ -77,16 +78,17 @@ final class DraculaShader: Shader {
             BLOOM_RADIUS_X: 5,
             BLOOM_RADIUS_Y: 3,
             
-            DOTMASK_ENABLE: 0,
+            DOTMASK_ENABLE: 1,
             DOTMASK_TYPE: 2,
-            DOTMASK_WIDTH: 3,
+            DOTMASK_WIDTH: 5,
             DOTMASK_SHIFT: 0.3,
-            DOTMASK_WEIGHT: 0.8,
-            DOTMASK_WEIGHT2: 0.2,
-            DOTMASK_BRIGHTNESS: 0.5,
-            DOTMASK_BRIGHTNESS2: 0.5,
-            DOTMASK_SATURATION: 0.8,
-            
+            DOTMASK_WEIGHT: 0.69,
+            DOTMASK_BRIGHTNESS: 2.36,
+            DOTMASK_BLUR: 0.0,
+            DOTMASK_MIX: 0.45,
+            DOTMASK_GAIN: 1.0,
+            DOTMASK_LOOSE: 0.5,
+
             SCANLINES_ENABLE: 1,
             SCANLINE_DISTANCE: 8.0,
             SCANLINE_SHARPNESS: 1.77,
@@ -101,9 +103,9 @@ final class DraculaShader: Shader {
             SCANLINE_WEIGHT8: 0.44,
             SCANLINE_BRIGHTNESS: 0.5,
             
-            DEBUG_ENABLE: 0,
-            DEBUG_TEXTURE: 1,
-            DEBUG_SLIDER: 0.0
+            DEBUG_ENABLE: 1,
+            DEBUG_TEXTURE: 9,
+            DEBUG_SLIDER: 0.5
         )
     }
     
@@ -400,7 +402,7 @@ final class DraculaShader: Shader {
                     
                     ShaderSetting(
                         name: "Dotmask Type",
-                        items: [ ("Add", 0), ("Blend", 1), ("Shift", 2) ],
+                        items: [ ("Add", 0), ("Blend", 1), ("Scale", 2), ("Shift", 3) ],
                         value: Binding(
                             key: "DOTMASK_TYPE",
                             get: { [unowned self] in Float(self.uniforms.DOTMASK_TYPE) },
@@ -418,22 +420,13 @@ final class DraculaShader: Shader {
                     
                     ShaderSetting(
                         name: "Dotmask Weight",
-                        range: 0.0...2.0, step: 0.01,
+                        range: 0.01...2.0, step: 0.01,
                         value: Binding(
                             key: "DOTMASK_WEIGHT",
                             get: { [unowned self] in self.uniforms.DOTMASK_WEIGHT },
                             set: { [unowned self] in self.uniforms.DOTMASK_WEIGHT = $0 }),
                     ),
-                    
-                    ShaderSetting(
-                        name: "Dotmask Weight 2",
-                        range: 0.0...2.0, step: 0.01,
-                        value: Binding(
-                            key: "DOTMASK_WEIGHT2",
-                            get: { [unowned self] in self.uniforms.DOTMASK_WEIGHT2 },
-                            set: { [unowned self] in self.uniforms.DOTMASK_WEIGHT2 = $0 }),
-                    ),
-                    
+                                        
                     ShaderSetting(
                         name: "Dotmask Shift",
                         range: 0.0...1.0, step: 0.01,
@@ -445,30 +438,49 @@ final class DraculaShader: Shader {
                     
                     ShaderSetting(
                         name: "Dotmask Brightness",
-                        range: 0...1, step: 0.01,
+                        range: 0...20, step: 0.01,
                         value: Binding(
                             key: "DOTMASK_BRIGHTNESS",
                             get: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS },
                             set: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS = $0 }),
                     ),
-                    
+                                        
                     ShaderSetting(
-                        name: "Dotmask Brightness 2",
-                        range: 0...5, step: 0.01,
+                        name: "Dotmask Blur",
+                        range: 0...4, step: 0.01,
                         value: Binding(
-                            key: "DOTMASK_BRIGHTNESS2",
-                            get: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS2 },
-                            set: { [unowned self] in self.uniforms.DOTMASK_BRIGHTNESS2 = $0 }),
+                            key: "DOTMASK_BLUR",
+                            get: { [unowned self] in self.uniforms.DOTMASK_BLUR },
+                            set: { [unowned self] in self.uniforms.DOTMASK_BLUR = $0 }),
                     ),
                     
                     ShaderSetting(
-                        name: "Dotmask Saturation",
+                        name: "Dotmask Mix",
                         range: 0...1, step: 0.01,
                         value: Binding(
-                            key: "DOTMASK_SATURATION",
-                            get: { [unowned self] in self.uniforms.DOTMASK_SATURATION },
-                            set: { [unowned self] in self.uniforms.DOTMASK_SATURATION = $0 }),
-                    )
+                            key: "DOTMASK_MIX",
+                            get: { [unowned self] in self.uniforms.DOTMASK_MIX },
+                            set: { [unowned self] in self.uniforms.DOTMASK_MIX = $0 }),
+                    ),
+                    
+                    ShaderSetting(
+                        name: "Dotmask Gain",
+                        range: 0.0...1.0, step: 0.01,
+                        value: Binding(
+                            key: "DOTMASK_GAIN",
+                            get: { [unowned self] in self.uniforms.DOTMASK_GAIN },
+                            set: { [unowned self] in self.uniforms.DOTMASK_GAIN = $0 }),
+                    ),
+
+                    ShaderSetting(
+                        name: "Dotmask Loose",
+                        range: 0.0...1.0, step: 0.01,
+                        value: Binding(
+                            key: "DOTMASK_LOOSE",
+                            get: { [unowned self] in self.uniforms.DOTMASK_LOOSE },
+                            set: { [unowned self] in self.uniforms.DOTMASK_LOOSE = $0 }),
+                    ),
+
                 ]),
             
             Group(title: "Debugging", enable: Binding(
@@ -487,6 +499,7 @@ final class DraculaShader: Shader {
                                   ("Luma", 6),
                                   ("Chroma U/I", 7),
                                   ("Chroma V/Q", 8),
+                                  ("Dotmask", 9),
                                   ("Bloom texture", 10) ],
                         value: Binding(
                             key: "DEBUG_TEXTURE",
@@ -510,7 +523,7 @@ final class DraculaShader: Shader {
         
         super.activate()
         splitKernel = ColorSpaceFilter(sampler: ShaderLibrary.linear)
-        dotMaskKernel = DotMaskFilter(sampler: ShaderLibrary.linear)
+        dotMaskKernel = DotMaskFilter(sampler: ShaderLibrary.mipmapLinear)
         crtKernel = CrtFilter(sampler: ShaderLibrary.mipmapLinear)
         chromaKernel = CompositeFilter(sampler: ShaderLibrary.linear)
         debugKernel = DebugFilter(sampler: ShaderLibrary.mipmapLinear)
@@ -541,7 +554,7 @@ final class DraculaShader: Shader {
         
         if crt?.width != crtWidth || crt?.height != crtHeight {
             
-            dotmask = output.makeTexture(width: inpWidth, height: inpHeight)
+            dotmask = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
             crt = output.makeTexture(width: crtWidth, height: crtHeight)
         }
     }
@@ -590,6 +603,8 @@ final class DraculaShader: Shader {
                             textures: [ycc, dotmask],
                             options: &uniforms,
                             length: MemoryLayout<Uniforms>.stride)
+        
+        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &dotmask)
         
         chromaKernel.apply(commandBuffer: commandBuffer,
                            textures: [ycc, dotmask, rgb, bri],
