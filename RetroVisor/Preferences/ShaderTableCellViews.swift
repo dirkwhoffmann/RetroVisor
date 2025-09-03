@@ -38,13 +38,13 @@ class ShaderGroupView: ShaderTableCellView {
         let count = group.children.count
         let optString = "\(count) option" + (count > 1 ? "s" : "")
 
-        if let setting = group.setting {
+        if let enabled = group.enabled {
             
             enableButton.isHidden = false
             disclosureButton.isHidden = true
-            enableButton.state = setting.enabled != false ? .on : .off
-            subLabel.stringValue = "\(setting.enableKey)"
-            
+            enableButton.state = enabled ? .on : .off
+            subLabel.stringValue = "\(group.enableKey)"
+        
         } else {
 
             enableButton.isHidden = true
@@ -69,7 +69,7 @@ class ShaderGroupView: ShaderTableCellView {
 
     @IBAction func enableAction(_ sender: NSButton) {
 
-        group.setting?.enabled = sender.state == .on
+        group.enabled = sender.state == .on
 
         if sender.state == .on {
             controller.outlineView.expandItem(group)

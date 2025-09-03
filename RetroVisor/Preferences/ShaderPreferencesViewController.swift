@@ -68,7 +68,7 @@ class ShaderPreferencesViewController: NSViewController {
 
         for group in outlineView.groups {
             
-            if group.setting?.enabled != false {
+            if group.enabled ?? true {
                 // print("Expand \(group.title)")
                 outlineView.expandItem(group)
             } else {

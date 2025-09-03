@@ -50,7 +50,7 @@ class ShaderSetting {
     
     var formatString: String { "%.3g" }
 
-    init(title: String,
+    init(title: String = "",
          range: ClosedRange<Double>? = nil,
          step: Float = 0.01,
          items: [(String,Int)]? = nil,
@@ -99,32 +99,35 @@ class ShaderSetting {
     }
 }
 
-class Group {
-
-    // Setting group name
-    let title: String
+class Group : ShaderSetting {
 
     // The NSTableCellView associated with this group
     var view: ShaderTableCellView?
-
-    // Binding for the enable key (optional)
-    // var enable: Binding?
-    
-    // Optional group setting
-    var setting: ShaderSetting?
     
     // All settings in this group
     var children: [ShaderSetting]
     
     var count: Int { children.filter { $0.hidden() == false }.count }
     
-    init(title: String,
-         setting: ShaderSetting? = nil,
+    init(title: String = "",
+         range: ClosedRange<Double>? = nil,
+         step: Float = 0.01,
+         items: [(String,Int)]? = nil,
+         enable: Binding? = nil,
+         value: Binding? = nil,
+         help: String? = nil,
+         hidden: @escaping () -> Bool = { false },
          _ children: [ShaderSetting]) {
         
-        self.title = title
-        self.setting = setting
         self.children = children
+        super.init(title: title,
+                   range: range,
+                   step: step,
+                   items: items,
+                   enable: enable,
+                   value: value,
+                   help: help,
+                   hidden: hidden)
     }
 }
 

@@ -12,49 +12,49 @@ import MetalPerformanceShaders
 
 @MainActor
 final class PassthroughShader: Shader {
-
+    
     struct Uniforms {
-
+        
         var INPUT_TEX_SCALE: Float
         var OUTPUT_TEX_SCALE: Float
-
+        
         var BLUR_ENABLE: Int32
         var BLUR_FILTER: Int32
         var BLUR_RADIUS_X: Float
         var BLUR_RADIUS_Y: Float
-
+        
         var RESAMPLE_FILTER: Int32
         var RESAMPLE_SCALE_X: Float
         var RESAMPLE_SCALE_Y: Float
-
+        
         static let defaults = Uniforms(
-
+            
             INPUT_TEX_SCALE: 0.5,
             OUTPUT_TEX_SCALE: 2.0,
-
+            
             BLUR_ENABLE: 0,
             BLUR_FILTER: BlurFilterType.box.rawValue,
             BLUR_RADIUS_X: 1.0,
             BLUR_RADIUS_Y: 1.0,
-
+            
             RESAMPLE_FILTER: ResampleFilterType.bilinear.rawValue,
             RESAMPLE_SCALE_X: 1.0,
             RESAMPLE_SCALE_Y: 1.0
         )
     }
-
+    
     var uniforms = Uniforms.defaults
-
+    
     // Filter
     var resampler = ResampleFilter()
     var blurFilter = BlurFilter()
-
+    
     // Downscaled input texture
     var src: MTLTexture!
-
+    
     // Blurred texture
     var blur: MTLTexture!
-
+    
     init() {
         
         super.init(name: "Passthrough")
@@ -70,8 +70,7 @@ final class PassthroughShader: Shader {
                     value: Binding(
                         key: "INPUT_TEX_SCALE",
                         get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
-                        set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 }),
-                ),
+                        set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 })),
                 
                 ShaderSetting(
                     title: "Resampler",
@@ -79,18 +78,15 @@ final class PassthroughShader: Shader {
                     value: Binding(
                         key: "RESAMPLE_FILTER",
                         get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
-                        set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) }),
-                ),
+                        set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) })),
             ]),
             
             Group(title: "Filter",
                   
-                  setting: ShaderSetting(
-                    title: "Filter Enable",
-                    value: Binding(
-                        key: "BLUR_ENABLE",
-                        get: { [unowned self] in Float(self.uniforms.BLUR_ENABLE) },
-                        set: { [unowned self] in self.uniforms.BLUR_ENABLE = Int32($0) })),
+                  enable: Binding(
+                    key: "BLUR_ENABLE",
+                    get: { [unowned self] in Float(self.uniforms.BLUR_ENABLE) },
+                    set: { [unowned self] in self.uniforms.BLUR_ENABLE = Int32($0) }),
                   
                   [ ShaderSetting(
                     title: "Blur Filter",
@@ -98,8 +94,7 @@ final class PassthroughShader: Shader {
                     value: Binding(
                         key: "BLUR_FILTER",
                         get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
-                        set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) }),
-                  ),
+                        set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) })),
                     
                     ShaderSetting(
                         title: "Blur width",
@@ -108,8 +103,7 @@ final class PassthroughShader: Shader {
                         value: Binding(
                             key: "BLUR_RADIUS_X",
                             get: { [unowned self] in self.uniforms.BLUR_RADIUS_X },
-                            set: { [unowned self] in self.uniforms.BLUR_RADIUS_X = $0 }),
-                    ),
+                            set: { [unowned self] in self.uniforms.BLUR_RADIUS_X = $0 })),
                     
                     ShaderSetting(
                         title: "Blur height",
@@ -119,8 +113,7 @@ final class PassthroughShader: Shader {
                             key: "BLUR_RADIUS_Y",
                             get: { [unowned self] in self.uniforms.BLUR_RADIUS_Y },
                             set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 }),
-                        hidden: {  [unowned self] in self.uniforms.BLUR_FILTER == BlurFilterType.gaussian.rawValue }
-                    ),
+                        hidden: {  [unowned self] in self.uniforms.BLUR_FILTER == BlurFilterType.gaussian.rawValue }),
                     
                     ShaderSetting(
                         title: "Scale X",
@@ -129,8 +122,7 @@ final class PassthroughShader: Shader {
                         value: Binding(
                             key: "RESAMPLE_SCALE_X",
                             get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X },
-                            set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X = $0 }),
-                    ),
+                            set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_X = $0 })),
                     
                     ShaderSetting(
                         title: "Scale Y",
@@ -139,8 +131,7 @@ final class PassthroughShader: Shader {
                         value: Binding(
                             key: "RESAMPLE_SCALE_Y",
                             get: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y },
-                            set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y = $0 }),
-                    )
+                            set: { [unowned self] in self.uniforms.RESAMPLE_SCALE_Y = $0 }))
                   ])
         ]
     }
@@ -159,16 +150,16 @@ final class PassthroughShader: Shader {
     
     override func apply(commandBuffer: MTLCommandBuffer,
                         in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
-
+        
         // Create helper textures if needed
         updateTextures(in: input, out: output)
-
+        
         // Rescale to the source texture size
         resampler.type = ResampleFilterType(rawValue: uniforms.RESAMPLE_FILTER)!
         resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
-
+        
         if uniforms.BLUR_ENABLE != 0 {
-
+            
             // Blur the source texture
             blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
             blurFilter.resampleX = uniforms.RESAMPLE_SCALE_X
@@ -176,12 +167,12 @@ final class PassthroughShader: Shader {
             blurFilter.blurWidth = uniforms.BLUR_RADIUS_X
             blurFilter.blurHeight = uniforms.BLUR_RADIUS_Y
             blurFilter.apply(commandBuffer: commandBuffer, in: src, out: blur)
-
+            
             // Rescale to the output texture size
             resampler.apply(commandBuffer: commandBuffer, in: blur, out: output)
-
+            
         } else {
-
+            
             // Rescale to the output texture size
             resampler.apply(commandBuffer: commandBuffer, in: src, out: output)
         }
