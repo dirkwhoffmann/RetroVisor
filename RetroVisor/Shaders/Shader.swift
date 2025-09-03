@@ -26,28 +26,29 @@ struct Binding {
 
 class ShaderSetting {
 
-    // Setting name
-    let title: String
+    // Description of this setting
+    var title: String
 
-    // Parameters for numeric arguments
+    // Parameters for numeric settings
     let range: ClosedRange<Double>?
     let step: Float
 
-    // Parameters for enum-like arguments
+    // Parameters for enum settings
     let items: [(String,Int)]?
 
     // Optional help string
     let help: String?
 
-    // Indicates if this options should be hidden from the user
+    // Indicates if this options should be hidden in the GUI
     var hidden: () -> Bool = { false }
 
     // Binding for the enable key
-    var enable: Binding?
+    private var enable: Binding?
 
     // Binding for the value key
-    var value: Binding?
+    private var value: Binding?
     
+    // Format string for numeric arguments
     var formatString: String { "%.3g" }
 
     init(title: String = "",
@@ -101,10 +102,10 @@ class ShaderSetting {
 
 class Group : ShaderSetting {
 
-    // The NSTableCellView associated with this group
+    // The cell view associated with this group
     var view: ShaderTableCellView?
     
-    // All settings in this group
+    // The settings in this group
     var children: [ShaderSetting]
     
     var count: Int { children.filter { $0.hidden() == false }.count }
@@ -129,6 +130,19 @@ class Group : ShaderSetting {
                    help: help,
                    hidden: hidden)
     }
+    
+    func findSetting(key: String) -> ShaderSetting? {
+        
+        // Check this setting's bindings
+        if enableKey == key || valueKey == key { return self }
+        
+        // Recurse into children
+        for child in children {
+            if child.enableKey == key || child.valueKey == key { return child }
+        }
+        
+        return nil
+    }
 }
 
 @MainActor
@@ -149,6 +163,12 @@ class Shader : Loggable {
 
         self.name = name
     }
+    
+    // Searches a setting by name
+    func findSetting(key: String) -> ShaderSetting? {
+        for group in settings { if let match = group.findSetting(key: key) { return match } }
+        return nil
+    }
 
     // Called once when the user selects this shader
     func activate() { log("Activating \(name)") }
@@ -156,10 +176,13 @@ class Shader : Loggable {
     // Called once when the user selects another shader
     func retire() { log("Retiring \(name)") }
 
+    // Called when the user changes as uniform
+    func uniformsDidChange(setting: ShaderSetting) { }
+    
     // Runs the shader
     func apply(commandBuffer: MTLCommandBuffer,
                in input: MTLTexture, out output: MTLTexture, rect: CGRect = .unity) {
-
+        
         fatalError("To be implemented by a subclass")
     }
 }

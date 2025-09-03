@@ -27,8 +27,6 @@ class ShaderGroupView: ShaderTableCellView {
     var group: Group!
 
     var shader: Shader { controller.shader }
-    // var clickable: Bool { group.setting != nil }
-    // var expandable: Bool { group.setting == nil }
 
     func setup(with group: Group) {
 
@@ -70,6 +68,8 @@ class ShaderGroupView: ShaderTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         group.enabled = sender.state == .on
+        shader.uniformsDidChange(setting: group)
+
 
         if sender.state == .on {
             controller.outlineView.expandItem(group)
@@ -103,9 +103,9 @@ class ShaderSettingView: ShaderTableCellView {
             let active = !shaderSetting.hidden()
 
             optionLabel.stringValue = shaderSetting.title
-            subLabel.stringValue = shaderSetting.value?.key ?? ""
+            subLabel.stringValue = shaderSetting.valueKey
             helpButtom.isHidden = shaderSetting.help == nil
-            optCeckbox.isHidden = shaderSetting.enable == nil
+            optCeckbox.isHidden = shaderSetting.enabled == nil
 
             optionLabel.textColor = active ? .textColor : .disabledControlTextColor
             subLabel.textColor = active ? .textColor : .disabledControlTextColor
@@ -182,6 +182,7 @@ class ShaderSettingView: ShaderTableCellView {
         let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
         shaderSetting.floatValue = rounded
+        shader.uniformsDidChange(setting: shaderSetting)
         value = shaderSetting.floatValue
     }
 
@@ -193,6 +194,7 @@ class ShaderSettingView: ShaderTableCellView {
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
         shaderSetting.intValue = sender.selectedTag()
+        shader.uniformsDidChange(setting: shaderSetting)
         update();
         controller.outlineView.reloadData()
     }
@@ -200,6 +202,7 @@ class ShaderSettingView: ShaderTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         shaderSetting.enabled = sender.state == .on
+        shader.uniformsDidChange(setting: shaderSetting)
         update();
         controller.outlineView.reloadData()
     }

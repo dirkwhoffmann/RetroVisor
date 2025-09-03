@@ -131,6 +131,27 @@ final class ColorSplitShader: Shader {
         kernel = ColorSplitFilter(sampler: ShaderLibrary.linear)
     }
 
+    override func uniformsDidChange(setting: ShaderSetting) {
+        
+        if (setting.valueKey == "COLOR_SPACE") {
+
+            let x = findSetting(key: "X_ENABLE")!
+            let y = findSetting(key: "Y_ENABLE")!
+            let z = findSetting(key: "Z_ENABLE")!
+
+            print("COLOR SPACE")
+
+            switch (setting.intValue) {
+                
+            case 0: x.title = "Red"; y.title = "Green"; z.title = "Blue"
+            case 1: x.title = "Hue"; y.title = "Saturation"; z.title = "Value"
+            case 2: x.title = "Luma"; y.title = "Chroma (U)"; z.title = "Chroma (Y)"
+            case 3: x.title = "Luma"; y.title = "Chroma (I)"; z.title = "Chroma (Q)"
+            default: x.title = "X"; y.title = "Y"; z.title = "Z"
+            }
+        }
+    }
+    
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
         let srcW = Int(Float(output.width))
