@@ -41,7 +41,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
 
         ShaderLibrary.shared.register(CRTEasyShader())
-        ShaderLibrary.shared.register(HSVShader())
+        ShaderLibrary.shared.register(ColorSplitShader())
         ShaderLibrary.shared.register(DraculaShader())
         ShaderLibrary.shared.register(PlaygroundShader())
         ShaderLibrary.shared.selectShader(at: 3)

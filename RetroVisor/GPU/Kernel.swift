@@ -188,11 +188,11 @@ class DebugFilter: Kernel {
     }
 }
 
-class HSVFilter: Kernel {
+class ColorSplitFilter: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
 
-        self.init(name: "hsv::hsv", sampler: sampler)
+        self.init(name: "colorsplit::splitter", sampler: sampler)
     }
 }
 
