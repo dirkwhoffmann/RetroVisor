@@ -155,7 +155,7 @@ protocol ShaderDelegate {
 extension ShaderDelegate {
     
     func title(setting: ShaderSetting) -> String { setting.title }
-    func isHidden(key: String) -> Bool { false }
+    func isHidden(setting: ShaderSetting) -> Bool { false }
 }
 
 @MainActor

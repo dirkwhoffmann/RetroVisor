@@ -462,7 +462,8 @@ final class DraculaShader: Shader {
                   
                   [ ShaderSetting(
                     title: "Debug",
-                    items: [ ("Ycc", 1),
+                    items: [ ("Source", 0),
+                             ("Ycc", 1),
                              ("Ycc (Mipmap 1)", 2),
                              ("Ycc (Mipmap 2)", 3),
                              ("Ycc (Mipmap 3)", 4),
@@ -605,7 +606,7 @@ final class DraculaShader: Shader {
         if uniforms.DEBUG_ENABLE > 0 {
             
             debugKernel.apply(commandBuffer: commandBuffer,
-                              textures: [ycc, dotmask, blm, output],
+                              textures: [src, ycc, dotmask, blm, output],
                               options: &uniforms,
                               length: MemoryLayout<Uniforms>.stride)
         }

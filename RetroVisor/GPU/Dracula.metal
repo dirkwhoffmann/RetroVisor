@@ -218,19 +218,6 @@ namespace dracula {
     }
 
     /*
-    inline half3 scanlineWeight(uint2 pixel, uint height, float weight, float brightness, float bloom) {
-        
-        // Calculate distance to nearest scanline
-        float dy = ((float(pixel.y % height) / float(height - 1)) - 0.5);
-     
-        // Calculate scanline weight
-        float scanlineWeight = max(1.0 - dy * dy * 24 * weight, brightness);
-        
-        // Apply bloom effect an return
-        half3 result = scanlineWeight * bloom;
-        return result;
-    }
-    */
     
     inline float wrap01(float x) { return x - floor(x); }           // like fract()
     inline float wrapSigned(float x) { return x - floor(x + 0.5f); } // to [-0.5, 0.5)
@@ -249,6 +236,7 @@ namespace dracula {
         }
         return h0 + t * (h1 - h0);
     }
+    */
     
     kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
                     texture2d<half, access::sample> ycc       [[ texture(1) ]],
@@ -267,20 +255,6 @@ namespace dracula {
         // Read image pixel
         Color4 color = inTex.sample(sam, uv);
         
-        /*
-         uint line = gid.y % 4;
-
-         if (line == 0) {
-         color = scanline(color, u.SCANLINE_WEIGHT1);
-         } else if (line == 1) {
-         color = scanline(color, u.SCANLINE_WEIGHT2);
-         } else if (line == 2) {
-         color = scanline(color, u.SCANLINE_WEIGHT3);
-         } else if (line == 3) {
-         color = scanline(color, u.SCANLINE_WEIGHT4);
-         }
-         */
-
         // Apply bloom effect
         /*
         if (u.BLOOM_ENABLE) {
@@ -316,32 +290,6 @@ namespace dracula {
             } else if (line == 7) {
                 color = scanline(col, u.SCANLINE_WEIGHT8);
             }
-            
-            // uint column = gid.x % 4;
-            // Color4 colcol = color;
-            
-            /*
-            if (column == 0) {
-                colcol = scanline(col, u.SCANLINE_WEIGHT1);
-            } else if (column == 1) {
-                colcol = scanline(col, u.SCANLINE_WEIGHT2);
-            } else if (column == 2) {
-                colcol = scanline(col, u.SCANLINE_WEIGHT3);
-            } else if (column == 3) {
-                colcol = scanline(col, u.SCANLINE_WEIGHT4);
-            } else if (column == 4) {
-                colcol = scanline(col, u.SCANLINE_WEIGHT5);
-            } else if (column == 5) {
-                colcol = scanline(col, u.SCANLINE_WEIGHT6);
-            } else if (column == 6) {
-                colcol = scanline(col, u.SCANLINE_WEIGHT7);
-            } else if (column == 7) {
-                colcol = scanline(col, u.SCANLINE_WEIGHT8);
-            }
-            */
-            // if (column == 0) color *= 0.2;
-            
-            // color = mix(color, colcol, 0.5);
         }
 
         // Apply dot mask effect
@@ -372,37 +320,18 @@ namespace dracula {
                 Color4 gain = min(color, 1 - color) * mask;
                 Color4 loose = min(color, 1 - color) * 0.5 * (1 - mask);
                 color += u.DOTMASK_GAIN * gain - u.DOTMASK_LOOSE * loose;
-     
-            } else {
-                
-                // Convert to HSV
-                Color3 hsv = RGB2HSV(color.rgb);
-                Color3 maskHSV = RGB2HSV(mask.rgb);
-
-                // Mix the hues (circular interpolation is best)
-                float mixAmount = u.DOTMASK_MIX; // 0 = no effect, 1 = full mask hue
-                hsv.x = hue_shift(hsv.x, maskHSV.x, mixAmount); // hue
-                // keep hsv.y (saturation) and hsv.z (value) unchanged
-
-                // Convert back
-                color = Color4(HSV2RGB(hsv), 1.0);
-                
-                // color = Color4(HSV2RGB(Color3(maskHSV.x,1.0,1.0)), 1.0);
             }
-            
-            // Normalize gid to 0..1 in output texture
-            // Coord2 uv = (Coord2(gid) + 0.5) / Coord2(outTex.get_width(), outTex.get_height());
         }
-
 
         outTex.write(pow(color, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
         return;
     }
 
-    kernel void debug(texture2d<half, access::sample> ycc       [[ texture(0) ]],
-                      texture2d<half, access::sample> dotMask   [[ texture(1) ]],
-                      texture2d<half, access::sample> bloomTex  [[ texture(2) ]],
-                      texture2d<half, access::write>  final     [[ texture(3) ]],
+    kernel void debug(texture2d<half, access::sample> src       [[ texture(0) ]],
+                      texture2d<half, access::sample> ycc       [[ texture(1) ]],
+                      texture2d<half, access::sample> dotMask   [[ texture(2) ]],
+                      texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
+                      texture2d<half, access::write>  final     [[ texture(4) ]],
                       constant Uniforms               &u        [[ buffer(0)  ]],
                       sampler                         sam       [[ sampler(0) ]],
                       uint2                           gid       [[ thread_position_in_grid ]])
@@ -415,6 +344,11 @@ namespace dracula {
             Color4 color;
 
             switch(u.DEBUG_TEXTURE) {
+
+                case 0:
+
+                    color = src.sample(sam, uv);
+                    break;
 
                 case 1:
 
