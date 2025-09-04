@@ -41,13 +41,13 @@ namespace dracula {
         uint  DOTMASK_ENABLE;
         uint  DOTMASK_TYPE;
         uint  DOTMASK_COLOR;
-        float DOTMASK_WIDTH;
+        uint  DOTMASK_WIDTH;
+        uint  DOTMASK_HEIGHT;
         float DOTMASK_SHIFT;
         float DOTMASK_WEIGHT;
         float DOTMASK_SATURATION;
         float DOTMASK_BRIGHTNESS;
         float DOTMASK_BLUR;
-        float DOTMASK_MIX;
         float DOTMASK_GAIN;
         float DOTMASK_LOOSE;
 
@@ -112,7 +112,7 @@ namespace dracula {
     float dotMaskWeight(uint2 gid, Coord2 shift, constant Uniforms &u) {
         
         // Setup the grid cell
-        uint2 gridSize = uint2(uint(u.DOTMASK_WIDTH), uint(u.DOTMASK_WIDTH));
+        uint2 gridSize = uint2(u.DOTMASK_WIDTH, u.DOTMASK_HEIGHT);
         uint2 gridRange = uint2(gridSize.x - 1, gridSize.y - 1);
 
         // Shift gid

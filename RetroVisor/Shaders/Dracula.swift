@@ -34,13 +34,13 @@ final class DraculaShader: Shader {
         var DOTMASK_ENABLE: Int32
         var DOTMASK_TYPE: Int32
         var DOTMASK_COLOR: Int32
-        var DOTMASK_WIDTH: Float
+        var DOTMASK_WIDTH: Int32
+        var DOTMASK_HEIGHT: Int32
         var DOTMASK_SHIFT: Float
         var DOTMASK_WEIGHT: Float
         var DOTMASK_SATURATION: Float
         var DOTMASK_BRIGHTNESS: Float
         var DOTMASK_BLUR: Float
-        var DOTMASK_MIX: Float
         var DOTMASK_GAIN: Float
         var DOTMASK_LOOSE: Float
         
@@ -84,12 +84,12 @@ final class DraculaShader: Shader {
             DOTMASK_TYPE: 0,
             DOTMASK_COLOR: 0,
             DOTMASK_WIDTH: 5,
+            DOTMASK_HEIGHT: 5,
             DOTMASK_SHIFT: 0.3,
             DOTMASK_WEIGHT: 0.69,
             DOTMASK_SATURATION: 0.5,
             DOTMASK_BRIGHTNESS: 1.0,
             DOTMASK_BLUR: 0.0,
-            DOTMASK_MIX: 0.45,
             DOTMASK_GAIN: 1.0,
             DOTMASK_LOOSE: 0.5,
             
@@ -404,16 +404,16 @@ final class DraculaShader: Shader {
                         range: 1.0...16.0, step: 1.0,
                         value: Binding(
                             key: "DOTMASK_WIDTH",
-                            get: { [unowned self] in self.uniforms.DOTMASK_WIDTH },
-                            set: { [unowned self] in self.uniforms.DOTMASK_WIDTH = $0 })),
-                    
+                            get: { [unowned self] in Float(self.uniforms.DOTMASK_WIDTH) },
+                            set: { [unowned self] in self.uniforms.DOTMASK_WIDTH = Int32($0) })),
+
                     ShaderSetting(
-                        title: "Dotmask Weight",
-                        range: 0.01...2.0, step: 0.01,
+                        title: "Dotmask Height",
+                        range: 1.0...16.0, step: 1.0,
                         value: Binding(
-                            key: "DOTMASK_WEIGHT",
-                            get: { [unowned self] in self.uniforms.DOTMASK_WEIGHT },
-                            set: { [unowned self] in self.uniforms.DOTMASK_WEIGHT = $0 })),
+                            key: "DOTMASK_HEIGHT",
+                            get: { [unowned self] in Float(self.uniforms.DOTMASK_HEIGHT) },
+                            set: { [unowned self] in self.uniforms.DOTMASK_HEIGHT = Int32($0) })),
                     
                     ShaderSetting(
                         title: "Dotmask Shift",
@@ -446,15 +446,7 @@ final class DraculaShader: Shader {
                             key: "DOTMASK_BLUR",
                             get: { [unowned self] in self.uniforms.DOTMASK_BLUR },
                             set: { [unowned self] in self.uniforms.DOTMASK_BLUR = $0 })),
-                    
-                    ShaderSetting(
-                        title: "Dotmask Mix",
-                        range: 0...1, step: 0.01,
-                        value: Binding(
-                            key: "DOTMASK_MIX",
-                            get: { [unowned self] in self.uniforms.DOTMASK_MIX },
-                            set: { [unowned self] in self.uniforms.DOTMASK_MIX = $0 })),
-                    
+                                        
                     ShaderSetting(
                         title: "Dotmask Gain",
                         range: 0.0...1.0, step: 0.01,
@@ -581,8 +573,8 @@ final class DraculaShader: Shader {
         
         let descriptor = DotMaskDescriptor(type: uniforms.DOTMASK_TYPE,
                                            color: uniforms.DOTMASK_COLOR,
-                                           cellWidth: Int32(uniforms.DOTMASK_WIDTH),
-                                           cellHeight: Int32(uniforms.DOTMASK_WIDTH),
+                                           cellWidth: uniforms.DOTMASK_WIDTH,
+                                           cellHeight: uniforms.DOTMASK_HEIGHT,
                                            saturation: uniforms.DOTMASK_SATURATION,
                                            brightness: uniforms.DOTMASK_BRIGHTNESS,
                                            blur: 1.0)
