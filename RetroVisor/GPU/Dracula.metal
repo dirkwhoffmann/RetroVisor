@@ -41,8 +41,7 @@ namespace dracula {
         uint  DOTMASK_ENABLE;
         uint  DOTMASK_TYPE;
         uint  DOTMASK_COLOR;
-        uint  DOTMASK_WIDTH;
-        uint  DOTMASK_HEIGHT;
+        uint  DOTMASK_SIZE;
         float DOTMASK_SATURATION;
         float DOTMASK_BRIGHTNESS;
         float DOTMASK_BLUR;

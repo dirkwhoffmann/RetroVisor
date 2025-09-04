@@ -187,8 +187,7 @@ namespace playground {
         
         uint TYPE;
         uint COLOR;
-        uint CELL_WIDTH;
-        uint CELL_HEIGHT;
+        uint SIZE;
         float SATURATION;
         float BRIGHTNESS;
         float BLUR;
@@ -201,9 +200,7 @@ namespace playground {
                         uint2                           gid       [[ thread_position_in_grid ]])
     {
         float2 texSize = float2(input.get_width(), input.get_height());
-        // uint2 gridSize = uint2(input.get_width(), input.get_height());
-        // uint2 gridSize = uint2(u.CELL_WIDTH, u.CELL_HEIGHT);
-        uint2 gridSize = uint2(float2(u.CELL_WIDTH, u.CELL_HEIGHT) * texSize);
+        uint2 gridSize = uint2(float2(u.SIZE, u.SIZE) * texSize);
 
         float2 uv = (float2(gid % gridSize) + 0.5) / float2(gridSize);
 

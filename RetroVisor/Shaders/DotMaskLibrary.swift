@@ -14,8 +14,7 @@ struct DotMaskDescriptor: Equatable {
 
     var type: Int32
     var color: Int32
-    var cellWidth: Int32
-    var cellHeight: Int32
+    var cellSize: Int32
     var saturation: Float
     var brightness: Float
     var blur: Float
@@ -26,8 +25,7 @@ class DotMaskLibrary {
     
     var descriptor = DotMaskDescriptor(type: 0,
                                        color: 0,
-                                       cellWidth: 0,
-                                       cellHeight: 0,
+                                       cellSize: 0,
                                        saturation: 0.0,
                                        brightness: 0.0,
                                        blur: 0.0)
@@ -52,7 +50,7 @@ class DotMaskLibrary {
         
         let s = Double(descriptor.saturation)
         let b = Double(descriptor.brightness)
-        let type = Int(descriptor.type)
+        // let type = Int(descriptor.type)
         
         
         let R = UInt32(color: NSColor(hue: 0.0, saturation: s, brightness: 1.0, alpha: 1.0))
