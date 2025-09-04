@@ -40,7 +40,7 @@ namespace dracula {
         // Dot mask
         uint  DOTMASK_ENABLE;
         uint  DOTMASK_TYPE;
-        uint  DOTMASK_MODE;
+        uint  DOTMASK_COLOR;
         float DOTMASK_WIDTH;
         float DOTMASK_SHIFT;
         float DOTMASK_WEIGHT;
@@ -296,33 +296,11 @@ namespace dracula {
 
         // Apply dot mask effect
         if (u.DOTMASK_ENABLE) {
-
+            
             Color4 mask = dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
-            // mask += dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
-            // mask = Color4(sigmoid(mask.rgb, u.DOTMASK_BRIGHTNESS), 1.0);
-
-            
-            // REMOVE ASAP
-            //outTex.write(mask, gid);
-            // return;
-            
-            if (u.DOTMASK_MODE == 0) {
-                
-                // Multiply
-                color = color * (u.DOTMASK_MIX * mask + (1 - u.DOTMASK_MIX));
-                // color *= u.DOTMASK_BRIGHTNESS;
-                
-            } else if (u.DOTMASK_MODE == 1) {
-                
-                // Blend
-                color = mix(color, mask, u.DOTMASK_MIX);
-                
-            } else if (u.DOTMASK_MODE == 2) {
-                
-                Color4 gain = min(color, 1 - color) * mask;
-                Color4 loose = min(color, 1 - color) * 0.5 * (1 - mask);
-                color += u.DOTMASK_GAIN * gain - u.DOTMASK_LOOSE * loose;
-            }
+            Color4 gain = min(color, 1 - color) * mask;
+            Color4 loose = min(color, 1 - color) * 0.5 * (1 - mask);
+            color += u.DOTMASK_GAIN * gain - u.DOTMASK_LOOSE * loose;
         }
 
         outTex.write(pow(color, Color4(1.0 / u.GAMMA_OUTPUT)), gid);

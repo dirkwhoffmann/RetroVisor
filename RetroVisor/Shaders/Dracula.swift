@@ -33,7 +33,7 @@ final class DraculaShader: Shader {
         
         var DOTMASK_ENABLE: Int32
         var DOTMASK_TYPE: Int32
-        var DOTMASK_MODE: Int32
+        var DOTMASK_COLOR: Int32
         var DOTMASK_WIDTH: Float
         var DOTMASK_SHIFT: Float
         var DOTMASK_WEIGHT: Float
@@ -81,8 +81,8 @@ final class DraculaShader: Shader {
             BLOOM_RADIUS_Y: 3,
             
             DOTMASK_ENABLE: 1,
-            DOTMASK_TYPE: 1,
-            DOTMASK_MODE: 2,
+            DOTMASK_TYPE: 0,
+            DOTMASK_COLOR: 0,
             DOTMASK_WIDTH: 5,
             DOTMASK_SHIFT: 0.3,
             DOTMASK_WEIGHT: 0.69,
@@ -384,20 +384,20 @@ final class DraculaShader: Shader {
                     set: { [unowned self] in self.uniforms.DOTMASK_ENABLE = Int32($0) }),
                   
                   [ ShaderSetting(
-                    title: "Dotmask Type", // TODO: CHANGE TO ENUM TYPE
-                    range: 0...4, step: 1.0,
+                    title: "Dotmask Type",
+                    items: [ ("Aperture Grille", 0), ("Shadow Mask", 1), ("Slot Mask", 2) ],
                     value: Binding(
                         key: "DOTMASK_TYPE",
                         get: { [unowned self] in Float(self.uniforms.DOTMASK_TYPE) },
                         set: { [unowned self] in self.uniforms.DOTMASK_TYPE = Int32($0) })),
 
                     ShaderSetting(
-                        title: "Dotmask Mode",
-                        items: [ ("Add", 0), ("Blend", 1), ("Scale", 2), ("Shift", 3) ],
-                        value: Binding(
-                            key: "DOTMASK_MODE",
-                            get: { [unowned self] in Float(self.uniforms.DOTMASK_MODE) },
-                            set: { [unowned self] in self.uniforms.DOTMASK_MODE = Int32($0) })),
+                      title: "Dotmask Color",
+                      items: [ ("GM", 0), ("RGB", 1) ],
+                      value: Binding(
+                          key: "DOTMASK_COLOR",
+                          get: { [unowned self] in Float(self.uniforms.DOTMASK_COLOR) },
+                          set: { [unowned self] in self.uniforms.DOTMASK_COLOR = Int32($0) })),
                     
                     ShaderSetting(
                         title: "Dotmask Width",
@@ -580,6 +580,7 @@ final class DraculaShader: Shader {
         
         
         let descriptor = DotMaskDescriptor(type: uniforms.DOTMASK_TYPE,
+                                           color: uniforms.DOTMASK_COLOR,
                                            cellWidth: Int32(uniforms.DOTMASK_WIDTH),
                                            cellHeight: Int32(uniforms.DOTMASK_WIDTH),
                                            saturation: uniforms.DOTMASK_SATURATION,

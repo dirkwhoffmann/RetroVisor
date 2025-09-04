@@ -186,6 +186,7 @@ namespace playground {
     struct DotMaskdUniforms {
         
         uint TYPE;
+        uint COLOR;
         uint CELL_WIDTH;
         uint CELL_HEIGHT;
         float SATURATION;
