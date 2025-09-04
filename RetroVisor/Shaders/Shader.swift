@@ -40,7 +40,7 @@ class ShaderSetting {
     let help: String?
 
     // Indicates if this options should be hidden in the GUI
-    var hidden: () -> Bool = { false }
+    // var hidden: () -> Bool = { false }
 
     // Binding for the enable key
     private var enable: Binding?
@@ -57,8 +57,7 @@ class ShaderSetting {
          items: [(String,Int)]? = nil,
          enable: Binding? = nil,
          value: Binding? = nil,
-         help: String? = nil,
-         hidden: @escaping () -> Bool = { false }
+         help: String? = nil
         ) {
 
         self.title = title
@@ -68,7 +67,6 @@ class ShaderSetting {
         self.step = step
         self.items = items
         self.help = help
-        self.hidden = hidden
     }
  
     var enableKey: String { enable?.key ?? "" }
@@ -108,7 +106,7 @@ class Group : ShaderSetting {
     // The settings in this group
     var children: [ShaderSetting]
     
-    var count: Int { children.filter { $0.hidden() == false }.count }
+    // var count: Int { children.filter { $0.hidden() == false }.count }
     
     init(title: String = "",
          range: ClosedRange<Double>? = nil,
@@ -127,8 +125,7 @@ class Group : ShaderSetting {
                    items: items,
                    enable: enable,
                    value: value,
-                   help: help,
-                   hidden: hidden)
+                   help: help)
     }
     
     func findSetting(key: String) -> ShaderSetting? {
@@ -146,6 +143,21 @@ class Group : ShaderSetting {
 }
 
 @MainActor
+protocol ShaderDelegate {
+    
+    func isHidden(setting: ShaderSetting) -> Bool
+    func uniformsDidChange(setting: ShaderSetting)
+}
+
+/*
+extension ShaderDelegate {
+    
+    func isHidden(key: String) -> Bool { false }
+    func uniformsDidChange(setting: ShaderSetting) { }
+}
+*/
+
+@MainActor
 class Shader : Loggable {
 
     static var device: MTLDevice { MTLCreateSystemDefaultDevice()! }
@@ -159,6 +171,9 @@ class Shader : Loggable {
     // Shader settings
     var settings: [Group] = []
 
+    // Delegate
+    var delegate: ShaderDelegate?
+    
     init(name: String) {
 
         self.name = name
@@ -177,7 +192,7 @@ class Shader : Loggable {
     func retire() { log("Retiring \(name)") }
 
     // Called when the user changes as uniform
-    func uniformsDidChange(setting: ShaderSetting) { }
+    // func uniformsDidChange(setting: ShaderSetting) { }
     
     // Runs the shader
     func apply(commandBuffer: MTLCommandBuffer,

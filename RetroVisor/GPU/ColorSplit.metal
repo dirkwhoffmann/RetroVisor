@@ -18,7 +18,7 @@ namespace colorsplit {
     struct Uniforms {
 
         uint  COLOR_SPACE;
-        uint  CHANNEL;
+        uint  FILTER;
 
         uint  X_ENABLE;
         float X_VALUE;
@@ -52,7 +52,7 @@ namespace colorsplit {
             default: break;
         }
 
-        switch (u.CHANNEL) {
+        switch (u.FILTER) {
                 
             case 0: xyz = xyz.xxx; break;
             case 1: xyz = xyz.yyy; break;

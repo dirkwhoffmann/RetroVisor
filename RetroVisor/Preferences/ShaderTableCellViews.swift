@@ -10,7 +10,11 @@
 import Cocoa
 
 class ShaderTableCellView: NSTableCellView {
-    
+
+    @IBOutlet weak var controller: ShaderPreferencesViewController!
+
+    var shader: Shader { controller.shader }
+
     func updateIcon(expanded: Bool) {
         
     }
@@ -18,15 +22,12 @@ class ShaderTableCellView: NSTableCellView {
 
 class ShaderGroupView: ShaderTableCellView {
 
-    @IBOutlet weak var controller: ShaderPreferencesViewController!
     @IBOutlet weak var disclosureButton: NSButton!
     @IBOutlet weak var enableButton: NSButton!
     @IBOutlet weak var label: NSTextField!
     @IBOutlet weak var subLabel: NSTextField!
 
     var group: Group!
-
-    var shader: Shader { controller.shader }
 
     func setup(with group: Group) {
 
@@ -68,7 +69,7 @@ class ShaderGroupView: ShaderTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         group.enabled = sender.state == .on
-        shader.uniformsDidChange(setting: group)
+        shader.delegate?.uniformsDidChange(setting: group)
 
 
         if sender.state == .on {
@@ -81,7 +82,6 @@ class ShaderGroupView: ShaderTableCellView {
 
 class ShaderSettingView: ShaderTableCellView {
 
-    @IBOutlet weak var controller: ShaderPreferencesViewController!
     @IBOutlet weak var optionImage: NSImageView!
     @IBOutlet weak var optionLabel: NSTextField!
     @IBOutlet weak var subLabel: NSTextField!
@@ -91,8 +91,6 @@ class ShaderSettingView: ShaderTableCellView {
     @IBOutlet weak var valuePopup: NSPopUpButton!
     @IBOutlet weak var valueLabel: NSTextField!
     @IBOutlet weak var helpButtom: NSButton!
-
-    var shader: Shader { return ShaderLibrary.shared.currentShader }
     
     var shaderSetting: ShaderSetting! {
 
@@ -100,27 +98,27 @@ class ShaderSettingView: ShaderTableCellView {
 
             // let enableKey = shaderSetting.enableKey
             let enabled = shaderSetting.enabled ?? true
-            let active = !shaderSetting.hidden()
+            let hidden = shader.delegate?.isHidden(setting: shaderSetting) ?? false
 
             optionLabel.stringValue = shaderSetting.title
             subLabel.stringValue = shaderSetting.valueKey
             helpButtom.isHidden = shaderSetting.help == nil
             optCeckbox.isHidden = shaderSetting.enabled == nil
 
-            optionLabel.textColor = active ? .textColor : .disabledControlTextColor
-            subLabel.textColor = active ? .textColor : .disabledControlTextColor
-            helpButtom.isEnabled = true
-            optCeckbox.isEnabled = true
+            optionLabel.textColor = hidden ? .disabledControlTextColor : .textColor
+            subLabel.textColor = hidden ? .disabledControlTextColor : .textColor
+            helpButtom.isEnabled = !hidden
+            optCeckbox.isEnabled = !hidden
 
             valuePopup.isHidden = true
             valueSlider.isHidden = true
             valueStepper.isHidden = true
             valueLabel.isHidden = true
 
-            valuePopup.isEnabled = enabled && active
-            valueSlider.isEnabled = enabled && active
-            valueStepper.isEnabled = enabled && active
-            valueLabel.textColor = enabled && active ? .textColor : .disabledControlTextColor
+            valuePopup.isEnabled = enabled && !hidden
+            valueSlider.isEnabled = enabled && !hidden
+            valueStepper.isEnabled = enabled && !hidden
+            valueLabel.textColor = enabled && !hidden ? .textColor : .disabledControlTextColor
 
             if let range = shaderSetting.range {
 
@@ -182,7 +180,7 @@ class ShaderSettingView: ShaderTableCellView {
         let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
         shaderSetting.floatValue = rounded
-        shader.uniformsDidChange(setting: shaderSetting)
+        shader.delegate?.uniformsDidChange(setting: shaderSetting)
         value = shaderSetting.floatValue
     }
 
@@ -194,7 +192,7 @@ class ShaderSettingView: ShaderTableCellView {
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
         shaderSetting.intValue = sender.selectedTag()
-        shader.uniformsDidChange(setting: shaderSetting)
+        shader.delegate?.uniformsDidChange(setting: shaderSetting)
         update();
         controller.outlineView.reloadData()
     }
@@ -202,7 +200,7 @@ class ShaderSettingView: ShaderTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         shaderSetting.enabled = sender.state == .on
-        shader.uniformsDidChange(setting: shaderSetting)
+        shader.delegate?.uniformsDidChange(setting: shaderSetting)
         update();
         controller.outlineView.reloadData()
     }

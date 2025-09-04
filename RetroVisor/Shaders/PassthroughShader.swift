@@ -59,6 +59,8 @@ final class PassthroughShader: Shader {
         
         super.init(name: "Passthrough")
         
+        delegate = self
+        
         settings = [
             
             Group(title: "Textures", [
@@ -112,8 +114,7 @@ final class PassthroughShader: Shader {
                         value: Binding(
                             key: "BLUR_RADIUS_Y",
                             get: { [unowned self] in self.uniforms.BLUR_RADIUS_Y },
-                            set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 }),
-                        hidden: {  [unowned self] in self.uniforms.BLUR_FILTER == BlurFilterType.gaussian.rawValue }),
+                            set: { [unowned self] in self.uniforms.BLUR_RADIUS_Y = $0 })),
                     
                     ShaderSetting(
                         title: "Scale X",
@@ -176,5 +177,23 @@ final class PassthroughShader: Shader {
             // Rescale to the output texture size
             resampler.apply(commandBuffer: commandBuffer, in: src, out: output)
         }
+    }
+}
+
+extension PassthroughShader: ShaderDelegate {
+    
+    func isHidden(setting: ShaderSetting) -> Bool {
+        
+        switch setting.valueKey {
+            
+        case "BLUR_RADIUS_Y":
+            return uniforms.BLUR_FILTER == BlurFilterType.gaussian.rawValue
+        default:
+            return false
+        }
+    }
+    
+    func uniformsDidChange(setting: ShaderSetting) {
+        
     }
 }

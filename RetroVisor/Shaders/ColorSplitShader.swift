@@ -18,7 +18,7 @@ final class ColorSplitShader: Shader {
     struct Uniforms {
 
         var COLOR_SPACE: Int32
-        var CHANNEL: Int32
+        var FILTER: Int32
 
         var X_ENABLE: Int32
         var X_VALUE: Float
@@ -32,7 +32,7 @@ final class ColorSplitShader: Shader {
         static let defaults = Uniforms(
 
             COLOR_SPACE: 0,
-            CHANNEL: 3,
+            FILTER: 3,
             
             X_ENABLE: 0,
             X_VALUE: 0.5,
@@ -58,6 +58,8 @@ final class ColorSplitShader: Shader {
 
         super.init(name: "Color Splitter")
 
+        delegate = self
+        
         settings = [
 
             Group(title: "Color Space", [
@@ -72,12 +74,12 @@ final class ColorSplitShader: Shader {
                 ),
 
                 ShaderSetting(
-                    title: "Splitter",
-                    items: [("Channel 1", 0), ("Channel 2", 1), ("Channel 3", 2), ("Recombine", 3)],
+                    title: "Channel Filter",
+                    items: [("Extract 1", 0), ("Extract 2", 1), ("Extract 3", 2), ("Recombine", 3)],
                     value: Binding(
-                        key: "CHANNEL",
-                        get: { [unowned self] in Float(self.uniforms.CHANNEL) },
-                        set: { [unowned self] in self.uniforms.CHANNEL = Int32($0) }),
+                        key: "FILTER",
+                        get: { [unowned self] in Float(self.uniforms.FILTER) },
+                        set: { [unowned self] in self.uniforms.FILTER = Int32($0) }),
                 ),
 
                 ShaderSetting(
@@ -130,27 +132,6 @@ final class ColorSplitShader: Shader {
         super.activate()
         kernel = ColorSplitFilter(sampler: ShaderLibrary.linear)
     }
-
-    override func uniformsDidChange(setting: ShaderSetting) {
-        
-        if (setting.valueKey == "COLOR_SPACE") {
-
-            let x = findSetting(key: "X_ENABLE")!
-            let y = findSetting(key: "Y_ENABLE")!
-            let z = findSetting(key: "Z_ENABLE")!
-
-            print("COLOR SPACE")
-
-            switch (setting.intValue) {
-                
-            case 0: x.title = "Red"; y.title = "Green"; z.title = "Blue"
-            case 1: x.title = "Hue"; y.title = "Saturation"; z.title = "Value"
-            case 2: x.title = "Luma"; y.title = "Chroma (U)"; z.title = "Chroma (Y)"
-            case 3: x.title = "Luma"; y.title = "Chroma (I)"; z.title = "Chroma (Q)"
-            default: x.title = "X"; y.title = "Y"; z.title = "Z"
-            }
-        }
-    }
     
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
@@ -177,5 +158,40 @@ final class ColorSplitShader: Shader {
                         textures: [src, output],
                         options: &uniforms,
                         length: MemoryLayout<PlaygroundUniforms>.stride)
+    }
+}
+
+extension ColorSplitShader: ShaderDelegate {
+    
+    func isHidden(setting: ShaderSetting) -> Bool {
+        
+        switch setting.valueKey {
+            
+        case "X_VALUE", "Y_VALUE", "Z_VALUE":
+            return uniforms.FILTER < 3
+        default:
+            return false
+        }
+    }
+    
+    func uniformsDidChange(setting: ShaderSetting) {
+        
+        if (setting.valueKey == "COLOR_SPACE") {
+
+            let x = findSetting(key: "X_ENABLE")!
+            let y = findSetting(key: "Y_ENABLE")!
+            let z = findSetting(key: "Z_ENABLE")!
+
+            print("COLOR SPACE")
+
+            switch (setting.intValue) {
+                
+            case 0: x.title = "Red"; y.title = "Green"; z.title = "Blue"
+            case 1: x.title = "Hue"; y.title = "Saturation"; z.title = "Value"
+            case 2: x.title = "Luma"; y.title = "Chroma (U)"; z.title = "Chroma (Y)"
+            case 3: x.title = "Luma"; y.title = "Chroma (I)"; z.title = "Chroma (Q)"
+            default: x.title = "X"; y.title = "Y"; z.title = "Z"
+            }
+        }
     }
 }
