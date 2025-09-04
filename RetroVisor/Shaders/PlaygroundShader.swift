@@ -578,6 +578,7 @@ final class PlaygroundShader: Shader {
         let descriptor = DotMaskDescriptor(type: uniforms.DOTMASK,
                                            cellWidth: 16,
                                            cellHeight: 16,
+                                           saturation: 1.0,
                                            brightness: uniforms.DOTMASK_BRIGHTNESS,
                                            blur: uniforms.BRIGHTNESS)
         

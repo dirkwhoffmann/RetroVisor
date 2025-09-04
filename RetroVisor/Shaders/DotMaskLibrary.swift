@@ -15,6 +15,7 @@ struct DotMaskDescriptor: Equatable {
     var type: Int32
     var cellWidth: Int32
     var cellHeight: Int32
+    var saturation: Float
     var brightness: Float
     var blur: Float
 }
@@ -25,6 +26,7 @@ class DotMaskLibrary {
     var descriptor = DotMaskDescriptor(type: 0,
                                        cellWidth: 0,
                                        cellHeight: 0,
+                                       saturation: 0.0,
                                        brightness: 0.0,
                                        blur: 0.0)
 
@@ -44,33 +46,38 @@ class DotMaskLibrary {
 
         // Exit if the texture is up to date
         if self.descriptor == descriptor { return }
-
         self.descriptor = descriptor
 
-        let brightness = descriptor.brightness
+        let s = Double(descriptor.saturation)
+        let b = Double(descriptor.brightness)
         let type = Int(descriptor.type)
         // let blur = descriptor.blur
 
-        let max  = UInt8(clamping: Int(85 + brightness * 170))
-        let base = UInt8(clamping: Int((1 - brightness) * 85))
-        let none = UInt8(clamping: Int(30 + (1 - brightness) * 55))
+        /*
+        let red = NSColor(hue: 0.0, saturation: s, brightness: b, alpha: 1.0)
+        let green = NSColor(hue: 0.333, saturation: s, brightness: b, alpha: 1.0)
+        let blue = NSColor(hue: 0.666, saturation: s, brightness: b, alpha: 1.0)
+        let magenta = NSColor(hue: 0.833, saturation: s, brightness: b, alpha: 1.0)
+         */
+        
+        let max  = UInt8(clamping: Int(85 + descriptor.brightness * 170))
+        // let base = UInt8(clamping: Int((1 - descriptor.brightness) * 85))
+        let none = UInt8(clamping: Int(30 + (1 - descriptor.brightness) * 55))
 
+        /*
         let R = UInt32(r: max, g: base, b: base)
         let G = UInt32(r: base, g: max, b: base)
         let B = UInt32(r: base, g: base, b: max)
         let M = UInt32(r: max, g: base, b: max)
+        */
+
+        let R = UInt32(color: NSColor(hue: 0.0, saturation: s, brightness: b, alpha: 1.0))
+        let G = UInt32(color: NSColor(hue: 0.333, saturation: s, brightness: b, alpha: 1.0))
+        let B = UInt32(color: NSColor(hue: 0.666, saturation: s, brightness: b, alpha: 1.0))
+        let M = UInt32(color: NSColor(hue: 0.833, saturation: s, brightness: b, alpha: 1.0))
+        
         let W = UInt32(r: max, g: max, b: max)
         let N = UInt32(r: none, g: none, b: none)
-
-        /*
-         let maskSize = [
-         CGSize(width: 1, height: 1),
-         CGSize(width: 3, height: 1),
-         CGSize(width: 4, height: 2),
-         CGSize(width: 3, height: 9),
-         CGSize(width: 4, height: 8)
-         ]
-         */
 
         let maskData = [
 

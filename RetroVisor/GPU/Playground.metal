@@ -188,6 +188,7 @@ namespace playground {
         uint TYPE;
         uint CELL_WIDTH;
         uint CELL_HEIGHT;
+        float SATURATION;
         float BRIGHTNESS;
         float BLUR;
     };

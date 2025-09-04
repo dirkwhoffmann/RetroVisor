@@ -37,6 +37,7 @@ final class DraculaShader: Shader {
         var DOTMASK_WIDTH: Float
         var DOTMASK_SHIFT: Float
         var DOTMASK_WEIGHT: Float
+        var DOTMASK_SATURATION: Float
         var DOTMASK_BRIGHTNESS: Float
         var DOTMASK_BLUR: Float
         var DOTMASK_MIX: Float
@@ -85,7 +86,8 @@ final class DraculaShader: Shader {
             DOTMASK_WIDTH: 5,
             DOTMASK_SHIFT: 0.3,
             DOTMASK_WEIGHT: 0.69,
-            DOTMASK_BRIGHTNESS: 2.36,
+            DOTMASK_SATURATION: 0.5,
+            DOTMASK_BRIGHTNESS: 1.0,
             DOTMASK_BLUR: 0.0,
             DOTMASK_MIX: 0.45,
             DOTMASK_GAIN: 1.0,
@@ -420,7 +422,15 @@ final class DraculaShader: Shader {
                             key: "DOTMASK_SHIFT",
                             get: { [unowned self] in self.uniforms.DOTMASK_SHIFT },
                             set: { [unowned self] in self.uniforms.DOTMASK_SHIFT = $0 })),
-                    
+
+                    ShaderSetting(
+                        title: "Dotmask Saturation",
+                        range: 0...1, step: 0.01,
+                        value: Binding(
+                            key: "DOTMASK_SATURATION",
+                            get: { [unowned self] in self.uniforms.DOTMASK_SATURATION },
+                            set: { [unowned self] in self.uniforms.DOTMASK_SATURATION = $0 })),
+
                     ShaderSetting(
                         title: "Dotmask Brightness",
                         range: 0...1, step: 0.01,
@@ -572,12 +582,13 @@ final class DraculaShader: Shader {
         let descriptor = DotMaskDescriptor(type: uniforms.DOTMASK_TYPE,
                                            cellWidth: Int32(uniforms.DOTMASK_WIDTH),
                                            cellHeight: Int32(uniforms.DOTMASK_WIDTH),
+                                           saturation: uniforms.DOTMASK_SATURATION,
                                            brightness: uniforms.DOTMASK_BRIGHTNESS,
                                            blur: 1.0)
-
+        
         dotMaskLibrary.create(commandBuffer: commandBuffer,
-         descriptor: descriptor,
-         texture: &dot)
+                              descriptor: descriptor,
+                              texture: &dot)
         
         /*
         dotMaskKernel.apply(commandBuffer: commandBuffer,

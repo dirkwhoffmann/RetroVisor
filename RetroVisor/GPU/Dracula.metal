@@ -44,6 +44,7 @@ namespace dracula {
         float DOTMASK_WIDTH;
         float DOTMASK_SHIFT;
         float DOTMASK_WEIGHT;
+        float DOTMASK_SATURATION;
         float DOTMASK_BRIGHTNESS;
         float DOTMASK_BLUR;
         float DOTMASK_MIX;

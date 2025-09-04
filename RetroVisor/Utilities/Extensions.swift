@@ -40,6 +40,16 @@ extension UInt32 {
 
     init(r: UInt8, g: UInt8, b: UInt8, a: UInt8) { self.init(rgba: (r, g, b, a)) }
     init(r: UInt8, g: UInt8, b: UInt8) { self.init(rgba: (r, g, b)) }
+    
+    init(color c: NSColor) {
+
+        let r = UInt32(c.redComponent * 255.0)
+        let g = UInt32(c.greenComponent * 255.0)
+        let b = UInt32(c.blueComponent * 255.0)
+        let a = UInt32(c.alphaComponent * 255.0)
+
+        self.init(bigEndian: r << 24 | g << 16 | b << 8 | a)
+    }
 }
 
 extension Float {
