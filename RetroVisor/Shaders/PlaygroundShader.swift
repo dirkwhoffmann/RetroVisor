@@ -500,7 +500,7 @@ final class PlaygroundShader: Shader {
                         title: "Debug Slider",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
-                            key: "DEBUG_SLIDER",
+                            key: "DEBUG_SLICE",
                             get: { [unowned self] in self.uniforms.DEBUG_SLIDER },
                             set: { [unowned self] in self.uniforms.DEBUG_SLIDER = $0 }))
                   ]),

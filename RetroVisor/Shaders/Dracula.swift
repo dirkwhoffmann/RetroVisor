@@ -36,8 +36,6 @@ final class DraculaShader: Shader {
         var DOTMASK_COLOR: Int32
         var DOTMASK_WIDTH: Int32
         var DOTMASK_HEIGHT: Int32
-        var DOTMASK_SHIFT: Float
-        var DOTMASK_WEIGHT: Float
         var DOTMASK_SATURATION: Float
         var DOTMASK_BRIGHTNESS: Float
         var DOTMASK_BLUR: Float
@@ -60,7 +58,8 @@ final class DraculaShader: Shader {
         
         var DEBUG_ENABLE: Int32
         var DEBUG_TEXTURE: Int32
-        var DEBUG_SLIDER: Float
+        var DEBUG_ANCHOR: Int32
+        var DEBUG_SLICE: Float
         
         static let defaults = Uniforms(
             
@@ -85,8 +84,6 @@ final class DraculaShader: Shader {
             DOTMASK_COLOR: 0,
             DOTMASK_WIDTH: 5,
             DOTMASK_HEIGHT: 5,
-            DOTMASK_SHIFT: 0.3,
-            DOTMASK_WEIGHT: 0.69,
             DOTMASK_SATURATION: 0.5,
             DOTMASK_BRIGHTNESS: 1.0,
             DOTMASK_BLUR: 0.0,
@@ -109,7 +106,8 @@ final class DraculaShader: Shader {
             
             DEBUG_ENABLE: 1,
             DEBUG_TEXTURE: 9,
-            DEBUG_SLIDER: 0.5
+            DEBUG_ANCHOR: 0,
+            DEBUG_SLICE: 0.5
         )
     }
     
@@ -416,14 +414,6 @@ final class DraculaShader: Shader {
                             set: { [unowned self] in self.uniforms.DOTMASK_HEIGHT = Int32($0) })),
                     
                     ShaderSetting(
-                        title: "Dotmask Shift",
-                        range: 0.0...1.0, step: 0.01,
-                        value: Binding(
-                            key: "DOTMASK_SHIFT",
-                            get: { [unowned self] in self.uniforms.DOTMASK_SHIFT },
-                            set: { [unowned self] in self.uniforms.DOTMASK_SHIFT = $0 })),
-
-                    ShaderSetting(
                         title: "Dotmask Saturation",
                         range: 0...1, step: 0.01,
                         value: Binding(
@@ -457,7 +447,7 @@ final class DraculaShader: Shader {
                     
                     ShaderSetting(
                         title: "Dotmask Loose",
-                        range: 0.0...1.0, step: 0.01,
+                        range: -1.0...0.0, step: 0.01,
                         value: Binding(
                             key: "DOTMASK_LOOSE",
                             get: { [unowned self] in self.uniforms.DOTMASK_LOOSE },
@@ -473,8 +463,8 @@ final class DraculaShader: Shader {
                     set: { [unowned self] in self.uniforms.DEBUG_ENABLE = Int32($0) }),
                   
                   [ ShaderSetting(
-                    title: "Debug",
-                    items: [ ("Source", 0),
+                    title: "Debug Texture",
+                    items: [ ("Original", 0),
                              ("Ycc", 1),
                              ("Ycc (Mipmap 1)", 2),
                              ("Ycc (Mipmap 2)", 3),
@@ -491,12 +481,23 @@ final class DraculaShader: Shader {
                         set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) })),
                     
                     ShaderSetting(
-                        title: "Debug Slider",
+                      title: "Debug Anchor",
+                      items: [ ("Left", 0),
+                               ("Right", 1),
+                               ("Above", 2),
+                               ("Below", 3) ],
+                      value: Binding(
+                          key: "DEBUG_TEXTURE",
+                          get: { [unowned self] in Float(self.uniforms.DEBUG_ANCHOR) },
+                          set: { [unowned self] in self.uniforms.DEBUG_ANCHOR = Int32($0) })),
+                    
+                    ShaderSetting(
+                        title: "Debug Area",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
-                            key: "DEBUG_SLIDER",
-                            get: { [unowned self] in self.uniforms.DEBUG_SLIDER },
-                            set: { [unowned self] in self.uniforms.DEBUG_SLIDER = $0 }))
+                            key: "DEBUG_SLICE",
+                            get: { [unowned self] in self.uniforms.DEBUG_SLICE },
+                            set: { [unowned self] in self.uniforms.DEBUG_SLICE = $0 }))
                   ]),
         ]
     }
