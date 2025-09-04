@@ -10,6 +10,7 @@
 import MetalKit
 import MetalPerformanceShaders
 
+@MainActor
 struct Binding {
     
     let key: String
@@ -24,6 +25,7 @@ struct Binding {
     }
 }
 
+@MainActor
 class ShaderSetting {
 
     // Description of this setting
@@ -98,6 +100,7 @@ class ShaderSetting {
     }
 }
 
+@MainActor
 class Group : ShaderSetting {
 
     // The cell view associated with this group
@@ -145,17 +148,15 @@ class Group : ShaderSetting {
 @MainActor
 protocol ShaderDelegate {
     
+    func title(setting: ShaderSetting) -> String
     func isHidden(setting: ShaderSetting) -> Bool
-    func uniformsDidChange(setting: ShaderSetting)
 }
 
-/*
 extension ShaderDelegate {
     
+    func title(setting: ShaderSetting) -> String { setting.title }
     func isHidden(key: String) -> Bool { false }
-    func uniformsDidChange(setting: ShaderSetting) { }
 }
-*/
 
 @MainActor
 class Shader : Loggable {
@@ -190,9 +191,6 @@ class Shader : Loggable {
 
     // Called once when the user selects another shader
     func retire() { log("Retiring \(name)") }
-
-    // Called when the user changes as uniform
-    // func uniformsDidChange(setting: ShaderSetting) { }
     
     // Runs the shader
     func apply(commandBuffer: MTLCommandBuffer,
@@ -202,6 +200,7 @@ class Shader : Loggable {
     }
 }
 
+@MainActor
 class ScaleShader<F: MPSImageScale> : Shader {
 
     override func apply(commandBuffer: MTLCommandBuffer,
@@ -218,11 +217,13 @@ class ScaleShader<F: MPSImageScale> : Shader {
     }
 }
 
+@MainActor
 class BilinearShader: ScaleShader<MPSImageBilinearScale> {
 
     init() { super.init(name: "Bilinear") }
 }
 
+@MainActor
 class LanczosShader: ScaleShader<MPSImageLanczosScale> {
 
     init() { super.init(name: "Lanczos") }

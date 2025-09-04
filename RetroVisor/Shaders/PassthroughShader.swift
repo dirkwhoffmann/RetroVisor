@@ -191,9 +191,5 @@ extension PassthroughShader: ShaderDelegate {
         default:
             return false
         }
-    }
-    
-    func uniformsDidChange(setting: ShaderSetting) {
-        
-    }
+    }    
 }

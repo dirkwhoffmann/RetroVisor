@@ -32,7 +32,7 @@ class ShaderGroupView: ShaderTableCellView {
     func setup(with group: Group) {
 
         self.group = group
-        label.stringValue = group.title
+        label.stringValue = shader.delegate?.title(setting: group) ?? group.title
 
         let count = group.children.count
         let optString = "\(count) option" + (count > 1 ? "s" : "")
@@ -69,8 +69,6 @@ class ShaderGroupView: ShaderTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         group.enabled = sender.state == .on
-        shader.delegate?.uniformsDidChange(setting: group)
-
 
         if sender.state == .on {
             controller.outlineView.expandItem(group)
@@ -99,8 +97,9 @@ class ShaderSettingView: ShaderTableCellView {
             // let enableKey = shaderSetting.enableKey
             let enabled = shaderSetting.enabled ?? true
             let hidden = shader.delegate?.isHidden(setting: shaderSetting) ?? false
-
-            optionLabel.stringValue = shaderSetting.title
+            let customTitle = shader.delegate?.title(setting: shaderSetting)
+            
+            optionLabel.stringValue = customTitle ?? shaderSetting.title
             subLabel.stringValue = shaderSetting.valueKey
             helpButtom.isHidden = shaderSetting.help == nil
             optCeckbox.isHidden = shaderSetting.enabled == nil
@@ -180,7 +179,6 @@ class ShaderSettingView: ShaderTableCellView {
         let rounded = round(sender.floatValue / shaderSetting.step) * shaderSetting.step
 
         shaderSetting.floatValue = rounded
-        shader.delegate?.uniformsDidChange(setting: shaderSetting)
         value = shaderSetting.floatValue
     }
 
@@ -192,7 +190,6 @@ class ShaderSettingView: ShaderTableCellView {
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
         shaderSetting.intValue = sender.selectedTag()
-        shader.delegate?.uniformsDidChange(setting: shaderSetting)
         update();
         controller.outlineView.reloadData()
     }
@@ -200,7 +197,6 @@ class ShaderSettingView: ShaderTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         shaderSetting.enabled = sender.state == .on
-        shader.delegate?.uniformsDidChange(setting: shaderSetting)
         update();
         controller.outlineView.reloadData()
     }

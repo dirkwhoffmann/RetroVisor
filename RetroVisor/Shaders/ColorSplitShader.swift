@@ -163,6 +163,25 @@ final class ColorSplitShader: Shader {
 
 extension ColorSplitShader: ShaderDelegate {
     
+    func title(setting: ShaderSetting) -> String {
+     
+        let x = [ "Red",    "Hue",         "Luma",        "Luma"       ]
+        let y = [ "Green",  "Saturation",  "Chroma (U)",  "Chroma (I)" ]
+        let z = [ "Blue",   "Value",       "Chroma (V)",  "Chroma (Q)" ]
+
+        let i = max(0, min(Int(uniforms.COLOR_SPACE), 3));
+        
+        switch setting.valueKey {
+            
+        case "X_VALUE": return x[i]
+        case "Y_VALUE": return y[i]
+        case "Z_VALUE": return z[i]
+
+        default:
+            return setting.title
+        }
+    }
+    
     func isHidden(setting: ShaderSetting) -> Bool {
         
         switch setting.valueKey {
@@ -171,27 +190,6 @@ extension ColorSplitShader: ShaderDelegate {
             return uniforms.FILTER < 3
         default:
             return false
-        }
-    }
-    
-    func uniformsDidChange(setting: ShaderSetting) {
-        
-        if (setting.valueKey == "COLOR_SPACE") {
-
-            let x = findSetting(key: "X_ENABLE")!
-            let y = findSetting(key: "Y_ENABLE")!
-            let z = findSetting(key: "Z_ENABLE")!
-
-            print("COLOR SPACE")
-
-            switch (setting.intValue) {
-                
-            case 0: x.title = "Red"; y.title = "Green"; z.title = "Blue"
-            case 1: x.title = "Hue"; y.title = "Saturation"; z.title = "Value"
-            case 2: x.title = "Luma"; y.title = "Chroma (U)"; z.title = "Chroma (Y)"
-            case 3: x.title = "Luma"; y.title = "Chroma (I)"; z.title = "Chroma (Q)"
-            default: x.title = "X"; y.title = "Y"; z.title = "Z"
-            }
         }
     }
 }
