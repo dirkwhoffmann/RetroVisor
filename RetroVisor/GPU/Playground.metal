@@ -183,18 +183,35 @@ namespace playground {
         output.write(half4(finalColor, 1.0), gid);
     }
 
+    struct DotMaskdUniforms {
+        
+        uint TYPE;
+        uint CELL_WIDTH;
+        uint CELL_HEIGHT;
+        float BRIGHTNESS;
+        float BLUR;
+    };
+
     kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
                         texture2d<half, access::write>  output    [[ texture(1) ]],
+                        constant DotMaskdUniforms       &u        [[ buffer(0)  ]],
                         sampler                         sam       [[ sampler(0) ]],
                         uint2                           gid       [[ thread_position_in_grid ]])
     {
-        // uint2 inSize = (input.get_width(), input.get_height());
-        uint2 gridSize = (input.get_width(), input.get_height());
-        // uint2 mgid = gid % gridSize;
+        float2 texSize = float2(input.get_width(), input.get_height());
+        // uint2 gridSize = uint2(input.get_width(), input.get_height());
+        // uint2 gridSize = uint2(u.CELL_WIDTH, u.CELL_HEIGHT);
+        uint2 gridSize = uint2(float2(u.CELL_WIDTH, u.CELL_HEIGHT) * texSize);
 
         float2 uv = (float2(gid % gridSize) + 0.5) / float2(gridSize);
 
         half4 color = input.sample(sam, uv);
+
+        /*
+        color = Color4(0.0,0.0,0.0,1.0);
+        if (gid.x % u.CELL_HEIGHT == 0) color = Color4(1.0,1.0,1.0,1.0);
+        if (gid.y % u.CELL_HEIGHT == 0) color = Color4(1.0,1.0,1.0,1.0);
+        */
         output.write(color, gid);
     }
 

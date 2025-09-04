@@ -40,6 +40,7 @@ namespace dracula {
         // Dot mask
         uint  DOTMASK_ENABLE;
         uint  DOTMASK_TYPE;
+        uint  DOTMASK_MODE;
         float DOTMASK_WIDTH;
         float DOTMASK_SHIFT;
         float DOTMASK_WEIGHT;
@@ -304,18 +305,18 @@ namespace dracula {
             //outTex.write(mask, gid);
             // return;
             
-            if (u.DOTMASK_TYPE == 0) {
+            if (u.DOTMASK_MODE == 0) {
                 
                 // Multiply
                 color = color * (u.DOTMASK_MIX * mask + (1 - u.DOTMASK_MIX));
                 // color *= u.DOTMASK_BRIGHTNESS;
                 
-            } else if (u.DOTMASK_TYPE == 1) {
+            } else if (u.DOTMASK_MODE == 1) {
                 
                 // Blend
                 color = mix(color, mask, u.DOTMASK_MIX);
                 
-            } else if (u.DOTMASK_TYPE == 2) {
+            } else if (u.DOTMASK_MODE == 2) {
                 
                 Color4 gain = min(color, 1 - color) * mask;
                 Color4 loose = min(color, 1 - color) * 0.5 * (1 - mask);
@@ -400,7 +401,8 @@ namespace dracula {
                     break;
 
                 case 9:
-                    color = dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
+                    // color = dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
+                    color = dotMask.sample(sam, uv);
                     break;
                     
                 default:

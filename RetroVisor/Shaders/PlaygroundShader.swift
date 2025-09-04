@@ -575,7 +575,9 @@ final class PlaygroundShader: Shader {
         // Pass 3: Apply chroma effects
         //
         
-        let descriptor = DotMaskDescriptor(type: Int(uniforms.DOTMASK),
+        let descriptor = DotMaskDescriptor(type: uniforms.DOTMASK,
+                                           cellWidth: 16,
+                                           cellHeight: 16,
                                            brightness: uniforms.DOTMASK_BRIGHTNESS,
                                            blur: uniforms.BRIGHTNESS)
         

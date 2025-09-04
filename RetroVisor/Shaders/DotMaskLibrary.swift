@@ -12,9 +12,9 @@ import MetalPerformanceShaders
 
 struct DotMaskDescriptor: Equatable {
 
-    // var width: Int
-    // var height: Int
-    var type: Int
+    var type: Int32
+    var cellWidth: Int32
+    var cellHeight: Int32
     var brightness: Float
     var blur: Float
 }
@@ -22,7 +22,11 @@ struct DotMaskDescriptor: Equatable {
 @MainActor
 class DotMaskLibrary {
 
-    var descriptor: DotMaskDescriptor?
+    var descriptor = DotMaskDescriptor(type: 0,
+                                       cellWidth: 0,
+                                       cellHeight: 0,
+                                       brightness: 0.0,
+                                       blur: 0.0)
 
     // GPU kernel
     var kernel: DotMaskFilter = DotMaskFilter(sampler: ShaderLibrary.linear)!
@@ -41,13 +45,15 @@ class DotMaskLibrary {
         // Exit if the texture is up to date
         if self.descriptor == descriptor { return }
 
-        let brightness = descriptor.brightness
-        let type = descriptor.type
-        let blur = descriptor.blur
+        self.descriptor = descriptor
 
-        let max  = UInt8(85 + brightness * 170)
-        let base = UInt8((1 - brightness) * 85)
-        let none = UInt8(30 + (1 - brightness) * 55)
+        let brightness = descriptor.brightness
+        let type = Int(descriptor.type)
+        // let blur = descriptor.blur
+
+        let max  = UInt8(clamping: Int(85 + brightness * 170))
+        let base = UInt8(clamping: Int((1 - brightness) * 85))
+        let none = UInt8(clamping: Int(30 + (1 - brightness) * 55))
 
         let R = UInt32(r: max, g: base, b: base)
         let G = UInt32(r: base, g: max, b: base)
@@ -120,13 +126,12 @@ class DotMaskLibrary {
 
         // Create the dot mask texture
         kernel.apply(commandBuffer: commandBuffer,
-                     source: imageTexture, target: texture)
-
+                     source: imageTexture, target: texture,
+                     options: &self.descriptor,
+                     length: MemoryLayout<DotMaskDescriptor>.stride)
 
         // Blur the texture
-        let filter = MPSImageGaussianBlur(device: imageTexture.device, sigma: blur)
-        filter.encode(commandBuffer: commandBuffer, inPlaceTexture: &texture)
-
-        self.descriptor = descriptor
+        // let filter = MPSImageGaussianBlur(device: imageTexture.device, sigma: blur)
+        // filter.encode(commandBuffer: commandBuffer, inPlaceTexture: &texture)
     }
 }
