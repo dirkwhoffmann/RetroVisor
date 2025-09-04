@@ -81,7 +81,7 @@ final class DraculaShader: Shader {
             BLOOM_RADIUS_Y: 3,
             
             DOTMASK_ENABLE: 1,
-            DOTMASK_TYPE: 0,
+            DOTMASK_TYPE: 1,
             DOTMASK_MODE: 2,
             DOTMASK_WIDTH: 5,
             DOTMASK_SHIFT: 0.3,

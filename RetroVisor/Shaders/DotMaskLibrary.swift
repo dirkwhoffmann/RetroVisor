@@ -51,38 +51,23 @@ class DotMaskLibrary {
         let s = Double(descriptor.saturation)
         let b = Double(descriptor.brightness)
         let type = Int(descriptor.type)
-        // let blur = descriptor.blur
 
-        /*
-        let red = NSColor(hue: 0.0, saturation: s, brightness: b, alpha: 1.0)
-        let green = NSColor(hue: 0.333, saturation: s, brightness: b, alpha: 1.0)
-        let blue = NSColor(hue: 0.666, saturation: s, brightness: b, alpha: 1.0)
-        let magenta = NSColor(hue: 0.833, saturation: s, brightness: b, alpha: 1.0)
-         */
+
+        let R = UInt32(color: NSColor(hue: 0.0, saturation: s, brightness: 1.0, alpha: 1.0))
+        let G = UInt32(color: NSColor(hue: 0.333, saturation: s, brightness: 1.0, alpha: 1.0))
+        let B = UInt32(color: NSColor(hue: 0.666, saturation: s, brightness: 1.0, alpha: 1.0))
+        let M = UInt32(color: NSColor(hue: 0.833, saturation: s, brightness: 1.0, alpha: 1.0))
         
-        let max  = UInt8(clamping: Int(85 + descriptor.brightness * 170))
-        // let base = UInt8(clamping: Int((1 - descriptor.brightness) * 85))
-        let none = UInt8(clamping: Int(30 + (1 - descriptor.brightness) * 55))
-
-        /*
-        let R = UInt32(r: max, g: base, b: base)
-        let G = UInt32(r: base, g: max, b: base)
-        let B = UInt32(r: base, g: base, b: max)
-        let M = UInt32(r: max, g: base, b: max)
-        */
-
-        let R = UInt32(color: NSColor(hue: 0.0, saturation: s, brightness: b, alpha: 1.0))
-        let G = UInt32(color: NSColor(hue: 0.333, saturation: s, brightness: b, alpha: 1.0))
-        let B = UInt32(color: NSColor(hue: 0.666, saturation: s, brightness: b, alpha: 1.0))
-        let M = UInt32(color: NSColor(hue: 0.833, saturation: s, brightness: b, alpha: 1.0))
+        // let W = UInt32(r: max, g: max, b: max)
+        let W = UInt32(r: 255, g: 255, b: 255)
+        // let N = UInt32(r: none, g: none, b: none)
+        let N = UInt32(color: NSColor(red: b, green: b, blue: b, alpha: 1.0))
         
-        let W = UInt32(r: max, g: max, b: max)
-        let N = UInt32(r: none, g: none, b: none)
-
         let maskData = [
 
-            [ [ W ] ],
+            // [ [ W ] ],
 
+            // Aperture grille
             [ [ M, G, N ],
               [ M, G, N ],
               [ M, G, N ] ],
@@ -92,6 +77,7 @@ class DotMaskLibrary {
               [ R, G, B, N ],
               [ R, G, B, N ] ],
 
+            // Shadow mask
             [ [ M, G, N ],
               [ M, G, N ],
               [ N, N, N ],
@@ -106,6 +92,38 @@ class DotMaskLibrary {
               [ R, G, B, N ],
               [ R, G, B, N ],
               [ N, N, N, N ],
+              [ B, N, R, G ],
+              [ B, N, R, G ],
+              [ B, N, R, G ],
+              [ N, N, N, N ] ],
+            
+            // Slot mask
+            [ [ M, G, N ],
+              [ M, G, N ],
+              [ M, G, N ],
+              [ M, G, N ],
+              [ N, N, N ],
+              [ N, M, G ],
+              [ N, M, G ],
+              [ N, M, G ],
+              [ N, M, G ],
+              [ N, N, N ],
+              [ G, N, M ],
+              [ G, N, M ],
+              [ G, N, M ],
+              [ G, N, M ],
+              [ N, N, N ] ],
+
+            [ [ R, G, B, N ],
+              [ R, G, B, N ],
+              [ R, G, B, N ],
+              [ R, G, B, N ],
+              [ R, G, B, N ],
+              [ R, G, B, N ],
+              [ N, N, N, N ],
+              [ B, N, R, G ],
+              [ B, N, R, G ],
+              [ B, N, R, G ],
               [ B, N, R, G ],
               [ B, N, R, G ],
               [ B, N, R, G ],

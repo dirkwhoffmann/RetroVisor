@@ -402,8 +402,8 @@ namespace dracula {
                     break;
 
                 case 9:
-                    // color = dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
-                    color = dotMask.sample(sam, uv);
+                    color = dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
+                    // color = dotMask.sample(sam, uv);
                     break;
                     
                 default:
