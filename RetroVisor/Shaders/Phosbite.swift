@@ -153,7 +153,7 @@ final class Phosbite: Shader {
     var blurFilter = BlurFilter()
     
     // Shadow mask and dot mask textures
-    var dot: MTLTexture!
+    var dom: MTLTexture!
     
     // Dot mask provider
     var dotMaskLibrary: DotMaskLibrary!
@@ -567,7 +567,7 @@ final class Phosbite: Shader {
         
         if crt?.width != crtWidth || crt?.height != crtHeight {
             
-            dot = output.makeTexture(width: crtWidth, height: crtHeight, mipmaps: 4)
+            dom = output.makeTexture(width: crtWidth, height: crtHeight, mipmaps: 4)
             crt = output.makeTexture(width: crtWidth, height: crtHeight)
         }
 
@@ -616,18 +616,18 @@ final class Phosbite: Shader {
         
         dotMaskLibrary.create(commandBuffer: commandBuffer,
                               descriptor: descriptor,
-                              texture: &dot)
+                              texture: &dom)
         
         /*
         dotMaskKernel.apply(commandBuffer: commandBuffer,
-                            textures: [ycc, dot],
+                            textures: [ycc, dom],
                             options: &uniforms,
                             length: MemoryLayout<Uniforms>.stride)
         */
-        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &dot)
+        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &dom)
         
         chromaKernel.apply(commandBuffer: commandBuffer,
-                           textures: [ycc, dot, rgb, bri],
+                           textures: [ycc, rgb, bri],
                            options: &uniforms,
                            length: MemoryLayout<Uniforms>.stride)
         
@@ -647,19 +647,19 @@ final class Phosbite: Shader {
         if uniforms.DEBUG_ENABLE == 0 {
             
             crtKernel.apply(commandBuffer: commandBuffer,
-                            textures: [lin, ycc, dot, blm, output],
+                            textures: [lin, ycc, dom, blm, output],
                             options: &uniforms,
                             length: MemoryLayout<Uniforms>.stride)
             
         } else {
             
             crtKernel.apply(commandBuffer: commandBuffer,
-                            textures: [lin, ycc, dot, blm, dbg],
+                            textures: [lin, ycc, dom, blm, dbg],
                             options: &uniforms,
                             length: MemoryLayout<Uniforms>.stride)
             
             debugKernel.apply(commandBuffer: commandBuffer,
-                              textures: [src, ycc, dot, blm, dbg, output],
+                              textures: [src, ycc, dom, blm, dbg, output],
                               options: &uniforms,
                               length: MemoryLayout<Uniforms>.stride)
         }

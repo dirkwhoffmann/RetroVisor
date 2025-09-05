@@ -77,38 +77,37 @@ namespace phosbite {
     // RGB to YUV/YIQ converter
     //
 
-    kernel void colorSpace(texture2d<half, access::sample> inTex     [[ texture(0) ]],
-                           texture2d<half, access::write>  linTex    [[ texture(1) ]],
-                           texture2d<half, access::write>  yccTex    [[ texture(2) ]],
-                           constant Uniforms               &u        [[ buffer(0)  ]],
-                           sampler                         sam       [[ sampler(0) ]],
-                           uint2                           gid       [[ thread_position_in_grid ]])
+    kernel void colorSpace(texture2d<half, access::sample> src [[ texture(0) ]], // RGB
+                           texture2d<half, access::write>  lin [[ texture(1) ]], // Linear RGB
+                           texture2d<half, access::write>  ycc [[ texture(2) ]], // Luma / Chroma
+                           constant Uniforms               &u  [[ buffer(0)  ]],
+                           sampler                         sam [[ sampler(0) ]],
+                           uint2                           gid [[ thread_position_in_grid ]])
     {
         // Get size of output textures
-        const Coord2 rect = float2(linTex.get_width(), linTex.get_height());
+        const Coord2 rect = float2(lin.get_width(), lin.get_height());
 
         // Normalize gid to 0..1 in rect
         Coord2 uv = (Coord2(gid) + 0.5) / rect;
 
         // Read pixel
-        Color3 rgb = pow(Color3(inTex.sample(sam, uv).rgb), Color3(u.GAMMA_INPUT));
-        linTex.write(Color4(rgb, 1.0), gid);
+        Color3 rgb = pow(Color3(src.sample(sam, uv).rgb), Color3(u.GAMMA_INPUT));
+        lin.write(Color4(rgb, 1.0), gid);
         
         // Split components
-        Color3 ycc = u.PAL == 1 ? RGB2YUV(rgb) : RGB2YIQ(rgb);
-        yccTex.write(Color4(ycc, 1.0), gid);
+        Color3 split = u.PAL == 1 ? RGB2YUV(rgb) : RGB2YIQ(rgb);
+        ycc.write(Color4(split, 1.0), gid);
     }
 
-    kernel void composite(texture2d<half, access::sample> ycc       [[ texture(0) ]],
-                          texture2d<half, access::sample> dotMask   [[ texture(1) ]],
-                          texture2d<half, access::write>  outTex    [[ texture(2) ]],
-                          texture2d<half, access::write>  brightTex [[ texture(3) ]],
-                          constant Uniforms               &u        [[ buffer(0)  ]],
-                          sampler                         sam       [[ sampler(0) ]],
-                          uint2                           gid       [[ thread_position_in_grid ]])
+    kernel void composite(texture2d<half, access::sample> ycc [[ texture(0) ]], // Luma / Chroma (in)
+                          texture2d<half, access::write>  out [[ texture(1) ]], // Luma / Chroma (out)
+                          texture2d<half, access::write>  bri [[ texture(2) ]], // Brightness (blooming)
+                          constant Uniforms               &u  [[ buffer(0)  ]],
+                          sampler                         sam [[ sampler(0) ]],
+                          uint2                           gid [[ thread_position_in_grid ]])
     {
-        uint W = outTex.get_width();
-        uint H = outTex.get_height();
+        uint W = out.get_width();
+        uint H = out.get_height();
         if (gid.x >= W || gid.y >= H) return;
 
         // Read pixel
@@ -148,7 +147,7 @@ namespace phosbite {
 
         half4 color = half4(half3(rgb), 1.0);
         
-        outTex.write(color, gid);
+        out.write(color, gid);
 
         //
         // Brightness pass
@@ -163,7 +162,7 @@ namespace phosbite {
             half3 mask = half3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(Y)));
 
             // Scale the bright part
-            brightTex.write(half4(color.rgb * mask * u.BLOOM_INTENSITY, 1.0), gid);
+            bri.write(half4(color.rgb * mask * u.BLOOM_INTENSITY, 1.0), gid);
         }
     }
 
@@ -172,30 +171,30 @@ namespace phosbite {
         return pow(x, pow(mix(0.8, 1.2, weight), 8));
     }
     
-    kernel void crt(texture2d<half, access::sample> inTex     [[ texture(0) ]],
-                    texture2d<half, access::sample> ycc       [[ texture(1) ]],
-                    texture2d<half, access::sample> dotMask   [[ texture(2) ]],
-                    texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
-                    texture2d<half, access::write>  outTex    [[ texture(4) ]],
-                    constant Uniforms               &u        [[ buffer(0)  ]],
-                    sampler                         sam       [[ sampler(0) ]],
-                    uint2                           gid       [[ thread_position_in_grid ]])
+    kernel void crt(texture2d<half, access::sample> rgb [[ texture(0) ]], // RGB
+                    texture2d<half, access::sample> ycc [[ texture(1) ]], // Luma / Chroma
+                    texture2d<half, access::sample> dom [[ texture(2) ]], // Dot Mask
+                    texture2d<half, access::sample> blm [[ texture(3) ]], // Bloom
+                    texture2d<half, access::write>  out [[ texture(4) ]],
+                    constant Uniforms               &u  [[ buffer(0)  ]],
+                    sampler                         sam [[ sampler(0) ]],
+                    uint2                           gid [[ thread_position_in_grid ]])
     {
         // float2 size = float2(outTex.get_width(), outTex.get_height());
 
         // Normalize gid to 0..1 in output texture
-        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(outTex.get_width(), outTex.get_height());
+        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(out.get_width(), out.get_height());
 
         // Read image pixel
-        Color4 color = inTex.sample(sam, uv);
+        Color4 color = rgb.sample(sam, uv);
                 
         // Apply scanline effect (if emulation type matches)
         if (u.SCANLINES_ENABLE) {
             
             uint line = gid.y % uint(u.SCANLINE_DISTANCE);
             
-            Color4 col = inTex.sample(sam, uv);
-            Color4 col2 = inTex.sample(sam, uv, level(u.SCANLINE_SHARPNESS));
+            Color4 col = rgb.sample(sam, uv);
+            Color4 col2 = rgb.sample(sam, uv, level(u.SCANLINE_SHARPNESS));
             col = mix(col, col2, u.SCANLINE_BLOOM);
             
             if (line == 0) {
@@ -220,13 +219,13 @@ namespace phosbite {
         // Apply dot mask effect
         if (u.DOTMASK_ENABLE) {
             
-            Color4 mask = dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
+            Color4 mask = dom.sample(sam, uv, level(u.DOTMASK_BLUR));
             Color4 gain = min(color, 1 - color) * mask;
             Color4 loose = min(color, 1 - color) * (1 - mask);
             color += u.DOTMASK_GAIN * gain + u.DOTMASK_LOOSE * loose;
         }
 
-        outTex.write(pow(color, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
+        out.write(pow(color, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
         return;
     }
 
@@ -244,14 +243,14 @@ namespace phosbite {
      
     inline Color4 sampleDebugTexture(int source,
                                      Coord2 uv,
-                                     texture2d<half, access::sample> src       [[ texture(0) ]],
-                                     texture2d<half, access::sample> ycc       [[ texture(1) ]],
-                                     texture2d<half, access::sample> dotMask   [[ texture(2) ]],
-                                     texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
-                                     texture2d<half, access::sample> dbg       [[ texture(4) ]],
-                                     constant Uniforms               &u        [[ buffer(0)  ]],
-                                     sampler                         sam       [[ sampler(0) ]],
-                                     uint2                           gid       [[ thread_position_in_grid ]])
+                                     texture2d<half, access::sample> src [[ texture(0) ]],
+                                     texture2d<half, access::sample> ycc [[ texture(1) ]],
+                                     texture2d<half, access::sample> dom [[ texture(2) ]],
+                                     texture2d<half, access::sample> blm [[ texture(3) ]],
+                                     texture2d<half, access::sample> dbg [[ texture(4) ]],
+                                     constant Uniforms               &u  [[ buffer(0)  ]],
+                                     sampler                         sam [[ sampler(0) ]],
+                                     uint2                           gid [[ thread_position_in_grid ]])
     {
         Color4 color;
 
@@ -293,11 +292,11 @@ namespace phosbite {
                 break;
                 
             case 6:
-                color = dotMask.sample(sam, uv, level(u.DEBUG_MIPMAP));
+                color = dom.sample(sam, uv, level(u.DEBUG_MIPMAP));
                 break;
                                 
             default:
-                color = bloomTex.sample(sam, uv);
+                color = blm.sample(sam, uv);
                 break;
         }
 
@@ -314,42 +313,42 @@ namespace phosbite {
         }
     }
     
-    kernel void debug(texture2d<half, access::sample> src       [[ texture(0) ]],
-                      texture2d<half, access::sample> ycc       [[ texture(1) ]],
-                      texture2d<half, access::sample> dotMask   [[ texture(2) ]],
-                      texture2d<half, access::sample> blm       [[ texture(3) ]],
-                      texture2d<half, access::sample> dbg       [[ texture(4) ]],
-                      texture2d<half, access::write>  final     [[ texture(5) ]],
-                      constant Uniforms               &u        [[ buffer(0)  ]],
-                      sampler                         sam       [[ sampler(0) ]],
-                      uint2                           gid       [[ thread_position_in_grid ]])
+    kernel void debug(texture2d<half, access::sample> src [[ texture(0) ]], // Original
+                      texture2d<half, access::sample> ycc [[ texture(1) ]], // Luma / Chroma
+                      texture2d<half, access::sample> dom [[ texture(2) ]], // Dot Mask
+                      texture2d<half, access::sample> blm [[ texture(3) ]], // Bloom
+                      texture2d<half, access::sample> dbg [[ texture(4) ]], // Final (read)
+                      texture2d<half, access::write>  fin [[ texture(5) ]], // Final (write)
+                      constant Uniforms               &u  [[ buffer(0)  ]],
+                      sampler                         sam [[ sampler(0) ]],
+                      uint2                           gid [[ thread_position_in_grid ]])
     {
         // Normalize gid to 0..1 in output texture
-        uint2 size = uint2(final.get_width(), final.get_height());
+        uint2 size = uint2(fin.get_width(), fin.get_height());
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(size);
                 
         // Sample the selected texures
         Color4 color1 = sampleDebugTexture(u.DEBUG_TEXTURE1,
-                                         uv, src, ycc, dotMask, blm, dbg, u, sam, gid);
+                                         uv, src, ycc, dom, blm, dbg, u, sam, gid);
         Color4 color2 = sampleDebugTexture(u.DEBUG_TEXTURE2,
-                                         uv, src, ycc, dotMask, blm, dbg, u, sam, gid);
+                                         uv, src, ycc, dom, blm, dbg, u, sam, gid);
 
         // Compute the pixel to display
         switch (debugPixelType(gid, size, u)) {
                 
             case -1:
                 
-                final.write(mixDebugPixel(color1, color2, u.DEBUG_LEFT), gid);
+                fin.write(mixDebugPixel(color1, color2, u.DEBUG_LEFT), gid);
                 return;
 
             case 1:
                 
-                final.write(mixDebugPixel(color1, color2, u.DEBUG_RIGHT), gid);
+                fin.write(mixDebugPixel(color1, color2, u.DEBUG_RIGHT), gid);
                 return;
 
             default:
                 
-                final.write(Color4(1.0,1.0,1.0,1.0), gid);
+                fin.write(Color4(1.0,1.0,1.0,1.0), gid);
                 return;
         }
     }
