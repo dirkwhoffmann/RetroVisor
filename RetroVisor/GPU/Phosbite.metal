@@ -27,6 +27,7 @@ namespace phosbite {
         uint  PAL;
         float GAMMA_INPUT;
         float GAMMA_OUTPUT;
+        float BRIGHT_BOOST;
         float CHROMA_RADIUS;
 
         // Bloom effect
@@ -78,24 +79,30 @@ namespace phosbite {
     //
 
     kernel void colorSpace(texture2d<half, access::sample> src [[ texture(0) ]], // RGB
-                           texture2d<half, access::write>  lin [[ texture(1) ]], // Linear RGB
-                           texture2d<half, access::write>  ycc [[ texture(2) ]], // Luma / Chroma
+                           // texture2d<half, access::write>  lin [[ texture(1) ]], // Linear RGB
+                           texture2d<half, access::write>  ycc [[ texture(1) ]], // Luma / Chroma
                            constant Uniforms               &u  [[ buffer(0)  ]],
                            sampler                         sam [[ sampler(0) ]],
                            uint2                           gid [[ thread_position_in_grid ]])
     {
         // Get size of output textures
-        const Coord2 rect = float2(lin.get_width(), lin.get_height());
+        const Coord2 rect = float2(ycc.get_width(), ycc.get_height());
 
         // Normalize gid to 0..1 in rect
         Coord2 uv = (Coord2(gid) + 0.5) / rect;
 
         // Read pixel
-        Color3 rgb = pow(Color3(src.sample(sam, uv).rgb), Color3(u.GAMMA_INPUT));
-        lin.write(Color4(rgb, 1.0), gid);
+        Color3 rgb = Color3(src.sample(sam, uv).rgb);
+
+        // Apply gamma correction
+        rgb = pow(rgb, Color3(u.GAMMA_INPUT));
         
         // Split components
         Color3 split = u.PAL == 1 ? RGB2YUV(rgb) : RGB2YIQ(rgb);
+        
+        // Boost brightness
+        split.x *= u.BRIGHT_BOOST;
+        
         ycc.write(Color4(split, 1.0), gid);
     }
 
@@ -134,19 +141,11 @@ namespace phosbite {
         Color uOut = mix(yccC.y, maxU, Color(smoothstep(0.0, 1.0, 1.0 - distU)));
         Color vOut = mix(yccC.z, maxV, Color(smoothstep(0.0, 1.0, 1.0 - distV)));
 
-        // Recombine with luma and convert back to RGB
+        // Recombine with scaled luma and convert back to RGB
         Color3 combined = Color3(yccC.x, uOut, vOut);
         Color3 rgb = u.PAL ? YUV2RGB(combined) : YIQ2RGB(combined);
 
-        // Write pixel
-        // outTex.write(half4(half3(rgb), 1.0), gid);
-
-        //
-        //
-        //
-
-        half4 color = half4(half3(rgb), 1.0);
-        
+        Color4 color = Color4(rgb, 1.0);
         out.write(color, gid);
 
         //
@@ -228,7 +227,6 @@ namespace phosbite {
             Color4 bloom = blm.sample(sam, uv);
             color = saturate(color + bloom);
         }
-
         
         out.write(pow(color, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
         return;

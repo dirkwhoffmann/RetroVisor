@@ -53,9 +53,12 @@ inline Color4 HSV2RGB(Color4 hsva) {
 
 inline Color3 RGB2YIQ(Color3 rgb) {
     
-    return Color3(dot(rgb, Color3(0.299,  0.587,  0.114)),   // Y
-                  dot(rgb, Color3(0.596, -0.274, -0.322)),   // I
-                  dot(rgb, Color3(0.211, -0.523,  0.312)));  // Q
+    Color3 yiq = Color3(dot(rgb, Color3(0.299,  0.587,  0.114)),   // Y
+                        dot(rgb, Color3(0.596, -0.274, -0.322)),   // I
+                        dot(rgb, Color3(0.211, -0.523,  0.312)));  // Q
+
+    // Shift chroma from [-0.5;0.5] to [0.0;1.0]
+    return Color3(yiq.x, yiq.y + 0.5, yiq.z + 0.5);
 }
 
 inline Color4 RGB2YIQ(Color4 rgba) {
@@ -64,6 +67,9 @@ inline Color4 RGB2YIQ(Color4 rgba) {
 }
 
 inline Color3 YIQ2RGB(Color3 yiq) {
+    
+    // Shift chroma from [0.0;1.0] to [-0.5;0.5]
+    yiq = Color3(yiq.x, yiq.y - 0.5, yiq.z - 0.5);
     
     Color Y = yiq.x, I = yiq.y, Q = yiq.z;
     Color3 rgb = Color3(Y + 0.956 * I + 0.621 * Q,
@@ -78,11 +84,14 @@ inline Color4 YIQ2RGB(Color4 yiqa) {
 }
 
 inline Color3 RGB2YUV(Color3 rgb) {
-
+    
     // PAL-ish YUV (BT.601)
-    return Color3(dot(rgb, Color3(0.299,     0.587,    0.114)),    // Y
-                  dot(rgb, Color3(-0.14713, -0.28886,  0.436)),    // U
-                  dot(rgb, Color3(0.615,    -0.51499, -0.10001))); // V
+    Color3 yuv = Color3(dot(rgb, Color3(0.299,     0.587,    0.114)),    // Y
+                        dot(rgb, Color3(-0.14713, -0.28886,  0.436)),    // U
+                        dot(rgb, Color3(0.615,    -0.51499, -0.10001))); // V
+
+    // Shift chroma from [-0.5;0.5] to [0.0;1.0]
+    return Color3(yuv.x, yuv.y + 0.5, yuv.z + 0.5);
 }
 
 inline Color4 RGB2YUV(Color4 rgba) {
@@ -92,6 +101,9 @@ inline Color4 RGB2YUV(Color4 rgba) {
 
 inline Color3 YUV2RGB(Color3 yuv) {
 
+    // Shift chroma from [0.0;1.0] to [-0.5;0.5]
+    yuv = Color3(yuv.x, yuv.y - 0.5, yuv.z - 0.5);
+    
     Color Y = yuv.x, U = yuv.y, V = yuv.z;
     Color3 rgb = Color3(Y + 1.13983 * V,
                         Y - 0.39465 * U - 0.58060 * V,

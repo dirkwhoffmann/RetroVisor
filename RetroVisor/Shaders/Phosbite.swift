@@ -22,6 +22,7 @@ final class Phosbite: Shader {
         var PAL: Int32
         var GAMMA_INPUT: Float
         var GAMMA_OUTPUT: Float
+        var BRIGHT_BOOST: Float
         var CHROMA_RADIUS: Float
         
         var BLOOM_ENABLE: Int32
@@ -72,6 +73,7 @@ final class Phosbite: Shader {
             PAL: 0,
             GAMMA_INPUT: 2.2,
             GAMMA_OUTPUT: 2.2,
+            BRIGHT_BOOST: 1.0,
             CHROMA_RADIUS: 1.3,
             
             BLOOM_ENABLE: 0,
@@ -220,6 +222,15 @@ final class Phosbite: Shader {
                         get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
                         set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 })),
                 
+                ShaderSetting(
+                    title: "Brightness Boost",
+                    range: 0.0...2.0, step: 0.01,
+                    value: Binding(
+                        key: "BRIGHT_BOOST",
+                        get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
+                        set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
+                ),
+
                 ShaderSetting(
                     title: "Chroma Radius",
                     range: 1...10, step: 1,
@@ -643,7 +654,7 @@ final class Phosbite: Shader {
         //
         
         splitKernel.apply(commandBuffer: commandBuffer,
-                          textures: [src, lin, ycc],
+                          textures:  [src, ycc], // [src, lin, ycc],
                           options: &uniforms,
                           length: MemoryLayout<Uniforms>.stride)
         
@@ -694,14 +705,14 @@ final class Phosbite: Shader {
         if uniforms.DEBUG_ENABLE == 0 {
             
             crtKernel.apply(commandBuffer: commandBuffer,
-                            textures: [lin, ycc, dom, blm, output],
+                            textures: [rgb, ycc, dom, blm, output],
                             options: &uniforms,
                             length: MemoryLayout<Uniforms>.stride)
             
         } else {
             
             crtKernel.apply(commandBuffer: commandBuffer,
-                            textures: [lin, ycc, dom, blm, dbg],
+                            textures: [rgb, ycc, dom, blm, dbg],
                             options: &uniforms,
                             length: MemoryLayout<Uniforms>.stride)
             
