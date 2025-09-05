@@ -11,7 +11,7 @@ import MetalKit
 import MetalPerformanceShaders
 
 @MainActor
-final class DraculaShader: Shader {
+final class Phosbite: Shader {
     
     struct Uniforms {
         
@@ -57,6 +57,7 @@ final class DraculaShader: Shader {
         
         var DEBUG_ENABLE: Int32
         var DEBUG_TEXTURE: Int32
+        var DEBUG_MODE: Int32
         var DEBUG_ANCHOR: Int32
         var DEBUG_SLICE: Float
         
@@ -104,6 +105,7 @@ final class DraculaShader: Shader {
             
             DEBUG_ENABLE: 1,
             DEBUG_TEXTURE: 9,
+            DEBUG_MODE: 0,
             DEBUG_ANCHOR: 0,
             DEBUG_SLICE: 0.5
         )
@@ -471,6 +473,17 @@ final class DraculaShader: Shader {
                         set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) })),
                     
                     ShaderSetting(
+                      title: "Display Mode",
+                      items: [ ("Plain", 0),
+                               ("Diff", 1),
+                               ("Brighter Parts", 2),
+                               ("Darker Parts", 3) ],
+                      value: Binding(
+                          key: "DEBUG_MODE",
+                          get: { [unowned self] in Float(self.uniforms.DEBUG_MODE) },
+                          set: { [unowned self] in self.uniforms.DEBUG_MODE = Int32($0) })),
+
+                    ShaderSetting(
                       title: "Debug Anchor",
                       items: [ ("Left", 0),
                                ("Right", 1),
@@ -618,41 +631,41 @@ final class DraculaShader: Shader {
     }
 }
 
-extension DraculaShader {
+extension Phosbite {
     
     class ColorSpaceFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "dracula::colorSpace", sampler: sampler)
+            self.init(name: "phosbite::colorSpace", sampler: sampler)
         }
     }
     
     class ShadowMaskFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "dracula::shadowMask", sampler: sampler)
+            self.init(name: "phosbite::shadowMask", sampler: sampler)
         }
     }
     
     class DotMaskFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "dracula::dotMask", sampler: sampler)
+            self.init(name: "phosbite::dotMask", sampler: sampler)
         }
     }
     
     class CompositeFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "dracula::composite", sampler: sampler)
+            self.init(name: "phosbite::composite", sampler: sampler)
         }
     }
     
     class CrtFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "dracula::crt", sampler: sampler)
+            self.init(name: "phosbite::crt", sampler: sampler)
         }
     }
     
     class DebugFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "dracula::debug", sampler: sampler)
+            self.init(name: "phosbite::debug", sampler: sampler)
         }
     }
 }

@@ -14,7 +14,7 @@
 
 using namespace metal;
 
-namespace dracula {
+namespace phosbite {
 
     struct Uniforms {
 
@@ -66,6 +66,7 @@ namespace dracula {
         // Debugging
         uint  DEBUG_ENABLE;
         uint  DEBUG_TEXTURE;
+        uint  DEBUG_MODE;
         uint  DEBUG_ANCHOR;
         float DEBUG_SLICE;
     };
@@ -185,16 +186,7 @@ namespace dracula {
 
         // Read image pixel
         Color4 color = inTex.sample(sam, uv);
-        
-        // Apply bloom effect
-        /*
-        if (u.BLOOM_ENABLE) {
-
-            Color4 bloom = bloomTex.sample(sam, uv);
-            color = saturate(color + bloom);
-        }
-        */
-        
+                
         // Apply scanline effect (if emulation type matches)
         if (u.SCANLINES_ENABLE) {
             
@@ -236,6 +228,39 @@ namespace dracula {
         return;
     }
 
+    //
+    // Debug kernel
+    //
+    
+    inline int debugPixelType(uint2 gid, uint2 size, constant Uniforms &u) {
+        
+        bool horizontal = (u.DEBUG_ANCHOR < 2);
+        bool anchorLow  = (u.DEBUG_ANCHOR == 0 || u.DEBUG_ANCHOR == 2);
+        
+        uint dim   = horizontal ? size.x : size.y;
+        uint coord = horizontal ? gid.x : gid.y;
+        
+        float cutoff = u.DEBUG_SLICE * dim;
+        
+        if (anchorLow) {
+            return coord < cutoff ? -1 : coord > cutoff ? 1 : 0;
+        } else {
+            return coord > cutoff ? -1 : coord < cutoff ? 1 : 0;
+        }
+    }
+    
+    inline bool isBorderPixel(uint2 gid, uint2 size, constant Uniforms &u) {
+        
+        bool horizontal = (u.DEBUG_ANCHOR < 2);
+        bool anchorLow  = (u.DEBUG_ANCHOR == 0 || u.DEBUG_ANCHOR == 2);
+
+        uint dim   = horizontal ? size.x : size.y;
+        uint coord = horizontal ? gid.x : gid.y;
+
+        float cutoff = u.DEBUG_SLICE * dim;
+        return anchorLow ? (coord < cutoff) : (coord > dim - cutoff);
+    }
+    
     kernel void debug(texture2d<half, access::sample> src       [[ texture(0) ]],
                       texture2d<half, access::sample> ycc       [[ texture(1) ]],
                       texture2d<half, access::sample> dotMask   [[ texture(2) ]],
@@ -246,19 +271,21 @@ namespace dracula {
                       uint2                           gid       [[ thread_position_in_grid ]])
     {
         // Normalize gid to 0..1 in output texture
-        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(final.get_width(), final.get_height());
+        uint2 size = uint2(final.get_width(), final.get_height());
+        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(size);
         
-        switch (u.DEBUG_ANCHOR) {
-                
-            case 0: if (gid.x >= u.DEBUG_SLICE * final.get_width()) { return; } else break;
-            case 1: if (gid.x <= (1.0 - u.DEBUG_SLICE) * final.get_width()) { return; } else break;
-            case 2: if (gid.y >= u.DEBUG_SLICE * final.get_height()) { return; } else break;
-            case 3: if (gid.y <= (1.0 - u.DEBUG_SLICE) * final.get_height()) { return; } else break;
-
+        // Exit if gid is outside the debug region
+        int type = debugPixelType(gid, size, u);
+        
+        if (type == -1) { // Outside
+            return;
+        }
+        if (type == 0) { // Border
+            final.write(Color4(0.0,0.0,0.0,1.0), gid);
+            return;
         }
         
         Color4 color;
-        
         switch(u.DEBUG_TEXTURE) {
                 
             case 0:
@@ -323,6 +350,19 @@ namespace dracula {
             default:
                 
                 color = bloomTex.sample(sam, uv);
+                break;
+        }
+        
+        // Display debug pixel depending of debug mode
+        
+        switch (u.DEBUG_MODE) {
+                
+            case 1:
+                
+                color = abs(src.sample(sam, uv) - color);
+                break;
+                
+            default:
                 break;
         }
         
