@@ -12,23 +12,20 @@ import MetalPerformanceShaders
 
 struct DotMaskDescriptor: Equatable {
 
-    var type: Int32
-    var color: Int32
-    var cellSize: Int32
-    var saturation: Float
-    var brightness: Float
-    var blur: Float
+    var width = Int32(0)
+    var height = Int32(0)
+    var type = Int32(0)
+    var color = Int32(0)
+    var cellSize = Int32(0)
+    var saturation = Float(0.0)
+    var brightness = Float(0.0)
+    var blur = Float(0.0)
 }
 
 @MainActor
 class DotMaskLibrary {
     
-    var descriptor = DotMaskDescriptor(type: 0,
-                                       color: 0,
-                                       cellSize: 0,
-                                       saturation: 0.0,
-                                       brightness: 0.0,
-                                       blur: 0.0)
+    var descriptor = DotMaskDescriptor()
     
     // GPU kernel
     var kernel: DotMaskFilter = DotMaskFilter(sampler: ShaderLibrary.linear)!

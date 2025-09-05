@@ -180,43 +180,40 @@ namespace phosbite {
                     sampler                         sam [[ sampler(0) ]],
                     uint2                           gid [[ thread_position_in_grid ]])
     {
-        // float2 size = float2(outTex.get_width(), outTex.get_height());
-
         // Normalize gid to 0..1 in output texture
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(out.get_width(), out.get_height());
 
-        // Read image pixel
+        // Read source pixel
         Color4 color = rgb.sample(sam, uv);
                 
-        // Apply scanline effect (if emulation type matches)
+        // Apply the scanline effect
         if (u.SCANLINES_ENABLE) {
             
             uint line = gid.y % uint(u.SCANLINE_DISTANCE);
             
-            Color4 col = rgb.sample(sam, uv);
-            Color4 col2 = rgb.sample(sam, uv, level(u.SCANLINE_SHARPNESS));
-            col = mix(col, col2, u.SCANLINE_BLOOM);
+            Color4 blurred = rgb.sample(sam, uv, level(u.SCANLINE_SHARPNESS));
+            color = mix(color, blurred, u.SCANLINE_BLOOM);
             
             if (line == 0) {
-                color = scanline(col, u.SCANLINE_WEIGHT1);
+                color = scanline(color, u.SCANLINE_WEIGHT1);
             } else if (line == 1) {
-                color = scanline(col, u.SCANLINE_WEIGHT2);
+                color = scanline(color, u.SCANLINE_WEIGHT2);
             } else if (line == 2) {
-                color = scanline(col, u.SCANLINE_WEIGHT3);
+                color = scanline(color, u.SCANLINE_WEIGHT3);
             } else if (line == 3) {
-                color = scanline(col, u.SCANLINE_WEIGHT4);
+                color = scanline(color, u.SCANLINE_WEIGHT4);
             } else if (line == 4) {
-                color = scanline(col, u.SCANLINE_WEIGHT5);
+                color = scanline(color, u.SCANLINE_WEIGHT5);
             } else if (line == 5) {
-                color = scanline(col, u.SCANLINE_WEIGHT6);
+                color = scanline(color, u.SCANLINE_WEIGHT6);
             } else if (line == 6) {
-                color = scanline(col, u.SCANLINE_WEIGHT7);
+                color = scanline(color, u.SCANLINE_WEIGHT7);
             } else if (line == 7) {
-                color = scanline(col, u.SCANLINE_WEIGHT8);
+                color = scanline(color, u.SCANLINE_WEIGHT8);
             }
         }
 
-        // Apply dot mask effect
+        // Apply the dot mask effect
         if (u.DOTMASK_ENABLE) {
             
             Color4 mask = dom.sample(sam, uv, level(u.DOTMASK_BLUR));
@@ -225,6 +222,14 @@ namespace phosbite {
             color += u.DOTMASK_GAIN * gain + u.DOTMASK_LOOSE * loose;
         }
 
+        // Apply the bloom effect
+        if (u.BLOOM_ENABLE) {
+
+            Color4 bloom = blm.sample(sam, uv);
+            color = saturate(color + bloom);
+        }
+
+        
         out.write(pow(color, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
         return;
     }
@@ -336,20 +341,9 @@ namespace phosbite {
         // Compute the pixel to display
         switch (debugPixelType(gid, size, u)) {
                 
-            case -1:
-                
-                fin.write(mixDebugPixel(color1, color2, u.DEBUG_LEFT), gid);
-                return;
-
-            case 1:
-                
-                fin.write(mixDebugPixel(color1, color2, u.DEBUG_RIGHT), gid);
-                return;
-
-            default:
-                
-                fin.write(Color4(1.0,1.0,1.0,1.0), gid);
-                return;
+            case -1: fin.write(mixDebugPixel(color1, color2, u.DEBUG_LEFT), gid); break;
+            case  1: fin.write(mixDebugPixel(color1, color2, u.DEBUG_RIGHT), gid); break;
+            default: fin.write(Color4(1.0,1.0,1.0,1.0), gid);
         }
     }
 }

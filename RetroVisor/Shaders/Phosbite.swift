@@ -607,7 +607,8 @@ final class Phosbite: Shader {
         //
         
         
-        let descriptor = DotMaskDescriptor(type: uniforms.DOTMASK_TYPE,
+        let descriptor = DotMaskDescriptor(width: Int32(dom.width),
+                                           height: Int32(dom.height),
                                            color: uniforms.DOTMASK_COLOR,
                                            cellSize: uniforms.DOTMASK_SIZE,
                                            saturation: uniforms.DOTMASK_SATURATION,
