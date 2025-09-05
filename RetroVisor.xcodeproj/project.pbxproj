@@ -25,14 +25,12 @@
 		503FCC332E4B016400EF49DA /* Shadowed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC322E4B016000EF49DA /* Shadowed.swift */; };
 		503FCC352E4B85BD00EF49DA /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC342E4B85B900EF49DA /* Settings.swift */; };
 		504F539A2E59BC6600C5291F /* FilterLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504F53992E59BC5A00C5291F /* FilterLibrary.swift */; };
-		504F539E2E5AE05800C5291F /* DotMaskLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504F539D2E5AE04F00C5291F /* DotMaskLibrary.swift */; };
 		504F53A02E6173D000C5291F /* ColorSplitShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504F539F2E6173C300C5291F /* ColorSplitShader.swift */; };
 		504F53A22E6179BB00C5291F /* ColorSplit.metal in Sources */ = {isa = PBXBuildFile; fileRef = 504F53A12E6179AE00C5291F /* ColorSplit.metal */; };
 		5069364D2E4EFD2D0037984F /* Shader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069364C2E4EFD2B0037984F /* Shader.swift */; };
 		506936502E4EFF160037984F /* CrtEasyShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */; };
 		506936522E4F0E590037984F /* ShaderLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936512E4F0E540037984F /* ShaderLibrary.swift */; };
 		506936542E4F2FE40037984F /* PassthroughShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936532E4F2FDB0037984F /* PassthroughShader.swift */; };
-		506936582E4F49340037984F /* PlaygroundShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936572E4F49220037984F /* PlaygroundShader.swift */; };
 		5069365A2E4F49CA0037984F /* Playground.metal in Sources */ = {isa = PBXBuildFile; fileRef = 506936592E4F49C40037984F /* Playground.metal */; };
 		5069365C2E4F76280037984F /* Kernel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069365B2E4F76250037984F /* Kernel.swift */; };
 		509E84C32E57584400384C75 /* ImageToolbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509E84C22E57584100384C75 /* ImageToolbox.swift */; };
@@ -73,14 +71,12 @@
 		503FCC322E4B016000EF49DA /* Shadowed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadowed.swift; sourceTree = "<group>"; };
 		503FCC342E4B85B900EF49DA /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		504F53992E59BC5A00C5291F /* FilterLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterLibrary.swift; sourceTree = "<group>"; };
-		504F539D2E5AE04F00C5291F /* DotMaskLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DotMaskLibrary.swift; sourceTree = "<group>"; };
 		504F539F2E6173C300C5291F /* ColorSplitShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSplitShader.swift; sourceTree = "<group>"; };
 		504F53A12E6179AE00C5291F /* ColorSplit.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ColorSplit.metal; sourceTree = "<group>"; };
 		5069364C2E4EFD2B0037984F /* Shader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shader.swift; sourceTree = "<group>"; };
 		5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrtEasyShader.swift; sourceTree = "<group>"; };
 		506936512E4F0E540037984F /* ShaderLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderLibrary.swift; sourceTree = "<group>"; };
 		506936532E4F2FDB0037984F /* PassthroughShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassthroughShader.swift; sourceTree = "<group>"; };
-		506936572E4F49220037984F /* PlaygroundShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaygroundShader.swift; sourceTree = "<group>"; };
 		506936592E4F49C40037984F /* Playground.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Playground.metal; sourceTree = "<group>"; };
 		5069365B2E4F76250037984F /* Kernel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kernel.swift; sourceTree = "<group>"; };
 		507ADD342E68770A00BB7E10 /* ColorToolbox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ColorToolbox.metal; sourceTree = "<group>"; };
@@ -162,14 +158,12 @@
 		5069364E2E4EFD360037984F /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
-				504F539D2E5AE04F00C5291F /* DotMaskLibrary.swift */,
 				504F53992E59BC5A00C5291F /* FilterLibrary.swift */,
 				506936512E4F0E540037984F /* ShaderLibrary.swift */,
 				5069364C2E4EFD2B0037984F /* Shader.swift */,
 				506936532E4F2FDB0037984F /* PassthroughShader.swift */,
 				504F539F2E6173C300C5291F /* ColorSplitShader.swift */,
 				5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */,
-				506936572E4F49220037984F /* PlaygroundShader.swift */,
 				5011EDEC2E6317EC00B0938A /* Phosbite.swift */,
 			);
 			path = Shaders;
@@ -322,7 +316,6 @@
 				50BA966D2E40C3CB006BA8DF /* ShaderTableCellViews.swift in Sources */,
 				50292D942E471A330084CFE3 /* PermissionWindowController.swift in Sources */,
 				503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */,
-				506936582E4F49340037984F /* PlaygroundShader.swift in Sources */,
 				5069364D2E4EFD2D0037984F /* Shader.swift in Sources */,
 				503FCC352E4B85BD00EF49DA /* Settings.swift in Sources */,
 				509E84C32E57584400384C75 /* ImageToolbox.swift in Sources */,
@@ -338,7 +331,6 @@
 				503FCC292E48F2D200EF49DA /* ShaderPreferencesViewController.swift in Sources */,
 				5011EDED2E6317F000B0938A /* Phosbite.swift in Sources */,
 				504F539A2E59BC6600C5291F /* FilterLibrary.swift in Sources */,
-				504F539E2E5AE05800C5291F /* DotMaskLibrary.swift in Sources */,
 				50079E712E43813C005BC5FD /* Extensions.swift in Sources */,
 				5069365C2E4F76280037984F /* Kernel.swift in Sources */,
 				506936542E4F2FE40037984F /* PassthroughShader.swift in Sources */,
