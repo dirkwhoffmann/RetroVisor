@@ -69,7 +69,8 @@ class ShaderGroupView: ShaderTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         group.enabled = sender.state == .on
-
+        shader.delegate?.settingDidChange(setting: group)
+        
         if sender.state == .on {
             controller.outlineView.expandItem(group)
         } else {
@@ -182,6 +183,7 @@ class ShaderSettingView: ShaderTableCellView {
 
         shaderSetting.floatValue = rounded
         value = shaderSetting.floatValue
+        shader.delegate?.settingDidChange(setting: shaderSetting)
     }
 
     @IBAction func stepperAction(_ sender: NSControl) {
@@ -192,6 +194,7 @@ class ShaderSettingView: ShaderTableCellView {
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
         shaderSetting.intValue = sender.selectedTag()
+        shader.delegate?.settingDidChange(setting: shaderSetting)
         update();
         controller.outlineView.reloadData()
     }
@@ -199,6 +202,7 @@ class ShaderSettingView: ShaderTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         shaderSetting.enabled = sender.state == .on
+        shader.delegate?.settingDidChange(setting: shaderSetting)
         update();
         controller.outlineView.reloadData()
     }

@@ -83,3 +83,34 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
 
     return tex.sample(sam, uv);
 }
+
+//
+// Dot mask kernel (Used by DotMasLibrary)
+//
+
+struct DotMaskdUniforms {
+    
+    uint WIDTH;
+    uint HEIGHT;
+    uint TYPE;
+    uint COLOR;
+    uint SIZE;
+    float SATURATION;
+    float BRIGHTNESS;
+    float BLUR;
+};
+
+kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
+                    texture2d<half, access::write>  output    [[ texture(1) ]],
+                    constant DotMaskdUniforms       &u        [[ buffer(0)  ]],
+                    sampler                         sam       [[ sampler(0) ]],
+                    uint2                           gid       [[ thread_position_in_grid ]])
+{
+    float2 texSize = float2(input.get_width(), input.get_height());
+    uint2 gridSize = uint2(float2(u.SIZE, u.SIZE) * texSize);
+
+    float2 uv = (float2(gid % gridSize) + 0.5) / float2(gridSize);
+
+    half4 color = input.sample(sam, uv);
+    output.write(color, gid);
+}

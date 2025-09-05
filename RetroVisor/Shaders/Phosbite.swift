@@ -118,34 +118,25 @@ final class Phosbite: Shader {
             DEBUG_MIPMAP: 0.0
         )
     }
-    
+
+    var uniforms: Uniforms = .defaults
+
+    // Kernels
     var splitKernel: Kernel!
     var chromaKernel: Kernel!
     var dotMaskKernel: Kernel!
     var crtKernel: Kernel!
     var debugKernel: Kernel!
     
-    var uniforms: Uniforms = .defaults
-    
-    // Result of pass 1: Downscaled input texture
-    var src: MTLTexture!
-    
-    // Result of pass 2: Texture in linear RGB and YUV/YIQ space
-    var lin: MTLTexture!
-    var ycc: MTLTexture!
-    
-    // Result of pass 3: Textures with composite effects applied
-    var rgb: MTLTexture!
-    var bri: MTLTexture!
-    
-    // Result of pass 4: The bloom texture
-    var blm: MTLTexture!
-    
-    // Result of pass 5: Texture with CRT effects applied
-    var crt: MTLTexture!
-
-    // Intermediate texture needed by the texture debugger
-    var dbg: MTLTexture!
+    // Textures
+    var src: MTLTexture! // Downscaled input texture
+    var ycc: MTLTexture! // Image in chroma/luma space
+    var rgb: MTLTexture! // Restored RGB texture
+    var bri: MTLTexture! // Brightness texture (blooming)
+    var dom: MTLTexture! // Dot mask
+    var blm: MTLTexture! // Bloom texture
+    var crt: MTLTexture! // Texture with CRT effects applied
+    var dbg: MTLTexture! // Copy of crt (needed by the debug kernel)
     
     // Performance shader for computing mipmaps
     var pyramid: MPSImagePyramid!
@@ -155,18 +146,18 @@ final class Phosbite: Shader {
     
     // Blur filter
     var blurFilter = BlurFilter()
+        
+    // Indicates whether the dot mask needs to be rebuild
+    var dotMaskNeedsUpdate: Bool = true
     
-    // Shadow mask and dot mask textures
-    var dom: MTLTexture!
-    
-    // Dot mask provider
-    var dotMaskLibrary: DotMaskLibrary!
-    
-    // var transform = MPSScaleTransform.init() // scaleX: 1.5, scaleY: 1.5, translateX: 0.0, translateY: 0.0)
-    
+    // Dot mask provider DEPRECATED
+    // var dotMaskLibrary: DotMaskLibrary!
+        
     init() {
         
         super.init(name: "Dracula")
+        
+        delegate = self
         
         settings = [
             
@@ -612,7 +603,6 @@ final class Phosbite: Shader {
         chromaKernel = CompositeFilter(sampler: ShaderLibrary.linear)
         debugKernel = DebugFilter(sampler: ShaderLibrary.mipmapLinear)
         pyramid = MPSImageGaussianPyramid(device: ShaderLibrary.device)
-        dotMaskLibrary = DotMaskLibrary()
     }
     
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
@@ -629,11 +619,10 @@ final class Phosbite: Shader {
         if ycc?.width != inpWidth || ycc?.height != inpHeight {
             
             src = output.makeTexture(width: inpWidth, height: inpHeight)
-            lin = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
             ycc = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
             bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
-            rgb = output.makeTexture(width: inpWidth, height: inpHeight)
+            rgb = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
         }
         
         if crt?.width != crtWidth || crt?.height != crtHeight {
@@ -646,6 +635,49 @@ final class Phosbite: Shader {
 
             dbg = output.makeTexture(width: crtWidth, height: crtHeight)
         }
+    }
+    
+    func updateDotMask(commandBuffer: MTLCommandBuffer) {
+                
+        let s = Double(uniforms.DOTMASK_SATURATION)
+        let b = Double(uniforms.DOTMASK_BRIGHTNESS)
+                
+        let R = UInt32(color: NSColor(hue: 0.0, saturation: s, brightness: 1.0, alpha: 1.0))
+        let G = UInt32(color: NSColor(hue: 0.333, saturation: s, brightness: 1.0, alpha: 1.0))
+        let B = UInt32(color: NSColor(hue: 0.666, saturation: s, brightness: 1.0, alpha: 1.0))
+        let M = UInt32(color: NSColor(hue: 0.833, saturation: s, brightness: 1.0, alpha: 1.0))
+        let N = UInt32(color: NSColor(red: b, green: b, blue: b, alpha: 1.0))
+        
+        let maskData = [
+            [ apertureGrille(M, G, N), apertureGrille(R, G, B, N) ],
+            [ slotMask      (M, G, N),       slotMask(R, G, B, N) ],
+            [ shadowMask    (M, G, N),     shadowMask(R, G, B, N) ]
+        ]
+        
+        // Create image representation in memory
+        let mask = maskData[Int(uniforms.DOTMASK_TYPE)][Int(uniforms.DOTMASK_COLOR)]
+        let height = mask.count, width = mask[0].count, maskSize = width * height
+        let mem = calloc(maskSize, MemoryLayout<UInt32>.size)!
+        let ptr = mem.bindMemory(to: UInt32.self, capacity: maskSize)
+        for h in 0...height - 1 {
+            for w in 0...width - 1 {
+                ptr[h * width + w] = mask[h][w]
+            }
+        }
+        
+        // Create image
+        let image = NSImage.make(data: mem, rect: CGSize(width: width, height: height))!
+        
+        // Convert image to texture
+        let tex = image.toTexture(device: ShaderLibrary.device)!
+        
+        // Create the dot mask texture
+        dotMaskKernel.apply(commandBuffer: commandBuffer,
+                            source: tex, target: dom,
+                            options: &uniforms,
+                            length: MemoryLayout<Uniforms>.stride)
+        
+        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &dom)
     }
     
     override func apply(commandBuffer: MTLCommandBuffer,
@@ -670,7 +702,7 @@ final class Phosbite: Shader {
                           length: MemoryLayout<Uniforms>.stride)
         
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
-        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &lin)
+        // pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &lin)
         
         //
         //
@@ -681,25 +713,19 @@ final class Phosbite: Shader {
                            textures: [ycc, rgb, bri],
                            options: &uniforms,
                            length: MemoryLayout<Uniforms>.stride)
-        
+
+        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &rgb)
+
         //
         // Pass 4: Create the dot mask texture
         //
         
-        let descriptor = DotMaskDescriptor(width: Int32(dom.width),
-                                           height: Int32(dom.height),
-                                           color: uniforms.DOTMASK_COLOR,
-                                           cellSize: uniforms.DOTMASK_SIZE,
-                                           saturation: uniforms.DOTMASK_SATURATION,
-                                           brightness: uniforms.DOTMASK_BRIGHTNESS,
-                                           blur: 1.0)
-        
-        dotMaskLibrary.create(commandBuffer: commandBuffer,
-                              descriptor: descriptor,
-                              texture: &dom)
-        
-        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &dom)
-
+        if dotMaskNeedsUpdate {
+            
+            updateDotMask(commandBuffer: commandBuffer)
+            dotMaskNeedsUpdate = false
+        }
+            
         //
         // Pass 5: Create the bloom texture
         //
@@ -734,6 +760,25 @@ final class Phosbite: Shader {
         }
     }
 }
+
+extension Phosbite: ShaderDelegate {
+    
+    func settingDidChange(setting: ShaderSetting) {
+
+        let key = setting.valueKey
+        
+        print("key = \(key)")
+        if key == "OUTPUT_TEX_SCALE" || key.starts(with: "DOTMASK") {
+            
+            print("DOTMASK DIRTY")
+            dotMaskNeedsUpdate = true
+        }
+    }
+}
+
+//
+// Kernels
+//
 
 extension Phosbite {
     
@@ -771,5 +816,69 @@ extension Phosbite {
         convenience init?(sampler: MTLSamplerState) {
             self.init(name: "phosbite::debug", sampler: sampler)
         }
+    }
+}
+
+//
+// Dot mask patterns
+//
+
+extension Phosbite {
+    
+    func apertureGrille(_ M: UInt32, _ G: UInt32, _ N: UInt32) -> [[UInt32]] {
+        
+        [ [ M, G, N ],
+          [ M, G, N ] ]
+    }
+    
+    func apertureGrille(_ R: UInt32, _ G: UInt32, _ B: UInt32, _ N: UInt32) -> [[UInt32]] {
+        
+        [ [ R, G, B, N ],
+          [ R, G, B, N ],
+          [ R, G, B, N ],
+          [ R, G, B, N ] ]
+    }
+    
+    func shadowMask(_ M: UInt32, _ G: UInt32, _ N: UInt32) -> [[UInt32]] {
+        
+        [ [ M, G, N ],
+          [ M, G, N ],
+          [ N, N, N ],
+          [ N, M, G ],
+          [ N, M, G ],
+          [ N, N, N ],
+          [ G, N, M ],
+          [ G, N, M ],
+          [ N, N, N ] ]
+    }
+    
+    func shadowMask(_ R: UInt32, _ G: UInt32, _ B: UInt32, _ N: UInt32) -> [[UInt32]] {
+        
+        [ [ R, G, B, N ],
+          [ R, G, B, N ],
+          [ R, G, B, N ],
+          [ N, N, N, N ],
+          [ B, N, R, G ],
+          [ B, N, R, G ],
+          [ B, N, R, G ],
+          [ N, N, N, N ] ]
+    }
+    
+    func slotMask(_ M: UInt32, _ G: UInt32, _ N: UInt32) -> [[UInt32]] {
+        
+        [ [ M, G, N, M, G, N ],
+          [ M, G, N, N, N, N ],
+          [ M, G, N, M, G, N ],
+          [ N, N, N, M, G, N ] ]
+    }
+    
+    func slotMask(_ R: UInt32, _ G: UInt32, _ B: UInt32, _ N: UInt32) -> [[UInt32]] {
+        
+        [ [ R, G, B, N, R, G, B, N ],
+          [ R, G, B, N, R, G, B, N ],
+          [ R, G, B, N, N, N, N, N ],
+          [ R, G, B, N, R, G, B, N ],
+          [ R, G, B, N, R, G, B, N ],
+          [ N, N, N, N, R, G, B, N ] ]
     }
 }

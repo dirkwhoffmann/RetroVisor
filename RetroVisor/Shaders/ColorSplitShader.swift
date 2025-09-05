@@ -157,7 +157,7 @@ final class ColorSplitShader: Shader {
         kernel.apply(commandBuffer: commandBuffer,
                         textures: [src, output],
                         options: &uniforms,
-                        length: MemoryLayout<PlaygroundUniforms>.stride)
+                        length: MemoryLayout<Uniforms>.stride)
     }
 }
 

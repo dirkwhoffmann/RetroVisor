@@ -7,6 +7,8 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
+#if false
+
 import MetalKit
 import MetalPerformanceShaders
 
@@ -154,7 +156,7 @@ final class PlaygroundShader: Shader {
     // var dotmaskBrightness: Float?
     
     //
-    var dotMaskLibrary: DotMaskLibrary!
+    // var dotMaskLibrary: DotMaskLibrary!
     
     // var texRect: SIMD4<Float> { app.windowController!.metalView!.uniforms.texRect }
     
@@ -635,3 +637,5 @@ final class PlaygroundShader: Shader {
         }
     }
 }
+
+#endif

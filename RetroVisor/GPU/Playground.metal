@@ -183,8 +183,11 @@ namespace playground {
         output.write(half4(finalColor, 1.0), gid);
     }
 
+    /*
     struct DotMaskdUniforms {
         
+        uint WIDTH;
+        uint HEIGHT;
         uint TYPE;
         uint COLOR;
         uint SIZE;
@@ -205,15 +208,9 @@ namespace playground {
         float2 uv = (float2(gid % gridSize) + 0.5) / float2(gridSize);
 
         half4 color = input.sample(sam, uv);
-
-        /*
-        color = Color4(0.0,0.0,0.0,1.0);
-        if (gid.x % u.CELL_HEIGHT == 0) color = Color4(1.0,1.0,1.0,1.0);
-        if (gid.y % u.CELL_HEIGHT == 0) color = Color4(1.0,1.0,1.0,1.0);
-        */
         output.write(color, gid);
     }
-
+*/
     kernel void composite(texture2d<half, access::sample> ycc       [[ texture(0) ]],
                           texture2d<half, access::sample> dotMask   [[ texture(1) ]],
                           texture2d<half, access::write>  outTex    [[ texture(2) ]],

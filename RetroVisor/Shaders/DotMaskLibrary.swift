@@ -7,6 +7,7 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
+/*
 import MetalKit
 import MetalPerformanceShaders
 
@@ -29,14 +30,7 @@ class DotMaskLibrary {
     
     // GPU kernel
     var kernel: DotMaskFilter = DotMaskFilter(sampler: ShaderLibrary.linear)!
-    
-    var bilinearFilter: MPSImageBilinearScale!
-    var lanczosFilter: MPSImageLanczosScale!
-    
-    init() {
-        
-    }
-    
+            
     func create(commandBuffer: MTLCommandBuffer,
                 descriptor: DotMaskDescriptor,
                 texture: inout MTLTexture) {
@@ -85,11 +79,7 @@ class DotMaskLibrary {
                         kernel.apply(commandBuffer: commandBuffer,
                                      source: imageTexture, target: texture,
                                      options: &self.descriptor,
-                                     length: MemoryLayout<DotMaskDescriptor>.stride)
-                        
-                        // Blur the texture
-                        // let filter = MPSImageGaussianBlur(device: imageTexture.device, sigma: blur)
-                        // filter.encode(commandBuffer: commandBuffer, inPlaceTexture: &texture)
+                                     length: MemoryLayout<DotMaskDescriptor>.stride)                        
     }
 }
 
@@ -152,3 +142,4 @@ extension DotMaskLibrary {
           [ N, N, N, N, R, G, B, N ] ]
     }
 }
+*/

@@ -160,7 +160,7 @@ class DotMaskFilter: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
 
-        self.init(name: "playground::dotMask", sampler: sampler)
+        self.init(name: "dotMask", sampler: sampler)
     }
 }
 

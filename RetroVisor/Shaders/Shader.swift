@@ -41,9 +41,6 @@ class ShaderSetting {
     // Optional help string
     let help: String?
 
-    // Indicates if this options should be hidden in the GUI
-    // var hidden: () -> Bool = { false }
-
     // Binding for the enable key
     private var enable: Binding?
 
@@ -150,12 +147,14 @@ protocol ShaderDelegate {
     
     func title(setting: ShaderSetting) -> String
     func isHidden(setting: ShaderSetting) -> Bool
+    func settingDidChange(setting: ShaderSetting)
 }
 
 extension ShaderDelegate {
     
     func title(setting: ShaderSetting) -> String { setting.title }
     func isHidden(setting: ShaderSetting) -> Bool { false }
+    func settingDidChange(setting: ShaderSetting) { }
 }
 
 @MainActor

@@ -43,7 +43,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         ShaderLibrary.shared.register(CRTEasyShader())
         ShaderLibrary.shared.register(ColorSplitShader())
         ShaderLibrary.shared.register(Phosbite())
-        ShaderLibrary.shared.register(PlaygroundShader())
         ShaderLibrary.shared.selectShader(at: 3)
 
         Task {

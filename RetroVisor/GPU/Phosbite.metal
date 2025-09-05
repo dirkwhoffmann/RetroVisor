@@ -76,7 +76,7 @@ namespace phosbite {
     };
     
     //
-    // RGB to YUV/YIQ converter
+    // Color space converter (RGB to YUV or YIQ)
     //
 
     kernel void colorSpace(texture2d<half, access::sample> src [[ texture(0) ]], // RGB
@@ -107,6 +107,10 @@ namespace phosbite {
         ycc.write(Color4(split, 1.0), gid);
     }
 
+    //
+    // Chroma effects
+    //
+    
     kernel void composite(texture2d<half, access::sample> ycc [[ texture(0) ]], // Luma / Chroma (in)
                           texture2d<half, access::write>  out [[ texture(1) ]], // Luma / Chroma (out)
                           texture2d<half, access::write>  bri [[ texture(2) ]], // Brightness (blooming)
@@ -166,11 +170,15 @@ namespace phosbite {
         }
     }
 
+    //
+    // Main CRT shader
+    //
+    
     inline half4 scanline(half4 x, float weight) {
         
         return pow(x, pow(mix(0.8, 1.2, weight), 8));
     }
-    
+
     kernel void crt(texture2d<half, access::sample> rgb [[ texture(0) ]], // RGB
                     texture2d<half, access::sample> ycc [[ texture(1) ]], // Luma / Chroma
                     texture2d<half, access::sample> dom [[ texture(2) ]], // Dot Mask
@@ -234,7 +242,26 @@ namespace phosbite {
     }
 
     //
-    // Debug kernel
+    // Dotmask
+    //
+    
+    kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
+                        texture2d<half, access::write>  output    [[ texture(1) ]],
+                        constant Uniforms               &u        [[ buffer(0)  ]],
+                        sampler                         sam       [[ sampler(0) ]],
+                        uint2                           gid       [[ thread_position_in_grid ]])
+    {
+        float2 texSize = float2(input.get_width(), input.get_height());
+        uint2 gridSize = uint2(float2(u.DOTMASK_SIZE, u.DOTMASK_SIZE) * texSize);
+
+        float2 uv = (float2(gid % gridSize) + 0.5) / float2(gridSize);
+
+        half4 color = input.sample(sam, uv);
+        output.write(color, gid);
+    }
+
+    //
+    // Debug
     //
     
     inline int debugPixelType(uint2 gid, uint2 size, constant Uniforms &u) {
