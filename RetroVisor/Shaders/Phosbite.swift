@@ -454,6 +454,55 @@ final class Phosbite: Shader {
                     
                   ]),
             
+            Group(title: "Blooming",
+                  
+                  enable: Binding(
+                    key: "BLOOM_ENABLE",
+                    get: { [unowned self] in Float(self.uniforms.BLOOM_ENABLE) },
+                    set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) }),
+                  [
+                    
+                    ShaderSetting(
+                        title: "Bloom Filter",
+                        items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
+                        value: Binding(
+                            key: "BLOOM_FILTER",
+                            get: { [unowned self] in Float(self.uniforms.BLOOM_FILTER) },
+                            set: { [unowned self] in self.uniforms.BLOOM_FILTER = Int32($0) })),
+                    
+                    ShaderSetting(
+                        title: "Bloom Threshold",
+                        range: 0.0...1.0, step: 0.01,
+                        value: Binding(
+                            key: "BLOOM_THRESHOLD",
+                            get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD },
+                            set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD = $0 })),
+                    
+                    ShaderSetting(
+                        title: "Bloom Intensity",
+                        range: 0.1...2.0, step: 0.01,
+                        value: Binding(
+                            key: "BLOOM_INTENSITY",
+                            get: { [unowned self] in self.uniforms.BLOOM_INTENSITY },
+                            set: { [unowned self] in self.uniforms.BLOOM_INTENSITY = $0 })),
+                    
+                    ShaderSetting(
+                        title: "Bloom Radius X",
+                        range: 0.0...30.0, step: 1.0,
+                        value: Binding(
+                            key: "BLOOM_RADIUS_X",
+                            get: { [unowned self] in self.uniforms.BLOOM_RADIUS_X },
+                            set: { [unowned self] in self.uniforms.BLOOM_RADIUS_X = $0 })),
+                    
+                    ShaderSetting(
+                        title: "Bloom Radius Y",
+                        range: 0.0...30.0, step: 1.0,
+                        value: Binding(
+                            key: "BLOOM_RADIUS_Y",
+                            get: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y },
+                            set: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y = $0 })),
+                  ]),
+            
             Group(title: "Debugging",
                   
                   enable: Binding(
@@ -606,6 +655,14 @@ final class Phosbite: Shader {
         // Pass 3: Apply chroma effects
         //
         
+        chromaKernel.apply(commandBuffer: commandBuffer,
+                           textures: [ycc, rgb, bri],
+                           options: &uniforms,
+                           length: MemoryLayout<Uniforms>.stride)
+        
+        //
+        // Pass 4: Create the dot mask texture
+        //
         
         let descriptor = DotMaskDescriptor(width: Int32(dom.width),
                                            height: Int32(dom.height),
@@ -619,21 +676,10 @@ final class Phosbite: Shader {
                               descriptor: descriptor,
                               texture: &dom)
         
-        /*
-        dotMaskKernel.apply(commandBuffer: commandBuffer,
-                            textures: [ycc, dom],
-                            options: &uniforms,
-                            length: MemoryLayout<Uniforms>.stride)
-        */
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &dom)
-        
-        chromaKernel.apply(commandBuffer: commandBuffer,
-                           textures: [ycc, rgb, bri],
-                           options: &uniforms,
-                           length: MemoryLayout<Uniforms>.stride)
-        
+
         //
-        // Pass 4: Create the bloom texture
+        // Pass 5: Create the bloom texture
         //
         
         blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLOOM_FILTER)!
@@ -642,7 +688,7 @@ final class Phosbite: Shader {
         blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
         
         //
-        // Pass 5: Emulate CRT artifacts
+        // Pass 6: Emulate CRT artifacts
         //
         
         if uniforms.DEBUG_ENABLE == 0 {
