@@ -28,6 +28,7 @@ namespace phosbite {
         float GAMMA_INPUT;
         float GAMMA_OUTPUT;
         float BRIGHT_BOOST;
+        float BRIGHT_BOOST_POST;
         float CHROMA_RADIUS;
 
         // Bloom effect
@@ -228,8 +229,8 @@ namespace phosbite {
             color = saturate(color + bloom);
         }
         
-        out.write(pow(color, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
-        return;
+        // Boost brightness and correct gamma
+        out.write(pow(color * u.BRIGHT_BOOST_POST, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
     }
 
     //

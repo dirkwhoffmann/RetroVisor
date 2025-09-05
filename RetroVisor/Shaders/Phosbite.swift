@@ -23,6 +23,7 @@ final class Phosbite: Shader {
         var GAMMA_INPUT: Float
         var GAMMA_OUTPUT: Float
         var BRIGHT_BOOST: Float
+        var BRIGHT_BOOST_POST: Float
         var CHROMA_RADIUS: Float
         
         var BLOOM_ENABLE: Int32
@@ -74,6 +75,7 @@ final class Phosbite: Shader {
             GAMMA_INPUT: 2.2,
             GAMMA_OUTPUT: 2.2,
             BRIGHT_BOOST: 1.0,
+            BRIGHT_BOOST_POST: 1.0,
             CHROMA_RADIUS: 1.3,
             
             BLOOM_ENABLE: 0,
@@ -229,6 +231,15 @@ final class Phosbite: Shader {
                         key: "BRIGHT_BOOST",
                         get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
                         set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
+                ),
+
+                ShaderSetting(
+                    title: "Brightness Boost (post)",
+                    range: 0.0...2.0, step: 0.01,
+                    value: Binding(
+                        key: "BRIGHT_BOOST_POST",
+                        get: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST },
+                        set: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST = $0 }),
                 ),
 
                 ShaderSetting(
