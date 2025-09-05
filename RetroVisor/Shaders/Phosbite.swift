@@ -56,9 +56,10 @@ final class Phosbite: Shader {
         var SCANLINE_BRIGHTNESS: Float
         
         var DEBUG_ENABLE: Int32
-        var DEBUG_TEXTURE: Int32
-        var DEBUG_MODE: Int32
-        var DEBUG_ANCHOR: Int32
+        var DEBUG_TEXTURE1: Int32
+        var DEBUG_TEXTURE2: Int32
+        var DEBUG_LEFT: Int32
+        var DEBUG_RIGHT: Int32
         var DEBUG_SLICE: Float
         
         static let defaults = Uniforms(
@@ -104,9 +105,10 @@ final class Phosbite: Shader {
             SCANLINE_BRIGHTNESS: 0.5,
             
             DEBUG_ENABLE: 1,
-            DEBUG_TEXTURE: 9,
-            DEBUG_MODE: 0,
-            DEBUG_ANCHOR: 0,
+            DEBUG_TEXTURE1: 0,
+            DEBUG_TEXTURE2: 1,
+            DEBUG_LEFT: 0,
+            DEBUG_RIGHT: 1,
             DEBUG_SLICE: 0.5
         )
     }
@@ -455,7 +457,7 @@ final class Phosbite: Shader {
                     set: { [unowned self] in self.uniforms.DEBUG_ENABLE = Int32($0) }),
                   
                   [ ShaderSetting(
-                    title: "Debug Texture",
+                    title: "Texture 1",
                     items: [ ("Original", 0),
                              ("Ycc", 1),
                              ("Ycc (Mipmap 1)", 2),
@@ -468,34 +470,50 @@ final class Phosbite: Shader {
                              ("Dotmask", 9),
                              ("Bloom texture", 10) ],
                     value: Binding(
-                        key: "DEBUG_TEXTURE",
-                        get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE) },
-                        set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) })),
+                        key: "DEBUG_TEXTURE1",
+                        get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE1) },
+                        set: { [unowned self] in self.uniforms.DEBUG_TEXTURE1 = Int32($0) })),
                     
                     ShaderSetting(
-                      title: "Display Mode",
-                      items: [ ("Plain", 0),
-                               ("Diff", 1),
-                               ("Brighter Parts", 2),
-                               ("Darker Parts", 3) ],
+                      title: "Texture 2",
+                      items: [ ("Original", 0),
+                               ("Ycc", 1),
+                               ("Ycc (Mipmap 1)", 2),
+                               ("Ycc (Mipmap 2)", 3),
+                               ("Ycc (Mipmap 3)", 4),
+                               ("Ycc (Mipmap 4)", 5),
+                               ("Luma", 6),
+                               ("Chroma U/I", 7),
+                               ("Chroma V/Q", 8),
+                               ("Dotmask", 9),
+                               ("Bloom texture", 10) ],
                       value: Binding(
-                          key: "DEBUG_MODE",
-                          get: { [unowned self] in Float(self.uniforms.DEBUG_MODE) },
-                          set: { [unowned self] in self.uniforms.DEBUG_MODE = Int32($0) })),
+                          key: "DEBUG_TEXTURE2",
+                          get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE2) },
+                          set: { [unowned self] in self.uniforms.DEBUG_TEXTURE2 = Int32($0) })),
+                    
+                    ShaderSetting(
+                      title: "Left View",
+                      items: [ ("Texture 1", 0),
+                               ("Texture 2", 1),
+                               ("Diff", 2) ],
+                      value: Binding(
+                          key: "DEBUG_LEFT",
+                          get: { [unowned self] in Float(self.uniforms.DEBUG_LEFT) },
+                          set: { [unowned self] in self.uniforms.DEBUG_LEFT = Int32($0) })),
 
                     ShaderSetting(
-                      title: "Debug Anchor",
-                      items: [ ("Left", 0),
-                               ("Right", 1),
-                               ("Above", 2),
-                               ("Below", 3) ],
+                      title: "Right View",
+                      items: [ ("Texture 1", 0),
+                               ("Texture 2", 1),
+                               ("Diff", 2) ],
                       value: Binding(
-                          key: "DEBUG_TEXTURE",
-                          get: { [unowned self] in Float(self.uniforms.DEBUG_ANCHOR) },
-                          set: { [unowned self] in self.uniforms.DEBUG_ANCHOR = Int32($0) })),
-                    
+                          key: "DEBUG_RIGHT",
+                          get: { [unowned self] in Float(self.uniforms.DEBUG_RIGHT) },
+                          set: { [unowned self] in self.uniforms.DEBUG_RIGHT = Int32($0) })),
+
                     ShaderSetting(
-                        title: "Debug Area",
+                        title: "Area Slider",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "DEBUG_SLICE",

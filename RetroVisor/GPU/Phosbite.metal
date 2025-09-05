@@ -65,9 +65,10 @@ namespace phosbite {
         
         // Debugging
         uint  DEBUG_ENABLE;
-        uint  DEBUG_TEXTURE;
-        uint  DEBUG_MODE;
-        uint  DEBUG_ANCHOR;
+        uint  DEBUG_TEXTURE1;
+        uint  DEBUG_TEXTURE2;
+        uint  DEBUG_LEFT;
+        uint  DEBUG_RIGHT;
         float DEBUG_SLICE;
     };
     
@@ -234,60 +235,27 @@ namespace phosbite {
     
     inline int debugPixelType(uint2 gid, uint2 size, constant Uniforms &u) {
         
-        bool horizontal = (u.DEBUG_ANCHOR < 2);
-        bool anchorLow  = (u.DEBUG_ANCHOR == 0 || u.DEBUG_ANCHOR == 2);
+        int cutoff = int(u.DEBUG_SLICE * size.x);
+        int coord = gid.x;
         
-        uint dim   = horizontal ? size.x : size.y;
-        uint coord = horizontal ? gid.x : gid.y;
-        
-        float cutoff = u.DEBUG_SLICE * dim;
-        
-        if (anchorLow) {
-            return coord < cutoff ? -1 : coord > cutoff ? 1 : 0;
-        } else {
-            return coord > cutoff ? -1 : coord < cutoff ? 1 : 0;
-        }
+        return coord < cutoff ? -1 : coord > cutoff ? 1 : 0;
     }
-    
-    inline bool isBorderPixel(uint2 gid, uint2 size, constant Uniforms &u) {
-        
-        bool horizontal = (u.DEBUG_ANCHOR < 2);
-        bool anchorLow  = (u.DEBUG_ANCHOR == 0 || u.DEBUG_ANCHOR == 2);
-
-        uint dim   = horizontal ? size.x : size.y;
-        uint coord = horizontal ? gid.x : gid.y;
-
-        float cutoff = u.DEBUG_SLICE * dim;
-        return anchorLow ? (coord < cutoff) : (coord > dim - cutoff);
-    }
-    
-    kernel void debug(texture2d<half, access::sample> src       [[ texture(0) ]],
-                      texture2d<half, access::sample> ycc       [[ texture(1) ]],
-                      texture2d<half, access::sample> dotMask   [[ texture(2) ]],
-                      texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
-                      texture2d<half, access::write>  final     [[ texture(4) ]],
-                      constant Uniforms               &u        [[ buffer(0)  ]],
-                      sampler                         sam       [[ sampler(0) ]],
-                      uint2                           gid       [[ thread_position_in_grid ]])
+     
+    inline Color4 sampleDebugTexture(int source,
+                                     Coord2 uv,
+                                     texture2d<half, access::sample> src       [[ texture(0) ]],
+                                     texture2d<half, access::sample> ycc       [[ texture(1) ]],
+                                     texture2d<half, access::sample> dotMask   [[ texture(2) ]],
+                                     texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
+                                     texture2d<half, access::write>  final     [[ texture(4) ]],
+                                     constant Uniforms               &u        [[ buffer(0)  ]],
+                                     sampler                         sam       [[ sampler(0) ]],
+                                     uint2                           gid       [[ thread_position_in_grid ]])
     {
-        // Normalize gid to 0..1 in output texture
-        uint2 size = uint2(final.get_width(), final.get_height());
-        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(size);
-        
-        // Exit if gid is outside the debug region
-        int type = debugPixelType(gid, size, u);
-        
-        if (type == -1) { // Outside
-            return;
-        }
-        if (type == 0) { // Border
-            final.write(Color4(0.0,0.0,0.0,1.0), gid);
-            return;
-        }
-        
         Color4 color;
-        switch(u.DEBUG_TEXTURE) {
-                
+
+        switch (source) {
+
             case 0:
                 
                 color = src.sample(sam, uv);
@@ -346,27 +314,61 @@ namespace phosbite {
                 color = dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
                 // color = dotMask.sample(sam, uv);
                 break;
-                
+                                
             default:
-                
                 color = bloomTex.sample(sam, uv);
                 break;
         }
+
+        return color;
+    }
+    
+    inline Color4 mixDebugPixel(Color4 color1, Color4 color2, int mode) {
         
-        // Display debug pixel depending of debug mode
-        
-        switch (u.DEBUG_MODE) {
+        switch (mode) {
                 
+            case 0:  return color1;
+            case 1:  return color2;
+            default: return abs(color1 - color2);
+        }
+    }
+    
+    kernel void debug(texture2d<half, access::sample> src       [[ texture(0) ]],
+                      texture2d<half, access::sample> ycc       [[ texture(1) ]],
+                      texture2d<half, access::sample> dotMask   [[ texture(2) ]],
+                      texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
+                      texture2d<half, access::write>  final     [[ texture(4) ]],
+                      constant Uniforms               &u        [[ buffer(0)  ]],
+                      sampler                         sam       [[ sampler(0) ]],
+                      uint2                           gid       [[ thread_position_in_grid ]])
+    {
+        // Normalize gid to 0..1 in output texture
+        uint2 size = uint2(final.get_width(), final.get_height());
+        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(size);
+                
+        // Sample the selected texures
+        Color4 color1 = sampleDebugTexture(u.DEBUG_TEXTURE1,
+                                         uv, src, ycc, dotMask, bloomTex, final, u, sam, gid);
+        Color4 color2 = sampleDebugTexture(u.DEBUG_TEXTURE2,
+                                         uv, src, ycc, dotMask, bloomTex, final, u, sam, gid);
+
+        // Compute the pixel to display
+        switch (debugPixelType(gid, size, u)) {
+                
+            case -1:
+                
+                final.write(mixDebugPixel(color1, color2, u.DEBUG_LEFT), gid);
+                return;
+
             case 1:
                 
-                color = abs(src.sample(sam, uv) - color);
-                break;
-                
+                final.write(mixDebugPixel(color1, color2, u.DEBUG_RIGHT), gid);
+                return;
+
             default:
-                break;
+                
+                final.write(Color4(1.0,1.0,1.0,1.0), gid);
+                return;
         }
-        
-        final.write(color, gid);
-        return;
     }
 }
