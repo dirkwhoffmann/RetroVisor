@@ -654,22 +654,8 @@ final class Phosbite: Shader {
             [ shadowMask    (M, G, N),     shadowMask(R, G, B, N) ]
         ]
         
-        // Create image representation in memory
-        let mask = maskData[Int(uniforms.DOTMASK_TYPE)][Int(uniforms.DOTMASK_COLOR)]
-        let height = mask.count, width = mask[0].count, maskSize = width * height
-        let mem = calloc(maskSize, MemoryLayout<UInt32>.size)!
-        let ptr = mem.bindMemory(to: UInt32.self, capacity: maskSize)
-        for h in 0...height - 1 {
-            for w in 0...width - 1 {
-                ptr[h * width + w] = mask[h][w]
-            }
-        }
-        
-        // Create image
-        let image = NSImage.make(data: mem, rect: CGSize(width: width, height: height))!
-        
-        // Convert image to texture
-        let tex = image.toTexture(device: ShaderLibrary.device)!
+        // Convert dot mask pattern to texture
+        let tex = dom.make(data: maskData[Int(uniforms.DOTMASK_TYPE)][Int(uniforms.DOTMASK_COLOR)])!
         
         // Create the dot mask texture
         dotMaskKernel.apply(commandBuffer: commandBuffer,
@@ -702,7 +688,6 @@ final class Phosbite: Shader {
                           length: MemoryLayout<Uniforms>.stride)
         
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
-        // pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &lin)
         
         //
         //
@@ -765,12 +750,7 @@ extension Phosbite: ShaderDelegate {
     
     func settingDidChange(setting: ShaderSetting) {
 
-        let key = setting.valueKey
-        
-        print("key = \(key)")
-        if key == "OUTPUT_TEX_SCALE" || key.starts(with: "DOTMASK") {
-            
-            print("DOTMASK DIRTY")
+        if setting.valueKey  == "OUTPUT_TEX_SCALE" || setting.valueKey .starts(with: "DOTMASK") {            
             dotMaskNeedsUpdate = true
         }
     }

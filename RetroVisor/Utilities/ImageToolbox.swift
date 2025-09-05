@@ -475,13 +475,12 @@ public extension NSImage {
 // Extensions to MTKTexture
 //
 
-
 extension MTLTexture {
-
+    
     func makeTexture(width: Int, height: Int, mipmaps: Int = 0) -> MTLTexture? {
-
+        
         print("Creating new texture \(width)x\(height)")
-
+        
         let desc = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: pixelFormat,
             width: width,
@@ -490,8 +489,25 @@ extension MTLTexture {
         )
         desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
         if mipmaps > 0 { desc.mipmapLevelCount = mipmaps }
-
+        
         return device.makeTexture(descriptor: desc)
     }
+    
+    func make(data: [[UInt32]]) -> MTLTexture? {
+        
+        let height = data.count, width = data[0].count, maskSize = width * height
+        let mem = calloc(maskSize, MemoryLayout<UInt32>.size)!
+        let ptr = mem.bindMemory(to: UInt32.self, capacity: maskSize)
+        for h in 0...height - 1 {
+            for w in 0...width - 1 {
+                ptr[h * width + w] = data[h][w]
+            }
+        }
+        
+        // Create image
+        let image = NSImage.make(data: mem, rect: CGSize(width: width, height: height))!
+        
+        // Convert image to texture
+        return image.toTexture(device: device)
+    }
 }
-
