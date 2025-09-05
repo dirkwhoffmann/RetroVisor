@@ -61,7 +61,8 @@ final class Phosbite: Shader {
         var DEBUG_LEFT: Int32
         var DEBUG_RIGHT: Int32
         var DEBUG_SLICE: Float
-        
+        var DEBUG_MIPMAP: Float
+
         static let defaults = Uniforms(
             
             INPUT_TEX_SCALE: 1.0,
@@ -109,7 +110,8 @@ final class Phosbite: Shader {
             DEBUG_TEXTURE2: 1,
             DEBUG_LEFT: 0,
             DEBUG_RIGHT: 1,
-            DEBUG_SLICE: 0.5
+            DEBUG_SLICE: 0.5,
+            DEBUG_MIPMAP: 0.0
         )
     }
     
@@ -137,6 +139,9 @@ final class Phosbite: Shader {
     
     // Result of pass 5: Texture with CRT effects applied
     var crt: MTLTexture!
+
+    // Intermediate texture needed by the texture debugger
+    var dbg: MTLTexture!
     
     // Performance shader for computing mipmaps
     var pyramid: MPSImagePyramid!
@@ -459,16 +464,14 @@ final class Phosbite: Shader {
                   [ ShaderSetting(
                     title: "Texture 1",
                     items: [ ("Original", 0),
-                             ("Ycc", 1),
-                             ("Ycc (Mipmap 1)", 2),
-                             ("Ycc (Mipmap 2)", 3),
-                             ("Ycc (Mipmap 3)", 4),
-                             ("Ycc (Mipmap 4)", 5),
-                             ("Luma", 6),
-                             ("Chroma U/I", 7),
-                             ("Chroma V/Q", 8),
-                             ("Dotmask", 9),
-                             ("Bloom texture", 10) ],
+                             ("Final", 1),
+                             ("", 0),
+                             ("Ycc", 2),
+                             ("Luma", 3),
+                             ("Chroma U/I", 4),
+                             ("Chroma V/Q", 5),
+                             ("Dotmask", 6),
+                             ("Bloom texture", 7) ],
                     value: Binding(
                         key: "DEBUG_TEXTURE1",
                         get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE1) },
@@ -476,17 +479,15 @@ final class Phosbite: Shader {
                     
                     ShaderSetting(
                       title: "Texture 2",
-                      items: [ ("Original", 0),
-                               ("Ycc", 1),
-                               ("Ycc (Mipmap 1)", 2),
-                               ("Ycc (Mipmap 2)", 3),
-                               ("Ycc (Mipmap 3)", 4),
-                               ("Ycc (Mipmap 4)", 5),
-                               ("Luma", 6),
-                               ("Chroma U/I", 7),
-                               ("Chroma V/Q", 8),
-                               ("Dotmask", 9),
-                               ("Bloom texture", 10) ],
+                      items: [ ("Source", 0),
+                               ("Final", 1),
+                               ("", 0),
+                               ("Ycc", 2),
+                               ("Luma", 3),
+                               ("Chroma U/I", 4),
+                               ("Chroma V/Q", 5),
+                               ("Dotmask", 6),
+                               ("Bloom texture", 7) ],
                       value: Binding(
                           key: "DEBUG_TEXTURE2",
                           get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE2) },
@@ -518,7 +519,15 @@ final class Phosbite: Shader {
                         value: Binding(
                             key: "DEBUG_SLICE",
                             get: { [unowned self] in self.uniforms.DEBUG_SLICE },
-                            set: { [unowned self] in self.uniforms.DEBUG_SLICE = $0 }))
+                            set: { [unowned self] in self.uniforms.DEBUG_SLICE = $0 })),
+                    
+                    ShaderSetting(
+                        title: "Mipmap level",
+                        range: 0.0...4.0, step: 0.01,
+                        value: Binding(
+                            key: "DEBUG_MIPMAP",
+                            get: { [unowned self] in self.uniforms.DEBUG_MIPMAP },
+                            set: { [unowned self] in self.uniforms.DEBUG_MIPMAP = $0 }))
                   ]),
         ]
     }
@@ -560,6 +569,11 @@ final class Phosbite: Shader {
             
             dot = output.makeTexture(width: crtWidth, height: crtHeight, mipmaps: 4)
             crt = output.makeTexture(width: crtWidth, height: crtHeight)
+        }
+
+        if (uniforms.DEBUG_ENABLE != 0 && dbg?.width != crtWidth || dbg?.height != crtHeight) {
+
+            dbg = output.makeTexture(width: crtWidth, height: crtHeight)
         }
     }
     
@@ -630,19 +644,22 @@ final class Phosbite: Shader {
         // Pass 5: Emulate CRT artifacts
         //
         
-        crtKernel.apply(commandBuffer: commandBuffer,
-                        textures: [lin, ycc, dot, blm, output],
-                        options: &uniforms,
-                        length: MemoryLayout<Uniforms>.stride)
-        
-        //
-        // Optional: Run the debugger
-        //
-        
-        if uniforms.DEBUG_ENABLE > 0 {
+        if uniforms.DEBUG_ENABLE == 0 {
+            
+            crtKernel.apply(commandBuffer: commandBuffer,
+                            textures: [lin, ycc, dot, blm, output],
+                            options: &uniforms,
+                            length: MemoryLayout<Uniforms>.stride)
+            
+        } else {
+            
+            crtKernel.apply(commandBuffer: commandBuffer,
+                            textures: [lin, ycc, dot, blm, dbg],
+                            options: &uniforms,
+                            length: MemoryLayout<Uniforms>.stride)
             
             debugKernel.apply(commandBuffer: commandBuffer,
-                              textures: [src, ycc, dot, blm, output],
+                              textures: [src, ycc, dot, blm, dbg, output],
                               options: &uniforms,
                               length: MemoryLayout<Uniforms>.stride)
         }

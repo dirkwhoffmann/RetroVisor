@@ -70,6 +70,7 @@ namespace phosbite {
         uint  DEBUG_LEFT;
         uint  DEBUG_RIGHT;
         float DEBUG_SLICE;
+        float DEBUG_MIPMAP;
     };
     
     //
@@ -247,7 +248,7 @@ namespace phosbite {
                                      texture2d<half, access::sample> ycc       [[ texture(1) ]],
                                      texture2d<half, access::sample> dotMask   [[ texture(2) ]],
                                      texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
-                                     texture2d<half, access::write>  final     [[ texture(4) ]],
+                                     texture2d<half, access::sample> dbg       [[ texture(4) ]],
                                      constant Uniforms               &u        [[ buffer(0)  ]],
                                      sampler                         sam       [[ sampler(0) ]],
                                      uint2                           gid       [[ thread_position_in_grid ]])
@@ -260,59 +261,39 @@ namespace phosbite {
                 
                 color = src.sample(sam, uv);
                 break;
-                
+
             case 1:
                 
-                color = ycc.sample(sam, uv);
-                color = Color4(u.PAL ? YUV2RGB(color.xyz) : YIQ2RGB(color.xyz), 1.0);
+                color = dbg.sample(sam, uv);
                 break;
-                
+
             case 2:
                 
-                color = ycc.sample(sam, uv, level(1));
+                color = ycc.sample(sam, uv, level(u.DEBUG_MIPMAP));
                 color = Color4(u.PAL ? YUV2RGB(color.xyz) : YIQ2RGB(color.xyz), 1.0);
                 break;
                 
             case 3:
                 
-                color = ycc.sample(sam, uv, level(2));
-                color = Color4(u.PAL ? YUV2RGB(color.xyz) : YIQ2RGB(color.xyz), 1.0);
+                color = ycc.sample(sam, uv, level(u.DEBUG_MIPMAP)).xxxw;
                 break;
                 
             case 4:
                 
-                color = ycc.sample(sam, uv, level(3));
+                color = ycc.sample(sam, uv, level(u.DEBUG_MIPMAP));
+                color = Color4(1.0, color.y, 0.0, color.w);
                 color = Color4(u.PAL ? YUV2RGB(color.xyz) : YIQ2RGB(color.xyz), 1.0);
                 break;
                 
             case 5:
                 
-                color = ycc.sample(sam, uv, level(4));
-                color = Color4(u.PAL ? YUV2RGB(color.xyz) : YIQ2RGB(color.xyz), 1.0);
-                break;
-                
-            case 6:
-                
-                color = ycc.sample(sam, uv).xxxw;
-                break;
-                
-            case 7:
-                
-                color = ycc.sample(sam, uv);
-                color = Color4(1.0, color.y, 0.0, color.w);
-                color = Color4(u.PAL ? YUV2RGB(color.xyz) : YIQ2RGB(color.xyz), 1.0);
-                break;
-                
-            case 8:
-                
-                color = ycc.sample(sam, uv);
+                color = ycc.sample(sam, uv, level(u.DEBUG_MIPMAP));
                 color = Color4(1.0, 0.0, color.z, color.w);
                 color = Color4(u.PAL ? YUV2RGB(color.xyz) : YIQ2RGB(color.xyz), 1.0);
                 break;
                 
-            case 9:
-                color = dotMask.sample(sam, uv, level(u.DOTMASK_BLUR));
-                // color = dotMask.sample(sam, uv);
+            case 6:
+                color = dotMask.sample(sam, uv, level(u.DEBUG_MIPMAP));
                 break;
                                 
             default:
@@ -329,15 +310,16 @@ namespace phosbite {
                 
             case 0:  return color1;
             case 1:  return color2;
-            default: return abs(color1 - color2);
+            default: return 0.5 + 0.5 * (color1 - color2); // abs(color1 - color2);
         }
     }
     
     kernel void debug(texture2d<half, access::sample> src       [[ texture(0) ]],
                       texture2d<half, access::sample> ycc       [[ texture(1) ]],
                       texture2d<half, access::sample> dotMask   [[ texture(2) ]],
-                      texture2d<half, access::sample> bloomTex  [[ texture(3) ]],
-                      texture2d<half, access::write>  final     [[ texture(4) ]],
+                      texture2d<half, access::sample> blm       [[ texture(3) ]],
+                      texture2d<half, access::sample> dbg       [[ texture(4) ]],
+                      texture2d<half, access::write>  final     [[ texture(5) ]],
                       constant Uniforms               &u        [[ buffer(0)  ]],
                       sampler                         sam       [[ sampler(0) ]],
                       uint2                           gid       [[ thread_position_in_grid ]])
@@ -348,9 +330,9 @@ namespace phosbite {
                 
         // Sample the selected texures
         Color4 color1 = sampleDebugTexture(u.DEBUG_TEXTURE1,
-                                         uv, src, ycc, dotMask, bloomTex, final, u, sam, gid);
+                                         uv, src, ycc, dotMask, blm, dbg, u, sam, gid);
         Color4 color2 = sampleDebugTexture(u.DEBUG_TEXTURE2,
-                                         uv, src, ycc, dotMask, bloomTex, final, u, sam, gid);
+                                         uv, src, ycc, dotMask, blm, dbg, u, sam, gid);
 
         // Compute the pixel to display
         switch (debugPixelType(gid, size, u)) {

@@ -133,13 +133,15 @@ class ShaderSettingView: ShaderTableCellView {
             }
 
             if let values = shaderSetting.items {
-
+                
                 valuePopup.isHidden = false
                 valuePopup.removeAllItems()
                 for value in values {
-                    let item = NSMenuItem(title: value.0,
-                                          action: nil,
-                                          keyEquivalent: "")
+                    
+                    let item = value.0.isEmpty ?
+                    NSMenuItem.separator() :
+                    NSMenuItem(title: value.0, action: nil, keyEquivalent: "")
+                    
                     item.tag = value.1
                     valuePopup.menu?.addItem(item)
                 }
