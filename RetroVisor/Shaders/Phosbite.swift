@@ -44,7 +44,7 @@ final class Phosbite: Shader {
         var DOTMASK_LOOSE: Float
         
         var SCANLINES_ENABLE: Int32
-        var SCANLINE_DISTANCE: Float
+        var SCANLINE_DISTANCE: Int32
         var SCANLINE_SHARPNESS: Float
         var SCANLINE_BLOOM: Float
         var SCANLINE_WEIGHT1: Float
@@ -96,7 +96,7 @@ final class Phosbite: Shader {
             DOTMASK_LOOSE: -0.5,
             
             SCANLINES_ENABLE: 1,
-            SCANLINE_DISTANCE: 8.0,
+            SCANLINE_DISTANCE: 8,
             SCANLINE_SHARPNESS: 1.77,
             SCANLINE_BLOOM: 1.0,
             SCANLINE_WEIGHT1: 0.48,
@@ -106,7 +106,7 @@ final class Phosbite: Shader {
             SCANLINE_WEIGHT5: 0.67,
             SCANLINE_WEIGHT6: 0.59,
             SCANLINE_WEIGHT7: 0.48,
-            SCANLINE_WEIGHT8: 0.44,
+            SCANLINE_WEIGHT8: 0.48,
             SCANLINE_BRIGHTNESS: 0.5,
             
             DEBUG_ENABLE: 1,
@@ -149,13 +149,10 @@ final class Phosbite: Shader {
         
     // Indicates whether the dot mask needs to be rebuild
     var dotMaskNeedsUpdate: Bool = true
-    
-    // Dot mask provider DEPRECATED
-    // var dotMaskLibrary: DotMaskLibrary!
-        
+            
     init() {
         
-        super.init(name: "Dracula")
+        super.init(name: "Phosbite")
         
         delegate = self
         
@@ -302,8 +299,8 @@ final class Phosbite: Shader {
                     range: 1...8, step: 1,
                     value: Binding(
                         key: "SCANLINE_DISTANCE",
-                        get: { [unowned self] in self.uniforms.SCANLINE_DISTANCE },
-                        set: { [unowned self] in self.uniforms.SCANLINE_DISTANCE = $0 })),
+                        get: { [unowned self] in Float(self.uniforms.SCANLINE_DISTANCE) },
+                        set: { [unowned self] in self.uniforms.SCANLINE_DISTANCE = Int32($0) })),
                     
                     ShaderSetting(
                         title: "Scanline Sharpness",
@@ -749,8 +746,9 @@ final class Phosbite: Shader {
 extension Phosbite: ShaderDelegate {
     
     func settingDidChange(setting: ShaderSetting) {
-
-        if setting.valueKey  == "OUTPUT_TEX_SCALE" || setting.valueKey .starts(with: "DOTMASK") {            
+                
+        if setting.valueKey  == "OUTPUT_TEX_SCALE" || setting.valueKey .starts(with: "DOTMASK") {
+            
             dotMaskNeedsUpdate = true
         }
     }

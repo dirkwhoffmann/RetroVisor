@@ -52,17 +52,10 @@ namespace phosbite {
 
         // Scanlines
         uint  SCANLINES_ENABLE;
-        float SCANLINE_DISTANCE;
+        uint  SCANLINE_DISTANCE;
         float SCANLINE_SHARPNESS;
         float SCANLINE_BLOOM;
-        float SCANLINE_WEIGHT1;
-        float SCANLINE_WEIGHT2;
-        float SCANLINE_WEIGHT3;
-        float SCANLINE_WEIGHT4;
-        float SCANLINE_WEIGHT5;
-        float SCANLINE_WEIGHT6;
-        float SCANLINE_WEIGHT7;
-        float SCANLINE_WEIGHT8;
+        float SCANLINE_WEIGHT[8];
         float SCANLINE_BRIGHTNESS;
         
         // Debugging
@@ -176,7 +169,7 @@ namespace phosbite {
     
     inline half4 scanline(half4 x, float weight) {
         
-        return pow(x, pow(mix(0.8, 1.2, weight), 8));
+        return pow(x, pow(mix(1.2, 0.8, weight), 8));
     }
 
     kernel void crt(texture2d<half, access::sample> rgb [[ texture(0) ]], // RGB
@@ -197,28 +190,12 @@ namespace phosbite {
         // Apply the scanline effect
         if (u.SCANLINES_ENABLE) {
             
-            uint line = gid.y % uint(u.SCANLINE_DISTANCE);
+            uint line = gid.y % (2 * u.SCANLINE_DISTANCE);
+            if (line >= u.SCANLINE_DISTANCE) line = 2 * u.SCANLINE_DISTANCE - 1 - line;
             
             Color4 blurred = rgb.sample(sam, uv, level(u.SCANLINE_SHARPNESS));
             color = mix(color, blurred, u.SCANLINE_BLOOM);
-            
-            if (line == 0) {
-                color = scanline(color, u.SCANLINE_WEIGHT1);
-            } else if (line == 1) {
-                color = scanline(color, u.SCANLINE_WEIGHT2);
-            } else if (line == 2) {
-                color = scanline(color, u.SCANLINE_WEIGHT3);
-            } else if (line == 3) {
-                color = scanline(color, u.SCANLINE_WEIGHT4);
-            } else if (line == 4) {
-                color = scanline(color, u.SCANLINE_WEIGHT5);
-            } else if (line == 5) {
-                color = scanline(color, u.SCANLINE_WEIGHT6);
-            } else if (line == 6) {
-                color = scanline(color, u.SCANLINE_WEIGHT7);
-            } else if (line == 7) {
-                color = scanline(color, u.SCANLINE_WEIGHT8);
-            }
+            color = scanline(color, u.SCANLINE_WEIGHT[line]);
         }
 
         // Apply the dot mask effect

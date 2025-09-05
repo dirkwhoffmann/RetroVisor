@@ -41,9 +41,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
 
         ShaderLibrary.shared.register(CRTEasyShader())
-        ShaderLibrary.shared.register(ColorSplitShader())
         ShaderLibrary.shared.register(Phosbite())
-        ShaderLibrary.shared.selectShader(at: 3)
+        ShaderLibrary.shared.register(ColorSplitShader())
+        ShaderLibrary.shared.selectShader(at: 2)
 
         Task {
 
