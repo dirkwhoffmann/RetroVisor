@@ -81,7 +81,7 @@ final class Phosbite: Shader {
             BRIGHT_BOOST: 1.0,
             BRIGHT_BOOST_POST: 1.0,
             CHROMA_BLUR_ENABLE: 0,
-            CHROMA_BLUR: 5,
+            CHROMA_BLUR: 16,
             
             BLOOM_ENABLE: 1,
             BLOOM_FILTER: BlurFilterType.box.rawValue,
@@ -152,6 +152,8 @@ final class Phosbite: Shader {
     var bl0: MTLTexture! // Blurred Channel 0 texture
     var bl1: MTLTexture! // Blurred Channel 1 texture
     var bl2: MTLTexture! // Blurren Channel 2 texture
+    var bll1: MTLTexture! // Blurred Channel 1 texture
+    var bll2: MTLTexture! // Blurren Channel 2 texture
 
     // Performance shader for computing mipmaps
     var pyramid: MPSImagePyramid!
@@ -620,6 +622,8 @@ final class Phosbite: Shader {
             bl0 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bl1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bl2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
+            bll1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
+            bll2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
             com = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
         }
@@ -695,20 +699,34 @@ final class Phosbite: Shader {
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
         
         //
-        // Pass 3: Create the bloom textures
+        // Pass 3: Create the blur and bloom textures
         //
         
-        blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLOOM_FILTER)!
-        blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
-        blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
-        // blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
-        blurFilter.apply(commandBuffer: commandBuffer, in: yc0, out: bl0)
+        if uniforms.BLOOM_ENABLE == 1 {
+            
+            blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLOOM_FILTER)!
+            blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
+            blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
+            blurFilter.apply(commandBuffer: commandBuffer, in: yc0, out: bl0)
+        }
 
-        blurFilter.blurWidth = uniforms.CHROMA_BLUR
-        blurFilter.blurHeight = 2.0
-        blurFilter.apply(commandBuffer: commandBuffer, in: yc1, out: bl1)
-        blurFilter.apply(commandBuffer: commandBuffer, in: yc2, out: bl2)
-
+        if uniforms.CHROMA_BLUR_ENABLE == 1 {
+            
+            let kernelWidth = Int(uniforms.CHROMA_BLUR) | 1
+            let kernelHeight = 1
+            let values = [Float](repeating: 0, count: kernelWidth * kernelHeight)
+            
+            let dilate = MPSImageDilate(device: ShaderLibrary.device,
+                                        kernelWidth: kernelWidth, kernelHeight: kernelHeight, values: values)
+            dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc1, destinationTexture: bll1)
+            dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc2, destinationTexture: bll2)
+            
+            blurFilter.blurWidth = uniforms.CHROMA_BLUR / 2.0
+            blurFilter.blurHeight = 2.0
+            blurFilter.apply(commandBuffer: commandBuffer, in: bll1, out: bl1)
+            blurFilter.apply(commandBuffer: commandBuffer, in: bll2, out: bl2)
+        }
+        
         //
         // Pass 4: Emulate CRT artifacts
         //
