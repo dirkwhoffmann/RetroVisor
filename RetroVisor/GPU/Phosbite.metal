@@ -132,7 +132,6 @@ namespace phosbite {
                     texture2d<half, access::sample> bl1 [[ texture(2) ]], // Bloom (Chroma 1)
                     texture2d<half, access::sample> bl2 [[ texture(3) ]], // Bloom (Chroma 2)
                     texture2d<half, access::sample> dom [[ texture(4) ]], // Dot Mask
-                    // texture2d<half, access::sample> blm [[ texture(5) ]], // Bloom
                     texture2d<half, access::write>  out [[ texture(5) ]],
                     constant Uniforms               &u  [[ buffer(0)  ]],
                     sampler                         sam [[ sampler(0) ]],
@@ -165,8 +164,8 @@ namespace phosbite {
             uint line = gid.y % (2 * u.SCANLINE_DISTANCE);
             if (line >= u.SCANLINE_DISTANCE) line = 2 * u.SCANLINE_DISTANCE - 1 - line;
             
-            // Color4 blurred = rgb.sample(sam, uv, level(u.SCANLINE_BLUR));
-            // color = mix(color, blurred, u.SCANLINE_BLOOM);
+            Color4 blurred = ycc.sample(sam, uv, level(u.SCANLINE_BLUR));
+            yccColor = mix(yccColor, blurred, u.SCANLINE_BLOOM);
 
             float w = u.SCANLINE_WEIGHT[line];
             yccColor.x = remap(float(yccColor.x), 1.0 - w, u.SCANLINE_GAIN, u.SCANLINE_LOSS);

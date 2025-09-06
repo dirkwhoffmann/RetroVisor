@@ -90,7 +90,7 @@ final class Phosbite: Shader {
             BLOOM_RADIUS_X: 5,
             BLOOM_RADIUS_Y: 3,
             
-            DOTMASK_ENABLE: 0,
+            DOTMASK_ENABLE: 1,
             DOTMASK_TYPE: 0,
             DOTMASK_COLOR: 0,
             DOTMASK_SIZE: 5,
@@ -100,10 +100,10 @@ final class Phosbite: Shader {
             DOTMASK_GAIN: 1.0,
             DOTMASK_LOSS: -0.5,
             
-            SCANLINES_ENABLE: 0,
+            SCANLINES_ENABLE: 1,
             SCANLINE_DISTANCE: 6,
             SCANLINE_SHARPNESS: 1.0,
-            SCANLINE_BLUR: 0.0,
+            SCANLINE_BLUR: 1.5,
             SCANLINE_BLOOM: 1.0,
             SCANLINE_STRENGTH: 1.0,
             SCANLINE_GAIN: 0.5,
