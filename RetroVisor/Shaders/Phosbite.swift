@@ -47,6 +47,7 @@ final class Phosbite: Shader {
         var SCANLINE_DISTANCE: Int32
         var SCANLINE_SHARPNESS: Float
         var SCANLINE_BLOOM: Float
+        var SCANLINE_MODULATION: Int32
         var SCANLINE_WEIGHT1: Float
         var SCANLINE_WEIGHT2: Float
         var SCANLINE_WEIGHT3: Float
@@ -90,23 +91,24 @@ final class Phosbite: Shader {
             DOTMASK_COLOR: 0,
             DOTMASK_SIZE: 5,
             DOTMASK_SATURATION: 0.5,
-            DOTMASK_BRIGHTNESS: 1.0,
+            DOTMASK_BRIGHTNESS: 0.5,
             DOTMASK_BLUR: 0.0,
             DOTMASK_GAIN: 1.0,
             DOTMASK_LOOSE: -0.5,
             
             SCANLINES_ENABLE: 1,
-            SCANLINE_DISTANCE: 8,
-            SCANLINE_SHARPNESS: 1.77,
+            SCANLINE_DISTANCE: 6,
+            SCANLINE_SHARPNESS: 0.5,
             SCANLINE_BLOOM: 1.0,
-            SCANLINE_WEIGHT1: 0.48,
-            SCANLINE_WEIGHT2: 0.68,
-            SCANLINE_WEIGHT3: 0.76,
-            SCANLINE_WEIGHT4: 0.80,
-            SCANLINE_WEIGHT5: 0.67,
-            SCANLINE_WEIGHT6: 0.59,
-            SCANLINE_WEIGHT7: 0.48,
-            SCANLINE_WEIGHT8: 0.48,
+            SCANLINE_MODULATION: 0,
+            SCANLINE_WEIGHT1: 0.10,
+            SCANLINE_WEIGHT2: 0.25,
+            SCANLINE_WEIGHT3: 0.40,
+            SCANLINE_WEIGHT4: 0.55,
+            SCANLINE_WEIGHT5: 0.70,
+            SCANLINE_WEIGHT6: 0.85,
+            SCANLINE_WEIGHT7: 1.0,
+            SCANLINE_WEIGHT8: 1.0,
             SCANLINE_BRIGHTNESS: 0.5,
             
             DEBUG_ENABLE: 1,
@@ -317,7 +319,15 @@ final class Phosbite: Shader {
                             key: "SCANLINE_BLOOM",
                             get: { [unowned self] in self.uniforms.SCANLINE_BLOOM },
                             set: { [unowned self] in self.uniforms.SCANLINE_BLOOM = $0 })),
-                    
+
+                    ShaderSetting(
+                        title: "Scanline Modulation",
+                        items: [ ("Power", 0), ("Exponential", 1), ("Polynomial", 2) ],
+                        value: Binding(
+                            key: "SCANLINE_MODULATION",
+                            get: { [unowned self] in Float(self.uniforms.SCANLINE_MODULATION) },
+                            set: { [unowned self] in self.uniforms.SCANLINE_MODULATION = Int32($0) })),
+
                     ShaderSetting(
                         title: "Scanline Weight 1",
                         range: 0.0...1.0, step: 0.01,

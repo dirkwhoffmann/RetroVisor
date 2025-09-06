@@ -55,6 +55,7 @@ namespace phosbite {
         uint  SCANLINE_DISTANCE;
         float SCANLINE_SHARPNESS;
         float SCANLINE_BLOOM;
+        uint  SCANLINE_MODULATION;
         float SCANLINE_WEIGHT[8];
         float SCANLINE_BRIGHTNESS;
         
@@ -195,7 +196,13 @@ namespace phosbite {
             
             Color4 blurred = rgb.sample(sam, uv, level(u.SCANLINE_SHARPNESS));
             color = mix(color, blurred, u.SCANLINE_BLOOM);
-            color = scanline(color, u.SCANLINE_WEIGHT[line]);
+            switch (u.SCANLINE_MODULATION) {
+                case 0: color = remapPow(color, u.SCANLINE_WEIGHT[line]); break;
+                case 1: color = remapExp(color, u.SCANLINE_WEIGHT[line]); break;
+                case 2: color = remapPol(color, u.SCANLINE_WEIGHT[line]); break;
+                default: color = Color4(0.0, 0.0, 0.0, 1.0);
+            }
+            // color = scanline(color, u.SCANLINE_WEIGHT[line]);
         }
 
         // Apply the dot mask effect
