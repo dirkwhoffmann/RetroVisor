@@ -83,7 +83,6 @@ namespace phosbite {
                           texture2d<half, access::write>  yc0 [[ texture(2) ]], // Luma
                           texture2d<half, access::write>  yc1 [[ texture(3) ]], // First Chroma
                           texture2d<half, access::write>  yc2 [[ texture(4) ]], // Second Chroma
-                          // texture2d<half, access::write>  bri [[ texture(5) ]], // Brightness
                           constant Uniforms               &u  [[ buffer(0)  ]],
                           sampler                         sam [[ sampler(0) ]],
                           uint2                           gid [[ thread_position_in_grid ]])
@@ -109,20 +108,12 @@ namespace phosbite {
         if (u.BLOOM_ENABLE) {
             
             // Filter out all texels below the threshold
-            Color3 threshold = Color3(u.BLOOM_THRESHOLD_LUMA,
-                                      u.BLOOM_THRESHOLD_CHROMA,
-                                      u.BLOOM_THRESHOLD_CHROMA);
-            Color3 mask = Color3(smoothstep(threshold, threshold + 0.1, split));
+            Color threshold = u.BLOOM_THRESHOLD_LUMA;
+            Color mask = smoothstep(threshold, threshold + 0.1h, split.x);
   
             // Scale the bright part
-            Color3 intensity = Color3(u.BLOOM_INTENSITY_LUMA,
-                                      u.BLOOM_INTENSITY_CHROMA,
-                                      u.BLOOM_INTENSITY_CHROMA);
-
+            Color intensity = u.BLOOM_INTENSITY_LUMA;
             yc0.write((split * mask * intensity).x, gid);
-
-            // DEPECATED
-            // bri.write(Color4((split * mask * intensity).x, split.y, split.z, 1.0), gid);
         }
         
         if (u.CHROMA_BLUR_ENABLE) {
