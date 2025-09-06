@@ -20,23 +20,24 @@ inline T sigmoid(T x, float k) {
     return 1.0 / (1.0 + exp(-k * (x - 0.5)));
 }
 
-//
-// Remapping curves: [0..1] -> [0..1]
-//
-
+/* Remaps the unit interval [0 ... 1] to [0 ... 1] using a pow-based function.
+ *
+ * Parameters:
+ *   a ∈ [0, 1] – Controls the curve shape:
+ *                values < 0.5 bend the curve toward 0 (concave),
+ *                values > 0.5 bend it toward 1 (convex).
+ *
+ *   b ∈ [0, 2] – Controls the bending strength:
+ *                smaller values produce a gentler curve,
+ *                larger values produce a stronger curve.
+ *
+ * Notes:
+ * - The function is nearly symmetric around a ≈ 0.5, but not exact,
+ *   in order to keep the implementation efficient.
+ */
 template<typename T>
-inline T remapExp(T x, float k) {
-    return 1.0 - exp(-x*x / ((1 - k/2)*(1 - k/2)));
+inline T remap(T x, float a, float b) {
+    return pow(x, 0.25f + pow(4.0f * (1 - a) * (1 - a), b));
 }
 
-template<typename T>
-inline T remapPow(T x, float k) {
-    return 1.0 - pow(1 - x, 2 * k);
-}
-
-template<typename T>
-inline T remapPol(T x, float k) {
-    // return smoothstep(0.0, 2.5 - 2 * k, x);
-    return smoothstep(0.49 * k, 1.0 - 0.5 * k, x);
-}
 #endif

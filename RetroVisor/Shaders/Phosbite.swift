@@ -46,8 +46,9 @@ final class Phosbite: Shader {
         var SCANLINES_ENABLE: Int32
         var SCANLINE_DISTANCE: Int32
         var SCANLINE_SHARPNESS: Float
+        var SCANLINE_BLUR: Float
         var SCANLINE_BLOOM: Float
-        var SCANLINE_MODULATION: Int32
+        var SCANLINE_STRENGTH: Float
         var SCANLINE_WEIGHT1: Float
         var SCANLINE_WEIGHT2: Float
         var SCANLINE_WEIGHT3: Float
@@ -56,7 +57,6 @@ final class Phosbite: Shader {
         var SCANLINE_WEIGHT6: Float
         var SCANLINE_WEIGHT7: Float
         var SCANLINE_WEIGHT8: Float
-        var SCANLINE_BRIGHTNESS: Float
         
         var DEBUG_ENABLE: Int32
         var DEBUG_TEXTURE1: Int32
@@ -98,18 +98,18 @@ final class Phosbite: Shader {
             
             SCANLINES_ENABLE: 1,
             SCANLINE_DISTANCE: 6,
-            SCANLINE_SHARPNESS: 0.5,
+            SCANLINE_SHARPNESS: 1.0,
+            SCANLINE_BLUR: 0.0,
             SCANLINE_BLOOM: 1.0,
-            SCANLINE_MODULATION: 0,
-            SCANLINE_WEIGHT1: 0.10,
-            SCANLINE_WEIGHT2: 0.25,
-            SCANLINE_WEIGHT3: 0.40,
-            SCANLINE_WEIGHT4: 0.55,
-            SCANLINE_WEIGHT5: 0.70,
-            SCANLINE_WEIGHT6: 0.85,
+            SCANLINE_STRENGTH: 1.0,
+            SCANLINE_WEIGHT1: 0.20,
+            SCANLINE_WEIGHT2: 0.36,
+            SCANLINE_WEIGHT3: 0.60,
+            SCANLINE_WEIGHT4: 0.68,
+            SCANLINE_WEIGHT5: 0.75,
+            SCANLINE_WEIGHT6: 0.80,
             SCANLINE_WEIGHT7: 1.0,
             SCANLINE_WEIGHT8: 1.0,
-            SCANLINE_BRIGHTNESS: 0.5,
             
             DEBUG_ENABLE: 1,
             DEBUG_TEXTURE1: 0,
@@ -305,12 +305,28 @@ final class Phosbite: Shader {
                         set: { [unowned self] in self.uniforms.SCANLINE_DISTANCE = Int32($0) })),
                     
                     ShaderSetting(
+                        title: "Scanline Strength",
+                        range: 0.0...1.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_STRENGTH",
+                            get: { [unowned self] in self.uniforms.SCANLINE_STRENGTH },
+                            set: { [unowned self] in self.uniforms.SCANLINE_STRENGTH = $0 })),
+
+                    ShaderSetting(
                         title: "Scanline Sharpness",
-                        range: 0...4.0, step: 0.01,
+                        range: 0.0...1.0, step: 0.01,
                         value: Binding(
                             key: "SCANLINE_SHARPNESS",
                             get: { [unowned self] in self.uniforms.SCANLINE_SHARPNESS },
                             set: { [unowned self] in self.uniforms.SCANLINE_SHARPNESS = $0 })),
+
+                    ShaderSetting(
+                        title: "Scanline Blur",
+                        range: 0...4.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_BLUR",
+                            get: { [unowned self] in self.uniforms.SCANLINE_BLUR },
+                            set: { [unowned self] in self.uniforms.SCANLINE_BLUR = $0 })),
                     
                     ShaderSetting(
                         title: "Scanline Bloom",
@@ -319,14 +335,6 @@ final class Phosbite: Shader {
                             key: "SCANLINE_BLOOM",
                             get: { [unowned self] in self.uniforms.SCANLINE_BLOOM },
                             set: { [unowned self] in self.uniforms.SCANLINE_BLOOM = $0 })),
-
-                    ShaderSetting(
-                        title: "Scanline Modulation",
-                        items: [ ("Power", 0), ("Exponential", 1), ("Polynomial", 2) ],
-                        value: Binding(
-                            key: "SCANLINE_MODULATION",
-                            get: { [unowned self] in Float(self.uniforms.SCANLINE_MODULATION) },
-                            set: { [unowned self] in self.uniforms.SCANLINE_MODULATION = Int32($0) })),
 
                     ShaderSetting(
                         title: "Scanline Weight 1",
@@ -391,14 +399,6 @@ final class Phosbite: Shader {
                             key: "SCANLINE_WEIGHT8",
                             get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT8 },
                             set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT8 = $0 })),
-                    
-                    ShaderSetting(
-                        title: "Scanline Brightness",
-                        range: 0.0...1.0, step: 0.01,
-                        value: Binding(
-                            key: "SCANLINE_BRIGHTNESS",
-                            get: { [unowned self] in self.uniforms.SCANLINE_BRIGHTNESS },
-                            set: { [unowned self] in self.uniforms.SCANLINE_BRIGHTNESS = $0 })),
                   ]),
             
             Group(title: "Dot Mask",
@@ -612,7 +612,7 @@ final class Phosbite: Shader {
         pyramid = MPSImageGaussianPyramid(device: ShaderLibrary.device)
     }
     
-    func updateTextures(in input: MTLTexture, out output: MTLTexture) {
+    func updateTextures(commandBuffer: MTLCommandBuffer, in input: MTLTexture, out output: MTLTexture) {
         
         // Size of the downscaled input texture
         let inpWidth = Int(Float(output.width) * uniforms.INPUT_TEX_SCALE)
@@ -641,6 +641,12 @@ final class Phosbite: Shader {
         if (uniforms.DEBUG_ENABLE != 0 && dbg?.width != crtWidth || dbg?.height != crtHeight) {
 
             dbg = output.makeTexture(width: crtWidth, height: crtHeight)
+        }
+        
+        if dotMaskNeedsUpdate {
+            
+            updateDotMask(commandBuffer: commandBuffer)
+            dotMaskNeedsUpdate = false
         }
     }
     
@@ -676,7 +682,7 @@ final class Phosbite: Shader {
     override func apply(commandBuffer: MTLCommandBuffer,
                         in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
         
-        updateTextures(in: input, out: output)
+        updateTextures(commandBuffer: commandBuffer, in: input, out: output)
         
         //
         // Pass 1: Crop and downsample the input area
@@ -686,11 +692,11 @@ final class Phosbite: Shader {
         resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
         
         //
-        // Pass 2: Convert RGB image into YUV/YIQ space and compute mipmaps
+        // Pass 2: Convert RGB image into YUV/YIQ space
         //
         
         splitKernel.apply(commandBuffer: commandBuffer,
-                          textures:  [src, ycc], // [src, lin, ycc],
+                          textures:  [src, ycc],
                           options: &uniforms,
                           length: MemoryLayout<Uniforms>.stride)
         
@@ -711,13 +717,14 @@ final class Phosbite: Shader {
         //
         // Pass 4: Create the dot mask texture
         //
-        
+        /*
         if dotMaskNeedsUpdate {
             
             updateDotMask(commandBuffer: commandBuffer)
             dotMaskNeedsUpdate = false
         }
-            
+            */
+        
         //
         // Pass 5: Create the bloom texture
         //

@@ -54,10 +54,10 @@ namespace phosbite {
         uint  SCANLINES_ENABLE;
         uint  SCANLINE_DISTANCE;
         float SCANLINE_SHARPNESS;
+        float SCANLINE_BLUR;
         float SCANLINE_BLOOM;
-        uint  SCANLINE_MODULATION;
+        float SCANLINE_STRENGTH;
         float SCANLINE_WEIGHT[8];
-        float SCANLINE_BRIGHTNESS;
         
         // Debugging
         uint  DEBUG_ENABLE;
@@ -74,7 +74,6 @@ namespace phosbite {
     //
 
     kernel void colorSpace(texture2d<half, access::sample> src [[ texture(0) ]], // RGB
-                           // texture2d<half, access::write>  lin [[ texture(1) ]], // Linear RGB
                            texture2d<half, access::write>  ycc [[ texture(1) ]], // Luma / Chroma
                            constant Uniforms               &u  [[ buffer(0)  ]],
                            sampler                         sam [[ sampler(0) ]],
@@ -194,14 +193,22 @@ namespace phosbite {
             uint line = gid.y % (2 * u.SCANLINE_DISTANCE);
             if (line >= u.SCANLINE_DISTANCE) line = 2 * u.SCANLINE_DISTANCE - 1 - line;
             
-            Color4 blurred = rgb.sample(sam, uv, level(u.SCANLINE_SHARPNESS));
+            Color4 blurred = rgb.sample(sam, uv, level(u.SCANLINE_BLUR));
             color = mix(color, blurred, u.SCANLINE_BLOOM);
+            /*
             switch (u.SCANLINE_MODULATION) {
                 case 0: color = remapPow(color, u.SCANLINE_WEIGHT[line]); break;
                 case 1: color = remapExp(color, u.SCANLINE_WEIGHT[line]); break;
                 case 2: color = remapPol(color, u.SCANLINE_WEIGHT[line]); break;
                 default: color = Color4(0.0, 0.0, 0.0, 1.0);
             }
+            */
+            // float w = mix(0.5 - u.SCANLINE_STRENGTH / 2, 0.5 + u.SCANLINE_STRENGTH / 2, float(line) / float(2 * u.SCANLINE_DISTANCE - 1));
+            float w = u.SCANLINE_WEIGHT[line];
+            // w = mix(0.5 - u.SCANLINE_STRENGTH / 2, 0.5 + u.SCANLINE_STRENGTH / 2, w);
+            w = mix(0, 0.5 + u.SCANLINE_STRENGTH / 2, w);
+            color = remap(color, w, u.SCANLINE_SHARPNESS);
+            // color = remap(color, w, u.SCANLINE_SHARPNESS);
             // color = scanline(color, u.SCANLINE_WEIGHT[line]);
         }
 
