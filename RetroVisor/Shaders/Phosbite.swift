@@ -144,7 +144,6 @@ final class Phosbite: Shader {
     var src: MTLTexture! // Downscaled input texture
     var ycc: MTLTexture! // Image in chroma/luma space
     var com: MTLTexture! // Image in chroma/luma space with composite effects DEPRECATED
-    var bri: MTLTexture! // Brightness texture to emulate blooming DEPRECATED
     var dom: MTLTexture! // Dot mask
     var blm: MTLTexture! // Bloom texture
     var crt: MTLTexture! // Texture with CRT effects applied
@@ -641,7 +640,6 @@ final class Phosbite: Shader {
             bl0 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bl1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bl2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
-            bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
             com = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
         }
@@ -710,7 +708,7 @@ final class Phosbite: Shader {
         //
         
         compositeKernel.apply(commandBuffer: commandBuffer,
-                          textures:  [src, ycc, yc0, yc1, yc2, bri],
+                          textures:  [src, ycc, yc0, yc1, yc2],
                           options: &uniforms,
                           length: MemoryLayout<Uniforms>.stride)
         
@@ -723,8 +721,9 @@ final class Phosbite: Shader {
         blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLOOM_FILTER)!
         blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
         blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
-        blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
-        
+        // blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
+        blurFilter.apply(commandBuffer: commandBuffer, in: yc0, out: bl0)
+
         blurFilter.blurWidth = uniforms.CHROMA_BLUR
         blurFilter.blurHeight = 2.0
         blurFilter.apply(commandBuffer: commandBuffer, in: yc1, out: bl1)
@@ -735,7 +734,7 @@ final class Phosbite: Shader {
         //
         
         crtKernel.apply(commandBuffer: commandBuffer,
-                        textures: [ycc, bl0, bl1, bl2, dom, blm, uniforms.DEBUG_ENABLE == 1 ? dbg : output],
+                        textures: [ycc, bl0, bl1, bl2, dom, uniforms.DEBUG_ENABLE == 1 ? dbg : output],
                         options: &uniforms,
                         length: MemoryLayout<Uniforms>.stride)
 

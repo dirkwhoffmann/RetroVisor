@@ -83,7 +83,7 @@ namespace phosbite {
                           texture2d<half, access::write>  yc0 [[ texture(2) ]], // Luma
                           texture2d<half, access::write>  yc1 [[ texture(3) ]], // First Chroma
                           texture2d<half, access::write>  yc2 [[ texture(4) ]], // Second Chroma
-                          texture2d<half, access::write>  bri [[ texture(5) ]], // Brightness
+                          // texture2d<half, access::write>  bri [[ texture(5) ]], // Brightness
                           constant Uniforms               &u  [[ buffer(0)  ]],
                           sampler                         sam [[ sampler(0) ]],
                           uint2                           gid [[ thread_position_in_grid ]])
@@ -122,7 +122,7 @@ namespace phosbite {
             yc0.write((split * mask * intensity).x, gid);
 
             // DEPECATED
-            bri.write(Color4((split * mask * intensity).x, split.y, split.z, 1.0), gid);
+            // bri.write(Color4((split * mask * intensity).x, split.y, split.z, 1.0), gid);
         }
         
         if (u.CHROMA_BLUR_ENABLE) {
@@ -143,8 +143,8 @@ namespace phosbite {
                     texture2d<half, access::sample> bl1 [[ texture(2) ]], // Bloom (Chroma 1)
                     texture2d<half, access::sample> bl2 [[ texture(3) ]], // Bloom (Chroma 2)
                     texture2d<half, access::sample> dom [[ texture(4) ]], // Dot Mask
-                    texture2d<half, access::sample> blm [[ texture(5) ]], // Bloom
-                    texture2d<half, access::write>  out [[ texture(6) ]],
+                    // texture2d<half, access::sample> blm [[ texture(5) ]], // Bloom
+                    texture2d<half, access::write>  out [[ texture(5) ]],
                     constant Uniforms               &u  [[ buffer(0)  ]],
                     sampler                         sam [[ sampler(0) ]],
                     uint2                           gid [[ thread_position_in_grid ]])
@@ -166,8 +166,8 @@ namespace phosbite {
         // Apply bloom effect
         if (u.BLOOM_ENABLE) {
 
-            Color4 bloom = blm.sample(sam, uv);
-            yccColor.x = saturate(yccColor.x + bloom.x);
+            Color bloom = bl0.sample(sam, uv).x;
+            yccColor.x = saturate(yccColor.x + bloom);
         }
         
         // Apply the scanline effect
