@@ -80,17 +80,17 @@ final class Phosbite: Shader {
             GAMMA_OUTPUT: 2.2,
             BRIGHT_BOOST: 1.0,
             BRIGHT_BOOST_POST: 1.0,
-            CHROMA_BLUR_ENABLE: 0,
+            CHROMA_BLUR_ENABLE: 1,
             CHROMA_BLUR: 16,
             
-            BLOOM_ENABLE: 1,
+            BLOOM_ENABLE: 0,
             BLOOM_FILTER: BlurFilterType.box.rawValue,
             BLOOM_THRESHOLD: 0.7,
             BLOOM_INTENSITY: 1.0,
             BLOOM_RADIUS_X: 5,
             BLOOM_RADIUS_Y: 3,
             
-            DOTMASK_ENABLE: 1,
+            DOTMASK_ENABLE: 0,
             DOTMASK_TYPE: 0,
             DOTMASK_COLOR: 0,
             DOTMASK_SIZE: 5,
@@ -100,7 +100,7 @@ final class Phosbite: Shader {
             DOTMASK_GAIN: 1.0,
             DOTMASK_LOSS: -0.5,
             
-            SCANLINES_ENABLE: 1,
+            SCANLINES_ENABLE: 0,
             SCANLINE_DISTANCE: 6,
             SCANLINE_SHARPNESS: 1.0,
             SCANLINE_BLUR: 1.5,
@@ -130,24 +130,27 @@ final class Phosbite: Shader {
     var uniforms: Uniforms = .defaults
 
     // Kernels
+    var splitKernel: Kernel!
     var compositeKernel: Kernel!
-    // var chromaKernel: Kernel!
     var dotMaskKernel: Kernel!
     var crtKernel: Kernel!
     var debugKernel: Kernel!
     
     // Textures
     var src: MTLTexture! // Downscaled input texture
+
+    var yc0: MTLTexture! // Channel 0 of the ycc texture (for bloom effects)
+    var yc1: MTLTexture! // Channel 1 of the ycc texture (for bloom effects)
+    var yc2: MTLTexture! // Channel 2 of the ycc texture (for bloom effects)
+    var bri: MTLTexture! // Brightness texture
     var ycc: MTLTexture! // Image in chroma/luma space
-    var com: MTLTexture! // Image in chroma/luma space with composite effects DEPRECATED
+
+    // var com: MTLTexture! // Image in chroma/luma space with composite effects DEPRECATED
     var dom: MTLTexture! // Dot mask
     var blm: MTLTexture! // Bloom texture
     var crt: MTLTexture! // Texture with CRT effects applied
     var dbg: MTLTexture! // Copy of crt (needed by the debug kernel)
     
-    var yc0: MTLTexture! // Channel 0 of the ycc texture (for bloom effects)
-    var yc1: MTLTexture! // Channel 1 of the ycc texture (for bloom effects)
-    var yc2: MTLTexture! // Channel 2 of the ycc texture (for bloom effects)
 
     var bl0: MTLTexture! // Blurred Channel 0 texture
     var bl1: MTLTexture! // Blurred Channel 1 texture
@@ -593,10 +596,10 @@ final class Phosbite: Shader {
     override func activate() {
         
         super.activate()
+        splitKernel = SplitFilter(sampler: ShaderLibrary.linear)
         compositeKernel = CompositeFilter(sampler: ShaderLibrary.linear)
         dotMaskKernel = DotMaskFilter(sampler: ShaderLibrary.mipmapLinear)
         crtKernel = CrtFilter(sampler: ShaderLibrary.mipmapLinear)
-        // chromaKernel = CompositeFilter(sampler: ShaderLibrary.linear)
         debugKernel = DebugFilter(sampler: ShaderLibrary.mipmapLinear)
         pyramid = MPSImageGaussianPyramid(device: ShaderLibrary.device)
     }
@@ -619,13 +622,14 @@ final class Phosbite: Shader {
             yc0 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             yc1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             yc2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
+            bri = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bl0 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bl1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bl2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bll1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bll2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
-            com = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
+            // com = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
         }
         
         if crt?.width != crtWidth || crt?.height != crtHeight {
@@ -691,13 +695,11 @@ final class Phosbite: Shader {
         // Pass 2: Convert the input image into YUV/YIQ space
         //
         
-        compositeKernel.apply(commandBuffer: commandBuffer,
-                          textures:  [src, ycc, yc0, yc1, yc2],
+        splitKernel.apply(commandBuffer: commandBuffer,
+                          textures:  [src, ycc, yc0, yc1, yc2, bri],
                           options: &uniforms,
                           length: MemoryLayout<Uniforms>.stride)
-        
-        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
-        
+                
         //
         // Pass 3: Create the blur and bloom textures
         //
@@ -707,13 +709,13 @@ final class Phosbite: Shader {
             blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLOOM_FILTER)!
             blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
             blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
-            blurFilter.apply(commandBuffer: commandBuffer, in: yc0, out: bl0)
+            blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: bl0)
         }
 
         if uniforms.CHROMA_BLUR_ENABLE == 1 {
             
             let kernelWidth = Int(uniforms.CHROMA_BLUR) | 1
-            let kernelHeight = 1
+            let kernelHeight = 3
             let values = [Float](repeating: 0, count: kernelWidth * kernelHeight)
             
             let dilate = MPSImageDilate(device: ShaderLibrary.device,
@@ -725,8 +727,12 @@ final class Phosbite: Shader {
             blurFilter.blurHeight = 2.0
             blurFilter.apply(commandBuffer: commandBuffer, in: bll1, out: bl1)
             blurFilter.apply(commandBuffer: commandBuffer, in: bll2, out: bl2)
+            
+            compositeKernel.apply(commandBuffer: commandBuffer, textures: [yc0, bl1, bl2, ycc])
         }
         
+        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
+
         //
         // Pass 4: Emulate CRT artifacts
         //
@@ -770,18 +776,18 @@ extension Phosbite: ShaderDelegate {
 
 extension Phosbite {
     
+    class SplitFilter: Kernel {
+        convenience init?(sampler: MTLSamplerState) {
+            self.init(name: "phosbite::split", sampler: sampler)
+        }
+    }
+    
     class CompositeFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
             self.init(name: "phosbite::composite", sampler: sampler)
         }
     }
-    
-    class ShadowMaskFilter: Kernel {
-        convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "phosbite::shadowMask", sampler: sampler)
-        }
-    }
-    
+
     class DotMaskFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
             self.init(name: "phosbite::dotMask", sampler: sampler)

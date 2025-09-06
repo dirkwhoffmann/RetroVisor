@@ -73,17 +73,18 @@ namespace phosbite {
     };
     
     //
-    // Composite filter (RGB to YUV or YIQ)
+    // SPlit filter (RGB to YUV or YIQ)
     //
     
-    kernel void composite(texture2d<half, access::sample> src [[ texture(0) ]], // RGB
-                          texture2d<half, access::write>  ycc [[ texture(1) ]], // Luma / Chroma
-                          texture2d<half, access::write>  yc0 [[ texture(2) ]], // Luma
-                          texture2d<half, access::write>  yc1 [[ texture(3) ]], // First Chroma
-                          texture2d<half, access::write>  yc2 [[ texture(4) ]], // Second Chroma
-                          constant Uniforms               &u  [[ buffer(0)  ]],
-                          sampler                         sam [[ sampler(0) ]],
-                          uint2                           gid [[ thread_position_in_grid ]])
+    kernel void split(texture2d<half, access::sample> src [[ texture(0) ]], // RGB
+                      texture2d<half, access::write>  ycc [[ texture(1) ]], // Luma / Chroma
+                      texture2d<half, access::write>  yc0 [[ texture(2) ]], // Luma
+                      texture2d<half, access::write>  yc1 [[ texture(3) ]], // First Chroma
+                      texture2d<half, access::write>  yc2 [[ texture(4) ]], // Second Chroma
+                      texture2d<half, access::write>  bri [[ texture(5) ]], // Brightness texture
+                      constant Uniforms               &u  [[ buffer(0)  ]],
+                      sampler                         sam [[ sampler(0) ]],
+                      uint2                           gid [[ thread_position_in_grid ]])
     {
         // Get size of output textures
         const Coord2 rect = float2(ycc.get_width(), ycc.get_height());
@@ -103,7 +104,7 @@ namespace phosbite {
         // Boost brightness
         split.x *= u.BRIGHT_BOOST;
         
-        if (u.BLOOM_ENABLE) {
+        if (u.CHROMA_BLUR_ENABLE || u.BLOOM_ENABLE) {
             
             // Filter out all texels below the threshold
             Color threshold = u.BLOOM_THRESHOLD;
@@ -111,18 +112,40 @@ namespace phosbite {
   
             // Scale the bright part
             Color intensity = u.BLOOM_INTENSITY;
-            yc0.write((split * mask * intensity).x, gid);
+            bri.write(split.x * mask * intensity, gid);
         }
         
         if (u.CHROMA_BLUR_ENABLE) {
             
+            yc0.write(split.x, gid);
             yc1.write(split.y, gid);
             yc2.write(split.z, gid);
-        }
 
-        ycc.write(Color4(split, 1.0), gid);
+        } else {
+            
+            ycc.write(Color4(split, 1.0), gid);
+        }
     }
 
+    //
+    // Composite filter (merge seperate channels into common YCC texture)
+    //
+    
+    kernel void composite(texture2d<half, access::sample> ch0 [[ texture(0) ]], // Luma
+                          texture2d<half, access::sample> ch1 [[ texture(1) ]], // Chroma
+                          texture2d<half, access::sample> ch2 [[ texture(2) ]], // Chroma
+                          texture2d<half, access::write>  ycc [[ texture(3) ]],
+                          // constant Uniforms               &u  [[ buffer(0)  ]],
+                          sampler                         sam [[ sampler(0) ]],
+                          uint2                           gid [[ thread_position_in_grid ]])
+    {
+        Color c0 = ch0.read(gid).x;
+        Color c1 = ch1.read(gid).x;
+        Color c2 = ch2.read(gid).x;
+        
+        ycc.write(Color4(c0, c1, c2, 1.0), gid);
+    }
+    
     //
     // Main CRT shader
     //
@@ -145,11 +168,13 @@ namespace phosbite {
 
         // Apply chroma blur effect
         
+        /*
         if (u.CHROMA_BLUR_ENABLE) {
 
             yccColor.y = bl1.sample(sam, uv).x;
             yccColor.z = bl2.sample(sam, uv).x;
         }
+        */
         
         // Apply bloom effect
         if (u.BLOOM_ENABLE) {
