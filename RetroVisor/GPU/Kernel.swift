@@ -114,6 +114,7 @@ class Kernel {
 //
 // Passthrough kernel
 //
+/*
 
 class BypassFilter: Kernel {
 
@@ -122,11 +123,12 @@ class BypassFilter: Kernel {
         self.init(name: "bypass", sampler: sampler)
     }
 }
-
+*/
 //
 // CrtEasy kernel
 //
 
+/*
 class CrtEasyKernel: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
@@ -134,7 +136,7 @@ class CrtEasyKernel: Kernel {
         self.init(name: "crteasy::crtEasy", sampler: sampler)
     }
 }
-
+*/
 
 //
 // My personal playground. Nothing to see here. Move on.
@@ -189,7 +191,7 @@ class DebugFilter: Kernel {
     }
 }
 */
- 
+ /*
 class ColorSplitFilter: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
@@ -197,3 +199,4 @@ class ColorSplitFilter: Kernel {
         self.init(name: "colorsplit::splitter", sampler: sampler)
     }
 }
+*/

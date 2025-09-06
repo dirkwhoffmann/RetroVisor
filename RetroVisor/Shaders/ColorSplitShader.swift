@@ -193,3 +193,14 @@ extension ColorSplitShader: ShaderDelegate {
         }
     }
 }
+
+extension ColorSplitShader {
+    
+    class ColorSplitFilter: Kernel {
+
+        convenience init?(sampler: MTLSamplerState) {
+
+            self.init(name: "colorsplit::splitter", sampler: sampler)
+        }
+    }
+}

@@ -276,3 +276,14 @@ final class CRTEasyShader: Shader {
                      length2: MemoryLayout<CrtUniforms>.stride)
     }
 }
+
+extension CRTEasyShader {
+    
+    class CrtEasyKernel: Kernel {
+
+        convenience init?(sampler: MTLSamplerState) {
+
+            self.init(name: "crteasy::crtEasy", sampler: sampler)
+        }
+    }
+}

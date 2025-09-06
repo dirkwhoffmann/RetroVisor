@@ -193,3 +193,14 @@ extension PassthroughShader: ShaderDelegate {
         }
     }    
 }
+
+extension PassthroughShader {
+    
+    class BypassFilter: Kernel {
+
+        convenience init?(sampler: MTLSamplerState) {
+
+            self.init(name: "bypass", sampler: sampler)
+        }
+    }
+}
