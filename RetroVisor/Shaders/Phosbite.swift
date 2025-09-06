@@ -24,8 +24,8 @@ final class Phosbite: Shader {
         var GAMMA_OUTPUT: Float
         var BRIGHT_BOOST: Float
         var BRIGHT_BOOST_POST: Float
-        var CHROMA_RADIUS_ENABLE: Float
-        var CHROMA_RADIUS: Float
+        var CHROMA_BLUR_ENABLE: Float
+        var CHROMA_BLUR: Float
         
         var BLOOM_ENABLE: Int32
         var BLOOM_FILTER: Int32
@@ -82,8 +82,8 @@ final class Phosbite: Shader {
             GAMMA_OUTPUT: 2.2,
             BRIGHT_BOOST: 1.0,
             BRIGHT_BOOST_POST: 1.0,
-            CHROMA_RADIUS_ENABLE: 0,
-            CHROMA_RADIUS: 5,
+            CHROMA_BLUR_ENABLE: 0,
+            CHROMA_BLUR: 5,
             
             BLOOM_ENABLE: 1,
             BLOOM_FILTER: BlurFilterType.box.rawValue,
@@ -251,16 +251,16 @@ final class Phosbite: Shader {
                 ),
 
                 ShaderSetting(
-                    title: "Chroma Radius",
-                    range: 1...16, step: 1,
+                    title: "Chroma Blur",
+                    range: 1...32, step: 1,
                     enable: Binding(
-                        key: "CHROMA_RADIUS_ENABLE",
-                        get: { [unowned self] in self.uniforms.CHROMA_RADIUS_ENABLE },
-                        set: { [unowned self] in self.uniforms.CHROMA_RADIUS_ENABLE = $0 }),
+                        key: "CHROMA_BLUR_ENABLE",
+                        get: { [unowned self] in self.uniforms.CHROMA_BLUR_ENABLE },
+                        set: { [unowned self] in self.uniforms.CHROMA_BLUR_ENABLE = $0 }),
                     value: Binding(
-                        key: "CHROMA_RADIUS",
-                        get: { [unowned self] in self.uniforms.CHROMA_RADIUS },
-                        set: { [unowned self] in self.uniforms.CHROMA_RADIUS = $0 })),
+                        key: "CHROMA_BLUR",
+                        get: { [unowned self] in self.uniforms.CHROMA_BLUR },
+                        set: { [unowned self] in self.uniforms.CHROMA_BLUR = $0 })),
             ]),
             
             Group(title: "Blooming",
@@ -725,7 +725,7 @@ final class Phosbite: Shader {
         blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
         blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
         
-        blurFilter.blurWidth = uniforms.CHROMA_RADIUS
+        blurFilter.blurWidth = uniforms.CHROMA_BLUR
         blurFilter.blurHeight = 2.0
         blurFilter.apply(commandBuffer: commandBuffer, in: yc1, out: bl1)
         blurFilter.apply(commandBuffer: commandBuffer, in: yc2, out: bl2)
@@ -735,7 +735,7 @@ final class Phosbite: Shader {
         //
         
         crtKernel.apply(commandBuffer: commandBuffer,
-                        textures: [ycc, dom, blm, uniforms.DEBUG_ENABLE == 1 ? dbg : output],
+                        textures: [ycc, bl0, bl1, bl2, dom, blm, uniforms.DEBUG_ENABLE == 1 ? dbg : output],
                         options: &uniforms,
                         length: MemoryLayout<Uniforms>.stride)
 

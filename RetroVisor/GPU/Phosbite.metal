@@ -29,8 +29,8 @@ namespace phosbite {
         float GAMMA_OUTPUT;
         float BRIGHT_BOOST;
         float BRIGHT_BOOST_POST;
-        float CHROMA_RADIUS_ENABLE;
-        float CHROMA_RADIUS;
+        float CHROMA_BLUR_ENABLE;
+        float CHROMA_BLUR;
 
         // Bloom effect
         uint  BLOOM_ENABLE;
@@ -125,9 +125,13 @@ namespace phosbite {
             bri.write(Color4((split * mask * intensity).x, split.y, split.z, 1.0), gid);
         }
         
+        if (u.CHROMA_BLUR_ENABLE) {
+            
+            yc1.write(split.y, gid);
+            yc2.write(split.z, gid);
+        }
+
         ycc.write(Color4(split, 1.0), gid);
-        yc1.write(split.y, gid);
-        yc2.write(split.z, gid);
     }
 
     //
@@ -135,9 +139,12 @@ namespace phosbite {
     //
     
     kernel void crt(texture2d<half, access::sample> ycc [[ texture(0) ]], // Luma / Chroma
-                    texture2d<half, access::sample> dom [[ texture(1) ]], // Dot Mask
-                    texture2d<half, access::sample> blm [[ texture(2) ]], // Bloom
-                    texture2d<half, access::write>  out [[ texture(3) ]],
+                    texture2d<half, access::sample> bl0 [[ texture(1) ]], // Bloom (Luma)
+                    texture2d<half, access::sample> bl1 [[ texture(2) ]], // Bloom (Chroma 1)
+                    texture2d<half, access::sample> bl2 [[ texture(3) ]], // Bloom (Chroma 2)
+                    texture2d<half, access::sample> dom [[ texture(4) ]], // Dot Mask
+                    texture2d<half, access::sample> blm [[ texture(5) ]], // Bloom
+                    texture2d<half, access::write>  out [[ texture(6) ]],
                     constant Uniforms               &u  [[ buffer(0)  ]],
                     sampler                         sam [[ sampler(0) ]],
                     uint2                           gid [[ thread_position_in_grid ]])
@@ -148,13 +155,19 @@ namespace phosbite {
         // Read source pixel
         Color4 yccColor = ycc.sample(sam, uv);
 
-        // Experimental: Apply the bloom effect to chroma channels
+        // Apply chroma blur effect
         
+        if (u.CHROMA_BLUR_ENABLE) {
+
+            yccColor.y = bl1.sample(sam, uv).x;
+            yccColor.z = bl2.sample(sam, uv).x;
+        }
+        
+        // Apply bloom effect
         if (u.BLOOM_ENABLE) {
 
             Color4 bloom = blm.sample(sam, uv);
             yccColor.x = saturate(yccColor.x + bloom.x);
-            yccColor.yz = bloom.yz;
         }
         
         // Apply the scanline effect
