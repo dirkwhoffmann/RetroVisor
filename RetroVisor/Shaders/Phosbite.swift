@@ -143,13 +143,21 @@ final class Phosbite: Shader {
     // Textures
     var src: MTLTexture! // Downscaled input texture
     var ycc: MTLTexture! // Image in chroma/luma space
-    var com: MTLTexture! // Image in chroma/luma space with composite effects
-    var bri: MTLTexture! // Brightness texture to emulate blooming
+    var com: MTLTexture! // Image in chroma/luma space with composite effects DEPRECATED
+    var bri: MTLTexture! // Brightness texture to emulate blooming DEPRECATED
     var dom: MTLTexture! // Dot mask
     var blm: MTLTexture! // Bloom texture
     var crt: MTLTexture! // Texture with CRT effects applied
     var dbg: MTLTexture! // Copy of crt (needed by the debug kernel)
     
+    var yc0: MTLTexture! // Channel 0 of the ycc texture (for bloom effects)
+    var yc1: MTLTexture! // Channel 1 of the ycc texture (for bloom effects)
+    var yc2: MTLTexture! // Channel 2 of the ycc texture (for bloom effects)
+
+    var bl0: MTLTexture! // Blurred Channel 0 texture
+    var bl1: MTLTexture! // Blurred Channel 1 texture
+    var bl2: MTLTexture! // Blurren Channel 2 texture
+
     // Performance shader for computing mipmaps
     var pyramid: MPSImagePyramid!
     
@@ -528,15 +536,17 @@ final class Phosbite: Shader {
                   
                   [ ShaderSetting(
                     title: "Texture 1",
-                    items: [ ("Original", 0),
+                    items: [ ("Source", 0),
                              ("Final", 1),
                              ("", 0),
-                             ("Ycc", 2),
-                             ("Luma", 3),
-                             ("Chroma U/I", 4),
-                             ("Chroma V/Q", 5),
-                             ("Dotmask", 6),
-                             ("Bloom texture", 7) ],
+                             ("ycc", 2),
+                             ("ycc (Y)", 3),
+                             ("ycc (C1)", 4),
+                             ("ycc (C2)", 5),
+                             ("Bloom (Y)", 6),
+                             ("Bloom (C1)", 7),
+                             ("Bloom (C2)", 8),
+                             ("Dotmask", 9) ],
                     value: Binding(
                         key: "DEBUG_TEXTURE1",
                         get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE1) },
@@ -547,12 +557,14 @@ final class Phosbite: Shader {
                       items: [ ("Source", 0),
                                ("Final", 1),
                                ("", 0),
-                               ("Ycc", 2),
-                               ("Luma", 3),
-                               ("Chroma U/I", 4),
-                               ("Chroma V/Q", 5),
-                               ("Dotmask", 6),
-                               ("Bloom texture", 7) ],
+                               ("ycc", 2),
+                               ("ycc (Y)", 3),
+                               ("ycc (C1)", 4),
+                               ("ycc (C2)", 5),
+                               ("Bloom (Y)", 6),
+                               ("Bloom (C1)", 7),
+                               ("Bloom (C2)", 8),
+                               ("Dotmask", 9) ],
                       value: Binding(
                           key: "DEBUG_TEXTURE2",
                           get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE2) },
@@ -623,6 +635,12 @@ final class Phosbite: Shader {
             
             src = output.makeTexture(width: inpWidth, height: inpHeight)
             ycc = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
+            yc0 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
+            yc1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
+            yc2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
+            bl0 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
+            bl1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
+            bl2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
             com = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
@@ -692,14 +710,14 @@ final class Phosbite: Shader {
         //
         
         compositeKernel.apply(commandBuffer: commandBuffer,
-                          textures:  [src, ycc, bri],
+                          textures:  [src, ycc, yc0, yc1, yc2, bri],
                           options: &uniforms,
                           length: MemoryLayout<Uniforms>.stride)
         
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
         
         //
-        // Pass 3: Create the bloom texture
+        // Pass 3: Create the bloom textures
         //
         
         blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLOOM_FILTER)!
@@ -707,6 +725,11 @@ final class Phosbite: Shader {
         blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
         blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
         
+        blurFilter.blurWidth = uniforms.CHROMA_RADIUS
+        blurFilter.blurHeight = 2.0
+        blurFilter.apply(commandBuffer: commandBuffer, in: yc1, out: bl1)
+        blurFilter.apply(commandBuffer: commandBuffer, in: yc2, out: bl2)
+
         //
         // Pass 4: Emulate CRT artifacts
         //
@@ -723,7 +746,7 @@ final class Phosbite: Shader {
         if uniforms.DEBUG_ENABLE == 1 {
             
             debugKernel.apply(commandBuffer: commandBuffer,
-                              textures: [src, ycc, dom, blm, dbg, output],
+                              textures: [src, dbg, ycc, yc0, yc1, yc2, bl0, bl1, bl2, dom, output],
                               options: &uniforms,
                               length: MemoryLayout<Uniforms>.stride)
         }
