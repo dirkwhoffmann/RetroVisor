@@ -35,8 +35,10 @@ namespace phosbite {
         // Bloom effect
         uint  BLOOM_ENABLE;
         uint  BLOOM_FILTER;
-        float BLOOM_THRESHOLD;
-        float BLOOM_INTENSITY;
+        float BLOOM_THRESHOLD_LUMA;
+        float BLOOM_THRESHOLD_CHROMA;
+        float BLOOM_INTENSITY_LUMA;
+        float BLOOM_INTENSITY_CHROMA;
         float BLOOM_RADIUS_X;
         float BLOOM_RADIUS_Y;
 
@@ -102,12 +104,18 @@ namespace phosbite {
         split.x *= u.BRIGHT_BOOST;
         
         if (u.BLOOM_ENABLE) {
-
-            // Keep only if brighter than threshold
-            Color3 mask = Color3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, split));
-
+            
+            // Filter out all texels below the threshold
+            Color3 threshold = Color3(u.BLOOM_THRESHOLD_LUMA,
+                                      u.BLOOM_THRESHOLD_CHROMA,
+                                      u.BLOOM_THRESHOLD_CHROMA);
+            Color3 mask = Color3(smoothstep(threshold, threshold + 0.1, split));
+            
             // Scale the bright part
-            bri.write(Color4(split * mask * u.BLOOM_INTENSITY, 1.0), gid);
+            Color3 intensity = Color3(u.BLOOM_INTENSITY_LUMA,
+                                      u.BLOOM_INTENSITY_CHROMA,
+                                      u.BLOOM_INTENSITY_CHROMA);
+            bri.write(Color4(split * mask * intensity, 1.0), gid);
         }
         
         ycc.write(Color4(split, 1.0), gid);
@@ -117,6 +125,7 @@ namespace phosbite {
     // Chroma effects
     //
     
+    /*
     kernel void composite(texture2d<half, access::sample> ycc [[ texture(0) ]], // Luma / Chroma (in)
                           texture2d<half, access::write>  out [[ texture(1) ]], // Luma / Chroma (out)
                           texture2d<half, access::write>  bri [[ texture(2) ]], // Brightness (blooming)
@@ -133,10 +142,6 @@ namespace phosbite {
             
             int radius = 3 * u.CHROMA_RADIUS;
             float sigma = 2 * u.CHROMA_RADIUS * u.CHROMA_RADIUS;
-            // float maxY = yccC.x;
-            // float maxU = yccC.y;
-            // float maxV = yccC.z;
-            // Color maxY = yccC.x, maxU = 0.0, maxV = yccC.z;
             
             for (int dx = -radius; dx <= radius; dx++) {
                 
@@ -153,7 +158,8 @@ namespace phosbite {
         
         out.write(yccC, gid);
     }
-
+    */
+    
     //
     // Main CRT shader
     //
