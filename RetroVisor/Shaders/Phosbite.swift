@@ -732,7 +732,7 @@ final class Phosbite: Shader {
         //
         
         crtKernel.apply(commandBuffer: commandBuffer,
-                        textures: [ycc, bl0, bl1, bl2, dom, uniforms.DEBUG_ENABLE == 1 ? dbg : output],
+                        textures: [ycc, bl0, bl1, bl2, dom, uniforms.DEBUG_ENABLE == 1 ? dbg : crt],
                         options: &uniforms,
                         length: MemoryLayout<Uniforms>.stride)
 
@@ -746,6 +746,9 @@ final class Phosbite: Shader {
                               textures: [src, dbg, ycc, yc0, yc1, yc2, bl0, bl1, bl2, dom, output],
                               options: &uniforms,
                               length: MemoryLayout<Uniforms>.stride)
+        } else {
+            
+            resampler.apply(commandBuffer: commandBuffer, in: crt, out: output)
         }
     }
 }
