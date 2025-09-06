@@ -58,7 +58,6 @@ enum BlurFilterType: Int32 {
     case box = 0
     case tent = 1
     case gaussian = 2
-    case median = 3
 
     init?(_ rawValue: Float) { self.init(rawValue: Int32(rawValue)) }
     var floatValue: Float { return Float(self.rawValue) }
@@ -114,9 +113,6 @@ class BlurFilter {
                 filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
             case .gaussian:
                 let filter = MPSImageGaussianBlur(device: output.device, sigma: sigma)
-                filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
-            case .median:
-                let filter = MPSImageMedian(device: output.device, kernelDiameter: max(3, rw))
                 filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
             }
         }

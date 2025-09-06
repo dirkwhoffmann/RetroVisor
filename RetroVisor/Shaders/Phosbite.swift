@@ -29,10 +29,8 @@ final class Phosbite: Shader {
         
         var BLOOM_ENABLE: Int32
         var BLOOM_FILTER: Int32
-        var BLOOM_THRESHOLD_LUMA: Float
-        var BLOOM_THRESHOLD_CHROMA: Float
-        var BLOOM_INTENSITY_LUMA: Float
-        var BLOOM_INTENSITY_CHROMA: Float
+        var BLOOM_THRESHOLD: Float
+        var BLOOM_INTENSITY: Float
         var BLOOM_RADIUS_X: Float
         var BLOOM_RADIUS_Y: Float
         
@@ -87,10 +85,8 @@ final class Phosbite: Shader {
             
             BLOOM_ENABLE: 1,
             BLOOM_FILTER: BlurFilterType.box.rawValue,
-            BLOOM_THRESHOLD_LUMA: 0.7,
-            BLOOM_THRESHOLD_CHROMA: 0.8,
-            BLOOM_INTENSITY_LUMA: 1.0,
-            BLOOM_INTENSITY_CHROMA: 1.0,
+            BLOOM_THRESHOLD: 0.7,
+            BLOOM_INTENSITY: 1.0,
             BLOOM_RADIUS_X: 5,
             BLOOM_RADIUS_Y: 3,
             
@@ -271,43 +267,27 @@ final class Phosbite: Shader {
                   
                   [ ShaderSetting(
                     title: "Bloom Filter",
-                    items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
+                    items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2)],
                     value: Binding(
                         key: "BLOOM_FILTER",
                         get: { [unowned self] in Float(self.uniforms.BLOOM_FILTER) },
                         set: { [unowned self] in self.uniforms.BLOOM_FILTER = Int32($0) })),
                     
                     ShaderSetting(
-                        title: "Bloom Threshold (Luma)",
+                        title: "Bloom Threshold",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
-                            key: "BLOOM_THRESHOLD_LUMA",
-                            get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD_LUMA },
-                            set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD_LUMA = $0 })),
+                            key: "BLOOM_THRESHOLD",
+                            get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD },
+                            set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD = $0 })),
 
                     ShaderSetting(
-                        title: "Bloom Threshold (Chroma)",
-                        range: 0.0...1.0, step: 0.01,
-                        value: Binding(
-                            key: "BLOOM_THRESHOLD_CHROMA",
-                            get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD_CHROMA },
-                            set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD_CHROMA = $0 })),
-
-                    ShaderSetting(
-                        title: "Bloom Intensity (Luma)",
+                        title: "Bloom Intensity",
                         range: 0.1...2.0, step: 0.01,
                         value: Binding(
                             key: "BLOOM_INTENSITY",
-                            get: { [unowned self] in self.uniforms.BLOOM_INTENSITY_LUMA },
-                            set: { [unowned self] in self.uniforms.BLOOM_INTENSITY_LUMA = $0 })),
-
-                    ShaderSetting(
-                        title: "Bloom Intensity (Chroma)",
-                        range: 0.1...2.0, step: 0.01,
-                        value: Binding(
-                            key: "BLOOM_INTENSITY",
-                            get: { [unowned self] in self.uniforms.BLOOM_INTENSITY_CHROMA },
-                            set: { [unowned self] in self.uniforms.BLOOM_INTENSITY_CHROMA = $0 })),
+                            get: { [unowned self] in self.uniforms.BLOOM_INTENSITY },
+                            set: { [unowned self] in self.uniforms.BLOOM_INTENSITY = $0 })),
 
                     ShaderSetting(
                         title: "Bloom Radius X",

@@ -35,10 +35,8 @@ namespace phosbite {
         // Bloom effect
         uint  BLOOM_ENABLE;
         uint  BLOOM_FILTER;
-        float BLOOM_THRESHOLD_LUMA;
-        float BLOOM_THRESHOLD_CHROMA;
-        float BLOOM_INTENSITY_LUMA;
-        float BLOOM_INTENSITY_CHROMA;
+        float BLOOM_THRESHOLD;
+        float BLOOM_INTENSITY;
         float BLOOM_RADIUS_X;
         float BLOOM_RADIUS_Y;
 
@@ -108,11 +106,11 @@ namespace phosbite {
         if (u.BLOOM_ENABLE) {
             
             // Filter out all texels below the threshold
-            Color threshold = u.BLOOM_THRESHOLD_LUMA;
+            Color threshold = u.BLOOM_THRESHOLD;
             Color mask = smoothstep(threshold, threshold + 0.1h, split.x);
   
             // Scale the bright part
-            Color intensity = u.BLOOM_INTENSITY_LUMA;
+            Color intensity = u.BLOOM_INTENSITY;
             yc0.write((split * mask * intensity).x, gid);
         }
         

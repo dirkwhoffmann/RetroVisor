@@ -92,7 +92,7 @@ final class PassthroughShader: Shader {
                   
                   [ ShaderSetting(
                     title: "Blur Filter",
-                    items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2), ("MEDIAN", 3)],
+                    items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2)],
                     value: Binding(
                         key: "BLUR_FILTER",
                         get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
