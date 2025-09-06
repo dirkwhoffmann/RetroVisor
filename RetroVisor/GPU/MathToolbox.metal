@@ -23,21 +23,75 @@ inline T sigmoid(T x, float k) {
 /* Remaps the unit interval [0 ... 1] to [0 ... 1] using a pow-based function.
  *
  * Parameters:
- *   a ∈ [0, 1] – Controls the curve shape:
- *                values < 0.5 bend the curve toward 0 (concave),
- *                values > 0.5 bend it toward 1 (convex).
  *
- *   b ∈ [0, 2] – Controls the bending strength:
+ *   a ∈ [0, 1] – Controls the curve shape:
+ *                values < 0.5 bend the curve toward 1 (convex),
+ *                values > 0.5 bend it toward 0 (concave).
+ *
+ * Note: The function is nearly symmetric around a ≈ 0.5, but not exact,
+ *       in order to keep the implementation efficient.
+ */
+
+template<typename T>
+inline T remap(T x, float a) {
+    
+    return pow(x, 0.25 + 4.0 * a * a);
+}
+
+/* Remap variant with controllable bending strength
+ *
+ * Parameters:
+ *   a ∈ [0, 1] – Controls the curve shape as above.
+ *
+ *   b ∈ [0, 1] – Controls the bending strength:
  *                smaller values produce a gentler curve,
  *                larger values produce a stronger curve.
- *
- * Notes:
- * - The function is nearly symmetric around a ≈ 0.5, but not exact,
- *   in order to keep the implementation efficient.
  */
 template<typename T>
 inline T remap(T x, float a, float b) {
-    return pow(x, 0.25f + pow(4.0f * (1 - a) * (1 - a), b));
+    
+    a = mix(0.5 - 0.5 * abs(b), 0.5 + 0.5 * abs(b), a);
+    return pow(x, 0.25 + (4.0 * a * a));
+}
+
+/* Remap variant with individual bending strengths for concave and convex curves.
+ *
+ * Parameters:
+ *
+ *   a  ∈ [0, 1] – Controls the curve shape as above.
+ *   b1 ∈ [0, 1] – Controls the bending strength for convex curves.
+ *   b2 ∈ [0, 1] – Controls the bending strength for concave curves.
+*/
+template<typename T>
+inline T remap(T x, float a, float b1, float b2) {
+
+    a *= 2;
+    if (a < 1.0) {
+        a = mix(0.5 - 0.5 * abs(b1), 0.5, a);
+    } else {
+        a = mix(0.5, 0.5 + 0.5 * abs(b2), a - 1);
+    }
+    return pow(x, 0.25 + (4.0 * a * a));
+}
+
+/* Remap variant with more pronounced curving.
+ *
+ * Parameters:
+ *
+ *   a  ∈ [0, 1] – Controls the curve shape as above.
+ *   b1 ∈ [0, 1] – Controls the bending strength as above.
+ *   b2 ∈ [0, 1] – Controls the bending strength as above.
+*/
+template<typename T>
+inline T remapXL(T x, float a, float b1, float b2) {
+
+    a *= 2;
+    if (a < 1.0) {
+        a = mix(0.5 - 0.5 * abs(b1), 0.5, a);
+    } else {
+        a = mix(0.5, 0.5 + 0.5 * abs(b2), a - 1);
+    }
+    return pow(x, 0.125 + (8.0 * a * a * a));
 }
 
 #endif

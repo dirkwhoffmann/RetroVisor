@@ -41,7 +41,7 @@ final class Phosbite: Shader {
         var DOTMASK_BRIGHTNESS: Float
         var DOTMASK_BLUR: Float
         var DOTMASK_GAIN: Float
-        var DOTMASK_LOOSE: Float
+        var DOTMASK_LOSS: Float
         
         var SCANLINES_ENABLE: Int32
         var SCANLINE_DISTANCE: Int32
@@ -49,6 +49,8 @@ final class Phosbite: Shader {
         var SCANLINE_BLUR: Float
         var SCANLINE_BLOOM: Float
         var SCANLINE_STRENGTH: Float
+        var SCANLINE_GAIN: Float
+        var SCANLINE_LOSS: Float
         var SCANLINE_WEIGHT1: Float
         var SCANLINE_WEIGHT2: Float
         var SCANLINE_WEIGHT3: Float
@@ -94,7 +96,7 @@ final class Phosbite: Shader {
             DOTMASK_BRIGHTNESS: 0.5,
             DOTMASK_BLUR: 0.0,
             DOTMASK_GAIN: 1.0,
-            DOTMASK_LOOSE: -0.5,
+            DOTMASK_LOSS: -0.5,
             
             SCANLINES_ENABLE: 1,
             SCANLINE_DISTANCE: 6,
@@ -102,6 +104,8 @@ final class Phosbite: Shader {
             SCANLINE_BLUR: 0.0,
             SCANLINE_BLOOM: 1.0,
             SCANLINE_STRENGTH: 1.0,
+            SCANLINE_GAIN: 0.5,
+            SCANLINE_LOSS: 0.5,
             SCANLINE_WEIGHT1: 0.20,
             SCANLINE_WEIGHT2: 0.36,
             SCANLINE_WEIGHT3: 0.60,
@@ -337,6 +341,22 @@ final class Phosbite: Shader {
                             set: { [unowned self] in self.uniforms.SCANLINE_BLOOM = $0 })),
 
                     ShaderSetting(
+                        title: "Scanline Gain",
+                        range: 0.0...1.0, step: 0.01,
+                        value: Binding(
+                            key: "SCANLINE_GAIN",
+                            get: { [unowned self] in self.uniforms.SCANLINE_GAIN },
+                            set: { [unowned self] in self.uniforms.SCANLINE_GAIN = $0 })),
+                    
+                    ShaderSetting(
+                        title: "Scanline Loss",
+                        range: -1.0...0.0, step: 0.01,
+                        value: Binding(
+                            key: "DOTMASK_LOSS",
+                            get: { [unowned self] in self.uniforms.SCANLINE_LOSS },
+                            set: { [unowned self] in self.uniforms.SCANLINE_LOSS = $0 })),
+
+                    ShaderSetting(
                         title: "Scanline Weight 1",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
@@ -465,13 +485,12 @@ final class Phosbite: Shader {
                             set: { [unowned self] in self.uniforms.DOTMASK_GAIN = $0 })),
                     
                     ShaderSetting(
-                        title: "Dotmask Loose",
+                        title: "Dotmask Loss",
                         range: -1.0...0.0, step: 0.01,
                         value: Binding(
-                            key: "DOTMASK_LOOSE",
-                            get: { [unowned self] in self.uniforms.DOTMASK_LOOSE },
-                            set: { [unowned self] in self.uniforms.DOTMASK_LOOSE = $0 })),
-                    
+                            key: "DOTMASK_LOSS",
+                            get: { [unowned self] in self.uniforms.DOTMASK_LOSS },
+                            set: { [unowned self] in self.uniforms.DOTMASK_LOSS = $0 })),
                   ]),
             
             Group(title: "Blooming",

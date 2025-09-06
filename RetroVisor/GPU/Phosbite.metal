@@ -48,7 +48,7 @@ namespace phosbite {
         float DOTMASK_BRIGHTNESS;
         float DOTMASK_BLUR;
         float DOTMASK_GAIN;
-        float DOTMASK_LOOSE;
+        float DOTMASK_LOSS;
 
         // Scanlines
         uint  SCANLINES_ENABLE;
@@ -57,6 +57,8 @@ namespace phosbite {
         float SCANLINE_BLUR;
         float SCANLINE_BLOOM;
         float SCANLINE_STRENGTH;
+        float SCANLINE_GAIN;
+        float SCANLINE_LOSS;
         float SCANLINE_WEIGHT[8];
         
         // Debugging
@@ -205,9 +207,7 @@ namespace phosbite {
             */
             // float w = mix(0.5 - u.SCANLINE_STRENGTH / 2, 0.5 + u.SCANLINE_STRENGTH / 2, float(line) / float(2 * u.SCANLINE_DISTANCE - 1));
             float w = u.SCANLINE_WEIGHT[line];
-            // w = mix(0.5 - u.SCANLINE_STRENGTH / 2, 0.5 + u.SCANLINE_STRENGTH / 2, w);
-            w = mix(0, 0.5 + u.SCANLINE_STRENGTH / 2, w);
-            color = remap(color, w, u.SCANLINE_SHARPNESS);
+            color = remap(color, 1.0 - w, u.SCANLINE_GAIN, u.SCANLINE_LOSS);
             // color = remap(color, w, u.SCANLINE_SHARPNESS);
             // color = scanline(color, u.SCANLINE_WEIGHT[line]);
         }
@@ -218,7 +218,7 @@ namespace phosbite {
             Color4 mask = dom.sample(sam, uv, level(u.DOTMASK_BLUR));
             Color4 gain = min(color, 1 - color) * mask;
             Color4 loose = min(color, 1 - color) * (1 - mask);
-            color += u.DOTMASK_GAIN * gain + u.DOTMASK_LOOSE * loose;
+            color += u.DOTMASK_GAIN * gain + u.DOTMASK_LOSS * loose;
         }
 
         // Apply the bloom effect
