@@ -75,15 +75,15 @@ namespace phosbite {
     };
     
     //
-    // Color space converter (RGB to YUV or YIQ)
+    // Composite filter (RGB to YUV or YIQ)
     //
-
-    kernel void colorSpace(texture2d<half, access::sample> src [[ texture(0) ]], // RGB
-                           texture2d<half, access::write>  ycc [[ texture(1) ]], // Luma / Chroma
-                           texture2d<half, access::write>  bri [[ texture(2) ]], // Brightness
-                           constant Uniforms               &u  [[ buffer(0)  ]],
-                           sampler                         sam [[ sampler(0) ]],
-                           uint2                           gid [[ thread_position_in_grid ]])
+    
+    kernel void composite(texture2d<half, access::sample> src [[ texture(0) ]], // RGB
+                          texture2d<half, access::write>  ycc [[ texture(1) ]], // Luma / Chroma
+                          texture2d<half, access::write>  bri [[ texture(2) ]], // Brightness
+                          constant Uniforms               &u  [[ buffer(0)  ]],
+                          sampler                         sam [[ sampler(0) ]],
+                          uint2                           gid [[ thread_position_in_grid ]])
     {
         // Get size of output textures
         const Coord2 rect = float2(ycc.get_width(), ycc.get_height());
@@ -122,45 +122,6 @@ namespace phosbite {
     }
 
     //
-    // Chroma effects
-    //
-    
-    /*
-    kernel void composite(texture2d<half, access::sample> ycc [[ texture(0) ]], // Luma / Chroma (in)
-                          texture2d<half, access::write>  out [[ texture(1) ]], // Luma / Chroma (out)
-                          texture2d<half, access::write>  bri [[ texture(2) ]], // Brightness (blooming)
-                          constant Uniforms               &u  [[ buffer(0)  ]],
-                          sampler                         sam [[ sampler(0) ]],
-                          uint2                           gid [[ thread_position_in_grid ]])
-    {
-        uint W = out.get_width();
-        
-        // Read pixel
-        Color4 yccC = ycc.read(gid);
-
-        if (u.CHROMA_RADIUS_ENABLE) {
-            
-            int radius = 3 * u.CHROMA_RADIUS;
-            float sigma = 2 * u.CHROMA_RADIUS * u.CHROMA_RADIUS;
-            
-            for (int dx = -radius; dx <= radius; dx++) {
-                
-                if (dx == 0) continue;
-                
-                float3 sample = float3(ycc.read(uint2(clamp(int(gid.x) + dx, 0, int(W - 1)), gid.y)).xyz);
-                float3 gauss = sample * exp(float(-dx*dx)/sigma);
-                
-                // if (gauss.x > maxY) { maxY = gauss.x; }
-                if (gauss.y > yccC.y) { yccC.y = gauss.y; }
-                if (gauss.z > yccC.z) { yccC.z = gauss.z; }
-            }
-        }
-        
-        out.write(yccC, gid);
-    }
-    */
-    
-    //
     // Main CRT shader
     //
     
@@ -177,15 +138,15 @@ namespace phosbite {
 
         // Read source pixel
         Color4 yccColor = ycc.sample(sam, uv);
-        
+
         // Experimental: Apply the bloom effect to chroma channels
         
         if (u.BLOOM_ENABLE) {
 
             Color4 bloom = blm.sample(sam, uv);
-            yccColor.yz = saturate(yccColor.yz + bloom.yz);
+            yccColor = saturate(yccColor + bloom);
         }
-                
+        
         // Apply the scanline effect
         if (u.SCANLINES_ENABLE) {
             
@@ -201,7 +162,7 @@ namespace phosbite {
             // color = scanline(color, u.SCANLINE_WEIGHT[line]);
 
         }
-        Color4 color = u.PAL ? YUV2RGB(yccColor) : YIQ2RGB(yccColor);
+        Color4 color = YCC2RGB(yccColor, u.PAL); //  u.PAL ? YUV2RGB(yccColor) : YIQ2RGB(yccColor);
 
         // Apply the dot mask effect
         if (u.DOTMASK_ENABLE) {
@@ -213,11 +174,12 @@ namespace phosbite {
         }
 
         // Apply the bloom effect
+        
         /*
         if (u.BLOOM_ENABLE) {
 
             Color4 bloom = blm.sample(sam, uv);
-            color = saturate(color + bloom);
+            color = saturate(color + YCC2RGB(bloom, u.PAL));
         }
         */
         
@@ -312,6 +274,7 @@ namespace phosbite {
                                 
             default:
                 color = blm.sample(sam, uv);
+                color = YCC2RGB(color, u.PAL);
                 break;
         }
 

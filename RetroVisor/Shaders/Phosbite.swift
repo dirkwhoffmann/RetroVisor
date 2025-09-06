@@ -85,7 +85,7 @@ final class Phosbite: Shader {
             CHROMA_RADIUS_ENABLE: 0,
             CHROMA_RADIUS: 5,
             
-            BLOOM_ENABLE: 0,
+            BLOOM_ENABLE: 1,
             BLOOM_FILTER: BlurFilterType.box.rawValue,
             BLOOM_THRESHOLD_LUMA: 0.7,
             BLOOM_THRESHOLD_CHROMA: 0.8,
@@ -134,7 +134,7 @@ final class Phosbite: Shader {
     var uniforms: Uniforms = .defaults
 
     // Kernels
-    var splitKernel: Kernel!
+    var compositeKernel: Kernel!
     // var chromaKernel: Kernel!
     var dotMaskKernel: Kernel!
     var crtKernel: Kernel!
@@ -600,7 +600,7 @@ final class Phosbite: Shader {
     override func activate() {
         
         super.activate()
-        splitKernel = ColorSpaceFilter(sampler: ShaderLibrary.linear)
+        compositeKernel = CompositeFilter(sampler: ShaderLibrary.linear)
         dotMaskKernel = DotMaskFilter(sampler: ShaderLibrary.mipmapLinear)
         crtKernel = CrtFilter(sampler: ShaderLibrary.mipmapLinear)
         // chromaKernel = CompositeFilter(sampler: ShaderLibrary.linear)
@@ -691,7 +691,7 @@ final class Phosbite: Shader {
         // Pass 2: Convert the input image into YUV/YIQ space
         //
         
-        splitKernel.apply(commandBuffer: commandBuffer,
+        compositeKernel.apply(commandBuffer: commandBuffer,
                           textures:  [src, ycc, bri],
                           options: &uniforms,
                           length: MemoryLayout<Uniforms>.stride)
@@ -747,9 +747,9 @@ extension Phosbite: ShaderDelegate {
 
 extension Phosbite {
     
-    class ColorSpaceFilter: Kernel {
+    class CompositeFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "phosbite::colorSpace", sampler: sampler)
+            self.init(name: "phosbite::composite", sampler: sampler)
         }
     }
     
@@ -764,14 +764,6 @@ extension Phosbite {
             self.init(name: "phosbite::dotMask", sampler: sampler)
         }
     }
-    
-    /*
-    class CompositeFilter: Kernel {
-        convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "phosbite::composite", sampler: sampler)
-        }
-    }
-    */
     
     class CrtFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {

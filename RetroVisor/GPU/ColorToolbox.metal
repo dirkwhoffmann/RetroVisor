@@ -116,5 +116,24 @@ inline Color4 YUV2RGB(Color4 yuva) {
     return Color4(YUV2RGB(Color3(yuva)), yuva.a);
 }
 
+inline Color3 RGB2YCC(Color3 rgb, uint PAL) {
+    
+    return PAL ? RGB2YUV(rgb) : RGB2YIQ(rgb);
+}
+
+inline Color4 RGB2YCC(Color4 rgba, uint PAL) {
+    
+    return PAL ? RGB2YUV(rgba) : RGB2YIQ(rgba);
+}
+
+inline Color3 YCC2RGB(Color3 rgb, uint PAL) {
+    
+    return PAL ? YUV2RGB(rgb) : YIQ2RGB(rgb);
+}
+
+inline Color4 YCC2RGB(Color4 rgba, uint PAL) {
+    
+    return PAL ? YUV2RGB(rgba) : YIQ2RGB(rgba);
+}
 
 #endif

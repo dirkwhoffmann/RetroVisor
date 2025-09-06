@@ -140,6 +140,7 @@ class CrtEasyKernel: Kernel {
 // My personal playground. Nothing to see here. Move on.
 //
 
+/*
 class ColorSpaceFilter: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
@@ -187,7 +188,8 @@ class DebugFilter: Kernel {
         self.init(name: "playground::debug", sampler: sampler)
     }
 }
-
+*/
+ 
 class ColorSplitFilter: Kernel {
 
     convenience init?(sampler: MTLSamplerState) {
@@ -195,4 +197,3 @@ class ColorSplitFilter: Kernel {
         self.init(name: "colorsplit::splitter", sampler: sampler)
     }
 }
-
