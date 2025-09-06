@@ -29,6 +29,7 @@ namespace phosbite {
         float GAMMA_OUTPUT;
         float BRIGHT_BOOST;
         float BRIGHT_BOOST_POST;
+        float CHROMA_RADIUS_ENABLE;
         float CHROMA_RADIUS;
 
         // Bloom effect
@@ -114,54 +115,49 @@ namespace phosbite {
                           uint2                           gid [[ thread_position_in_grid ]])
     {
         uint W = out.get_width();
-        uint H = out.get_height();
-        if (gid.x >= W || gid.y >= H) return;
-
+        
         // Read pixel
         Color4 yccC = ycc.read(gid);
 
-        // Search the maximum chroma value in surrounding pixels
-        int radius = u.CHROMA_RADIUS;
-        Color maxU = yccC.y, maxV = yccC.z;
-        int maxDxU = 0, maxDxV = 0;
-
-        for (int dx = -radius; dx <= radius; dx++) {
-
-            if (dx == 0) continue;
-            int x = clamp(int(gid.x) + dx, 0, int(W - 1));
-            Color4 sample = ycc.read(uint2(x, gid.y));
-
-            if (sample.y > maxU) { maxU = sample.y; maxDxU = abs(dx); }
-            if (sample.z > maxV) { maxV = sample.z; maxDxV = abs(dx); }
+        if (u.CHROMA_RADIUS_ENABLE) {
+            
+            int radius = 3 * u.CHROMA_RADIUS;
+            float sigma = 2 * u.CHROMA_RADIUS * u.CHROMA_RADIUS;
+            // float maxY = yccC.x;
+            // float maxU = yccC.y;
+            // float maxV = yccC.z;
+            // Color maxY = yccC.x, maxU = 0.0, maxV = yccC.z;
+            
+            for (int dx = -radius; dx <= radius; dx++) {
+                
+                if (dx == 0) continue;
+                
+                float3 sample = float3(ycc.read(uint2(clamp(int(gid.x) + dx, 0, int(W - 1)), gid.y)).xyz);
+                float3 gauss = sample * exp(float(-dx*dx)/sigma);
+                
+                // if (gauss.x > maxY) { maxY = gauss.x; }
+                if (gauss.y > yccC.y) { yccC.y = gauss.y; }
+                if (gauss.z > yccC.z) { yccC.z = gauss.z; }
+            }
         }
+        
+        out.write(yccC, gid);
 
-        // Interpolation weights based on distance
-        float distU = float(maxDxU) / float(max(1, radius));
-        float distV = float(maxDxV) / float(max(1, radius));
-        Color uOut = mix(yccC.y, maxU, Color(smoothstep(0.0, 1.0, 1.0 - distU)));
-        Color vOut = mix(yccC.z, maxV, Color(smoothstep(0.0, 1.0, 1.0 - distV)));
-
-        // Recombine with scaled luma and convert back to RGB
-        Color3 combined = Color3(yccC.x, uOut, vOut);
-        Color3 rgb = u.PAL ? YUV2RGB(combined) : YIQ2RGB(combined);
-
-        Color4 color = Color4(rgb, 1.0);
-        out.write(color, gid);
-
+        
         //
         // Brightness pass
         //
 
         if (u.BLOOM_ENABLE) {
 
-            // Compute luminance TODO: TAKE FROM ABOVE (yccC.x)
-            Color Y = dot(rgb, Color3(0.299, 0.587, 0.114));
+            // Compute luminance
+            float Y = yccC.x; // dot(rgb, Color3(0.299, 0.587, 0.114));
 
             // Keep only if brighter than threshold TODO: USE SOME POW-FUNCTION TO SCALE? DON'T USE THRESHOLD
-            half3 mask = half3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(Y)));
+            Color mask = Color(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, Y));
 
             // Scale the bright part
-            bri.write(half4(color.rgb * mask * u.BLOOM_INTENSITY, 1.0), gid);
+            bri.write(Color4(Y * mask * u.BLOOM_INTENSITY, yccC.y, yccC.z, 1.0), gid);
         }
     }
 
@@ -169,16 +165,10 @@ namespace phosbite {
     // Main CRT shader
     //
     
-    inline half4 scanline(half4 x, float weight) {
-        
-        return pow(x, pow(mix(1.2, 0.8, weight), 8));
-    }
-
-    kernel void crt(texture2d<half, access::sample> rgb [[ texture(0) ]], // RGB
-                    texture2d<half, access::sample> ycc [[ texture(1) ]], // Luma / Chroma
-                    texture2d<half, access::sample> dom [[ texture(2) ]], // Dot Mask
-                    texture2d<half, access::sample> blm [[ texture(3) ]], // Bloom
-                    texture2d<half, access::write>  out [[ texture(4) ]],
+    kernel void crt(texture2d<half, access::sample> ycc [[ texture(0) ]], // Luma / Chroma
+                    texture2d<half, access::sample> dom [[ texture(1) ]], // Dot Mask
+                    texture2d<half, access::sample> blm [[ texture(2) ]], // Bloom
+                    texture2d<half, access::write>  out [[ texture(3) ]],
                     constant Uniforms               &u  [[ buffer(0)  ]],
                     sampler                         sam [[ sampler(0) ]],
                     uint2                           gid [[ thread_position_in_grid ]])
@@ -187,7 +177,6 @@ namespace phosbite {
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(out.get_width(), out.get_height());
 
         // Read source pixel
-        // Color4 color = rgb.sample(sam, uv);
         Color4 yccColor = ycc.sample(sam, uv);
         
         // Apply the scanline effect

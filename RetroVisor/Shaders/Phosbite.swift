@@ -24,6 +24,7 @@ final class Phosbite: Shader {
         var GAMMA_OUTPUT: Float
         var BRIGHT_BOOST: Float
         var BRIGHT_BOOST_POST: Float
+        var CHROMA_RADIUS_ENABLE: Float
         var CHROMA_RADIUS: Float
         
         var BLOOM_ENABLE: Int32
@@ -79,7 +80,8 @@ final class Phosbite: Shader {
             GAMMA_OUTPUT: 2.2,
             BRIGHT_BOOST: 1.0,
             BRIGHT_BOOST_POST: 1.0,
-            CHROMA_RADIUS: 1.3,
+            CHROMA_RADIUS_ENABLE: 0,
+            CHROMA_RADIUS: 5,
             
             BLOOM_ENABLE: 0,
             BLOOM_FILTER: BlurFilterType.box.rawValue,
@@ -88,7 +90,7 @@ final class Phosbite: Shader {
             BLOOM_RADIUS_X: 5,
             BLOOM_RADIUS_Y: 3,
             
-            DOTMASK_ENABLE: 1,
+            DOTMASK_ENABLE: 0,
             DOTMASK_TYPE: 0,
             DOTMASK_COLOR: 0,
             DOTMASK_SIZE: 5,
@@ -98,14 +100,14 @@ final class Phosbite: Shader {
             DOTMASK_GAIN: 1.0,
             DOTMASK_LOSS: -0.5,
             
-            SCANLINES_ENABLE: 1,
+            SCANLINES_ENABLE: 0,
             SCANLINE_DISTANCE: 6,
             SCANLINE_SHARPNESS: 1.0,
             SCANLINE_BLUR: 0.0,
             SCANLINE_BLOOM: 1.0,
             SCANLINE_STRENGTH: 1.0,
             SCANLINE_GAIN: 0.5,
-            SCANLINE_LOSS: 0.5,
+            SCANLINE_LOSS: -0.5,
             SCANLINE_WEIGHT1: 0.20,
             SCANLINE_WEIGHT2: 0.36,
             SCANLINE_WEIGHT3: 0.60,
@@ -137,8 +139,8 @@ final class Phosbite: Shader {
     // Textures
     var src: MTLTexture! // Downscaled input texture
     var ycc: MTLTexture! // Image in chroma/luma space
-    var rgb: MTLTexture! // Restored RGB texture
-    var bri: MTLTexture! // Brightness texture (blooming)
+    var com: MTLTexture! // Image in chroma/luma space with composite effects
+    var bri: MTLTexture! // Brightness texture to emulate blooming
     var dom: MTLTexture! // Dot mask
     var blm: MTLTexture! // Bloom texture
     var crt: MTLTexture! // Texture with CRT effects applied
@@ -238,7 +240,11 @@ final class Phosbite: Shader {
 
                 ShaderSetting(
                     title: "Chroma Radius",
-                    range: 1...10, step: 1,
+                    range: 1...16, step: 1,
+                    enable: Binding(
+                        key: "CHROMA_RADIUS_ENABLE",
+                        get: { [unowned self] in self.uniforms.CHROMA_RADIUS_ENABLE },
+                        set: { [unowned self] in self.uniforms.CHROMA_RADIUS_ENABLE = $0 }),
                     value: Binding(
                         key: "CHROMA_RADIUS",
                         get: { [unowned self] in self.uniforms.CHROMA_RADIUS },
@@ -648,7 +654,7 @@ final class Phosbite: Shader {
             ycc = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
             bri = output.makeTexture(width: inpWidth, height: inpHeight)
             blm = output.makeTexture(width: inpWidth, height: inpHeight)
-            rgb = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
+            com = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
         }
         
         if crt?.width != crtWidth || crt?.height != crtHeight {
@@ -723,15 +729,15 @@ final class Phosbite: Shader {
         
         //
         //
-        // Pass 3: Apply chroma effects
+        // Pass 3: Apply composite effects
         //
         
         chromaKernel.apply(commandBuffer: commandBuffer,
-                           textures: [ycc, rgb, bri],
+                           textures: [ycc, com, bri],
                            options: &uniforms,
                            length: MemoryLayout<Uniforms>.stride)
-
-        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &rgb)
+        
+        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &com)
         
         //
         // Pass 4: Create the bloom texture
@@ -746,19 +752,12 @@ final class Phosbite: Shader {
         // Pass 5: Emulate CRT artifacts
         //
         
-        if uniforms.DEBUG_ENABLE == 0 {
-            
-            crtKernel.apply(commandBuffer: commandBuffer,
-                            textures: [rgb, ycc, dom, blm, output],
-                            options: &uniforms,
-                            length: MemoryLayout<Uniforms>.stride)
-            
-        } else {
-            
-            crtKernel.apply(commandBuffer: commandBuffer,
-                            textures: [rgb, ycc, dom, blm, dbg],
-                            options: &uniforms,
-                            length: MemoryLayout<Uniforms>.stride)
+        crtKernel.apply(commandBuffer: commandBuffer,
+                        textures: [com, dom, blm, uniforms.DEBUG_ENABLE == 1 ? dbg : output],
+                        options: &uniforms,
+                        length: MemoryLayout<Uniforms>.stride)
+        
+        if uniforms.DEBUG_ENABLE == 1 {
             
             debugKernel.apply(commandBuffer: commandBuffer,
                               textures: [src, ycc, dom, blm, dbg, output],
