@@ -728,19 +728,7 @@ final class Phosbite: Shader {
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
         
         //
-        //
-        // Pass 3: Apply composite effects
-        //
-        
-        chromaKernel.apply(commandBuffer: commandBuffer,
-                           textures: [ycc, com, bri],
-                           options: &uniforms,
-                           length: MemoryLayout<Uniforms>.stride)
-        
-        pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &com)
-        
-        //
-        // Pass 4: Create the bloom texture
+        // Pass 3: Create the bloom texture
         //
         
         blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLOOM_FILTER)!
@@ -749,14 +737,18 @@ final class Phosbite: Shader {
         blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
         
         //
-        // Pass 5: Emulate CRT artifacts
+        // Pass 4: Emulate CRT artifacts
         //
         
         crtKernel.apply(commandBuffer: commandBuffer,
-                        textures: [com, dom, blm, uniforms.DEBUG_ENABLE == 1 ? dbg : output],
+                        textures: [ycc, dom, blm, uniforms.DEBUG_ENABLE == 1 ? dbg : output],
                         options: &uniforms,
                         length: MemoryLayout<Uniforms>.stride)
-        
+
+        //
+        // Pass 5 (optional): Mix in debug textures
+        //
+
         if uniforms.DEBUG_ENABLE == 1 {
             
             debugKernel.apply(commandBuffer: commandBuffer,

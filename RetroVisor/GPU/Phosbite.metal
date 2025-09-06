@@ -152,25 +152,6 @@ namespace phosbite {
         }
         
         out.write(yccC, gid);
-
-        
-        //
-        // Brightness pass
-        //
-
-        /*
-        if (u.BLOOM_ENABLE) {
-
-            // Compute luminance
-            // float Y = yccC.x; // dot(rgb, Color3(0.299, 0.587, 0.114));
-
-            // Keep only if brighter than threshold TODO: USE SOME POW-FUNCTION TO SCALE? DON'T USE THRESHOLD
-            Color3 mask = Color3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, yccC.xyz));
-
-            // Scale the bright part
-            bri.write(Color4(yccC.xyz * mask * u.BLOOM_INTENSITY, 1.0), gid);
-        }
-        */
     }
 
     //
@@ -198,9 +179,7 @@ namespace phosbite {
             Color4 bloom = blm.sample(sam, uv);
             yccColor.yz = saturate(yccColor.yz + bloom.yz);
         }
-        
-
-        
+                
         // Apply the scanline effect
         if (u.SCANLINES_ENABLE) {
             
