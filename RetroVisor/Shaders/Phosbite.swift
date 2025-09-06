@@ -721,7 +721,7 @@ final class Phosbite: Shader {
         //
         
         splitKernel.apply(commandBuffer: commandBuffer,
-                          textures:  [src, ycc],
+                          textures:  [src, ycc, bri],
                           options: &uniforms,
                           length: MemoryLayout<Uniforms>.stride)
         

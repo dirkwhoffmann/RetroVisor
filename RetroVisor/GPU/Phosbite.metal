@@ -78,6 +78,7 @@ namespace phosbite {
 
     kernel void colorSpace(texture2d<half, access::sample> src [[ texture(0) ]], // RGB
                            texture2d<half, access::write>  ycc [[ texture(1) ]], // Luma / Chroma
+                           texture2d<half, access::write>  bri [[ texture(2) ]], // Brightness
                            constant Uniforms               &u  [[ buffer(0)  ]],
                            sampler                         sam [[ sampler(0) ]],
                            uint2                           gid [[ thread_position_in_grid ]])
@@ -99,6 +100,15 @@ namespace phosbite {
         
         // Boost brightness
         split.x *= u.BRIGHT_BOOST;
+        
+        if (u.BLOOM_ENABLE) {
+
+            // Keep only if brighter than threshold
+            Color3 mask = Color3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, split));
+
+            // Scale the bright part
+            bri.write(Color4(split * mask * u.BLOOM_INTENSITY, 1.0), gid);
+        }
         
         ycc.write(Color4(split, 1.0), gid);
     }
@@ -148,17 +158,19 @@ namespace phosbite {
         // Brightness pass
         //
 
+        /*
         if (u.BLOOM_ENABLE) {
 
             // Compute luminance
-            float Y = yccC.x; // dot(rgb, Color3(0.299, 0.587, 0.114));
+            // float Y = yccC.x; // dot(rgb, Color3(0.299, 0.587, 0.114));
 
             // Keep only if brighter than threshold TODO: USE SOME POW-FUNCTION TO SCALE? DON'T USE THRESHOLD
-            Color mask = Color(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, Y));
+            Color3 mask = Color3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, yccC.xyz));
 
             // Scale the bright part
-            bri.write(Color4(Y * mask * u.BLOOM_INTENSITY, yccC.y, yccC.z, 1.0), gid);
+            bri.write(Color4(yccC.xyz * mask * u.BLOOM_INTENSITY, 1.0), gid);
         }
+        */
     }
 
     //
@@ -178,6 +190,16 @@ namespace phosbite {
 
         // Read source pixel
         Color4 yccColor = ycc.sample(sam, uv);
+        
+        // Experimental: Apply the bloom effect to chroma channels
+        
+        if (u.BLOOM_ENABLE) {
+
+            Color4 bloom = blm.sample(sam, uv);
+            yccColor.yz = saturate(yccColor.yz + bloom.yz);
+        }
+        
+
         
         // Apply the scanline effect
         if (u.SCANLINES_ENABLE) {
@@ -206,11 +228,13 @@ namespace phosbite {
         }
 
         // Apply the bloom effect
+        /*
         if (u.BLOOM_ENABLE) {
 
             Color4 bloom = blm.sample(sam, uv);
             color = saturate(color + bloom);
         }
+        */
         
         // Boost brightness and correct gamma
         out.write(pow(color * u.BRIGHT_BOOST_POST, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
