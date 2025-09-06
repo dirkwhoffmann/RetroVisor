@@ -94,4 +94,13 @@ inline T remapXL(T x, float a, float b1, float b2) {
     return pow(x, 0.125 + (8.0 * a * a * a));
 }
 
+
+/* Remap function used in older implementations.
+ * Let's keep it for inspiration...
+ */
+inline half4 remap8(half4 x, float weight) {
+    
+    return pow(x, pow(mix(1.2, 0.8, weight), 8));
+}
+
 #endif

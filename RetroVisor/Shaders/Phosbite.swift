@@ -704,14 +704,14 @@ final class Phosbite: Shader {
         updateTextures(commandBuffer: commandBuffer, in: input, out: output)
         
         //
-        // Pass 1: Crop and downsample the input area
+        // Pass 1: Crop and downsample the RGB input image
         //
         
         resampler.type = ResampleFilterType(rawValue: uniforms.RESAMPLE_FILTER)!
         resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
         
         //
-        // Pass 2: Convert RGB image into YUV/YIQ space
+        // Pass 2: Convert the input image into YUV/YIQ space
         //
         
         splitKernel.apply(commandBuffer: commandBuffer,
@@ -732,20 +732,9 @@ final class Phosbite: Shader {
                            length: MemoryLayout<Uniforms>.stride)
 
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &rgb)
-
-        //
-        // Pass 4: Create the dot mask texture
-        //
-        /*
-        if dotMaskNeedsUpdate {
-            
-            updateDotMask(commandBuffer: commandBuffer)
-            dotMaskNeedsUpdate = false
-        }
-            */
         
         //
-        // Pass 5: Create the bloom texture
+        // Pass 4: Create the bloom texture
         //
         
         blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLOOM_FILTER)!
@@ -754,7 +743,7 @@ final class Phosbite: Shader {
         blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: blm)
         
         //
-        // Pass 6: Emulate CRT artifacts
+        // Pass 5: Emulate CRT artifacts
         //
         
         if uniforms.DEBUG_ENABLE == 0 {

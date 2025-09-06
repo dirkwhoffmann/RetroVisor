@@ -154,10 +154,10 @@ namespace phosbite {
 
         if (u.BLOOM_ENABLE) {
 
-            // Compute luminance
+            // Compute luminance TODO: TAKE FROM ABOVE (yccC.x)
             Color Y = dot(rgb, Color3(0.299, 0.587, 0.114));
 
-            // Keep only if brighter than threshold
+            // Keep only if brighter than threshold TODO: USE SOME POW-FUNCTION TO SCALE? DON'T USE THRESHOLD
             half3 mask = half3(smoothstep(u.BLOOM_THRESHOLD, u.BLOOM_THRESHOLD + 0.1, float3(Y)));
 
             // Scale the bright part
@@ -187,30 +187,25 @@ namespace phosbite {
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(out.get_width(), out.get_height());
 
         // Read source pixel
-        Color4 color = rgb.sample(sam, uv);
-                
+        // Color4 color = rgb.sample(sam, uv);
+        Color4 yccColor = ycc.sample(sam, uv);
+        
         // Apply the scanline effect
         if (u.SCANLINES_ENABLE) {
             
             uint line = gid.y % (2 * u.SCANLINE_DISTANCE);
             if (line >= u.SCANLINE_DISTANCE) line = 2 * u.SCANLINE_DISTANCE - 1 - line;
             
-            Color4 blurred = rgb.sample(sam, uv, level(u.SCANLINE_BLUR));
-            color = mix(color, blurred, u.SCANLINE_BLOOM);
-            /*
-            switch (u.SCANLINE_MODULATION) {
-                case 0: color = remapPow(color, u.SCANLINE_WEIGHT[line]); break;
-                case 1: color = remapExp(color, u.SCANLINE_WEIGHT[line]); break;
-                case 2: color = remapPol(color, u.SCANLINE_WEIGHT[line]); break;
-                default: color = Color4(0.0, 0.0, 0.0, 1.0);
-            }
-            */
-            // float w = mix(0.5 - u.SCANLINE_STRENGTH / 2, 0.5 + u.SCANLINE_STRENGTH / 2, float(line) / float(2 * u.SCANLINE_DISTANCE - 1));
+            // Color4 blurred = rgb.sample(sam, uv, level(u.SCANLINE_BLUR));
+            // color = mix(color, blurred, u.SCANLINE_BLOOM);
+
             float w = u.SCANLINE_WEIGHT[line];
-            color = remap(color, 1.0 - w, u.SCANLINE_GAIN, u.SCANLINE_LOSS);
+            yccColor.x = remap(float(yccColor.x), 1.0 - w, u.SCANLINE_GAIN, u.SCANLINE_LOSS);
             // color = remap(color, w, u.SCANLINE_SHARPNESS);
             // color = scanline(color, u.SCANLINE_WEIGHT[line]);
+
         }
+        Color4 color = u.PAL ? YUV2RGB(yccColor) : YIQ2RGB(yccColor);
 
         // Apply the dot mask effect
         if (u.DOTMASK_ENABLE) {
