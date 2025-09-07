@@ -53,7 +53,6 @@ struct Uniforms {
     var window: SIMD2<Float>
     var center: SIMD2<Float>
     var mouse: SIMD2<Float>
-    // var texRect: SIMD4<Float>
 }
 
 class MetalView: MTKView, Loggable, MTKViewDelegate {
@@ -148,9 +147,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Create a texture cache
         CVMetalTextureCacheCreate(nil, nil, device, nil, &textureCache)
 
-        // Setup the vertex buffers
-        // textureRectDidChange(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
-
         // Load shaders from the default library
         let vertexFunc = ShaderLibrary.library.makeFunction(name: "vertex_main")!
         let fragmentFunc = ShaderLibrary.library.makeFunction(name: "fragment_main")!
@@ -200,16 +196,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     func textureRectDidChange(_ rect: CGRect?) {
 
         texRect = rect ?? .unity
-
-        /*
-        if let rect = rect {
-
-            uniforms.texRect = [ Float(rect.minX),
-                                 Float(rect.minY),
-                                 Float(rect.maxX),
-                                 Float(rect.maxY) ]
-        }
-        */
     }
 
     func updateTextures(rect: NSRect) {
@@ -221,8 +207,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         let width = NSScreen.scaleFactor * width
         let height = NSScreen.scaleFactor * height
-
-        // print("Creating out texture of size \(width)x\(height)")
 
         if outTexture?.width != width || outTexture?.height != height {
 
@@ -296,13 +280,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         //
         // Stage 1: Apply the effect shader
         //
-
-        /*
-        let rect = CGRect(x: Double(uniforms.texRect.x),
-                          y: Double(uniforms.texRect.y),
-                          width: Double(uniforms.texRect.z - uniforms.texRect.x),
-                          height: Double(uniforms.texRect.w - uniforms.texRect.y))
-        */
 
         ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer,
                                                  in: inTexture, out: outTexture, rect: texRect)

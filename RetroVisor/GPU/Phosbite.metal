@@ -80,14 +80,14 @@ namespace phosbite {
     // Utilities
     //
     
-    inline Color4 sampleRGB(texture2d<half> tex, sampler sam, float2 uv, float mipLevel = 0) {
+    inline Color3 sampleRGB(texture2d<half> tex, sampler sam, float2 uv, float mipLevel = 0) {
         
-        return tex.sample(sam, uv, level(mipLevel));
+        return tex.sample(sam, uv, level(mipLevel)).rgb;
     }
 
-    inline Color4 sampleYCC(texture2d<half> tex, sampler sam, float2 uv, float mipLevel = 0) {
+    inline Color3 sampleYCC(texture2d<half> tex, sampler sam, float2 uv, float mipLevel = 0) {
         
-        return tex.sample(sam, uv, level(mipLevel)) + Color4(0.0, -0.5, -0.5, 0.0);
+        return tex.sample(sam, uv, level(mipLevel)).rgb + Color3(0.0, -0.5, -0.5);
     }
     
     //
@@ -108,7 +108,7 @@ namespace phosbite {
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(ycc.get_width(), ycc.get_height());
 
         // Read pixel
-        Color3 rgb = Color3(src.sample(sam, uv).rgb);
+        Color3 rgb = sampleRGB(src, sam, uv);
 
         // Apply gamma correction
         rgb = pow(rgb, Color3(u.GAMMA_INPUT));
@@ -183,12 +183,12 @@ namespace phosbite {
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(out.get_width(), out.get_height());
 
         // Read source pixel
-        Color4 yccColor = sampleYCC(ycc, sam, uv);
+        Color3 yccColor = sampleYCC(ycc, sam, uv);
 
         // Apply bloom effect
         if (u.BLOOM_ENABLE) {
 
-            Color bloom = bl0.sample(sam, uv).x;
+            Color bloom = bl0.sample(sam, uv).x; // TODO: Use sampeYcc
             yccColor.x = saturate(yccColor.x + bloom);
         }
         
@@ -200,7 +200,7 @@ namespace phosbite {
             if (line >= u.SCANLINE_DISTANCE) line = 2 * u.SCANLINE_DISTANCE - 1 - line;
             
             // Read image data
-            Color4 blurred = sampleYCC(ycc, sam, uv, u.SCANLINE_BLUR);
+            Color3 blurred = sampleYCC(ycc, sam, uv, u.SCANLINE_BLUR);
             yccColor = mix(yccColor, blurred, u.SCANLINE_BLOOM);
 
             // Modulate intensity bases on the line's individual weight
@@ -209,19 +209,21 @@ namespace phosbite {
         }
         
         // Convert color from YCC space to RGB space
-        Color4 color = YCC2RGB(yccColor, u.PAL);
+        Color3 color = YCC2RGB(yccColor, u.PAL);
 
         // Apply the dot mask effect
         if (u.DOTMASK_ENABLE) {
             
-            Color4 mask = sampleRGB(dom, sam, uv, u.DOTMASK_BLUR);
-            Color4 gain = min(color, 1 - color) * mask;
-            Color4 loose = min(color, 1 - color) * (1 - mask);
+            Color3 mask = sampleRGB(dom, sam, uv, u.DOTMASK_BLUR);
+            Color3 gain = min(color, 1 - color) * mask;
+            Color3 loose = min(color, 1 - color) * (1 - mask);
             color += u.DOTMASK_GAIN * gain + u.DOTMASK_LOSS * loose;
         }
                 
         // Boost brightness and correct gamma
-        out.write(pow(color * u.BRIGHT_BOOST, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
+        color = pow(color * u.BRIGHT_BOOST, Color3(1.0 / u.GAMMA_OUTPUT));
+        
+        out.write(Color4(color, 1.0), gid);
     }
 
     //
@@ -236,11 +238,10 @@ namespace phosbite {
     {
         float2 texSize = float2(input.get_width(), input.get_height());
         uint2 gridSize = uint2(float2(u.DOTMASK_SIZE, u.DOTMASK_SIZE) * texSize);
-
         float2 uv = (float2(gid % gridSize) + 0.5) / float2(gridSize);
 
-        half4 color = input.sample(sam, uv);
-        output.write(color, gid);
+        Color3 color = sampleRGB(input, sam, uv);
+        output.write(Color4(color, 1.0), gid);
     }
 
     //
@@ -255,7 +256,7 @@ namespace phosbite {
         return coord < cutoff ? -1 : coord > cutoff ? 1 : 0;
     }
      
-    inline Color4 sampleDebugTexture(int source,
+    inline Color3 sampleDebugTexture(int source,
                                      Coord2 uv,
                                      texture2d<half, access::sample> src [[ texture(0) ]],
                                      texture2d<half, access::sample> fin [[ texture(1) ]],
@@ -277,21 +278,21 @@ namespace phosbite {
             case 0:  return sampleRGB(src, sam, uv);
             case 1:  return sampleRGB(fin, sam, uv);
             case 2:  return YCC2RGB(sampleYCC(ycc, sam, uv, u.DEBUG_MIPMAP), u.PAL);
-            case 3:  return Color4(sampleYCC(yc0, sam, uv).xxx, 1.0);
-            case 4:  return Color4(sampleYCC(yc1, sam, uv).xxx, 1.0);
-            case 5:  return Color4(sampleYCC(yc2, sam, uv).xxx, 1.0);
-            case 6:  return Color4(sampleYCC(bl0, sam, uv).xxx, 1.0);
-            case 7:  return Color4(sampleYCC(bl1, sam, uv).xxx, 1.0);
-            case 8:  return Color4(sampleYCC(bl2, sam, uv).xxx, 1.0);
-            case 9:  return Color4(sampleYCC(bri, sam, uv).xxx, 1.0);
+            case 3:  return sampleYCC(yc0, sam, uv).xxx;
+            case 4:  return sampleYCC(yc1, sam, uv).xxx;
+            case 5:  return sampleYCC(yc2, sam, uv).xxx;
+            case 6:  return sampleYCC(bl0, sam, uv).xxx;
+            case 7:  return sampleYCC(bl1, sam, uv).xxx;
+            case 8:  return sampleYCC(bl2, sam, uv).xxx;
+            case 9:  return sampleYCC(bri, sam, uv).xxx;
             case 10: return sampleRGB(dom, sam, uv, u.DEBUG_MIPMAP);
                                 
             default:
-                return Color4(0.0, 0.0, 0.0, 1.0);
+                return Color3(0.0, 0.0, 0.0);
         }
     }
     
-    inline Color4 mixDebugPixel(Color4 color1, Color4 color2, int mode) {
+    inline Color3 mixDebugPixel(Color3 color1, Color3 color2, int mode) {
         
         switch (mode) {
                 
@@ -322,18 +323,18 @@ namespace phosbite {
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(size);
                 
         // Sample the selected texures
-        Color4 color1 = sampleDebugTexture(u.DEBUG_TEXTURE1, uv,
+        Color3 color1 = sampleDebugTexture(u.DEBUG_TEXTURE1, uv,
                                            src, fin, ycc, yc0, yc1, yc2, bri, bl0, bl1, bl2, dom,
                                            u, sam, gid);
-        Color4 color2 = sampleDebugTexture(u.DEBUG_TEXTURE2, uv,
+        Color3 color2 = sampleDebugTexture(u.DEBUG_TEXTURE2, uv,
                                            src, fin, ycc, yc0, yc1, yc2, bri, bl0, bl1, bl2, dom,
                                            u, sam, gid);
 
         // Compute the pixel to display
         switch (debugPixelType(gid, size, u)) {
                 
-            case -1: out.write(mixDebugPixel(color1, color2, u.DEBUG_LEFT), gid); break;
-            case  1: out.write(mixDebugPixel(color1, color2, u.DEBUG_RIGHT), gid); break;
+            case -1: out.write(Color4(mixDebugPixel(color1, color2, u.DEBUG_LEFT), 1.0), gid); break;
+            case  1: out.write(Color4(mixDebugPixel(color1, color2, u.DEBUG_RIGHT), 1.0), gid); break;
             default: out.write(Color4(1.0,1.0,1.0,1.0), gid);
         }
     }
