@@ -119,25 +119,9 @@ namespace phosbite {
         
         // Boost brightness (DEPRECATED)
         // split.x *= u.BRIGHT_BOOST;
-
-        // Adjust contrast and brightness (uniforms in [0..1])
-        split.x = ((split.x - 0.5) * (0.5 + u.CV_CONTRAST) + 0.5) * (0.5 + u.CV_BRIGHTNESS);
-
-        // Adjust saturation and tint (uniforms in [0..1])
-        split.y *= 0.5 + u.CV_SATURATION;
-        split.z *= 0.5 + u.CV_SATURATION;
-
-        // Adjust staturation tint (uniforms in [0..1]) TODO: SHORTEN THIS
-        float angle = (u.CV_TINT - 0.5) * 2.0 * M_PI;
-        float cosA = cos(angle);
-        float sinA = sin(angle);
-        float U1 = split.y, V1 = split.z;
-        float U2 = (U1 * cosA - V1 * sinA) * (0.5 + u.CV_SATURATION);
-        float V2 = (U1 * sinA + V1 * cosA) * (0.5 + u.CV_SATURATION);
-        split.y = U2;
-        split.z = V2;
+  
         
-        if (u.CV_CHROMA_BLUR_ENABLE || u.BLOOM_ENABLE) {
+        if (u.BLOOM_ENABLE) {
             
             // Filter out all texels below the threshold
             Color threshold = u.BLOOM_THRESHOLD;
@@ -148,14 +132,16 @@ namespace phosbite {
             bri.write(split.x * mask * intensity, gid);
         }
         
-        if (u.CV_CHROMA_BLUR_ENABLE) {
+        if (u.CV_ENABLE) {
             
+            // Set up channel textures for further processing
             yc0.write(split.x, gid);
             yc1.write(split.y + 0.5, gid);
             yc2.write(split.z + 0.5, gid);
 
         } else {
             
+            // Directly assemble the ycc texture, so we can bypass the composite kernel
             ycc.write(Color4(split.x, split.y + 0.5, split.z + 0.5, 1.0), gid);
         }
     }
@@ -172,11 +158,25 @@ namespace phosbite {
                           sampler                         sam [[ sampler(0) ]],
                           uint2                           gid [[ thread_position_in_grid ]])
     {
-        Color c0 = ch0.read(gid).x;
+        Color y  = ch0.read(gid).x;
         Color c1 = ch1.read(gid).x - 0.5;
         Color c2 = ch2.read(gid).x - 0.5;
         
-        ycc.write(Color4(c0, c1 + 0.5, c2 + 0.5, 1.0), gid);
+        // Adjust contrast and brightness (uniforms in [0..1])
+        y = ((y - 0.5) * (0.5 + u.CV_CONTRAST) + 0.5) * (0.5 + u.CV_BRIGHTNESS);
+
+        // Adjust staturation tint (uniforms in [0..1])
+        float angle = (u.CV_TINT - 0.5) * 2.0 * M_PI;
+        float cosA = cos(angle), sinA = sin(angle);
+        float2 cc = float2(c1 * cosA - c2 * sinA, c1 * sinA + c2 * cosA) * (0.5 + u.CV_SATURATION);
+        /*
+        float cc1 = (c1 * cosA - c2 * sinA) * (0.5 + u.CV_SATURATION);
+        float cc2 = (c1 * sinA + c2 * cosA) * (0.5 + u.CV_SATURATION);
+        split.y = U2;
+        split.z = V2;
+        */
+        
+        ycc.write(Color4(y, cc.x + 0.5, cc.y + 0.5, 1.0), gid);
     }
     
     //

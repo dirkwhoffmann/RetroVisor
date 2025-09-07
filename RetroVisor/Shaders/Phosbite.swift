@@ -745,29 +745,48 @@ final class Phosbite: Shader {
         // Pass 3: Emulate composite effects
         //
 
-        if uniforms.CV_CHROMA_BLUR_ENABLE == 1 {
+        if uniforms.CV_ENABLE == 1 {
             
-            let kernelWidth = Int(uniforms.CV_CHROMA_BLUR) | 1
-            let kernelHeight = 3
-            let values = [Float](repeating: 0, count: kernelWidth * kernelHeight)
+            var post1: MTLTexture = yc1
+            var post2: MTLTexture = yc2
+
+            if uniforms.CV_CHROMA_BLUR > 0 { // TODO: USE CV_CHROMA_BOOST
+                
+                // Dilate the chroma channels TODO: ADD A DILATE FILTER LIKE THE RESAMPLER
+                let kernelWidth = Int(uniforms.CV_CHROMA_BLUR) | 1
+                let kernelHeight = 3
+                let values = [Float](repeating: 0, count: kernelWidth * kernelHeight) // TODO: Don't create all the time
+                
+                let dilate = MPSImageDilate(device: ShaderLibrary.device,
+                                            kernelWidth: kernelWidth, kernelHeight: kernelHeight, values: values)
+                dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc1, destinationTexture: bll1)
+                dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc2, destinationTexture: bll2)
+
+                post1 = bll1
+                post2 = bll2
+            }
             
-            let dilate = MPSImageDilate(device: ShaderLibrary.device,
-                                        kernelWidth: kernelWidth, kernelHeight: kernelHeight, values: values)
-            dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc1, destinationTexture: bll1)
-            dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc2, destinationTexture: bll2)
+            if uniforms.CV_CHROMA_BLUR > 0 {
+                
+                // Blur the chroma channels
+                blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
+                blurFilter.blurWidth = uniforms.CV_CHROMA_BLUR / 2.0
+                blurFilter.blurHeight = 2.0
+                blurFilter.apply(commandBuffer: commandBuffer, in: post1, out: bl1)
+                blurFilter.apply(commandBuffer: commandBuffer, in: post2, out: bl2)
+
+                post1 = bl1
+                post2 = bl2
+            }
             
-            blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
-            blurFilter.blurWidth = uniforms.CV_CHROMA_BLUR / 2.0
-            blurFilter.blurHeight = 2.0
-            blurFilter.apply(commandBuffer: commandBuffer, in: bll1, out: bl1)
-            blurFilter.apply(commandBuffer: commandBuffer, in: bll2, out: bl2)
-            
+            // Recombine channel textures to the final ycc texture
             compositeKernel.apply(commandBuffer: commandBuffer,
                                   textures: [yc0, bl1, bl2, ycc],
                                   options: &uniforms,
                                   length: MemoryLayout<Uniforms>.stride)
         }
         
+        // Compute mipmaps
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
         
         //
