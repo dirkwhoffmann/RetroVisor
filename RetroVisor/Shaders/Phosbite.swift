@@ -160,14 +160,13 @@ final class Phosbite: Shader {
     var crt: MTLTexture! // Texture with CRT effects applied
     var dbg: MTLTexture! // Copy of crt (needed by the debug kernel)
         
-    // Performance shader for computing mipmaps
+    // Performance shader for mipmap computation
     var pyramid: MPSImagePyramid!
     
-    // Resampler used for image scaling
-    var resampler = ResampleFilter()
-    
-    // Blur filter
-    var blurFilter = BlurFilter()
+    // Filters for scaling, blurring, and dilating images
+    let resampler = ResampleFilter()
+    let blurFilter = BlurFilter()
+    let dilationFilter = DilationFilter()
     
     // Indicates whether the dot mask needs to be rebuild
     var dotMaskNeedsUpdate: Bool = true
@@ -207,12 +206,12 @@ final class Phosbite: Shader {
                         set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 })),
                 
                 ShaderSetting(
-                title: "Brightness Boost",
-                range: 0.0...2.0, step: 0.01,
-                value: Binding(
-                key: "CV_BRIGHT_BOOST",
-                get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
-                set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
+                    title: "Brightness Boost",
+                    range: 0.0...2.0, step: 0.01,
+                    value: Binding(
+                        key: "CV_BRIGHT_BOOST",
+                        get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
+                        set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
                 ),
                 
                 ShaderSetting(
@@ -735,34 +734,24 @@ final class Phosbite: Shader {
 
             if uniforms.CV_CHROMA_BOOST > 0 {
                 
-                // Dilate the chroma channels TODO: ADD A DILATE FILTER LIKE THE RESAMPLER
-                let kernelWidth = Int(uniforms.CV_CHROMA_BOOST) | 1
-                let kernelHeight = 3
-                let values = [Float](repeating: 0, count: kernelWidth * kernelHeight) // TODO: Don't create all the time
-                
-                let dilate = MPSImageDilate(device: ShaderLibrary.device,
-                                            kernelWidth: kernelWidth, kernelHeight: kernelHeight, values: values)
-                dilate.encode(commandBuffer: commandBuffer, sourceTexture: src1, destinationTexture: dst1)
-                dilate.encode(commandBuffer: commandBuffer, sourceTexture: src2, destinationTexture: dst2)
-               
+                // Dilate the two chroma channels
+                dilationFilter.size = (Int(uniforms.CV_CHROMA_BOOST), 3)
+                dilationFilter.apply(commandBuffer: commandBuffer, in: [src1, src2], out: [dst1, dst2])
                 swap(&src1, &dst1)
                 swap(&src2, &dst2)
             }
             
             if uniforms.CV_CHROMA_BLUR > 0 {
                 
-                // Blur the chroma channels
+                // Blur the two chroma channels
                 blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
-                blurFilter.blurWidth = uniforms.CV_CHROMA_BLUR
-                blurFilter.blurHeight = 2.0
-                blurFilter.apply(commandBuffer: commandBuffer, in: src1, out: dst1)
-                blurFilter.apply(commandBuffer: commandBuffer, in: src2, out: dst2)
-                
+                blurFilter.blurSize = (uniforms.CV_CHROMA_BLUR, 2.0)
+                blurFilter.apply(commandBuffer: commandBuffer, in: [src1, src2], out: [dst1, dst2])
                 swap(&src1, &dst1)
                 swap(&src2, &dst2)
             }
             
-            // Recombine channel textures to the final ycc texture
+            // Recombine the channel textures into the final ycc texture
             compositeKernel.apply(commandBuffer: commandBuffer,
                                   textures: [yc0, src1, src2, ycc],
                                   options: &uniforms,
@@ -779,8 +768,7 @@ final class Phosbite: Shader {
         if uniforms.BLOOM_ENABLE == 1 {
             
             blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
-            blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
-            blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
+            blurFilter.blurSize = (uniforms.BLOOM_RADIUS_X, uniforms.BLOOM_RADIUS_Y)
             blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: bl0)
         }
         

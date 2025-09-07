@@ -77,7 +77,7 @@ namespace phosbite {
     };
     
     //
-    // Little helpers
+    // Utilities
     //
     
     inline Color4 sampleRGB(texture2d<half> tex, sampler sam, float2 uv, float mipLevel = 0) {
@@ -91,7 +91,7 @@ namespace phosbite {
     }
     
     //
-    // SPlit filter (RGB to YUV or YIQ)
+    // Split kernel (RGB to YUV or YIQ)
     //
     
     kernel void split(texture2d<half, access::sample> src [[ texture(0) ]], // RGB
@@ -140,7 +140,7 @@ namespace phosbite {
     }
 
     //
-    // Composite filter (merge seperate channels into common YCC texture)
+    // Composite effect kernel
     //
     
     kernel void composite(texture2d<half, access::sample> ch0 [[ texture(0) ]], // Luma
@@ -166,7 +166,7 @@ namespace phosbite {
     }
     
     //
-    // Main CRT shader
+    // CRT effect kernel
     //
     
     kernel void crt(texture2d<half, access::sample> ycc [[ texture(0) ]], // Luma / Chroma
@@ -195,12 +195,15 @@ namespace phosbite {
         // Apply the scanline effect
         if (u.SCANLINES_ENABLE) {
             
+            // Compute the relative line number
             uint line = gid.y % (2 * u.SCANLINE_DISTANCE);
             if (line >= u.SCANLINE_DISTANCE) line = 2 * u.SCANLINE_DISTANCE - 1 - line;
             
+            // Read image data
             Color4 blurred = sampleYCC(ycc, sam, uv, u.SCANLINE_BLUR);
             yccColor = mix(yccColor, blurred, u.SCANLINE_BLOOM);
 
+            // Modulate intensity bases on the line's individual weight
             float w = u.SCANLINE_WEIGHT[line];
             yccColor.x = remap(float(yccColor.x), 1.0 - w, u.SCANLINE_GAIN, u.SCANLINE_LOSS);
         }
@@ -222,7 +225,7 @@ namespace phosbite {
     }
 
     //
-    // Dotmask
+    // Dotmask kernel
     //
     
     kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
@@ -241,7 +244,7 @@ namespace phosbite {
     }
 
     //
-    // Debug
+    // Debug kernel
     //
     
     inline int debugPixelType(uint2 gid, uint2 size, constant Uniforms &u) {
@@ -294,7 +297,7 @@ namespace phosbite {
                 
             case 0:  return color1;
             case 1:  return color2;
-            default: return 0.5 + 0.5 * (color1 - color2); // abs(color1 - color2);
+            default: return 0.5 + 0.5 * (color1 - color2);
         }
     }
     

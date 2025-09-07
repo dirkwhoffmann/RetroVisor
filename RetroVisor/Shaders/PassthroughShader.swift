@@ -163,10 +163,8 @@ final class PassthroughShader: Shader {
             
             // Blur the source texture
             blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
-            blurFilter.resampleX = uniforms.RESAMPLE_SCALE_X
-            blurFilter.resampleY = uniforms.RESAMPLE_SCALE_Y
-            blurFilter.blurWidth = uniforms.BLUR_RADIUS_X
-            blurFilter.blurHeight = uniforms.BLUR_RADIUS_Y
+            blurFilter.resampleXY = (uniforms.RESAMPLE_SCALE_X, uniforms.RESAMPLE_SCALE_Y)
+            blurFilter.blurSize = (uniforms.BLUR_RADIUS_X, uniforms.BLUR_RADIUS_Y)
             blurFilter.apply(commandBuffer: commandBuffer, in: src, out: blur)
             
             // Rescale to the output texture size

@@ -51,6 +51,13 @@ class ResampleFilter {
             filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
         }
     }
+    
+    func apply(commandBuffer: MTLCommandBuffer, in input: [MTLTexture], out output: [MTLTexture]) {
+
+        for i in 0..<input.count {
+            apply(commandBuffer: commandBuffer, in: input[i], out: output[i])
+        }
+    }
 }
 
 enum BlurFilterType: Int32 {
@@ -67,12 +74,10 @@ enum BlurFilterType: Int32 {
 class BlurFilter {
 
     var blurType = BlurFilterType.box
-    var blurWidth = Float(1.0)
-    var blurHeight = Float(1.0)
-
+    var blurSize = (Float(1.0), Float(1.0))
+    
     var resampler = ResampleFilter(type: .bilinear)
-    var resampleX = Float(1.0)
-    var resampleY = Float(1.0)
+    var resampleXY = (Float(1.0), Float(1.0))
 
     private var down: MTLTexture?
     private var blur: MTLTexture?
@@ -86,8 +91,8 @@ class BlurFilter {
 
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
 
-        let W = Int(ceil(Float(input.width) * resampleX))
-        let H = Int(ceil(Float(input.height) * resampleY))
+        let W = Int(ceil(Float(input.width) * resampleXY.0))
+        let H = Int(ceil(Float(input.height) * resampleXY.1))
 
         if down?.width != W || down?.height != H {
 
@@ -98,9 +103,9 @@ class BlurFilter {
 
     func apply(commandBuffer: MTLCommandBuffer, in input: MTLTexture, out output: MTLTexture) {
 
-        var rw: Int { Int(blurWidth) | 1 }
-        var rh: Int { Int(blurHeight) | 1 }
-        var sigma: Float { blurWidth / 4.0 }
+        var rw: Int { Int(blurSize.0) | 1 }
+        var rh: Int { Int(blurSize.1) | 1 }
+        var sigma: Float { blurSize.0 / 4.0 }
 
         func applyBlur(in input: MTLTexture, out output: MTLTexture) {
 
@@ -117,7 +122,7 @@ class BlurFilter {
             }
         }
 
-        if resampleX == 1.0 && resampleY == 1.0 {
+        if resampleXY == (1.0,1.0) {
 
             // Apply blur without scaling
             applyBlur(in: input, out: output)
@@ -135,6 +140,13 @@ class BlurFilter {
 
             // Upscale the blurred texture
             resampler.apply(commandBuffer: commandBuffer, in: blur!, out: output)
+        }
+    }
+    
+    func apply(commandBuffer: MTLCommandBuffer, in input: [MTLTexture], out output: [MTLTexture]) {
+
+        for i in 0..<input.count {
+            apply(commandBuffer: commandBuffer, in: input[i], out: output[i])
         }
     }
 }
@@ -173,3 +185,35 @@ extension MPSImageScale {
     }
 }
 
+@MainActor
+class DilationFilter {
+    
+    var size = (3,3) { didSet { if size != oldValue { setupFilter() } } }
+    
+    private var filter: MPSImageDilate!
+    private var values: [Float]!
+    
+    init() { setupFilter() }
+    
+    func setupFilter() {
+        
+        let W = size.0 | 1
+        let H = size.1 | 1
+        values = [Float](repeating: 0, count: W * H)
+        
+        filter = MPSImageDilate(device: ShaderLibrary.device,
+                                kernelWidth: W, kernelHeight: H, values: values)
+    }
+    
+    func apply(commandBuffer: MTLCommandBuffer, in input: MTLTexture, out output: MTLTexture) {
+        
+        filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
+    }
+
+    func apply(commandBuffer: MTLCommandBuffer, in input: [MTLTexture], out output: [MTLTexture]) {
+
+        for i in 0..<input.count {
+            apply(commandBuffer: commandBuffer, in: input[i], out: output[i])
+        }
+    }
+}
