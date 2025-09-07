@@ -19,6 +19,7 @@ final class Phosbite: Shader {
         var PAL: Int32
         var GAMMA_INPUT: Float
         var GAMMA_OUTPUT: Float
+        var BRIGHT_BOOST: Float
         var INPUT_TEX_SCALE: Float
         var OUTPUT_TEX_SCALE: Float
         var RESAMPLE_FILTER: Int32
@@ -30,8 +31,6 @@ final class Phosbite: Shader {
         var CV_BRIGHTNESS: Float
         var CV_SATURATION: Float
         var CV_TINT: Float
-        var CV_BRIGHT_BOOST: Float
-        var CV_BRIGHT_BOOST_POST: Float
         var CV_CHROMA_BOOST: Float
         var CV_CHROMA_BLUR: Float
         
@@ -81,6 +80,7 @@ final class Phosbite: Shader {
             PAL: 0,
             GAMMA_INPUT: 2.2,
             GAMMA_OUTPUT: 2.2,
+            BRIGHT_BOOST: 1.0,
             INPUT_TEX_SCALE: 1.0,
             OUTPUT_TEX_SCALE: 2.0,
             RESAMPLE_FILTER: ResampleFilterType.bilinear.rawValue,
@@ -91,8 +91,6 @@ final class Phosbite: Shader {
             CV_BRIGHTNESS: 0.5,
             CV_SATURATION: 0.5,
             CV_TINT: 0.0,
-            CV_BRIGHT_BOOST: 1.0,
-            CV_BRIGHT_BOOST_POST: 1.0,
             CV_CHROMA_BOOST: 8.0,
             CV_CHROMA_BLUR: 24,
             
@@ -209,6 +207,15 @@ final class Phosbite: Shader {
                         set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 })),
                 
                 ShaderSetting(
+                title: "Brightness Boost",
+                range: 0.0...2.0, step: 0.01,
+                value: Binding(
+                key: "CV_BRIGHT_BOOST",
+                get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
+                set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
+                ),
+                
+                ShaderSetting(
                     title: "Input Texture Downscaling",
                     range: 0.125...1.0, step: 0.125,
                     value: Binding(
@@ -271,27 +278,7 @@ final class Phosbite: Shader {
                             key: "CV_TINT",
                             get: { [unowned self] in self.uniforms.CV_TINT },
                             set: { [unowned self] in self.uniforms.CV_TINT = $0 })),
-                    
-                    /*
-                     ShaderSetting( // DEPRECATED
-                     title: "Brightness Boost",
-                     range: 0.0...2.0, step: 0.01,
-                     value: Binding(
-                     key: "CV_BRIGHT_BOOST",
-                     get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
-                     set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
-                     ),
-                     
-                     ShaderSetting( // DEPRECATED
-                     title: "Brightness Boost (post)",
-                     range: 0.0...2.0, step: 0.01,
-                     value: Binding(
-                     key: "CV_BRIGHT_BOOST_POST",
-                     get: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST },
-                     set: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST = $0 }),
-                     ),
-                     */
-                    
+                                        
                     ShaderSetting(
                         title: "Chroma Boost",
                         range: 0.0...32, step: 1,

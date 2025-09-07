@@ -22,6 +22,7 @@ namespace phosbite {
         uint  PAL;
         float GAMMA_INPUT;
         float GAMMA_OUTPUT;
+        float BRIGHT_BOOST;
         float INPUT_TEX_SCALE;
         float OUTPUT_TEX_SCALE;
         uint  RESAMPLE_FILTER;
@@ -33,8 +34,6 @@ namespace phosbite {
         float CV_BRIGHTNESS;
         float CV_SATURATION;
         float CV_TINT;
-        float CV_BRIGHT_BOOST;
-        float CV_BRIGHT_BOOST_POST;
         float CV_CHROMA_BOOST;
         float CV_CHROMA_BLUR;
 
@@ -117,21 +116,13 @@ namespace phosbite {
         // Split components
         Color3 split = RGB2YCC(rgb, u.PAL);
         
-        // Boost brightness (DEPRECATED)
-        // split.x *= u.BRIGHT_BOOST;
-  
-        
         if (u.BLOOM_ENABLE) {
             
-            // Filter out all texels below the threshold
-            Color threshold = u.BLOOM_THRESHOLD;
-            // Color mask = smoothstep(threshold, threshold + 0.1h, split.x);
-            Color mask = smoothstep(threshold, 1.0h, split.x);
+            // Create the filter math
+            float mask = smoothstep(u.BLOOM_THRESHOLD, 1.0, float(split.x));
 
             // Scale the bright part
-            Color intensity = u.BLOOM_INTENSITY;
-            bri.write(split.x * mask * 2.0 * intensity, gid);
-            // bri.write(pow(split.x, 1 + 10 * intensity), gid);
+            bri.write(split.x * mask * 2.0 * u.BLOOM_INTENSITY, gid);
         }
         
         if (u.CV_ENABLE) {
@@ -212,10 +203,9 @@ namespace phosbite {
 
             float w = u.SCANLINE_WEIGHT[line];
             yccColor.x = remap(float(yccColor.x), 1.0 - w, u.SCANLINE_GAIN, u.SCANLINE_LOSS);
-            // color = remap(color, w, u.SCANLINE_SHARPNESS);
-            // color = scanline(color, u.SCANLINE_WEIGHT[line]);
-
         }
+        
+        // Convert color from YCC space to RGB space
         Color4 color = YCC2RGB(yccColor, u.PAL);
 
         // Apply the dot mask effect
@@ -226,19 +216,9 @@ namespace phosbite {
             Color4 loose = min(color, 1 - color) * (1 - mask);
             color += u.DOTMASK_GAIN * gain + u.DOTMASK_LOSS * loose;
         }
-
-        // Apply the bloom effect
-        
-        /*
-        if (u.BLOOM_ENABLE) {
-
-            Color4 bloom = blm.sample(sam, uv);
-            color = saturate(color + YCC2RGB(bloom, u.PAL));
-        }
-        */
-        
+                
         // Boost brightness and correct gamma
-        out.write(pow(color * u.CV_BRIGHT_BOOST_POST, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
+        out.write(pow(color * u.BRIGHT_BOOST, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
     }
 
     //
