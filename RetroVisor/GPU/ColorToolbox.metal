@@ -18,6 +18,29 @@ typedef half    Color;
 typedef half3   Color3;
 typedef half4   Color4;
 
+/* The following macros convert between different color spaces.
+ *
+ *       RGB:  Red, Green, Blue
+ *
+ *             Range: R ∈ [0, 1], G ∈ [0, 1], B ∈ [0, 1]
+ *
+ *       HSV:  Hue, Saturation, Value
+ *
+ *             Range: H ∈ [0, 1], S ∈ [0, 1], V ∈ [0, 1]
+ *
+ *       YUV:  Luma (Y), Chroma (U/V), as used in PAL signals.
+ *
+ *             Y ∈ [0, 1], U ∈ [-0.5, 0.5], V ∈ [-0.5, 0.5]
+ *
+ *       YIQ:  Luma (Y), Chroma (I/Q), as used in NTSC signals.
+ *
+ *             Y ∈ [0, 1], I ∈ [-0.5, 0.5], Q ∈ [-0.5, 0.5]
+ *
+ * Note: YUV and YIQ utilize negative values for chroma components. They need to be
+ *       shifted into positive number space and back when storing them in a standard
+ *       unsigned normalized texture such as R8Unorm or RG8Unorm.
+ */
+
 inline Color3 RGB2HSV(Color3 rgb) {
     
     Color4 K = Color4(0.0, -1.0/3.0, 2.0/3.0, -1.0);
@@ -43,6 +66,7 @@ inline Color3 HSV2RGB(Color3 hsv) {
     
     Color4 K = Color4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
     Color3 p = abs(fract(hsv.xxx + K.xyz) * 6.0 - K.www);
+    
     return hsv.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), hsv.y);
 }
 
@@ -57,8 +81,7 @@ inline Color3 RGB2YIQ(Color3 rgb) {
                         dot(rgb, Color3(0.596, -0.274, -0.322)),   // I
                         dot(rgb, Color3(0.211, -0.523,  0.312)));  // Q
 
-    // Shift chroma from [-0.5;0.5] to [0.0;1.0]
-    return Color3(yiq.x, yiq.y + 0.5, yiq.z + 0.5);
+    return yiq;
 }
 
 inline Color4 RGB2YIQ(Color4 rgba) {
@@ -67,14 +90,13 @@ inline Color4 RGB2YIQ(Color4 rgba) {
 }
 
 inline Color3 YIQ2RGB(Color3 yiq) {
-    
-    // Shift chroma from [0.0;1.0] to [-0.5;0.5]
-    yiq = Color3(yiq.x, yiq.y - 0.5, yiq.z - 0.5);
-    
+        
     Color Y = yiq.x, I = yiq.y, Q = yiq.z;
+    
     Color3 rgb = Color3(Y + 0.956 * I + 0.621 * Q,
                         Y - 0.272 * I - 0.647 * Q,
                         Y - 1.106 * I + 1.703 * Q);
+    
     return clamp(rgb, 0.0, 1.0);
 }
 
@@ -90,8 +112,7 @@ inline Color3 RGB2YUV(Color3 rgb) {
                         dot(rgb, Color3(-0.14713, -0.28886,  0.436)),    // U
                         dot(rgb, Color3(0.615,    -0.51499, -0.10001))); // V
 
-    // Shift chroma from [-0.5;0.5] to [0.0;1.0]
-    return Color3(yuv.x, yuv.y + 0.5, yuv.z + 0.5);
+    return yuv;
 }
 
 inline Color4 RGB2YUV(Color4 rgba) {
@@ -100,14 +121,12 @@ inline Color4 RGB2YUV(Color4 rgba) {
 }
 
 inline Color3 YUV2RGB(Color3 yuv) {
-
-    // Shift chroma from [0.0;1.0] to [-0.5;0.5]
-    yuv = Color3(yuv.x, yuv.y - 0.5, yuv.z - 0.5);
     
     Color Y = yuv.x, U = yuv.y, V = yuv.z;
     Color3 rgb = Color3(Y + 1.13983 * V,
                         Y - 0.39465 * U - 0.58060 * V,
                         Y + 2.03211 * U);
+    
     return clamp(rgb, 0.0, 1.0);
 }
 

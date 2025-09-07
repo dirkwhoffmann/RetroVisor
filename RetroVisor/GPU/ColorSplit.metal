@@ -46,6 +46,7 @@ namespace colorsplit {
         Color3 xyz = Color3(inTex.sample(sam, uv).rgb);
 
         switch (u.COLOR_SPACE) {
+                
             case 1: xyz = RGB2HSV(xyz); break;
             case 2: xyz = RGB2YUV(xyz); break;
             case 3: xyz = RGB2YIQ(xyz); break;

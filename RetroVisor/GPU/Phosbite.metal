@@ -77,6 +77,20 @@ namespace phosbite {
     };
     
     //
+    // Little helpers
+    //
+    
+    inline Color4 sampleRGB(texture2d<half> tex, sampler sam, float2 uv, float mipLevel = 0) {
+        
+        return tex.sample(sam, uv, level(mipLevel));
+    }
+
+    inline Color4 sampleYCC(texture2d<half> tex, sampler sam, float2 uv, float mipLevel = 0) {
+        
+        return tex.sample(sam, uv, level(mipLevel)) + Color4(0.0, -0.5, -0.5, 0.0);
+    }
+    
+    //
     // SPlit filter (RGB to YUV or YIQ)
     //
     
@@ -100,7 +114,7 @@ namespace phosbite {
         rgb = pow(rgb, Color3(u.GAMMA_INPUT));
         
         // Split components
-        Color3 split = u.PAL == 1 ? RGB2YUV(rgb) : RGB2YIQ(rgb);
+        Color3 split = RGB2YCC(rgb, u.PAL);
         
         // Boost brightness (DEPRECATED)
         // split.x *= u.BRIGHT_BOOST;
@@ -112,17 +126,15 @@ namespace phosbite {
         split.y *= 0.5 + u.SATURATION;
         split.z *= 0.5 + u.SATURATION;
 
-        // Adjust staturation tint (uniforms in [0..1])
+        // Adjust staturation tint (uniforms in [0..1]) TODO: SHORTEN THIS
         float angle = (u.TINT - 0.5) * 2.0 * M_PI;
         float cosA = cos(angle);
         float sinA = sin(angle);
-        float U1 = split.y - 0.5, V1 = split.z - 0.5;
+        float U1 = split.y, V1 = split.z;
         float U2 = (U1 * cosA - V1 * sinA) * (0.5 + u.SATURATION);
         float V2 = (U1 * sinA + V1 * cosA) * (0.5 + u.SATURATION);
-//         float newY = (cos(angle) * split.y - sin(angle) * split.z) * (0.5 + u.SATURATION);
-//         float newZ = (sin(angle) * split.y + cos(angle) * split.z) * (0.5 + u.SATURATION);
-        split.y = U2 + 0.5;
-        split.z = V2 + 0.5;
+        split.y = U2;
+        split.z = V2;
         
         if (u.CHROMA_BLUR_ENABLE || u.BLOOM_ENABLE) {
             
@@ -138,12 +150,12 @@ namespace phosbite {
         if (u.CHROMA_BLUR_ENABLE) {
             
             yc0.write(split.x, gid);
-            yc1.write(split.y, gid);
-            yc2.write(split.z, gid);
+            yc1.write(split.y + 0.5, gid);
+            yc2.write(split.z + 0.5, gid);
 
         } else {
             
-            ycc.write(Color4(split, 1.0), gid);
+            ycc.write(Color4(split.x, split.y + 0.5, split.z + 0.5, 1.0), gid);
         }
     }
 
@@ -155,15 +167,14 @@ namespace phosbite {
                           texture2d<half, access::sample> ch1 [[ texture(1) ]], // Chroma
                           texture2d<half, access::sample> ch2 [[ texture(2) ]], // Chroma
                           texture2d<half, access::write>  ycc [[ texture(3) ]],
-                          // constant Uniforms               &u  [[ buffer(0)  ]],
                           sampler                         sam [[ sampler(0) ]],
                           uint2                           gid [[ thread_position_in_grid ]])
     {
         Color c0 = ch0.read(gid).x;
-        Color c1 = ch1.read(gid).x;
-        Color c2 = ch2.read(gid).x;
+        Color c1 = ch1.read(gid).x - 0.5;
+        Color c2 = ch2.read(gid).x - 0.5;
         
-        ycc.write(Color4(c0, c1, c2, 1.0), gid);
+        ycc.write(Color4(c0, c1 + 0.5, c2 + 0.5, 1.0), gid);
     }
     
     //
@@ -180,11 +191,11 @@ namespace phosbite {
                     sampler                         sam [[ sampler(0) ]],
                     uint2                           gid [[ thread_position_in_grid ]])
     {
-        // Normalize gid to 0..1 in output texture
+        // Normalize gid to [0..1]
         Coord2 uv = (Coord2(gid) + 0.5) / Coord2(out.get_width(), out.get_height());
 
         // Read source pixel
-        Color4 yccColor = ycc.sample(sam, uv);
+        Color4 yccColor = sampleYCC(ycc, sam, uv);
 
         // Apply chroma blur effect
         
@@ -209,7 +220,7 @@ namespace phosbite {
             uint line = gid.y % (2 * u.SCANLINE_DISTANCE);
             if (line >= u.SCANLINE_DISTANCE) line = 2 * u.SCANLINE_DISTANCE - 1 - line;
             
-            Color4 blurred = ycc.sample(sam, uv, level(u.SCANLINE_BLUR));
+            Color4 blurred = sampleYCC(ycc, sam, uv, u.SCANLINE_BLUR);
             yccColor = mix(yccColor, blurred, u.SCANLINE_BLOOM);
 
             float w = u.SCANLINE_WEIGHT[line];
@@ -218,12 +229,12 @@ namespace phosbite {
             // color = scanline(color, u.SCANLINE_WEIGHT[line]);
 
         }
-        Color4 color = YCC2RGB(yccColor, u.PAL); //  u.PAL ? YUV2RGB(yccColor) : YIQ2RGB(yccColor);
+        Color4 color = YCC2RGB(yccColor, u.PAL);
 
         // Apply the dot mask effect
         if (u.DOTMASK_ENABLE) {
             
-            Color4 mask = dom.sample(sam, uv, level(u.DOTMASK_BLUR));
+            Color4 mask = sampleRGB(dom, sam, uv, u.DOTMASK_BLUR);
             Color4 gain = min(color, 1 - color) * mask;
             Color4 loose = min(color, 1 - color) * (1 - mask);
             color += u.DOTMASK_GAIN * gain + u.DOTMASK_LOSS * loose;
@@ -292,16 +303,16 @@ namespace phosbite {
     {
         switch (source) {
 
-            case 0: return src.sample(sam, uv);
-            case 1: return fin.sample(sam, uv);
-            case 2: return YCC2RGB(ycc.sample(sam, uv, level(u.DEBUG_MIPMAP)), u.PAL);
-            case 3: return Color4(yc0.sample(sam, uv).xxx, 1.0);
-            case 4: return Color4(yc1.sample(sam, uv).xxx, 1.0);
-            case 5: return Color4(yc2.sample(sam, uv).xxx, 1.0);
-            case 6: return Color4(bl0.sample(sam, uv).xxx, 1.0);
-            case 7: return Color4(bl1.sample(sam, uv).xxx, 1.0);
-            case 8: return Color4(bl2.sample(sam, uv).xxx, 1.0);
-            case 9: return dom.sample(sam, uv, level(u.DEBUG_MIPMAP));
+            case 0: return sampleRGB(src, sam, uv);
+            case 1: return sampleRGB(fin, sam, uv);
+            case 2: return YCC2RGB(sampleYCC(ycc, sam, uv, u.DEBUG_MIPMAP), u.PAL);
+            case 3: return Color4(sampleYCC(yc0, sam, uv).xxx, 1.0);
+            case 4: return Color4(sampleYCC(yc1, sam, uv).xxx, 1.0);
+            case 5: return Color4(sampleYCC(yc2, sam, uv).xxx, 1.0);
+            case 6: return Color4(sampleYCC(bl0, sam, uv).xxx, 1.0);
+            case 7: return Color4(sampleYCC(bl1, sam, uv).xxx, 1.0);
+            case 8: return Color4(sampleYCC(bl2, sam, uv).xxx, 1.0);
+            case 9: return sampleRGB(dom, sam, uv, u.DEBUG_MIPMAP);
                                 
             default:
                 return Color4(0.0, 0.0, 0.0, 1.0);
