@@ -94,13 +94,13 @@ final class Phosbite: Shader {
             CV_CHROMA_BOOST: 8.0,
             CV_CHROMA_BLUR: 24,
             
-            BLOOM_ENABLE: 1,
+            BLOOM_ENABLE: 0,
             BLOOM_THRESHOLD: 0.0,
             BLOOM_INTENSITY: 1.0,
             BLOOM_RADIUS_X: 5,
             BLOOM_RADIUS_Y: 3,
             
-            DOTMASK_ENABLE: 0,
+            DOTMASK_ENABLE: 1,
             DOTMASK_TYPE: 0,
             DOTMASK_COLOR: 0,
             DOTMASK_SIZE: 5,
@@ -110,7 +110,7 @@ final class Phosbite: Shader {
             DOTMASK_GAIN: 1.0,
             DOTMASK_LOSS: -0.5,
             
-            SCANLINES_ENABLE: 0,
+            SCANLINES_ENABLE: 1,
             SCANLINE_DISTANCE: 6,
             SCANLINE_SHARPNESS: 1.0,
             SCANLINE_BLUR: 1.5,
@@ -213,7 +213,7 @@ final class Phosbite: Shader {
                 ),
                 
                 ShaderSetting(
-                    title: "Input Texture Downscaling",
+                    title: "Input Downscaling",
                     range: 0.125...1.0, step: 0.125,
                     value: Binding(
                         key: "INPUT_TEX_SCALE",
@@ -221,7 +221,7 @@ final class Phosbite: Shader {
                         set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 })),
                 
                 ShaderSetting(
-                    title: "Output Texture Upscaling Factor",
+                    title: "Output Upscaling",
                     range: 1.0...2.0, step: 0.125,
                     value: Binding(
                         key: "OUTPUT_TEX_SCALE",

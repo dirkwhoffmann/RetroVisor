@@ -79,7 +79,7 @@ namespace phosbite {
     //
     // Utilities
     //
-    
+
     inline Color3 sampleRGB(texture2d<half> tex, sampler sam, float2 uv, float mipLevel = 0) {
         
         return tex.sample(sam, uv, level(mipLevel)).rgb;
@@ -184,13 +184,6 @@ namespace phosbite {
 
         // Read source pixel
         Color3 yccColor = sampleYCC(ycc, sam, uv);
-
-        // Apply bloom effect
-        if (u.BLOOM_ENABLE) {
-
-            Color bloom = bl0.sample(sam, uv).x; // TODO: Use sampeYcc
-            yccColor.x = saturate(yccColor.x + bloom);
-        }
         
         // Apply the scanline effect
         if (u.SCANLINES_ENABLE) {
@@ -208,6 +201,13 @@ namespace phosbite {
             yccColor.x = remap(float(yccColor.x), 1.0 - w, u.SCANLINE_GAIN, u.SCANLINE_LOSS);
         }
         
+        // Apply bloom effect
+        if (u.BLOOM_ENABLE) {
+
+            Color bloom = bl0.sample(sam, uv).x;
+            yccColor.x = saturate(yccColor.x + bloom);
+        }
+
         // Convert color from YCC space to RGB space
         Color3 color = YCC2RGB(yccColor, u.PAL);
 
