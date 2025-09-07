@@ -134,14 +134,14 @@ namespace phosbite {
         
         if (u.CV_ENABLE) {
             
-            // Set up channel textures for further processing
+            // Prepare the input textures for the composite filter
             yc0.write(split.x, gid);
             yc1.write(split.y + 0.5, gid);
             yc2.write(split.z + 0.5, gid);
 
         } else {
             
-            // Directly assemble the ycc texture, so we can bypass the composite kernel
+            // Assemble the final ycc texture, so we can bypass the composite filter
             ycc.write(Color4(split.x, split.y + 0.5, split.z + 0.5, 1.0), gid);
         }
     }
@@ -163,18 +163,11 @@ namespace phosbite {
         Color c2 = ch2.read(gid).x - 0.5;
         
         // Adjust contrast and brightness (uniforms in [0..1])
-        y = ((y - 0.5) * (0.5 + u.CV_CONTRAST) + 0.5) * (0.5 + u.CV_BRIGHTNESS);
+        y = ((y - 0.5) * (0.5 + u.CV_CONTRAST) + 0.5) * (u.CV_BRIGHTNESS + 0.5);
 
         // Adjust staturation tint (uniforms in [0..1])
-        float angle = (u.CV_TINT - 0.5) * 2.0 * M_PI;
-        float cosA = cos(angle), sinA = sin(angle);
+        float cosA = cos(u.CV_TINT), sinA = sin(u.CV_TINT);
         float2 cc = float2(c1 * cosA - c2 * sinA, c1 * sinA + c2 * cosA) * (0.5 + u.CV_SATURATION);
-        /*
-        float cc1 = (c1 * cosA - c2 * sinA) * (0.5 + u.CV_SATURATION);
-        float cc2 = (c1 * sinA + c2 * cosA) * (0.5 + u.CV_SATURATION);
-        split.y = U2;
-        split.z = V2;
-        */
         
         ycc.write(Color4(y, cc.x + 0.5, cc.y + 0.5, 1.0), gid);
     }
