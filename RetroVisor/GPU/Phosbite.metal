@@ -35,7 +35,7 @@ namespace phosbite {
         float CV_TINT;
         float CV_BRIGHT_BOOST;
         float CV_BRIGHT_BOOST_POST;
-        float CV_CHROMA_BLUR_ENABLE;
+        float CV_CHROMA_BOOST;
         float CV_CHROMA_BLUR;
 
         // Bloom effect

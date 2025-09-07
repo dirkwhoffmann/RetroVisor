@@ -14,7 +14,7 @@ import MetalPerformanceShaders
 final class Phosbite: Shader {
     
     struct Uniforms {
-
+        
         // General
         var PAL: Int32
         var GAMMA_INPUT: Float
@@ -23,7 +23,7 @@ final class Phosbite: Shader {
         var OUTPUT_TEX_SCALE: Float
         var RESAMPLE_FILTER: Int32
         var BLUR_FILTER: Int32
-
+        
         // Compposite video effects
         var CV_ENABLE: Int32
         var CV_CONTRAST: Float
@@ -32,7 +32,7 @@ final class Phosbite: Shader {
         var CV_TINT: Float
         var CV_BRIGHT_BOOST: Float
         var CV_BRIGHT_BOOST_POST: Float
-        var CV_CHROMA_BLUR_ENABLE: Float
+        var CV_CHROMA_BOOST: Float
         var CV_CHROMA_BLUR: Float
         
         var BLOOM_ENABLE: Int32
@@ -75,7 +75,7 @@ final class Phosbite: Shader {
         var DEBUG_RIGHT: Int32
         var DEBUG_SLICE: Float
         var DEBUG_MIPMAP: Float
-
+        
         static let defaults = Uniforms(
             
             PAL: 0,
@@ -85,7 +85,7 @@ final class Phosbite: Shader {
             OUTPUT_TEX_SCALE: 2.0,
             RESAMPLE_FILTER: ResampleFilterType.bilinear.rawValue,
             BLUR_FILTER: BlurFilterType.box.rawValue,
-
+            
             CV_ENABLE: 1,
             CV_CONTRAST: 0.5,
             CV_BRIGHTNESS: 0.5,
@@ -93,7 +93,7 @@ final class Phosbite: Shader {
             CV_TINT: 0.5,
             CV_BRIGHT_BOOST: 1.0,
             CV_BRIGHT_BOOST_POST: 1.0,
-            CV_CHROMA_BLUR_ENABLE: 1,
+            CV_CHROMA_BOOST: 0.0,
             CV_CHROMA_BLUR: 16,
             
             BLOOM_ENABLE: 0,
@@ -138,9 +138,9 @@ final class Phosbite: Shader {
             DEBUG_MIPMAP: 0.0
         )
     }
-
+    
     var uniforms: Uniforms = .defaults
-
+    
     // Kernels
     var splitKernel: Kernel!
     var compositeKernel: Kernel!
@@ -155,20 +155,20 @@ final class Phosbite: Shader {
     var yc2: MTLTexture! // Channel 2 of the ycc texture (for bloom effects)
     var bri: MTLTexture! // Brightness texture (for bloom effects)
     var ycc: MTLTexture! // Image in chroma/luma space
-
+    
     // var com: MTLTexture! // Image in chroma/luma space with composite effects DEPRECATED
     var dom: MTLTexture! // Dot mask
     var blm: MTLTexture! // Bloom texture
     var crt: MTLTexture! // Texture with CRT effects applied
     var dbg: MTLTexture! // Copy of crt (needed by the debug kernel)
     
-
+    
     var bl0: MTLTexture! // Blurred Channel 0 texture
     var bl1: MTLTexture! // Blurred Channel 1 texture
     var bl2: MTLTexture! // Blurren Channel 2 texture
     var bll1: MTLTexture! // Blurred Channel 1 texture
     var bll2: MTLTexture! // Blurren Channel 2 texture
-
+    
     // Performance shader for computing mipmaps
     var pyramid: MPSImagePyramid!
     
@@ -177,10 +177,10 @@ final class Phosbite: Shader {
     
     // Blur filter
     var blurFilter = BlurFilter()
-        
+    
     // Indicates whether the dot mask needs to be rebuild
     var dotMaskNeedsUpdate: Bool = true
-            
+    
     init() {
         
         super.init(name: "Phosbite")
@@ -198,7 +198,7 @@ final class Phosbite: Shader {
                         key: "PAL",
                         get: { [unowned self] in Float(self.uniforms.PAL) },
                         set: { [unowned self] in self.uniforms.PAL = Int32($0) })),
-
+                
                 ShaderSetting(
                     title: "Gamma Input",
                     range: 0.1...5.0, step: 0.1,
@@ -214,7 +214,7 @@ final class Phosbite: Shader {
                         key: "GAMMA_OUTPUT",
                         get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
                         set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 })),
-
+                
                 ShaderSetting(
                     title: "Input Texture Downscaling",
                     range: 0.125...1.0, step: 0.125,
@@ -240,77 +240,82 @@ final class Phosbite: Shader {
                         set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) })),
                 
                 ShaderSetting(
-                  title: "Blur Filter",
-                  items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2)],
-                  value: Binding(
-                      key: "BLUR_FILTER",
-                      get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
-                      set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) })),
+                    title: "Blur Filter",
+                    items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2)],
+                    value: Binding(
+                        key: "BLUR_FILTER",
+                        get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
+                        set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) })),
             ]),
             
             Group(title: "Composite Video Effects",
-                                              
-                enable: Binding(
-                  key: "CV_ENABLE",
-                  get: { [unowned self] in Float(self.uniforms.CV_ENABLE) },
-                  set: { [unowned self] in self.uniforms.CV_ENABLE = Int32($0) }),
-                
-                [ ShaderSetting(
+                  
+                  enable: Binding(
+                    key: "CV_ENABLE",
+                    get: { [unowned self] in Float(self.uniforms.CV_ENABLE) },
+                    set: { [unowned self] in self.uniforms.CV_ENABLE = Int32($0) }),
+                  
+                  [ ShaderSetting(
                     title: "Brightness",
                     range: 0.0...1.0, step: 0.01,
                     value: Binding(
                         key: "CV_BRIGHTNESS",
                         get: { [unowned self] in self.uniforms.CV_BRIGHTNESS },
                         set: { [unowned self] in self.uniforms.CV_BRIGHTNESS = $0 })),
-
-                ShaderSetting(
-                    title: "Contrast",
-                    range: 0.0...1.0, step: 0.01,
-                    value: Binding(
-                        key: "CV_CONTRAST",
-                        get: { [unowned self] in self.uniforms.CV_CONTRAST },
-                        set: { [unowned self] in self.uniforms.CV_CONTRAST = $0 })),
-
-                ShaderSetting(
-                    title: "Tint",
-                    range: 0.0...1.0, step: 0.01,
-                    value: Binding(
-                        key: "CV_TINT",
-                        get: { [unowned self] in self.uniforms.CV_TINT },
-                        set: { [unowned self] in self.uniforms.CV_TINT = $0 })),
-
-                /*
-                ShaderSetting( // DEPRECATED
-                    title: "Brightness Boost",
-                    range: 0.0...2.0, step: 0.01,
-                    value: Binding(
-                        key: "CV_BRIGHT_BOOST",
-                        get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
-                        set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
-                ),
-
-                ShaderSetting( // DEPRECATED
-                    title: "Brightness Boost (post)",
-                    range: 0.0...2.0, step: 0.01,
-                    value: Binding(
-                        key: "CV_BRIGHT_BOOST_POST",
-                        get: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST },
-                        set: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST = $0 }),
-                ),
-                */
-                
-                ShaderSetting(
-                    title: "Chroma Blur",
-                    range: 1...32, step: 1,
-                    enable: Binding(
-                        key: "CV_CHROMA_BLUR_ENABLE",
-                        get: { [unowned self] in self.uniforms.CV_CHROMA_BLUR_ENABLE },
-                        set: { [unowned self] in self.uniforms.CV_CHROMA_BLUR_ENABLE = $0 }),
-                    value: Binding(
-                        key: "CV_CHROMA_BLUR",
-                        get: { [unowned self] in self.uniforms.CV_CHROMA_BLUR },
-                        set: { [unowned self] in self.uniforms.CV_CHROMA_BLUR = $0 })),
-            ]),
+                    
+                    ShaderSetting(
+                        title: "Contrast",
+                        range: 0.0...1.0, step: 0.01,
+                        value: Binding(
+                            key: "CV_CONTRAST",
+                            get: { [unowned self] in self.uniforms.CV_CONTRAST },
+                            set: { [unowned self] in self.uniforms.CV_CONTRAST = $0 })),
+                    
+                    ShaderSetting(
+                        title: "Tint",
+                        range: 0.0...1.0, step: 0.01,
+                        value: Binding(
+                            key: "CV_TINT",
+                            get: { [unowned self] in self.uniforms.CV_TINT },
+                            set: { [unowned self] in self.uniforms.CV_TINT = $0 })),
+                    
+                    /*
+                     ShaderSetting( // DEPRECATED
+                     title: "Brightness Boost",
+                     range: 0.0...2.0, step: 0.01,
+                     value: Binding(
+                     key: "CV_BRIGHT_BOOST",
+                     get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
+                     set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
+                     ),
+                     
+                     ShaderSetting( // DEPRECATED
+                     title: "Brightness Boost (post)",
+                     range: 0.0...2.0, step: 0.01,
+                     value: Binding(
+                     key: "CV_BRIGHT_BOOST_POST",
+                     get: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST },
+                     set: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST = $0 }),
+                     ),
+                     */
+                    
+                    ShaderSetting(
+                        title: "Chroma Boost",
+                        range: 0.0...32, step: 1,
+                        value: Binding(
+                            key: "CV_CHROMA_BOOST",
+                            get: { [unowned self] in self.uniforms.CV_CHROMA_BOOST },
+                            set: { [unowned self] in self.uniforms.CV_CHROMA_BOOST = $0 }),
+                    ),
+                    
+                    ShaderSetting(
+                        title: "Chroma Blur",
+                        range: 1...32, step: 1,
+                        value: Binding(
+                            key: "CV_CHROMA_BLUR",
+                            get: { [unowned self] in self.uniforms.CV_CHROMA_BLUR },
+                            set: { [unowned self] in self.uniforms.CV_CHROMA_BLUR = $0 })),
+                  ]),
             
             Group(title: "Blooming",
                   
@@ -320,13 +325,13 @@ final class Phosbite: Shader {
                     set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) }),
                   
                   [ ShaderSetting(
-                        title: "Bloom Threshold",
-                        range: 0.0...1.0, step: 0.01,
-                        value: Binding(
-                            key: "BLOOM_THRESHOLD",
-                            get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD },
-                            set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD = $0 })),
-
+                    title: "Bloom Threshold",
+                    range: 0.0...1.0, step: 0.01,
+                    value: Binding(
+                        key: "BLOOM_THRESHOLD",
+                        get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD },
+                        set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD = $0 })),
+                    
                     ShaderSetting(
                         title: "Bloom Intensity",
                         range: 0.1...2.0, step: 0.01,
@@ -334,7 +339,7 @@ final class Phosbite: Shader {
                             key: "BLOOM_INTENSITY",
                             get: { [unowned self] in self.uniforms.BLOOM_INTENSITY },
                             set: { [unowned self] in self.uniforms.BLOOM_INTENSITY = $0 })),
-
+                    
                     ShaderSetting(
                         title: "Bloom Radius X",
                         range: 0.0...30.0, step: 1.0,
@@ -374,7 +379,7 @@ final class Phosbite: Shader {
                             key: "SCANLINE_STRENGTH",
                             get: { [unowned self] in self.uniforms.SCANLINE_STRENGTH },
                             set: { [unowned self] in self.uniforms.SCANLINE_STRENGTH = $0 })),
-
+                    
                     ShaderSetting(
                         title: "Scanline Sharpness",
                         range: 0.0...1.0, step: 0.01,
@@ -382,7 +387,7 @@ final class Phosbite: Shader {
                             key: "SCANLINE_SHARPNESS",
                             get: { [unowned self] in self.uniforms.SCANLINE_SHARPNESS },
                             set: { [unowned self] in self.uniforms.SCANLINE_SHARPNESS = $0 })),
-
+                    
                     ShaderSetting(
                         title: "Scanline Blur",
                         range: 0...4.0, step: 0.01,
@@ -398,7 +403,7 @@ final class Phosbite: Shader {
                             key: "SCANLINE_BLOOM",
                             get: { [unowned self] in self.uniforms.SCANLINE_BLOOM },
                             set: { [unowned self] in self.uniforms.SCANLINE_BLOOM = $0 })),
-
+                    
                     ShaderSetting(
                         title: "Scanline Gain",
                         range: 0.0...1.0, step: 0.01,
@@ -414,7 +419,7 @@ final class Phosbite: Shader {
                             key: "DOTMASK_LOSS",
                             get: { [unowned self] in self.uniforms.SCANLINE_LOSS },
                             set: { [unowned self] in self.uniforms.SCANLINE_LOSS = $0 })),
-
+                    
                     ShaderSetting(
                         title: "Scanline Weight 1",
                         range: 0.0...1.0, step: 0.01,
@@ -494,15 +499,15 @@ final class Phosbite: Shader {
                         key: "DOTMASK_TYPE",
                         get: { [unowned self] in Float(self.uniforms.DOTMASK_TYPE) },
                         set: { [unowned self] in self.uniforms.DOTMASK_TYPE = Int32($0) })),
-
+                    
                     ShaderSetting(
-                      title: "Dotmask Color",
-                      items: [ ("GM", 0), ("RGB", 1) ],
-                      value: Binding(
-                          key: "DOTMASK_COLOR",
-                          get: { [unowned self] in Float(self.uniforms.DOTMASK_COLOR) },
-                          set: { [unowned self] in self.uniforms.DOTMASK_COLOR = Int32($0) })),
-
+                        title: "Dotmask Color",
+                        items: [ ("GM", 0), ("RGB", 1) ],
+                        value: Binding(
+                            key: "DOTMASK_COLOR",
+                            get: { [unowned self] in Float(self.uniforms.DOTMASK_COLOR) },
+                            set: { [unowned self] in self.uniforms.DOTMASK_COLOR = Int32($0) })),
+                    
                     ShaderSetting(
                         title: "Dotmask Size",
                         range: 1.0...16.0, step: 1.0,
@@ -518,7 +523,7 @@ final class Phosbite: Shader {
                             key: "DOTMASK_SATURATION",
                             get: { [unowned self] in self.uniforms.DOTMASK_SATURATION },
                             set: { [unowned self] in self.uniforms.DOTMASK_SATURATION = $0 })),
-
+                    
                     ShaderSetting(
                         title: "Dotmask Brightness",
                         range: 0...1, step: 0.01,
@@ -534,7 +539,7 @@ final class Phosbite: Shader {
                             key: "DOTMASK_BLUR",
                             get: { [unowned self] in self.uniforms.DOTMASK_BLUR },
                             set: { [unowned self] in self.uniforms.DOTMASK_BLUR = $0 })),
-                                        
+                    
                     ShaderSetting(
                         title: "Dotmask Gain",
                         range: 0.0...1.0, step: 0.01,
@@ -578,43 +583,43 @@ final class Phosbite: Shader {
                         set: { [unowned self] in self.uniforms.DEBUG_TEXTURE1 = Int32($0) })),
                     
                     ShaderSetting(
-                      title: "Texture 2",
-                      items: [ ("Source", 0),
-                               ("Final", 1),
-                               ("", 0),
-                               ("ycc", 2),
-                               ("ycc (Y)", 3),
-                               ("ycc (C1)", 4),
-                               ("ycc (C2)", 5),
-                               ("Bloom (Y)", 6),
-                               ("Bloom (C1)", 7),
-                               ("Bloom (C2)", 8),
-                               ("Dotmask", 9) ],
-                      value: Binding(
-                          key: "DEBUG_TEXTURE2",
-                          get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE2) },
-                          set: { [unowned self] in self.uniforms.DEBUG_TEXTURE2 = Int32($0) })),
+                        title: "Texture 2",
+                        items: [ ("Source", 0),
+                                 ("Final", 1),
+                                 ("", 0),
+                                 ("ycc", 2),
+                                 ("ycc (Y)", 3),
+                                 ("ycc (C1)", 4),
+                                 ("ycc (C2)", 5),
+                                 ("Bloom (Y)", 6),
+                                 ("Bloom (C1)", 7),
+                                 ("Bloom (C2)", 8),
+                                 ("Dotmask", 9) ],
+                        value: Binding(
+                            key: "DEBUG_TEXTURE2",
+                            get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE2) },
+                            set: { [unowned self] in self.uniforms.DEBUG_TEXTURE2 = Int32($0) })),
                     
                     ShaderSetting(
-                      title: "Left View",
-                      items: [ ("Texture 1", 0),
-                               ("Texture 2", 1),
-                               ("Diff", 2) ],
-                      value: Binding(
-                          key: "DEBUG_LEFT",
-                          get: { [unowned self] in Float(self.uniforms.DEBUG_LEFT) },
-                          set: { [unowned self] in self.uniforms.DEBUG_LEFT = Int32($0) })),
-
+                        title: "Left View",
+                        items: [ ("Texture 1", 0),
+                                 ("Texture 2", 1),
+                                 ("Diff", 2) ],
+                        value: Binding(
+                            key: "DEBUG_LEFT",
+                            get: { [unowned self] in Float(self.uniforms.DEBUG_LEFT) },
+                            set: { [unowned self] in self.uniforms.DEBUG_LEFT = Int32($0) })),
+                    
                     ShaderSetting(
-                      title: "Right View",
-                      items: [ ("Texture 1", 0),
-                               ("Texture 2", 1),
-                               ("Diff", 2) ],
-                      value: Binding(
-                          key: "DEBUG_RIGHT",
-                          get: { [unowned self] in Float(self.uniforms.DEBUG_RIGHT) },
-                          set: { [unowned self] in self.uniforms.DEBUG_RIGHT = Int32($0) })),
-
+                        title: "Right View",
+                        items: [ ("Texture 1", 0),
+                                 ("Texture 2", 1),
+                                 ("Diff", 2) ],
+                        value: Binding(
+                            key: "DEBUG_RIGHT",
+                            get: { [unowned self] in Float(self.uniforms.DEBUG_RIGHT) },
+                            set: { [unowned self] in self.uniforms.DEBUG_RIGHT = Int32($0) })),
+                    
                     ShaderSetting(
                         title: "Area Slider",
                         range: 0.0...1.0, step: 0.01,
@@ -678,9 +683,9 @@ final class Phosbite: Shader {
             dom = output.makeTexture(width: crtWidth, height: crtHeight, mipmaps: 4)
             crt = output.makeTexture(width: crtWidth, height: crtHeight)
         }
-
+        
         if (uniforms.DEBUG_ENABLE != 0 && dbg?.width != crtWidth || dbg?.height != crtHeight) {
-
+            
             dbg = output.makeTexture(width: crtWidth, height: crtHeight)
         }
         
@@ -692,10 +697,10 @@ final class Phosbite: Shader {
     }
     
     func updateDotMask(commandBuffer: MTLCommandBuffer) {
-                
+        
         let s = Double(uniforms.DOTMASK_SATURATION)
         let b = Double(uniforms.DOTMASK_BRIGHTNESS)
-                
+        
         let R = UInt32(color: NSColor(hue: 0.0, saturation: s, brightness: 1.0, alpha: 1.0))
         let G = UInt32(color: NSColor(hue: 0.333, saturation: s, brightness: 1.0, alpha: 1.0))
         let B = UInt32(color: NSColor(hue: 0.666, saturation: s, brightness: 1.0, alpha: 1.0))
@@ -740,16 +745,16 @@ final class Phosbite: Shader {
                           textures:  [src, ycc, yc0, yc1, yc2, bri],
                           options: &uniforms,
                           length: MemoryLayout<Uniforms>.stride)
-
+        
         //
         // Pass 3: Emulate composite effects
         //
-
+        
         if uniforms.CV_ENABLE == 1 {
             
             var post1: MTLTexture = yc1
             var post2: MTLTexture = yc2
-
+            
             if uniforms.CV_CHROMA_BLUR > 0 { // TODO: USE CV_CHROMA_BOOST
                 
                 // Dilate the chroma channels TODO: ADD A DILATE FILTER LIKE THE RESAMPLER
@@ -761,7 +766,7 @@ final class Phosbite: Shader {
                                             kernelWidth: kernelWidth, kernelHeight: kernelHeight, values: values)
                 dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc1, destinationTexture: bll1)
                 dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc2, destinationTexture: bll2)
-
+                
                 post1 = bll1
                 post2 = bll2
             }
@@ -774,7 +779,7 @@ final class Phosbite: Shader {
                 blurFilter.blurHeight = 2.0
                 blurFilter.apply(commandBuffer: commandBuffer, in: post1, out: bl1)
                 blurFilter.apply(commandBuffer: commandBuffer, in: post2, out: bl2)
-
+                
                 post1 = bl1
                 post2 = bl2
             }
@@ -792,7 +797,7 @@ final class Phosbite: Shader {
         //
         // Pass 4: Create the bloom texture
         //
-
+        
         if uniforms.BLOOM_ENABLE == 1 {
             
             blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
@@ -800,7 +805,7 @@ final class Phosbite: Shader {
             blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
             blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: bl0)
         }
-
+        
         //
         // Pass 5: Emulate CRT effects
         //
@@ -809,11 +814,11 @@ final class Phosbite: Shader {
                         textures: [ycc, bl0, bl1, bl2, dom, uniforms.DEBUG_ENABLE == 1 ? dbg : crt],
                         options: &uniforms,
                         length: MemoryLayout<Uniforms>.stride)
-
+        
         //
         // Pass 6: Mix in debug textures
         //
-
+        
         if uniforms.DEBUG_ENABLE == 1 {
             
             debugKernel.apply(commandBuffer: commandBuffer,
@@ -830,7 +835,7 @@ final class Phosbite: Shader {
 extension Phosbite: ShaderDelegate {
     
     func settingDidChange(setting: ShaderSetting) {
-                
+        
         if setting.valueKey  == "OUTPUT_TEX_SCALE" || setting.valueKey .starts(with: "DOTMASK") {
             
             dotMaskNeedsUpdate = true
@@ -855,7 +860,7 @@ extension Phosbite {
             self.init(name: "phosbite::composite", sampler: sampler)
         }
     }
-
+    
     class DotMaskFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
             self.init(name: "phosbite::dotMask", sampler: sampler)
