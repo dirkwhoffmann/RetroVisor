@@ -726,7 +726,7 @@ final class Phosbite: Shader {
         updateTextures(commandBuffer: commandBuffer, in: input, out: output)
         
         //
-        // Pass 1: Crop and downsample the RGB input image
+        // Pass 1: Crop and downsample the input image
         //
         
         resampler.type = ResampleFilterType(rawValue: uniforms.RESAMPLE_FILTER)!
@@ -740,18 +740,10 @@ final class Phosbite: Shader {
                           textures:  [src, ycc, yc0, yc1, yc2, bri],
                           options: &uniforms,
                           length: MemoryLayout<Uniforms>.stride)
-                
+
         //
-        // Pass 3: Create the blur and bloom textures
+        // Pass 3: Emulate composite effects
         //
-        
-        if uniforms.BLOOM_ENABLE == 1 {
-            
-            blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
-            blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
-            blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
-            blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: bl0)
-        }
 
         if uniforms.CV_CHROMA_BLUR_ENABLE == 1 {
             
@@ -764,18 +756,34 @@ final class Phosbite: Shader {
             dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc1, destinationTexture: bll1)
             dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc2, destinationTexture: bll2)
             
+            blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
             blurFilter.blurWidth = uniforms.CV_CHROMA_BLUR / 2.0
             blurFilter.blurHeight = 2.0
             blurFilter.apply(commandBuffer: commandBuffer, in: bll1, out: bl1)
             blurFilter.apply(commandBuffer: commandBuffer, in: bll2, out: bl2)
             
-            compositeKernel.apply(commandBuffer: commandBuffer, textures: [yc0, bl1, bl2, ycc])
+            compositeKernel.apply(commandBuffer: commandBuffer,
+                                  textures: [yc0, bl1, bl2, ycc],
+                                  options: &uniforms,
+                                  length: MemoryLayout<Uniforms>.stride)
         }
         
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
+        
+        //
+        // Pass 4: Create the bloom texture
+        //
+
+        if uniforms.BLOOM_ENABLE == 1 {
+            
+            blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
+            blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
+            blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
+            blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: bl0)
+        }
 
         //
-        // Pass 4: Emulate CRT artifacts
+        // Pass 5: Emulate CRT effects
         //
         
         crtKernel.apply(commandBuffer: commandBuffer,
@@ -784,7 +792,7 @@ final class Phosbite: Shader {
                         length: MemoryLayout<Uniforms>.stride)
 
         //
-        // Pass 5 (optional): Mix in debug textures
+        // Pass 6: Mix in debug textures
         //
 
         if uniforms.DEBUG_ENABLE == 1 {

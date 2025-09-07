@@ -168,6 +168,7 @@ namespace phosbite {
                           texture2d<half, access::sample> ch1 [[ texture(1) ]], // Chroma
                           texture2d<half, access::sample> ch2 [[ texture(2) ]], // Chroma
                           texture2d<half, access::write>  ycc [[ texture(3) ]],
+                          constant Uniforms               &u  [[ buffer(0)  ]],
                           sampler                         sam [[ sampler(0) ]],
                           uint2                           gid [[ thread_position_in_grid ]])
     {
