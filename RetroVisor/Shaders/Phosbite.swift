@@ -16,23 +16,24 @@ final class Phosbite: Shader {
     struct Uniforms {
 
         // General
+        var PAL: Int32
+        var GAMMA_INPUT: Float
+        var GAMMA_OUTPUT: Float
         var INPUT_TEX_SCALE: Float
         var OUTPUT_TEX_SCALE: Float
         var RESAMPLE_FILTER: Int32
         var BLUR_FILTER: Int32
 
-        // Compposite effects
-        var PAL: Int32
-        var GAMMA_INPUT: Float
-        var GAMMA_OUTPUT: Float
-        var CONTRAST: Float
-        var BRIGHTNESS: Float
-        var SATURATION: Float
-        var TINT: Float
-        var BRIGHT_BOOST: Float
-        var BRIGHT_BOOST_POST: Float
-        var CHROMA_BLUR_ENABLE: Float
-        var CHROMA_BLUR: Float
+        // Compposite video effects
+        var CV_ENABLE: Int32
+        var CV_CONTRAST: Float
+        var CV_BRIGHTNESS: Float
+        var CV_SATURATION: Float
+        var CV_TINT: Float
+        var CV_BRIGHT_BOOST: Float
+        var CV_BRIGHT_BOOST_POST: Float
+        var CV_CHROMA_BLUR_ENABLE: Float
+        var CV_CHROMA_BLUR: Float
         
         var BLOOM_ENABLE: Int32
         var BLOOM_THRESHOLD: Float
@@ -77,22 +78,23 @@ final class Phosbite: Shader {
 
         static let defaults = Uniforms(
             
+            PAL: 0,
+            GAMMA_INPUT: 2.2,
+            GAMMA_OUTPUT: 2.2,
             INPUT_TEX_SCALE: 1.0,
             OUTPUT_TEX_SCALE: 2.0,
             RESAMPLE_FILTER: ResampleFilterType.bilinear.rawValue,
             BLUR_FILTER: BlurFilterType.box.rawValue,
 
-            PAL: 0,
-            GAMMA_INPUT: 2.2,
-            GAMMA_OUTPUT: 2.2,
-            CONTRAST: 0.5,
-            BRIGHTNESS: 0.5,
-            SATURATION: 0.5,
-            TINT: 0.5,
-            BRIGHT_BOOST: 1.0,
-            BRIGHT_BOOST_POST: 1.0,
-            CHROMA_BLUR_ENABLE: 1,
-            CHROMA_BLUR: 16,
+            CV_ENABLE: 1,
+            CV_CONTRAST: 0.5,
+            CV_BRIGHTNESS: 0.5,
+            CV_SATURATION: 0.5,
+            CV_TINT: 0.5,
+            CV_BRIGHT_BOOST: 1.0,
+            CV_BRIGHT_BOOST_POST: 1.0,
+            CV_CHROMA_BLUR_ENABLE: 1,
+            CV_CHROMA_BLUR: 16,
             
             BLOOM_ENABLE: 0,
             BLOOM_THRESHOLD: 0.7,
@@ -148,11 +150,10 @@ final class Phosbite: Shader {
     
     // Textures
     var src: MTLTexture! // Downscaled input texture
-
     var yc0: MTLTexture! // Channel 0 of the ycc texture (for bloom effects)
     var yc1: MTLTexture! // Channel 1 of the ycc texture (for bloom effects)
     var yc2: MTLTexture! // Channel 2 of the ycc texture (for bloom effects)
-    var bri: MTLTexture! // Brightness texture
+    var bri: MTLTexture! // Brightness texture (for bloom effects)
     var ycc: MTLTexture! // Image in chroma/luma space
 
     // var com: MTLTexture! // Image in chroma/luma space with composite effects DEPRECATED
@@ -191,6 +192,30 @@ final class Phosbite: Shader {
             Group(title: "General", [
                 
                 ShaderSetting(
+                    title: "Video Standard",
+                    items: [("PAL", 1), ("NTSC", 0)],
+                    value: Binding(
+                        key: "PAL",
+                        get: { [unowned self] in Float(self.uniforms.PAL) },
+                        set: { [unowned self] in self.uniforms.PAL = Int32($0) })),
+
+                ShaderSetting(
+                    title: "Gamma Input",
+                    range: 0.1...5.0, step: 0.1,
+                    value: Binding(
+                        key: "GAMMA_INPUT",
+                        get: { [unowned self] in self.uniforms.GAMMA_INPUT },
+                        set: { [unowned self] in self.uniforms.GAMMA_INPUT = $0 })),
+                
+                ShaderSetting(
+                    title: "Gamma Output",
+                    range: 0.1...5.0, step: 0.1,
+                    value: Binding(
+                        key: "GAMMA_OUTPUT",
+                        get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
+                        set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 })),
+
+                ShaderSetting(
                     title: "Input Texture Downscaling",
                     range: 0.125...1.0, step: 0.125,
                     value: Binding(
@@ -221,63 +246,45 @@ final class Phosbite: Shader {
                       key: "BLUR_FILTER",
                       get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
                       set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) })),
-
-                ShaderSetting(
-                    title: "Gamma Input",
-                    range: 0.1...5.0, step: 0.1,
-                    value: Binding(
-                        key: "GAMMA_INPUT",
-                        get: { [unowned self] in self.uniforms.GAMMA_INPUT },
-                        set: { [unowned self] in self.uniforms.GAMMA_INPUT = $0 })),
-                
-                ShaderSetting(
-                    title: "Gamma Output",
-                    range: 0.1...5.0, step: 0.1,
-                    value: Binding(
-                        key: "GAMMA_OUTPUT",
-                        get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
-                        set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 })),
             ]),
             
-            Group(title: "Composite Effects", [
+            Group(title: "Composite Video Effects",
+                                              
+                enable: Binding(
+                  key: "CV_ENABLE",
+                  get: { [unowned self] in Float(self.uniforms.CV_ENABLE) },
+                  set: { [unowned self] in self.uniforms.CV_ENABLE = Int32($0) }),
                 
-                ShaderSetting(
-                    title: "Video Standard",
-                    items: [("PAL", 1), ("NTSC", 0)],
-                    value: Binding(
-                        key: "PAL",
-                        get: { [unowned self] in Float(self.uniforms.PAL) },
-                        set: { [unowned self] in self.uniforms.PAL = Int32($0) })),
-                                
-                ShaderSetting(
+                [ ShaderSetting(
                     title: "Brightness",
                     range: 0.0...1.0, step: 0.01,
                     value: Binding(
-                        key: "BRIGHTNESS",
-                        get: { [unowned self] in self.uniforms.BRIGHTNESS },
-                        set: { [unowned self] in self.uniforms.BRIGHTNESS = $0 })),
+                        key: "CV_BRIGHTNESS",
+                        get: { [unowned self] in self.uniforms.CV_BRIGHTNESS },
+                        set: { [unowned self] in self.uniforms.CV_BRIGHTNESS = $0 })),
 
                 ShaderSetting(
                     title: "Contrast",
                     range: 0.0...1.0, step: 0.01,
                     value: Binding(
-                        key: "TINT",
-                        get: { [unowned self] in self.uniforms.CONTRAST },
-                        set: { [unowned self] in self.uniforms.CONTRAST = $0 })),
+                        key: "CV_CONTRAST",
+                        get: { [unowned self] in self.uniforms.CV_CONTRAST },
+                        set: { [unowned self] in self.uniforms.CV_CONTRAST = $0 })),
 
                 ShaderSetting(
                     title: "Tint",
                     range: 0.0...1.0, step: 0.01,
                     value: Binding(
-                        key: "TINT",
-                        get: { [unowned self] in self.uniforms.TINT },
-                        set: { [unowned self] in self.uniforms.TINT = $0 })),
+                        key: "CV_TINT",
+                        get: { [unowned self] in self.uniforms.CV_TINT },
+                        set: { [unowned self] in self.uniforms.CV_TINT = $0 })),
 
+                /*
                 ShaderSetting( // DEPRECATED
                     title: "Brightness Boost",
                     range: 0.0...2.0, step: 0.01,
                     value: Binding(
-                        key: "BRIGHT_BOOST",
+                        key: "CV_BRIGHT_BOOST",
                         get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
                         set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
                 ),
@@ -286,22 +293,23 @@ final class Phosbite: Shader {
                     title: "Brightness Boost (post)",
                     range: 0.0...2.0, step: 0.01,
                     value: Binding(
-                        key: "BRIGHT_BOOST_POST",
+                        key: "CV_BRIGHT_BOOST_POST",
                         get: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST },
                         set: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST = $0 }),
                 ),
+                */
                 
                 ShaderSetting(
                     title: "Chroma Blur",
                     range: 1...32, step: 1,
                     enable: Binding(
-                        key: "CHROMA_BLUR_ENABLE",
-                        get: { [unowned self] in self.uniforms.CHROMA_BLUR_ENABLE },
-                        set: { [unowned self] in self.uniforms.CHROMA_BLUR_ENABLE = $0 }),
+                        key: "CV_CHROMA_BLUR_ENABLE",
+                        get: { [unowned self] in self.uniforms.CV_CHROMA_BLUR_ENABLE },
+                        set: { [unowned self] in self.uniforms.CV_CHROMA_BLUR_ENABLE = $0 }),
                     value: Binding(
-                        key: "CHROMA_BLUR",
-                        get: { [unowned self] in self.uniforms.CHROMA_BLUR },
-                        set: { [unowned self] in self.uniforms.CHROMA_BLUR = $0 })),
+                        key: "CV_CHROMA_BLUR",
+                        get: { [unowned self] in self.uniforms.CV_CHROMA_BLUR },
+                        set: { [unowned self] in self.uniforms.CV_CHROMA_BLUR = $0 })),
             ]),
             
             Group(title: "Blooming",
@@ -745,9 +753,9 @@ final class Phosbite: Shader {
             blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: bl0)
         }
 
-        if uniforms.CHROMA_BLUR_ENABLE == 1 {
+        if uniforms.CV_CHROMA_BLUR_ENABLE == 1 {
             
-            let kernelWidth = Int(uniforms.CHROMA_BLUR) | 1
+            let kernelWidth = Int(uniforms.CV_CHROMA_BLUR) | 1
             let kernelHeight = 3
             let values = [Float](repeating: 0, count: kernelWidth * kernelHeight)
             
@@ -756,7 +764,7 @@ final class Phosbite: Shader {
             dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc1, destinationTexture: bll1)
             dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc2, destinationTexture: bll2)
             
-            blurFilter.blurWidth = uniforms.CHROMA_BLUR / 2.0
+            blurFilter.blurWidth = uniforms.CV_CHROMA_BLUR / 2.0
             blurFilter.blurHeight = 2.0
             blurFilter.apply(commandBuffer: commandBuffer, in: bll1, out: bl1)
             blurFilter.apply(commandBuffer: commandBuffer, in: bll2, out: bl2)

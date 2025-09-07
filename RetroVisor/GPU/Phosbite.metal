@@ -18,24 +18,25 @@ namespace phosbite {
 
     struct Uniforms {
 
-        // Texture dimensions
+        // General
+        uint  PAL;
+        float GAMMA_INPUT;
+        float GAMMA_OUTPUT;
         float INPUT_TEX_SCALE;
         float OUTPUT_TEX_SCALE;
         uint  RESAMPLE_FILTER;
         uint  BLUR_FILTER;
         
-        // Chroma effects
-        uint  PAL;
-        float GAMMA_INPUT;
-        float GAMMA_OUTPUT;
-        float CONTRAST;
-        float BRIGHTNESS;
-        float SATURATION;
-        float TINT;
-        float BRIGHT_BOOST;
-        float BRIGHT_BOOST_POST;
-        float CHROMA_BLUR_ENABLE;
-        float CHROMA_BLUR;
+        // Composite video effects
+        uint  CV_ENABLE;
+        float CV_CONTRAST;
+        float CV_BRIGHTNESS;
+        float CV_SATURATION;
+        float CV_TINT;
+        float CV_BRIGHT_BOOST;
+        float CV_BRIGHT_BOOST_POST;
+        float CV_CHROMA_BLUR_ENABLE;
+        float CV_CHROMA_BLUR;
 
         // Bloom effect
         uint  BLOOM_ENABLE;
@@ -120,23 +121,23 @@ namespace phosbite {
         // split.x *= u.BRIGHT_BOOST;
 
         // Adjust contrast and brightness (uniforms in [0..1])
-        split.x = ((split.x - 0.5) * (0.5 + u.CONTRAST) + 0.5) * (0.5 + u.BRIGHTNESS);
+        split.x = ((split.x - 0.5) * (0.5 + u.CV_CONTRAST) + 0.5) * (0.5 + u.CV_BRIGHTNESS);
 
         // Adjust saturation and tint (uniforms in [0..1])
-        split.y *= 0.5 + u.SATURATION;
-        split.z *= 0.5 + u.SATURATION;
+        split.y *= 0.5 + u.CV_SATURATION;
+        split.z *= 0.5 + u.CV_SATURATION;
 
         // Adjust staturation tint (uniforms in [0..1]) TODO: SHORTEN THIS
-        float angle = (u.TINT - 0.5) * 2.0 * M_PI;
+        float angle = (u.CV_TINT - 0.5) * 2.0 * M_PI;
         float cosA = cos(angle);
         float sinA = sin(angle);
         float U1 = split.y, V1 = split.z;
-        float U2 = (U1 * cosA - V1 * sinA) * (0.5 + u.SATURATION);
-        float V2 = (U1 * sinA + V1 * cosA) * (0.5 + u.SATURATION);
+        float U2 = (U1 * cosA - V1 * sinA) * (0.5 + u.CV_SATURATION);
+        float V2 = (U1 * sinA + V1 * cosA) * (0.5 + u.CV_SATURATION);
         split.y = U2;
         split.z = V2;
         
-        if (u.CHROMA_BLUR_ENABLE || u.BLOOM_ENABLE) {
+        if (u.CV_CHROMA_BLUR_ENABLE || u.BLOOM_ENABLE) {
             
             // Filter out all texels below the threshold
             Color threshold = u.BLOOM_THRESHOLD;
@@ -147,7 +148,7 @@ namespace phosbite {
             bri.write(split.x * mask * intensity, gid);
         }
         
-        if (u.CHROMA_BLUR_ENABLE) {
+        if (u.CV_CHROMA_BLUR_ENABLE) {
             
             yc0.write(split.x, gid);
             yc1.write(split.y + 0.5, gid);
@@ -251,7 +252,7 @@ namespace phosbite {
         */
         
         // Boost brightness and correct gamma
-        out.write(pow(color * u.BRIGHT_BOOST_POST, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
+        out.write(pow(color * u.CV_BRIGHT_BOOST_POST, Color4(1.0 / u.GAMMA_OUTPUT)), gid);
     }
 
     //
