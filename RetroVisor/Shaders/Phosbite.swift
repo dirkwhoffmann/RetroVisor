@@ -86,18 +86,18 @@ final class Phosbite: Shader {
             RESAMPLE_FILTER: ResampleFilterType.bilinear.rawValue,
             BLUR_FILTER: BlurFilterType.box.rawValue,
             
-            CV_ENABLE: 1,
+            CV_ENABLE: 0,
             CV_CONTRAST: 0.5,
             CV_BRIGHTNESS: 0.5,
             CV_SATURATION: 0.5,
             CV_TINT: 0.0,
             CV_BRIGHT_BOOST: 1.0,
             CV_BRIGHT_BOOST_POST: 1.0,
-            CV_CHROMA_BOOST: 0.0,
-            CV_CHROMA_BLUR: 16,
+            CV_CHROMA_BOOST: 8.0,
+            CV_CHROMA_BLUR: 24,
             
-            BLOOM_ENABLE: 0,
-            BLOOM_THRESHOLD: 0.7,
+            BLOOM_ENABLE: 1,
+            BLOOM_THRESHOLD: 0.0,
             BLOOM_INTENSITY: 1.0,
             BLOOM_RADIUS_X: 5,
             BLOOM_RADIUS_Y: 3,
@@ -150,25 +150,18 @@ final class Phosbite: Shader {
     
     // Textures
     var src: MTLTexture! // Downscaled input texture
-    var yc0: MTLTexture! // Channel 0 of the ycc texture (for bloom effects)
-    var yc1: MTLTexture! // Channel 1 of the ycc texture (for bloom effects)
-    var yc2: MTLTexture! // Channel 2 of the ycc texture (for bloom effects)
-    var bri: MTLTexture! // Brightness texture (for bloom effects)
-    var ycc: MTLTexture! // Image in chroma/luma space
-    
-    // var com: MTLTexture! // Image in chroma/luma space with composite effects DEPRECATED
-    var dom: MTLTexture! // Dot mask
-    var blm: MTLTexture! // Bloom texture
+    var yc0: MTLTexture! // Channel 0 (Luma)
+    var yc1: MTLTexture! // Channel 1 (Chroma U/I)
+    var yc2: MTLTexture! // Channel 2 (Chroma I/Q)
+    var bri: MTLTexture! // Brightness texture (needed for blooming)
+    var bl0: MTLTexture! // Blurred brightness texture (bloom texture)
+    var bl1: MTLTexture! // Blurred channel 1 texture
+    var bl2: MTLTexture! // Blurren channel 2 texture
+    var ycc: MTLTexture! // Recombined chroma/luma texture
+    var dom: MTLTexture! // Dot mask texture
     var crt: MTLTexture! // Texture with CRT effects applied
     var dbg: MTLTexture! // Copy of crt (needed by the debug kernel)
-    
-    
-    var bl0: MTLTexture! // Blurred Channel 0 texture
-    var bl1: MTLTexture! // Blurred Channel 1 texture
-    var bl2: MTLTexture! // Blurren Channel 2 texture
-    // var bll1: MTLTexture! // Blurred Channel 1 texture
-    // var bll2: MTLTexture! // Blurren Channel 2 texture
-    
+        
     // Performance shader for computing mipmaps
     var pyramid: MPSImagePyramid!
     
@@ -573,10 +566,11 @@ final class Phosbite: Shader {
                              ("ycc (Y)", 3),
                              ("ycc (C1)", 4),
                              ("ycc (C2)", 5),
-                             ("Bloom (Y)", 6),
-                             ("Bloom (C1)", 7),
-                             ("Bloom (C2)", 8),
-                             ("Dotmask", 9) ],
+                             ("Bright Pass", 6),
+                             ("Bloom (Y)", 7),
+                             ("Bloom (C1)", 8),
+                             ("Bloom (C2)", 9),
+                             ("Dotmask", 10) ],
                     value: Binding(
                         key: "DEBUG_TEXTURE1",
                         get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE1) },
@@ -591,10 +585,11 @@ final class Phosbite: Shader {
                                  ("ycc (Y)", 3),
                                  ("ycc (C1)", 4),
                                  ("ycc (C2)", 5),
-                                 ("Bloom (Y)", 6),
-                                 ("Bloom (C1)", 7),
-                                 ("Bloom (C2)", 8),
-                                 ("Dotmask", 9) ],
+                                 ("Bright Pass", 6),
+                                 ("Bloom (Y)", 7),
+                                 ("Bloom (C1)", 8),
+                                 ("Bloom (C2)", 9),
+                                 ("Dotmask", 10) ],
                         value: Binding(
                             key: "DEBUG_TEXTURE2",
                             get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE2) },
@@ -672,8 +667,6 @@ final class Phosbite: Shader {
             bl0 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bl1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             bl2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
-            blm = output.makeTexture(width: inpWidth, height: inpHeight)
-            // com = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
         }
         
         if crt?.width != crtWidth || crt?.height != crtHeight {
@@ -762,8 +755,8 @@ final class Phosbite: Shader {
                 
                 let dilate = MPSImageDilate(device: ShaderLibrary.device,
                                             kernelWidth: kernelWidth, kernelHeight: kernelHeight, values: values)
-                dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc1, destinationTexture: bl1)
-                dilate.encode(commandBuffer: commandBuffer, sourceTexture: yc2, destinationTexture: bl2)
+                dilate.encode(commandBuffer: commandBuffer, sourceTexture: src1, destinationTexture: dst1)
+                dilate.encode(commandBuffer: commandBuffer, sourceTexture: src2, destinationTexture: dst2)
                
                 swap(&src1, &dst1)
                 swap(&src2, &dst2)
@@ -820,7 +813,7 @@ final class Phosbite: Shader {
         if uniforms.DEBUG_ENABLE == 1 {
             
             debugKernel.apply(commandBuffer: commandBuffer,
-                              textures: [src, dbg, ycc, yc0, yc1, yc2, bl0, bl1, bl2, dom, output],
+                              textures: [src, dbg, ycc, yc0, yc1, yc2, bl0, bl1, bl2, bri, dom, output],
                               options: &uniforms,
                               length: MemoryLayout<Uniforms>.stride)
         } else {

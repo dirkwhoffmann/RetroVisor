@@ -125,11 +125,13 @@ namespace phosbite {
             
             // Filter out all texels below the threshold
             Color threshold = u.BLOOM_THRESHOLD;
-            Color mask = smoothstep(threshold, threshold + 0.1h, split.x);
-  
+            // Color mask = smoothstep(threshold, threshold + 0.1h, split.x);
+            Color mask = smoothstep(threshold, 1.0h, split.x);
+
             // Scale the bright part
             Color intensity = u.BLOOM_INTENSITY;
-            bri.write(split.x * mask * intensity, gid);
+            bri.write(split.x * mask * 2.0 * intensity, gid);
+            // bri.write(pow(split.x, 1 + 10 * intensity), gid);
         }
         
         if (u.CV_ENABLE) {
@@ -165,7 +167,7 @@ namespace phosbite {
         // Adjust contrast and brightness (uniforms in [0..1])
         y = ((y - 0.5) * (0.5 + u.CV_CONTRAST) + 0.5) * (u.CV_BRIGHTNESS + 0.5);
 
-        // Adjust staturation tint (uniforms in [0..1])
+        // Adjust saturation and tint (uniforms in [0..1])
         float cosA = cos(u.CV_TINT), sinA = sin(u.CV_TINT);
         float2 cc = float2(c1 * cosA - c2 * sinA, c1 * sinA + c2 * cosA) * (0.5 + u.CV_SATURATION);
         
@@ -192,16 +194,6 @@ namespace phosbite {
         // Read source pixel
         Color4 yccColor = sampleYCC(ycc, sam, uv);
 
-        // Apply chroma blur effect
-        
-        /*
-        if (u.CHROMA_BLUR_ENABLE) {
-
-            yccColor.y = bl1.sample(sam, uv).x;
-            yccColor.z = bl2.sample(sam, uv).x;
-        }
-        */
-        
         // Apply bloom effect
         if (u.BLOOM_ENABLE) {
 
@@ -291,23 +283,25 @@ namespace phosbite {
                                      texture2d<half, access::sample> bl0 [[ texture(6) ]],
                                      texture2d<half, access::sample> bl1 [[ texture(7) ]],
                                      texture2d<half, access::sample> bl2 [[ texture(8) ]],
-                                     texture2d<half, access::sample> dom [[ texture(9) ]],
+                                     texture2d<half, access::sample> bri [[ texture(9) ]],
+                                     texture2d<half, access::sample> dom [[ texture(10)]],
                                      constant Uniforms               &u  [[ buffer(0)  ]],
                                      sampler                         sam [[ sampler(0) ]],
                                      uint2                           gid [[ thread_position_in_grid ]])
     {
         switch (source) {
 
-            case 0: return sampleRGB(src, sam, uv);
-            case 1: return sampleRGB(fin, sam, uv);
-            case 2: return YCC2RGB(sampleYCC(ycc, sam, uv, u.DEBUG_MIPMAP), u.PAL);
-            case 3: return Color4(sampleYCC(yc0, sam, uv).xxx, 1.0);
-            case 4: return Color4(sampleYCC(yc1, sam, uv).xxx, 1.0);
-            case 5: return Color4(sampleYCC(yc2, sam, uv).xxx, 1.0);
-            case 6: return Color4(sampleYCC(bl0, sam, uv).xxx, 1.0);
-            case 7: return Color4(sampleYCC(bl1, sam, uv).xxx, 1.0);
-            case 8: return Color4(sampleYCC(bl2, sam, uv).xxx, 1.0);
-            case 9: return sampleRGB(dom, sam, uv, u.DEBUG_MIPMAP);
+            case 0:  return sampleRGB(src, sam, uv);
+            case 1:  return sampleRGB(fin, sam, uv);
+            case 2:  return YCC2RGB(sampleYCC(ycc, sam, uv, u.DEBUG_MIPMAP), u.PAL);
+            case 3:  return Color4(sampleYCC(yc0, sam, uv).xxx, 1.0);
+            case 4:  return Color4(sampleYCC(yc1, sam, uv).xxx, 1.0);
+            case 5:  return Color4(sampleYCC(yc2, sam, uv).xxx, 1.0);
+            case 6:  return Color4(sampleYCC(bl0, sam, uv).xxx, 1.0);
+            case 7:  return Color4(sampleYCC(bl1, sam, uv).xxx, 1.0);
+            case 8:  return Color4(sampleYCC(bl2, sam, uv).xxx, 1.0);
+            case 9:  return Color4(sampleYCC(bri, sam, uv).xxx, 1.0);
+            case 10: return sampleRGB(dom, sam, uv, u.DEBUG_MIPMAP);
                                 
             default:
                 return Color4(0.0, 0.0, 0.0, 1.0);
@@ -330,11 +324,12 @@ namespace phosbite {
                       texture2d<half, access::sample> yc0 [[ texture(3) ]],
                       texture2d<half, access::sample> yc1 [[ texture(4) ]],
                       texture2d<half, access::sample> yc2 [[ texture(5) ]],
-                      texture2d<half, access::sample> bl0 [[ texture(6) ]],
-                      texture2d<half, access::sample> bl1 [[ texture(7) ]],
-                      texture2d<half, access::sample> bl2 [[ texture(8) ]],
-                      texture2d<half, access::sample> dom [[ texture(9) ]],
-                      texture2d<half, access::write>  out [[ texture(10)]],
+                      texture2d<half, access::sample> bri [[ texture(6) ]],
+                      texture2d<half, access::sample> bl0 [[ texture(7) ]],
+                      texture2d<half, access::sample> bl1 [[ texture(8) ]],
+                      texture2d<half, access::sample> bl2 [[ texture(9) ]],
+                      texture2d<half, access::sample> dom [[ texture(10)]],
+                      texture2d<half, access::write>  out [[ texture(11)]],
                       constant Uniforms               &u  [[ buffer(0)  ]],
                       sampler                         sam [[ sampler(0) ]],
                       uint2                           gid [[ thread_position_in_grid ]])
@@ -345,9 +340,11 @@ namespace phosbite {
                 
         // Sample the selected texures
         Color4 color1 = sampleDebugTexture(u.DEBUG_TEXTURE1, uv,
-                                           src, fin, ycc, yc0, yc1, yc2, bl0, bl1, bl2, dom, u, sam, gid);
+                                           src, fin, ycc, yc0, yc1, yc2, bri, bl0, bl1, bl2, dom,
+                                           u, sam, gid);
         Color4 color2 = sampleDebugTexture(u.DEBUG_TEXTURE2, uv,
-                                           src, fin, ycc, yc0, yc1, yc2, bl0, bl1, bl2, dom, u, sam, gid);
+                                           src, fin, ycc, yc0, yc1, yc2, bri, bl0, bl1, bl2, dom,
+                                           u, sam, gid);
 
         // Compute the pixel to display
         switch (debugPixelType(gid, size, u)) {
