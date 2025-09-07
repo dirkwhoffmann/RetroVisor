@@ -138,14 +138,7 @@ final class Phosbite: Shader {
     }
     
     var uniforms: Uniforms = .defaults
-    
-    // Kernels
-    var splitKernel: Kernel!
-    var compositeKernel: Kernel!
-    var dotMaskKernel: Kernel!
-    var crtKernel: Kernel!
-    var debugKernel: Kernel!
-    
+        
     // Textures
     var src: MTLTexture! // Downscaled input texture
     var yc0: MTLTexture! // Channel 0 (Luma)
@@ -159,15 +152,20 @@ final class Phosbite: Shader {
     var dom: MTLTexture! // Dot mask texture
     var crt: MTLTexture! // Texture with CRT effects applied
     var dbg: MTLTexture! // Copy of crt (needed by the debug kernel)
-        
-    // Performance shader for mipmap computation
+            
+    // Kernels
+    var splitKernel: Kernel!
+    var compositeKernel: Kernel!
+    var dotMaskKernel: Kernel!
+    var crtKernel: Kernel!
+    var debugKernel: Kernel!
+
+    // Performance shaders
+    var resampler: ResampleFilter!
+    var blurFilter: BlurFilter!
+    var dilationFilter: DilationFilter!
     var pyramid: MPSImagePyramid!
-    
-    // Filters for scaling, blurring, and dilating images
-    let resampler = ResampleFilter()
-    let blurFilter = BlurFilter()
-    let dilationFilter = DilationFilter()
-    
+
     // Indicates whether the dot mask needs to be rebuild
     var dotMaskNeedsUpdate: Bool = true
     
@@ -623,11 +621,16 @@ final class Phosbite: Shader {
     override func activate() {
         
         super.activate()
+        
         splitKernel = SplitFilter(sampler: ShaderLibrary.linear)
         compositeKernel = CompositeFilter(sampler: ShaderLibrary.linear)
         dotMaskKernel = DotMaskFilter(sampler: ShaderLibrary.mipmapLinear)
         crtKernel = CrtFilter(sampler: ShaderLibrary.mipmapLinear)
         debugKernel = DebugFilter(sampler: ShaderLibrary.mipmapLinear)
+        
+        resampler = ResampleFilter()
+        blurFilter = BlurFilter()
+        dilationFilter = DilationFilter()
         pyramid = MPSImageGaussianPyramid(device: ShaderLibrary.device)
     }
     
@@ -637,11 +640,10 @@ final class Phosbite: Shader {
         let inpWidth = Int(Float(output.width) * uniforms.INPUT_TEX_SCALE)
         let inpHeight = Int(Float(output.height) * uniforms.INPUT_TEX_SCALE)
         
-        // Internal texture size
+        // Size of the upscaled internal texture
         let crtWidth = Int(Float(output.width) * uniforms.OUTPUT_TEX_SCALE)
         let crtHeight = Int(Float(output.height) * uniforms.OUTPUT_TEX_SCALE)
         
-        // Update intermediate textures
         if ycc?.width != inpWidth || ycc?.height != inpHeight {
             
             src = output.makeTexture(width: inpWidth, height: inpHeight)
