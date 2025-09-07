@@ -14,21 +14,27 @@ import MetalPerformanceShaders
 final class Phosbite: Shader {
     
     struct Uniforms {
-        
+
+        // General
         var INPUT_TEX_SCALE: Float
         var OUTPUT_TEX_SCALE: Float
         var RESAMPLE_FILTER: Int32
-        
+        var BLUR_FILTER: Int32
+
+        // Compposite effects
         var PAL: Int32
         var GAMMA_INPUT: Float
         var GAMMA_OUTPUT: Float
+        var CONTRAST: Float
+        var BRIGHTNESS: Float
+        var SATURATION: Float
+        var TINT: Float
         var BRIGHT_BOOST: Float
         var BRIGHT_BOOST_POST: Float
         var CHROMA_BLUR_ENABLE: Float
         var CHROMA_BLUR: Float
         
         var BLOOM_ENABLE: Int32
-        var BLOOM_FILTER: Int32
         var BLOOM_THRESHOLD: Float
         var BLOOM_INTENSITY: Float
         var BLOOM_RADIUS_X: Float
@@ -74,17 +80,21 @@ final class Phosbite: Shader {
             INPUT_TEX_SCALE: 1.0,
             OUTPUT_TEX_SCALE: 2.0,
             RESAMPLE_FILTER: ResampleFilterType.bilinear.rawValue,
-            
+            BLUR_FILTER: BlurFilterType.box.rawValue,
+
             PAL: 0,
             GAMMA_INPUT: 2.2,
             GAMMA_OUTPUT: 2.2,
+            CONTRAST: 0.5,
+            BRIGHTNESS: 0.5,
+            SATURATION: 0.5,
+            TINT: 0.5,
             BRIGHT_BOOST: 1.0,
             BRIGHT_BOOST_POST: 1.0,
             CHROMA_BLUR_ENABLE: 1,
             CHROMA_BLUR: 16,
             
             BLOOM_ENABLE: 0,
-            BLOOM_FILTER: BlurFilterType.box.rawValue,
             BLOOM_THRESHOLD: 0.7,
             BLOOM_INTENSITY: 1.0,
             BLOOM_RADIUS_X: 5,
@@ -178,10 +188,10 @@ final class Phosbite: Shader {
         
         settings = [
             
-            Group(title: "Textures", [
+            Group(title: "General", [
                 
                 ShaderSetting(
-                    title: "Input Downscaling Factor",
+                    title: "Input Texture Downscaling",
                     range: 0.125...1.0, step: 0.125,
                     value: Binding(
                         key: "INPUT_TEX_SCALE",
@@ -189,7 +199,7 @@ final class Phosbite: Shader {
                         set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 })),
                 
                 ShaderSetting(
-                    title: "Output Upscaling Factor",
+                    title: "Output Texture Upscaling Factor",
                     range: 1.0...2.0, step: 0.125,
                     value: Binding(
                         key: "OUTPUT_TEX_SCALE",
@@ -204,18 +214,14 @@ final class Phosbite: Shader {
                         get: { [unowned self] in Float(self.uniforms.RESAMPLE_FILTER) },
                         set: { [unowned self] in self.uniforms.RESAMPLE_FILTER = Int32($0) })),
                 
-            ]),
-            
-            Group(title: "Chroma Effects", [
-                
                 ShaderSetting(
-                    title: "Video Standard",
-                    items: [("PAL", 1), ("NTSC", 0)],
-                    value: Binding(
-                        key: "PAL",
-                        get: { [unowned self] in Float(self.uniforms.PAL) },
-                        set: { [unowned self] in self.uniforms.PAL = Int32($0) })),
-                
+                  title: "Blur Filter",
+                  items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2)],
+                  value: Binding(
+                      key: "BLUR_FILTER",
+                      get: { [unowned self] in Float(self.uniforms.BLUR_FILTER) },
+                      set: { [unowned self] in self.uniforms.BLUR_FILTER = Int32($0) })),
+
                 ShaderSetting(
                     title: "Gamma Input",
                     range: 0.1...5.0, step: 0.1,
@@ -231,8 +237,43 @@ final class Phosbite: Shader {
                         key: "GAMMA_OUTPUT",
                         get: { [unowned self] in self.uniforms.GAMMA_OUTPUT },
                         set: { [unowned self] in self.uniforms.GAMMA_OUTPUT = $0 })),
+            ]),
+            
+            Group(title: "Composite Effects", [
                 
                 ShaderSetting(
+                    title: "Video Standard",
+                    items: [("PAL", 1), ("NTSC", 0)],
+                    value: Binding(
+                        key: "PAL",
+                        get: { [unowned self] in Float(self.uniforms.PAL) },
+                        set: { [unowned self] in self.uniforms.PAL = Int32($0) })),
+                                
+                ShaderSetting(
+                    title: "Brightness",
+                    range: 0.0...1.0, step: 0.01,
+                    value: Binding(
+                        key: "BRIGHTNESS",
+                        get: { [unowned self] in self.uniforms.BRIGHTNESS },
+                        set: { [unowned self] in self.uniforms.BRIGHTNESS = $0 })),
+
+                ShaderSetting(
+                    title: "Contrast",
+                    range: 0.0...1.0, step: 0.01,
+                    value: Binding(
+                        key: "TINT",
+                        get: { [unowned self] in self.uniforms.CONTRAST },
+                        set: { [unowned self] in self.uniforms.CONTRAST = $0 })),
+
+                ShaderSetting(
+                    title: "Tint",
+                    range: 0.0...1.0, step: 0.01,
+                    value: Binding(
+                        key: "TINT",
+                        get: { [unowned self] in self.uniforms.TINT },
+                        set: { [unowned self] in self.uniforms.TINT = $0 })),
+
+                ShaderSetting( // DEPRECATED
                     title: "Brightness Boost",
                     range: 0.0...2.0, step: 0.01,
                     value: Binding(
@@ -241,7 +282,7 @@ final class Phosbite: Shader {
                         set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
                 ),
 
-                ShaderSetting(
+                ShaderSetting( // DEPRECATED
                     title: "Brightness Boost (post)",
                     range: 0.0...2.0, step: 0.01,
                     value: Binding(
@@ -249,7 +290,7 @@ final class Phosbite: Shader {
                         get: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST },
                         set: { [unowned self] in self.uniforms.BRIGHT_BOOST_POST = $0 }),
                 ),
-
+                
                 ShaderSetting(
                     title: "Chroma Blur",
                     range: 1...32, step: 1,
@@ -271,14 +312,6 @@ final class Phosbite: Shader {
                     set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) }),
                   
                   [ ShaderSetting(
-                    title: "Bloom Filter",
-                    items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2)],
-                    value: Binding(
-                        key: "BLOOM_FILTER",
-                        get: { [unowned self] in Float(self.uniforms.BLOOM_FILTER) },
-                        set: { [unowned self] in self.uniforms.BLOOM_FILTER = Int32($0) })),
-                    
-                    ShaderSetting(
                         title: "Bloom Threshold",
                         range: 0.0...1.0, step: 0.01,
                         value: Binding(
@@ -706,7 +739,7 @@ final class Phosbite: Shader {
         
         if uniforms.BLOOM_ENABLE == 1 {
             
-            blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLOOM_FILTER)!
+            blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
             blurFilter.blurWidth = uniforms.BLOOM_RADIUS_X
             blurFilter.blurHeight = uniforms.BLOOM_RADIUS_Y
             blurFilter.apply(commandBuffer: commandBuffer, in: bri, out: bl0)

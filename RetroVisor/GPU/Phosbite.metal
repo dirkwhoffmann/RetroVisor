@@ -22,11 +22,16 @@ namespace phosbite {
         float INPUT_TEX_SCALE;
         float OUTPUT_TEX_SCALE;
         uint  RESAMPLE_FILTER;
-
-        // Chroma phase
+        uint  BLUR_FILTER;
+        
+        // Chroma effects
         uint  PAL;
         float GAMMA_INPUT;
         float GAMMA_OUTPUT;
+        float CONTRAST;
+        float BRIGHTNESS;
+        float SATURATION;
+        float TINT;
         float BRIGHT_BOOST;
         float BRIGHT_BOOST_POST;
         float CHROMA_BLUR_ENABLE;
@@ -34,7 +39,6 @@ namespace phosbite {
 
         // Bloom effect
         uint  BLOOM_ENABLE;
-        uint  BLOOM_FILTER;
         float BLOOM_THRESHOLD;
         float BLOOM_INTENSITY;
         float BLOOM_RADIUS_X;
@@ -86,11 +90,8 @@ namespace phosbite {
                       sampler                         sam [[ sampler(0) ]],
                       uint2                           gid [[ thread_position_in_grid ]])
     {
-        // Get size of output textures
-        const Coord2 rect = float2(ycc.get_width(), ycc.get_height());
-
-        // Normalize gid to 0..1 in rect
-        Coord2 uv = (Coord2(gid) + 0.5) / rect;
+        // Normalize gid to [0..1]
+        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(ycc.get_width(), ycc.get_height());
 
         // Read pixel
         Color3 rgb = Color3(src.sample(sam, uv).rgb);
@@ -101,8 +102,27 @@ namespace phosbite {
         // Split components
         Color3 split = u.PAL == 1 ? RGB2YUV(rgb) : RGB2YIQ(rgb);
         
-        // Boost brightness
-        split.x *= u.BRIGHT_BOOST;
+        // Boost brightness (DEPRECATED)
+        // split.x *= u.BRIGHT_BOOST;
+
+        // Adjust contrast and brightness (uniforms in [0..1])
+        split.x = ((split.x - 0.5) * (0.5 + u.CONTRAST) + 0.5) * (0.5 + u.BRIGHTNESS);
+
+        // Adjust saturation and tint (uniforms in [0..1])
+        split.y *= 0.5 + u.SATURATION;
+        split.z *= 0.5 + u.SATURATION;
+
+        // Adjust staturation tint (uniforms in [0..1])
+        float angle = (u.TINT - 0.5) * 2.0 * M_PI;
+        float cosA = cos(angle);
+        float sinA = sin(angle);
+        float U1 = split.y - 0.5, V1 = split.z - 0.5;
+        float U2 = (U1 * cosA - V1 * sinA) * (0.5 + u.SATURATION);
+        float V2 = (U1 * sinA + V1 * cosA) * (0.5 + u.SATURATION);
+//         float newY = (cos(angle) * split.y - sin(angle) * split.z) * (0.5 + u.SATURATION);
+//         float newZ = (sin(angle) * split.y + cos(angle) * split.z) * (0.5 + u.SATURATION);
+        split.y = U2 + 0.5;
+        split.z = V2 + 0.5;
         
         if (u.CHROMA_BLUR_ENABLE || u.BLOOM_ENABLE) {
             
