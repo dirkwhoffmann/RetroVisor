@@ -34,6 +34,7 @@
 		5069365C2E4F76280037984F /* Kernel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069365B2E4F76250037984F /* Kernel.swift */; };
 		507ADD392E6EA72200BB7E10 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507ADD382E6EA71C00BB7E10 /* Parser.swift */; };
 		507ADD3B2E6EE29000BB7E10 /* ShaderSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507ADD3A2E6EE28C00BB7E10 /* ShaderSetting.swift */; };
+		507ADD3D2E6F258500BB7E10 /* ColorFilter.metal in Sources */ = {isa = PBXBuildFile; fileRef = 507ADD3C2E6F257A00BB7E10 /* ColorFilter.metal */; };
 		509E84C32E57584400384C75 /* ImageToolbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509E84C22E57584100384C75 /* ImageToolbox.swift */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
@@ -83,6 +84,7 @@
 		507ADD362E68778900BB7E10 /* MathToolbox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MathToolbox.metal; sourceTree = "<group>"; };
 		507ADD382E6EA71C00BB7E10 /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 		507ADD3A2E6EE28C00BB7E10 /* ShaderSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderSetting.swift; sourceTree = "<group>"; };
+		507ADD3C2E6F257A00BB7E10 /* ColorFilter.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ColorFilter.metal; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		509E84C22E57584100384C75 /* ImageToolbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageToolbox.swift; sourceTree = "<group>"; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -227,6 +229,7 @@
 				50BA96652E3FF176006BA8DF /* ShaderTypes.metal */,
 				50BA964D2E3C80D6006BA8DF /* Shaders.metal */,
 				50BA96632E3FF0B3006BA8DF /* CrtEasy.metal */,
+				507ADD3C2E6F257A00BB7E10 /* ColorFilter.metal */,
 				504F53A12E6179AE00C5291F /* ColorSplit.metal */,
 				5011EDEA2E6317D500B0938A /* Phosbite.metal */,
 			);
@@ -348,6 +351,7 @@
 				50DE5B882E4E0666002C07EC /* IconBar.swift in Sources */,
 				50BA96542E3C80D6006BA8DF /* Shaders.metal in Sources */,
 				504F53A02E6173D000C5291F /* ColorSplitShader.swift in Sources */,
+				507ADD3D2E6F258500BB7E10 /* ColorFilter.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

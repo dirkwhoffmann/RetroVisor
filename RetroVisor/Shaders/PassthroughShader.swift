@@ -17,7 +17,12 @@ final class PassthroughShader: Shader {
         
         var INPUT_TEX_SCALE: Float
         var OUTPUT_TEX_SCALE: Float
-        
+
+        var PALETTE: Int32
+        var BRIGHTNESS: Float
+        var CONTRAST: Float
+        var SATURATION: Float
+
         var BLUR_ENABLE: Int32
         var BLUR_FILTER: Int32
         var BLUR_RADIUS_X: Float
@@ -31,6 +36,11 @@ final class PassthroughShader: Shader {
             
             INPUT_TEX_SCALE: 0.5,
             OUTPUT_TEX_SCALE: 2.0,
+            
+            PALETTE: 0,
+            BRIGHTNESS: 0.5,
+            CONTRAST: 0.5,
+            SATURATION: 0.5,
             
             BLUR_ENABLE: 0,
             BLUR_FILTER: BlurFilterType.box.rawValue,
@@ -48,10 +58,14 @@ final class PassthroughShader: Shader {
     // Filter
     var resampler = ResampleFilter()
     var blurFilter = BlurFilter()
+    var colorizer = PaletteFilter(sampler: ShaderLibrary.linear)
     
     // Downscaled input texture
     var src: MTLTexture!
-    
+
+    // Colorized texture
+    var col: MTLTexture!
+
     // Blurred texture
     var blur: MTLTexture!
     
@@ -91,6 +105,15 @@ final class PassthroughShader: Shader {
                     set: { [unowned self] in self.uniforms.BLUR_ENABLE = Int32($0) }),
                   
                   [ ShaderSetting(
+                    title: "Palette",
+                    items: [("COLOR", 0), ("BLACK_WHITE", 1), ("PAPER_WHITE", 2),
+                            ("GREEN", 3), ("AMBER", 4), ("SEPIA", 5)],
+                    value: Binding(
+                        key: "PALETTE",
+                        get: { [unowned self] in Float(self.uniforms.PALETTE) },
+                        set: { [unowned self] in self.uniforms.PALETTE = Int32($0) })),
+                    
+                    ShaderSetting(
                     title: "Blur Filter",
                     items: [("BOX", 0), ("TENT", 1), ("GAUSS", 2)],
                     value: Binding(
@@ -150,6 +173,7 @@ final class PassthroughShader: Shader {
         if src?.width != srcW || src?.height != srcH {
             
             src = output.makeTexture(width: srcW, height: srcH)
+            col = output.makeTexture(width: srcW, height: srcH)
             blur = output.makeTexture(width: srcW, height: srcH)
         }
     }
@@ -164,13 +188,19 @@ final class PassthroughShader: Shader {
         resampler.type = ResampleFilterType(rawValue: uniforms.RESAMPLE_FILTER)!
         resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
         
+        // Apply the color split filter
+        colorizer!.apply(commandBuffer: commandBuffer,
+                         textures: [src, col],
+                         options: &uniforms,
+                         length: MemoryLayout<Uniforms>.stride)
+        
         if uniforms.BLUR_ENABLE != 0 {
             
             // Blur the source texture
             blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
             blurFilter.resampleXY = (uniforms.RESAMPLE_SCALE_X, uniforms.RESAMPLE_SCALE_Y)
             blurFilter.blurSize = (uniforms.BLUR_RADIUS_X, uniforms.BLUR_RADIUS_Y)
-            blurFilter.apply(commandBuffer: commandBuffer, in: src, out: blur)
+            blurFilter.apply(commandBuffer: commandBuffer, in: col, out: blur)
             
             // Rescale to the output texture size
             resampler.apply(commandBuffer: commandBuffer, in: blur, out: output)
@@ -178,7 +208,7 @@ final class PassthroughShader: Shader {
         } else {
             
             // Rescale to the output texture size
-            resampler.apply(commandBuffer: commandBuffer, in: src, out: output)
+            resampler.apply(commandBuffer: commandBuffer, in: col, out: output)
         }
     }
 }
@@ -199,11 +229,11 @@ extension PassthroughShader: ShaderDelegate {
 
 extension PassthroughShader {
     
-    class BypassFilter: Kernel {
+    class PaletteFilter: Kernel {
 
         convenience init?(sampler: MTLSamplerState) {
 
-            self.init(name: "bypass", sampler: sampler)
+            self.init(name: "colorfilter::colorizer", sampler: sampler)
         }
     }
 }
