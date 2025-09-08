@@ -207,7 +207,7 @@ final class Phosbite: Shader {
                     title: "Brightness Boost",
                     range: 0.0...2.0, step: 0.01,
                     value: Binding(
-                        key: "CV_BRIGHT_BOOST",
+                        key: "BRIGHT_BOOST",
                         get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
                         set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
                 ),
@@ -809,6 +809,14 @@ extension Phosbite: ShaderDelegate {
     
     func isHidden(setting: ShaderSetting) -> Bool {
         
+        let key = setting.valueKey
+        
+        if key.starts(with: "BLOOM")    && uniforms.BLOOM_ENABLE     == 0 { return true }
+        if key.starts(with: "CV")       && uniforms.CV_ENABLE        == 0 { return true }
+        if key.starts(with: "DOTMASK")  && uniforms.DOTMASK_ENABLE   == 0 { return true }
+        if key.starts(with: "SCANLINE") && uniforms.SCANLINES_ENABLE == 0 { return true }
+        if key.starts(with: "DEBUG")    && uniforms.DEBUG_ENABLE     == 0 { return true }
+
         switch setting.valueKey {
             
         case "SCANLINE_WEIGHT1": return uniforms.SCANLINE_DISTANCE < 1

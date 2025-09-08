@@ -217,10 +217,24 @@ extension ColorFilter: ShaderDelegate {
     
     func isHidden(setting: ShaderSetting) -> Bool {
         
+        let FILTER_DISABLE = uniforms.BLUR_ENABLE == 0
+        let GAUSS = uniforms.BLUR_FILTER == BlurFilterType.gaussian.rawValue
+        
         switch setting.valueKey {
             
-        case "BLUR_RADIUS_Y":
-            return uniforms.BLUR_FILTER == BlurFilterType.gaussian.rawValue
+        case "PALETTE":             return FILTER_DISABLE
+        case "BRIGHTNESS":          return FILTER_DISABLE
+        case "CONTRAST":            return FILTER_DISABLE
+        case "SATURATION:":         return FILTER_DISABLE
+            
+        case "BLUR_ENABLE":         return FILTER_DISABLE
+        case "BLUR_FILTER":         return FILTER_DISABLE
+        case "BLUR_RADIUS_X":       return FILTER_DISABLE
+        case "BLUR_RADIUS_Y":       return FILTER_DISABLE || GAUSS
+            
+        case "RESAMPLE_SCALE_X":    return FILTER_DISABLE
+        case "RESAMPLE_SCALE_Y":    return FILTER_DISABLE
+            
         default:
             return false
         }
