@@ -34,6 +34,21 @@ final class Sankara: Shader {
         var CV_CHROMA_BOOST: Float
         var CV_CHROMA_BLUR: Float
         
+        var SCANLINES_ENABLE: Int32
+        var SCANLINE_DISTANCE: Int32
+        var SCANLINE_BLUR: Float
+        var SCANLINE_BLOOM: Float
+        var SCANLINE_GAIN: Float
+        var SCANLINE_LOSS: Float
+        var SCANLINE_WEIGHT1: Float
+        var SCANLINE_WEIGHT2: Float
+        var SCANLINE_WEIGHT3: Float
+        var SCANLINE_WEIGHT4: Float
+        var SCANLINE_WEIGHT5: Float
+        var SCANLINE_WEIGHT6: Float
+        var SCANLINE_WEIGHT7: Float
+        var SCANLINE_WEIGHT8: Float
+
         var BLOOM_ENABLE: Int32
         var BLOOM_THRESHOLD: Float
         var BLOOM_INTENSITY: Float
@@ -49,22 +64,7 @@ final class Sankara: Shader {
         var DOTMASK_BLUR: Float
         var DOTMASK_GAIN: Float
         var DOTMASK_LOSS: Float
-        
-        var SCANLINES_ENABLE: Int32
-        var SCANLINE_DISTANCE: Int32
-        var SCANLINE_BLUR: Float
-        var SCANLINE_BLOOM: Float
-        var SCANLINE_GAIN: Float
-        var SCANLINE_LOSS: Float
-        var SCANLINE_WEIGHT1: Float
-        var SCANLINE_WEIGHT2: Float
-        var SCANLINE_WEIGHT3: Float
-        var SCANLINE_WEIGHT4: Float
-        var SCANLINE_WEIGHT5: Float
-        var SCANLINE_WEIGHT6: Float
-        var SCANLINE_WEIGHT7: Float
-        var SCANLINE_WEIGHT8: Float
-        
+                
         var DEBUG_ENABLE: Int32
         var DEBUG_TEXTURE1: Int32
         var DEBUG_TEXTURE2: Int32
@@ -92,6 +92,21 @@ final class Sankara: Shader {
             CV_CHROMA_BOOST: 8.0,
             CV_CHROMA_BLUR: 24,
             
+            SCANLINES_ENABLE: 1,
+            SCANLINE_DISTANCE: 6,
+            SCANLINE_BLUR: 1.5,
+            SCANLINE_BLOOM: 1.0,
+            SCANLINE_GAIN: 0.5,
+            SCANLINE_LOSS: -0.5,
+            SCANLINE_WEIGHT1: 0.20,
+            SCANLINE_WEIGHT2: 0.36,
+            SCANLINE_WEIGHT3: 0.60,
+            SCANLINE_WEIGHT4: 0.68,
+            SCANLINE_WEIGHT5: 0.75,
+            SCANLINE_WEIGHT6: 0.80,
+            SCANLINE_WEIGHT7: 1.0,
+            SCANLINE_WEIGHT8: 1.0,
+
             BLOOM_ENABLE: 0,
             BLOOM_THRESHOLD: 0.0,
             BLOOM_INTENSITY: 1.0,
@@ -107,22 +122,7 @@ final class Sankara: Shader {
             DOTMASK_BLUR: 0.0,
             DOTMASK_GAIN: 1.0,
             DOTMASK_LOSS: -0.5,
-            
-            SCANLINES_ENABLE: 1,
-            SCANLINE_DISTANCE: 6,
-            SCANLINE_BLUR: 1.5,
-            SCANLINE_BLOOM: 1.0,
-            SCANLINE_GAIN: 0.5,
-            SCANLINE_LOSS: -0.5,
-            SCANLINE_WEIGHT1: 0.20,
-            SCANLINE_WEIGHT2: 0.36,
-            SCANLINE_WEIGHT3: 0.60,
-            SCANLINE_WEIGHT4: 0.68,
-            SCANLINE_WEIGHT5: 0.75,
-            SCANLINE_WEIGHT6: 0.80,
-            SCANLINE_WEIGHT7: 1.0,
-            SCANLINE_WEIGHT8: 1.0,
-            
+                        
             DEBUG_ENABLE: 0,
             DEBUG_TEXTURE1: 0,
             DEBUG_TEXTURE2: 1,
@@ -297,47 +297,7 @@ final class Sankara: Shader {
                             get: { [unowned self] in self.uniforms.CV_CHROMA_BLUR },
                             set: { [unowned self] in self.uniforms.CV_CHROMA_BLUR = $0 })),
                   ]),
-            
-            Group(title: "Blooming",
-                  
-                  enable: Binding(
-                    key: "BLOOM_ENABLE",
-                    get: { [unowned self] in Float(self.uniforms.BLOOM_ENABLE) },
-                    set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) }),
-                  
-                  [ ShaderSetting(
-                    title: "Bloom Threshold",
-                    range: 0.0...1.0, step: 0.01,
-                    value: Binding(
-                        key: "BLOOM_THRESHOLD",
-                        get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD },
-                        set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD = $0 })),
-                    
-                    ShaderSetting(
-                        title: "Bloom Intensity",
-                        range: 0.1...2.0, step: 0.01,
-                        value: Binding(
-                            key: "BLOOM_INTENSITY",
-                            get: { [unowned self] in self.uniforms.BLOOM_INTENSITY },
-                            set: { [unowned self] in self.uniforms.BLOOM_INTENSITY = $0 })),
-                    
-                    ShaderSetting(
-                        title: "Bloom Radius X",
-                        range: 0.0...30.0, step: 1.0,
-                        value: Binding(
-                            key: "BLOOM_RADIUS_X",
-                            get: { [unowned self] in self.uniforms.BLOOM_RADIUS_X },
-                            set: { [unowned self] in self.uniforms.BLOOM_RADIUS_X = $0 })),
-                    
-                    ShaderSetting(
-                        title: "Bloom Radius Y",
-                        range: 0.0...30.0, step: 1.0,
-                        value: Binding(
-                            key: "BLOOM_RADIUS_Y",
-                            get: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y },
-                            set: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y = $0 })),
-                  ]),
-            
+                        
             Group(title: "Scanlines",
                   
                   enable: Binding(
@@ -448,6 +408,46 @@ final class Sankara: Shader {
                             key: "SCANLINE_WEIGHT8",
                             get: { [unowned self] in self.uniforms.SCANLINE_WEIGHT8 },
                             set: { [unowned self] in self.uniforms.SCANLINE_WEIGHT8 = $0 })),
+                  ]),
+            
+            Group(title: "Blooming",
+                  
+                  enable: Binding(
+                    key: "BLOOM_ENABLE",
+                    get: { [unowned self] in Float(self.uniforms.BLOOM_ENABLE) },
+                    set: { [unowned self] in self.uniforms.BLOOM_ENABLE = Int32($0) }),
+                  
+                  [ ShaderSetting(
+                    title: "Bloom Threshold",
+                    range: 0.0...1.0, step: 0.01,
+                    value: Binding(
+                        key: "BLOOM_THRESHOLD",
+                        get: { [unowned self] in self.uniforms.BLOOM_THRESHOLD },
+                        set: { [unowned self] in self.uniforms.BLOOM_THRESHOLD = $0 })),
+                    
+                    ShaderSetting(
+                        title: "Bloom Intensity",
+                        range: 0.1...2.0, step: 0.01,
+                        value: Binding(
+                            key: "BLOOM_INTENSITY",
+                            get: { [unowned self] in self.uniforms.BLOOM_INTENSITY },
+                            set: { [unowned self] in self.uniforms.BLOOM_INTENSITY = $0 })),
+                    
+                    ShaderSetting(
+                        title: "Bloom Radius X",
+                        range: 0.0...31.0, step: 1.0,
+                        value: Binding(
+                            key: "BLOOM_RADIUS_X",
+                            get: { [unowned self] in self.uniforms.BLOOM_RADIUS_X },
+                            set: { [unowned self] in self.uniforms.BLOOM_RADIUS_X = $0 })),
+                    
+                    ShaderSetting(
+                        title: "Bloom Radius Y",
+                        range: 0.0...31.0, step: 1.0,
+                        value: Binding(
+                            key: "BLOOM_RADIUS_Y",
+                            get: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y },
+                            set: { [unowned self] in self.uniforms.BLOOM_RADIUS_Y = $0 })),
                   ]),
             
             Group(title: "Dot Mask",

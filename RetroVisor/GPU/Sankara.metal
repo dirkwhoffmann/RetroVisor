@@ -36,6 +36,15 @@ namespace sankara {
         float CV_CHROMA_BOOST;
         float CV_CHROMA_BLUR;
 
+        // Scanlines
+        uint  SCANLINES_ENABLE;
+        uint  SCANLINE_DISTANCE;
+        float SCANLINE_BLUR;
+        float SCANLINE_BLOOM;
+        float SCANLINE_GAIN;
+        float SCANLINE_LOSS;
+        float SCANLINE_WEIGHT[8];
+
         // Bloom effect
         uint  BLOOM_ENABLE;
         float BLOOM_THRESHOLD;
@@ -53,15 +62,6 @@ namespace sankara {
         float DOTMASK_BLUR;
         float DOTMASK_GAIN;
         float DOTMASK_LOSS;
-
-        // Scanlines
-        uint  SCANLINES_ENABLE;
-        uint  SCANLINE_DISTANCE;
-        float SCANLINE_BLUR;
-        float SCANLINE_BLOOM;
-        float SCANLINE_GAIN;
-        float SCANLINE_LOSS;
-        float SCANLINE_WEIGHT[8];
         
         // Debugging
         uint  DEBUG_ENABLE;
@@ -198,7 +198,7 @@ namespace sankara {
             yccColor.x = remap(float(yccColor.x), 1.0 - w, u.SCANLINE_GAIN, u.SCANLINE_LOSS);
         }
         
-        // Apply bloom effect
+        // Apply the bloom effect
         if (u.BLOOM_ENABLE) {
 
             Color bloom = bl0.sample(sam, uv).x;
