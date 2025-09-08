@@ -825,13 +825,12 @@ extension Phosbite: ShaderDelegate {
         }
     }
     
-    func settingDidChange(setting: ShaderSetting) -> Bool{
+    func settingDidChange(setting: ShaderSetting) {
         
         if setting.valueKey  == "OUTPUT_TEX_SCALE" || setting.valueKey .starts(with: "DOTMASK") {
             
             dotMaskNeedsUpdate = true
         }
-        return false
     }
 }
 

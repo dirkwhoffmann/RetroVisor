@@ -16,28 +16,31 @@ import MetalPerformanceShaders
  * rendering pipeline and serves as a registry for all shaders the application
  * supports.
  *
- *   - The `shared` singleton instance is the primary global access point
- *     for retrieving, adding, and managing shaders.
+ *   - This class is a singleton: the `shared` instance is the only instance
+ *     that can exist and is the global access point for retrieving, adding,
+ *     and managing shaders.
  *
- *   - The `passthroughShader` is always stored in the library and acts as a
- *     guaranteed fallback. It is returned whenever a requested shader is
- *     unavailable or an effect should be disabled.
+ *   - Note: The library must never be empty. Several functions assume that at
+ *     least one shader is available, and undefined behavior would occur
+ *     otherwise.
  */
 
 @MainActor
 final class ShaderLibrary {
 
-    // static let shared = ShaderLibrary()
-    static let shared: ShaderLibrary = {
+    static let shared = ShaderLibrary()
+    /*
+     static let shared: ShaderLibrary = {
           
         let lib = ShaderLibrary()
         lib.register(Phosbite())
         lib.register(CRTEasy())
-        // lib.register(ColorFilter())
+        lib.register(ColorFilter())
         lib.register(ColorSplitter())
         lib.selectShader(at: 0)
         return lib
     }()
+    */
     
     static let lanczos = LanczosShader()
     static let bilinear = BilinearShader()
@@ -102,9 +105,13 @@ final class ShaderLibrary {
 
     private init() {
 
-        print ("ShaderLibrary: init")
-        shaders.append(Passthrough())
+        shaders.append(Phosbite())
+        shaders.append(CRTEasy())
+        shaders.append(ColorFilter())
+        shaders.append(ColorSplitter())
+        
         currentShader = shaders[0]
+        currentShader.activate()
     }
 
     func register(_ shader: Shader) {

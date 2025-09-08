@@ -102,9 +102,7 @@ class Group : ShaderSetting {
     
     // The settings in this group
     var children: [ShaderSetting]
-    
-    // var count: Int { children.filter { $0.hidden() == false }.count }
-    
+        
     init(title: String = "",
          range: ClosedRange<Double>? = nil,
          step: Float = 0.01,
