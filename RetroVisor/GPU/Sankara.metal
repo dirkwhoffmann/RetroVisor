@@ -13,7 +13,7 @@
 
 using namespace metal;
 
-namespace phosbite {
+namespace sankara {
 
     struct Uniforms {
 

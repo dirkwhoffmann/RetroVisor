@@ -33,7 +33,7 @@ final class ShaderLibrary {
      static let shared: ShaderLibrary = {
           
         let lib = ShaderLibrary()
-        lib.register(Phosbite())
+        lib.register(Sankara())
         lib.register(CRTEasy())
         lib.register(ColorFilter())
         lib.register(ColorSplitter())
@@ -105,7 +105,7 @@ final class ShaderLibrary {
 
     private init() {
 
-        shaders.append(Phosbite())
+        shaders.append(Sankara())
         shaders.append(CRTEasy())
         shaders.append(ColorFilter())
         shaders.append(ColorSplitter())

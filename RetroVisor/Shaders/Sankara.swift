@@ -123,7 +123,7 @@ final class Sankara: Shader {
             SCANLINE_WEIGHT7: 1.0,
             SCANLINE_WEIGHT8: 1.0,
             
-            DEBUG_ENABLE: 1,
+            DEBUG_ENABLE: 0,
             DEBUG_TEXTURE1: 0,
             DEBUG_TEXTURE2: 1,
             DEBUG_LEFT: 0,
@@ -830,31 +830,31 @@ extension Sankara {
     
     class SplitFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "phosbite::split", sampler: sampler)
+            self.init(name: "sankara::split", sampler: sampler)
         }
     }
     
     class CompositeFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "phosbite::composite", sampler: sampler)
+            self.init(name: "sankara::composite", sampler: sampler)
         }
     }
     
     class DotMaskFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "phosbite::dotMask", sampler: sampler)
+            self.init(name: "sankara::dotMask", sampler: sampler)
         }
     }
     
     class CrtFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "phosbite::crt", sampler: sampler)
+            self.init(name: "sankara::crt", sampler: sampler)
         }
     }
     
     class DebugFilter: Kernel {
         convenience init?(sampler: MTLSamplerState) {
-            self.init(name: "phosbite::debug", sampler: sampler)
+            self.init(name: "sankara::debug", sampler: sampler)
         }
     }
 }
