@@ -8,9 +8,32 @@
 // -----------------------------------------------------------------------------
 
 #include <metal_stdlib>
-#include "ShaderTypes.metal"
 
 using namespace metal;
+
+struct VertexIn {
+
+    float4 position [[attribute(0)]];
+    float2 texCoord [[attribute(1)]];
+};
+
+struct VertexOut {
+
+    float4 position [[position]];
+    float2 texCoord;
+};
+
+struct Uniforms {
+
+    float time;
+    float2 shift;
+    float zoom;
+    float intensity;
+    float2 resolution;
+    float2 window;
+    float2 center;
+    float2 mouse;
+};
 
 //
 // Vertex shader
@@ -42,9 +65,9 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
                               constant Uniforms& uniforms [[buffer(0)]],
                               sampler sam [[sampler(0)]]) {
 
-    float2 shift = float2(0.5 - 0.5 / uniforms.zoom, 0.5 - 0.5 / uniforms.zoom);
-    float2 uv = in.texCoord / uniforms.zoom + shift;
-    float2 mouse = uniforms.mouse / uniforms.zoom + shift;
+    // float2 shift = float2(0.5 - 0.5 / uniforms.zoom, 0.5 - 0.5 / uniforms.zoom);
+    float2 uv = in.texCoord / uniforms.zoom + uniforms.shift;
+    float2 mouse = uniforms.mouse / uniforms.zoom + uniforms.shift;
 
     if (uniforms.intensity > 0.0) {
 
@@ -82,4 +105,35 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     }
 
     return tex.sample(sam, uv);
+}
+
+//
+// Dot mask kernel (Used by DotMasLibrary)
+//
+
+struct DotMaskdUniforms {
+    
+    uint WIDTH;
+    uint HEIGHT;
+    uint TYPE;
+    uint COLOR;
+    uint SIZE;
+    float SATURATION;
+    float BRIGHTNESS;
+    float BLUR;
+};
+
+kernel void dotMask(texture2d<half, access::sample> input     [[ texture(0) ]],
+                    texture2d<half, access::write>  output    [[ texture(1) ]],
+                    constant DotMaskdUniforms       &u        [[ buffer(0)  ]],
+                    sampler                         sam       [[ sampler(0) ]],
+                    uint2                           gid       [[ thread_position_in_grid ]])
+{
+    float2 texSize = float2(input.get_width(), input.get_height());
+    uint2 gridSize = uint2(float2(u.SIZE, u.SIZE) * texSize);
+
+    float2 uv = (float2(gid % gridSize) + 0.5) / float2(gridSize);
+
+    half4 color = input.sample(sam, uv);
+    output.write(color, gid);
 }

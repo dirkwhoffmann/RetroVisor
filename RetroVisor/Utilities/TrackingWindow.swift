@@ -33,6 +33,7 @@ import AppKit
  *    are useful for tasks such as mapping mouse positions or aligning UI elements.
  */
 
+@MainActor
 protocol TrackingWindowDelegate {
 
     func windowDidStartDrag(_ window: TrackingWindow)
@@ -59,6 +60,7 @@ extension TrackingWindowDelegate {
     func windowDidChangeScreen(_ window: TrackingWindow) {}
 }
 
+@MainActor
 class TrackingWindow: NSWindow, Loggable {
 
     // The window delegate
@@ -123,9 +125,9 @@ class TrackingWindow: NSWindow, Loggable {
     override func awakeFromNib() {
 
         super.awakeFromNib()
-        delegate = self
+        Task { @MainActor in delegate = self }
     }
-
+    
     private func recordLocations() {
 
         // Get the window origin
@@ -229,12 +231,14 @@ class TrackingWindow: NSWindow, Loggable {
         // Reset timer to detect resize end
         resizeDebounceTimer?.invalidate()
         resizeDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
-
-            if let self = self {
-
+            
+            Task { @MainActor in
+                
+                guard let self = self else { return }
+                
                 self.isResizing = false
-                log("windowDidStopResize(\(self))")
-                trackingDelegate?.windowDidStopResize(self)
+                self.log("windowDidStopResize(\(self))")
+                self.trackingDelegate?.windowDidStopResize(self)
             }
         }
 

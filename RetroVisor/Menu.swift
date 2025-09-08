@@ -148,24 +148,72 @@ extension AppDelegate: NSMenuItemValidation {
         }
     }
 
+    @IBAction func loadSettingsAction(_ sender: NSMenuItem) {
+        
+        let panel = NSOpenPanel()
+        panel.title = "Load Settings"
+        panel.allowedContentTypes = [.plainText]
+        
+        if panel.runModal() == .OK {
+            
+            if let url = panel.url {
+                do {
+                    try ShaderLibrary.shared.currentShader.dictionary = Parser.load(url: url)
+                } catch {
+                    let alert = NSAlert()
+                    alert.messageText = "Failed to load settings"
+                    alert.informativeText = error.localizedDescription
+                    alert.alertStyle = .warning
+                    alert.addButton(withTitle: "OK")
+                    alert.runModal()
+                }
+            }
+        }
+    }
+
+    @IBAction func saveSettingsAction(_ sender: NSMenuItem) {
+        
+        let panel = NSSavePanel()
+        panel.title = "Save Settings"
+        panel.allowedContentTypes = [.plainText]
+        panel.nameFieldStringValue = "settings.txt"
+        
+        if panel.runModal() == .OK {
+            if let url = panel.url {
+                let shader = ShaderLibrary.shared.currentShader
+                try? shader.saveSettings(url: url)
+            }
+        }
+    }
+
     @IBAction func resetZoom(_ sender: NSMenuItem) {
 
-        if let controller = windowController {
-            controller.metalView?.zoom = 1.0
+        if let metalView = windowController?.metalView {
+
+            metalView.zoom = 1.0
+            metalView.shift = [0, 0];
         }
     }
 
     @IBAction func zoomIn(_ sender: NSMenuItem) {
 
-        if let controller = windowController {
-            controller.metalView?.zoom += 0.5
+        if let metalView = windowController?.metalView {
+            
+            let oldCenter = metalView.map(coord: [0.5,0.5])
+            metalView.zoom += 0.5
+            let newCenter = metalView.map(coord: [0.5,0.5])
+            metalView.shift += oldCenter - newCenter;
         }
     }
 
     @IBAction func zoomOut(_ sender: NSMenuItem) {
 
-        if let controller = windowController {
-            controller.metalView?.zoom -= 0.5
+        if let metalView = windowController?.metalView {
+            
+            let oldCenter = metalView.map(coord: [0.5,0.5])
+            metalView.zoom -= 0.5
+            let newCenter = metalView.map(coord: [0.5,0.5])
+            metalView.shift += oldCenter - newCenter;
         }
     }
 }

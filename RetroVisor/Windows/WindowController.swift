@@ -10,6 +10,7 @@
 import Cocoa
 import ScreenCaptureKit
 
+@MainActor
 class WindowController: NSWindowController, Loggable {
 
     var viewController: ViewController? { return self.contentViewController as? ViewController }
@@ -106,6 +107,7 @@ class WindowController: NSWindowController, Loggable {
     }
 }
 
+@MainActor
 extension WindowController: TrackingWindowDelegate {
 
     func windowDidStartResize(_ window: TrackingWindow) {
@@ -150,6 +152,7 @@ extension WindowController: TrackingWindowDelegate {
     }
 }
 
+@MainActor
 extension WindowController: StreamerDelegate {
 
     func textureRectDidChange(rect: CGRect?) {
@@ -170,19 +173,19 @@ extension WindowController: StreamerDelegate {
         }
     }
 
-    func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
+    nonisolated func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
         switch type {
 
         case .screen:
 
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
+            let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
 
-            DispatchQueue.main.async { [weak self] in
-
+            Task { @MainActor [weak self] in
+                                
                 if let controller = self?.contentViewController as? ViewController {
-
-                    let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
+                    
                     self?.recorder.timestamp = pts
                     controller.metalView.update(with: pixelBuffer)
                 }
@@ -190,7 +193,7 @@ extension WindowController: StreamerDelegate {
 
         case .audio:
 
-            DispatchQueue.main.async { [weak self] in
+            Task { @MainActor [weak self] in
 
                 self?.recorder.appendAudio(buffer: buffer)
             }

@@ -8,18 +8,21 @@
 // -----------------------------------------------------------------------------
 
 import MetalKit
+import MetalPerformanceShaders
 
-struct ShaderSetting {
+@MainActor
+protocol ShaderDelegate {
+    
+    func title(setting: ShaderSetting) -> String
+    func isHidden(setting: ShaderSetting) -> Bool
+    func settingDidChange(setting: ShaderSetting)
+}
 
-    let name: String
-    let key: String
-    let range: ClosedRange<Double>?
-    let step: Float
-    let help: String?
-
-    var formatString: String {
-        return step < 0.1 ? "%.2f" : step < 1.0 ? "%.1f" : "%.0f"
-    }
+extension ShaderDelegate {
+    
+    func title(setting: ShaderSetting) -> String { setting.title }
+    func isHidden(setting: ShaderSetting) -> Bool { false }
+    func settingDidChange(setting: ShaderSetting) { }
 }
 
 @MainActor
@@ -28,31 +31,123 @@ class Shader : Loggable {
     static var device: MTLDevice { MTLCreateSystemDefaultDevice()! }
 
     // Enables debug output to the console
-    let logging: Bool = false
+    let logging: Bool = true
 
+    // Name of this shader
     var name: String = ""
-    var settings: [ShaderSetting] = []
+    
+    // Shader settings
+    var settings: [Group] = []
 
+    // Delegate
+    var delegate: ShaderDelegate?
+    
     init(name: String) {
 
         self.name = name
     }
+    
+    // Returns the names of all available presets
+    var presets: [String] { return ["Default"] }
 
-    func activate() {
-        log("Activating \(name)")
-    }
+    // Reverts the settings to the selected preset
+    func revertToPreset(nr: Int) { }
+    
+    // Called once when the user selects this shader
+    func activate() { log("Activating \(name)") }
 
-    func retire() {
-        log("Retiring \(name)")
-    }
-
+    // Called once when the user selects another shader
+    func retire() { log("Retiring \(name)") }
+    
+    // Runs the shader
     func apply(commandBuffer: MTLCommandBuffer,
-               in inTexture: MTLTexture, out outTexture: MTLTexture) {
-
+               in input: MTLTexture, out output: MTLTexture, rect: CGRect = .unity) {
+        
         fatalError("To be implemented by a subclass")
     }
+}
 
-    func get(key: String) -> Float { return 0 }
-    func set(key: String, value: Float) {}
-    func apply(to encoder: MTLRenderCommandEncoder, pass: Int = 1) { }
+//
+// Loading and saving options
+//
+
+extension Shader {
+    
+    // Searches a setting by name
+    func findSetting(key: String) -> ShaderSetting? {
+        
+        for group in settings { if let match = group.findSetting(key: key) { return match } }
+        return nil
+    }
+    
+    var dictionary: [String: [String: String]] {
+        
+        get {
+            var result: [String: [String: String]] = [:]
+            
+            for group in settings {
+                result[group.title] = group.dictionary
+            }
+            return result
+        }
+        set {
+            
+            for (_, keyValues) in newValue {
+                
+                for (key, value) in keyValues {
+                                    
+                    guard let setting = findSetting(key: key) else {
+                        
+                        log("Setting \(key) not found", .warning)
+                        continue
+                    }
+                    guard let value = Float(value) else {
+                        
+                        log("Failed to parse string \(value)", .warning)
+                        continue
+                    }
+                    if setting.enableKey == key { setting.enabled = value != 0 }
+                    if setting.valueKey == key { setting.floatValue = value }
+                }
+            }
+        }
+    }
+    
+    func saveSettings(url: URL) throws {
+                
+        try Parser.save(url: url, dict: dictionary)
+    }
+}
+
+//
+// Wrappers around MPSImageScale
+//
+
+@MainActor
+class ScaleShader<F: MPSImageScale> : Shader {
+
+    override func apply(commandBuffer: MTLCommandBuffer,
+                        in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
+
+        let filter = F(device: output.device)
+        var transform = MPSScaleTransform.init(in: input, out: output, rect: rect)
+
+        withUnsafePointer(to: &transform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
+
+            filter.scaleTransform = transformPtr
+            filter.encode(commandBuffer: commandBuffer, sourceTexture: input, destinationTexture: output)
+        }
+    }
+}
+
+@MainActor
+class BilinearShader: ScaleShader<MPSImageBilinearScale> {
+
+    init() { super.init(name: "Bilinear") }
+}
+
+@MainActor
+class LanczosShader: ScaleShader<MPSImageLanczosScale> {
+
+    init() { super.init(name: "Lanczos") }
 }

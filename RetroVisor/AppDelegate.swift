@@ -9,6 +9,7 @@
 
 import Cocoa
 
+@MainActor
 var app: AppDelegate { NSApp.delegate as! AppDelegate }
 
 @main @MainActor
@@ -40,10 +41,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
 
-        ShaderLibrary.shared.register(CRTEasyShader())
-        ShaderLibrary.shared.register(PlaygroundShader())
+        // TODO: MOVE TO SHADER LIBRARY INIT
+        /*
+        ShaderLibrary.shared.register(CRTEasy())
+        ShaderLibrary.shared.register(Sankara())
+        ShaderLibrary.shared.register(ColorSplitter())
         ShaderLibrary.shared.selectShader(at: 2)
-
+        */
+        
         Task {
 
             if await Streamer.canRecord {

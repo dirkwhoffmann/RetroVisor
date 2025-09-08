@@ -50,8 +50,7 @@ class Kernel {
 
     func apply(commandBuffer: MTLCommandBuffer,
                source: MTLTexture, target: MTLTexture,
-               options: UnsafeRawPointer? = nil, length: Int = 0,
-               options2: UnsafeRawPointer? = nil, length2: Int = 0) {
+               options: UnsafeRawPointer? = nil, length: Int = 0) {
 
         if let encoder = commandBuffer.makeComputeCommandEncoder() {
 
@@ -59,14 +58,12 @@ class Kernel {
             encoder.setTexture(target, index: 1)
 
             apply(encoder: encoder, width: target.width, height: target.height,
-                  options: options, length: length,
-                  options2: options2, length2: length2)
+                  options: options, length: length)
         }
     }
 
     func apply(commandBuffer: MTLCommandBuffer, textures: [MTLTexture],
-               options: UnsafeRawPointer? = nil, length: Int = 0,
-               options2: UnsafeRawPointer? = nil, length2: Int = 0) {
+               options: UnsafeRawPointer? = nil, length: Int = 0) {
 
         if let encoder = commandBuffer.makeComputeCommandEncoder() {
 
@@ -74,15 +71,13 @@ class Kernel {
                 encoder.setTexture(texture, index: index)
             }
             apply(encoder: encoder, width: textures.last!.width, height: textures.last!.height,
-                  options: options, length: length,
-                  options2: options2, length2: length2)
+                  options: options, length: length)
         }
     }
 
     private func apply(encoder: MTLComputeCommandEncoder,
                        width: Int, height: Int,
-                       options: UnsafeRawPointer?, length: Int = 0,
-                       options2: UnsafeRawPointer?, length2: Int = 0) {
+                       options: UnsafeRawPointer?, length: Int = 0) {
 
         // Select sampler
         encoder.setSamplerState(sampler ?? ShaderLibrary.linear, index: 0)
@@ -92,14 +87,13 @@ class Kernel {
 
         // Pass in shader options
         if let opt = options { encoder.setBytes(opt, length: length, index: 0) }
-        if let opt2 = options2 { encoder.setBytes(opt2, length: length2, index: 1) }
 
         // Choose a fixed, GPU-friendly group size
         let threadsPerThreadgroup = MTLSize(width: 16, height: 16, depth: 1)
 
         // Compute how many groups are needed (rounding up to cover all pixels)
         let threadgroupsPerGrid = MTLSize(
-            width: (width + threadsPerThreadgroup.width  - 1) / threadsPerThreadgroup.width,
+            width: (width + threadsPerThreadgroup.width - 1) / threadsPerThreadgroup.width,
             height: (height + threadsPerThreadgroup.height - 1) / threadsPerThreadgroup.height,
             depth: 1
         )
@@ -110,49 +104,3 @@ class Kernel {
         encoder.endEncoding()
     }
 }
-
-//
-// Passthrough kernel
-//
-
-class BypassFilter: Kernel {
-
-    convenience init?(sampler: MTLSamplerState) {
-
-        self.init(name: "bypass", sampler: sampler)
-    }
-}
-
-//
-// CrtEasy kernel
-//
-
-class CrtEasyKernel: Kernel {
-
-    convenience init?(sampler: MTLSamplerState) {
-
-        self.init(name: "crtEasy", sampler: sampler)
-    }
-}
-
-
-//
-// My personal playground. Nothing to see here. Move on.
-//
-
-class PlaygroundKernel1: Kernel {
-
-    convenience init?(sampler: MTLSamplerState) {
-
-        self.init(name: "playground1", sampler: sampler)
-    }
-}
-
-class PlaygroundKernel2: Kernel {
-
-    convenience init?(sampler: MTLSamplerState) {
-
-        self.init(name: "playground2", sampler: sampler)
-    }
-}
-

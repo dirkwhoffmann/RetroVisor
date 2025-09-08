@@ -46,13 +46,13 @@ struct Vertex {
 struct Uniforms {
 
     var time: Float
+    var shift: SIMD2<Float>
     var zoom: Float
     var intensity: Float
     var resolution: SIMD2<Float>
     var window: SIMD2<Float>
     var center: SIMD2<Float>
     var mouse: SIMD2<Float>
-    var texRect: SIMD4<Float>
 }
 
 class MetalView: MTKView, Loggable, MTKViewDelegate {
@@ -71,26 +71,55 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var renderPass: MTLRenderPassDescriptor!
 
     var uniforms = Uniforms.init(time: 0.0,
+                                 shift: [0, 0],
                                  zoom: 1.0,
                                  intensity: 0.0,
                                  resolution: [0, 0],
                                  window: [0, 0],
                                  center: [0, 0],
-                                 mouse: [0, 0],
-                                 texRect: [0.0, 0.0, 1.0, 1.0])
+                                 mouse: [0, 0])
 
     var textureCache: CVMetalTextureCache!
 
-    var inTexture: MTLTexture?  // Input texture from the screen capturer
-    var midTexture: MTLTexture? // Output of the first effect render stage
-    var outTexture: MTLTexture? // Output of the second effect render stage
+    // Input texture from the screen capturer
+    var inTexture: MTLTexture?
 
+    // Area of the input texture covered by the effect window
+    var texRect: CGRect = .unity
+
+    // Final output texture rendered in the effect window
+    var outTexture: MTLTexture?
+
+    // Animation parameters
     var time: Float = 0.0
-    var zoom: Float = 1.0 { didSet { zoom = min(max(zoom, 1.0), 16.0) } }
-
     var intensity = Animated<Float>(0.0)
     var animates: Bool { intensity.current > 0 }
 
+    // Zooming and panning
+    var shift: SIMD2<Float> = [0, 0] {
+        didSet {
+            shift.x = min(max(shift.x, 0.0), 1.0 - 1.0 / zoom)
+            shift.y = min(max(shift.y, 0.0), 1.0 - 1.0 / zoom)
+        }
+    }
+    var zoom: Float = 1.0 {
+        didSet {
+            zoom = min(max(zoom, 1.0), 16.0)
+        }
+    }
+
+    // Maps a [0,1]-coordinate to the zoom/shift area
+    func map(coord: SIMD2<Float>, size: NSSize = .unity) -> SIMD2<Float> {
+        
+        let normalized = SIMD2<Float>(coord.x / Float(size.width),
+                                      coord.y / Float(size.height))
+        return normalized / zoom + shift
+    }
+    func map(point: NSPoint, size: NSSize = .unity) -> SIMD2<Float> {
+    
+        return map(coord: [Float(point.x), Float(point.y)], size: size)
+    }
+    
     required init(coder: NSCoder) {
 
         super.init(coder: coder)
@@ -99,7 +128,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         enableSetNeedsDisplay = true
         framebufferOnly = false
         clearColor = MTLClearColorMake(0, 0, 0, 1)
-
+        colorPixelFormat = .bgra8Unorm
         initMetal()
 
         // Enable the magnification gesture
@@ -117,9 +146,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         // Create a texture cache
         CVMetalTextureCacheCreate(nil, nil, device, nil, &textureCache)
-
-        // Setup the vertex buffers
-        // textureRectDidChange(CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
 
         // Load shaders from the default library
         let vertexFunc = ShaderLibrary.library.makeFunction(name: "vertex_main")!
@@ -169,13 +195,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     func textureRectDidChange(_ rect: CGRect?) {
 
-        if let rect = rect {
-
-            uniforms.texRect = [ Float(rect.minX),
-                                 Float(rect.minY),
-                                 Float(rect.maxX),
-                                 Float(rect.maxY) ]
-        }
+        texRect = rect ?? .unity
     }
 
     func updateTextures(rect: NSRect) {
@@ -196,7 +216,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                                                       mipmapped: false)
             descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
 
-            midTexture = device!.makeTexture(descriptor: descriptor)
             outTexture = device!.makeTexture(descriptor: descriptor)
         }
     }
@@ -248,6 +267,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Setup uniforms
         uniforms.time = time
         uniforms.zoom = zoom
+        uniforms.shift = shift
         uniforms.intensity = intensity.current
         uniforms.resolution = [Float(inTexture.width), Float(inTexture.height)]
         uniforms.window = [Float(trackingWindow.liveFrame.width), Float(trackingWindow.liveFrame.height)]
@@ -262,7 +282,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         //
 
         ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer,
-                                                 in: inTexture, out: outTexture)
+                                                 in: inTexture, out: outTexture, rect: texRect)
 
         //
         // Stage 2: (Optional) in-texture blurring
@@ -308,6 +328,24 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     @objc func handleMagnify(_ recognizer: NSMagnificationGestureRecognizer) {
 
+        // Get the current mouse position and flip the y coordinate
+        var location = recognizer.location(in: self)
+        location.y = bounds.height - location.y
+        
+        // Apply the zoom effect
+        let oldLocation = map(point: location, size: bounds.size)
         zoom += Float(recognizer.magnification) * 0.1
+        let newLocation = map(point: location, size: bounds.size)
+
+        // Shift the image such that the mouse points to the same pixel again
+        shift += oldLocation - newLocation
+    }
+    
+    override func scrollWheel(with event: NSEvent) {
+        
+        let deltaX = Float(event.scrollingDeltaX) / (2000.0 * zoom)
+        let deltaY = Float(event.scrollingDeltaY) / (2000.0 * zoom)
+    
+        shift = [shift.x - deltaX, shift.y - deltaY]
     }
 }

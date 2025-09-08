@@ -10,6 +10,7 @@
 import AVFoundation
 import ScreenCaptureKit
 
+@MainActor
 protocol RecorderDelegate: AnyObject {
 
     func recorderDidStart()
@@ -30,9 +31,6 @@ class Recorder: Loggable {
 
     // The current recording state
     var isRecording: Bool { countdown == 0 }
-
-    // Time when the recorder started
-    // private var startTime: CMTime?
 
     // The recorded screen cutout
     private(set) var recordingRect: NSRect?
@@ -123,7 +121,7 @@ class Recorder: Loggable {
         delegate?.recorderDidStart()
     }
 
-    func stopRecording(completion: @escaping () -> Void) {
+    func stopRecording(completion: @Sendable @escaping () -> Void) {
 
         if !isRecording { return }
 
