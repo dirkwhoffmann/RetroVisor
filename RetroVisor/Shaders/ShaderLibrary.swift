@@ -103,7 +103,7 @@ final class ShaderLibrary {
     private init() {
 
         print ("ShaderLibrary: init")
-        shaders.append(ColorFilter())
+        shaders.append(Passthrough())
         currentShader = shaders[0]
     }
 
