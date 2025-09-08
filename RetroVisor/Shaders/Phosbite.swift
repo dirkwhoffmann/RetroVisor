@@ -52,10 +52,8 @@ final class Phosbite: Shader {
         
         var SCANLINES_ENABLE: Int32
         var SCANLINE_DISTANCE: Int32
-        var SCANLINE_SHARPNESS: Float
         var SCANLINE_BLUR: Float
         var SCANLINE_BLOOM: Float
-        var SCANLINE_STRENGTH: Float
         var SCANLINE_GAIN: Float
         var SCANLINE_LOSS: Float
         var SCANLINE_WEIGHT1: Float
@@ -112,10 +110,8 @@ final class Phosbite: Shader {
             
             SCANLINES_ENABLE: 1,
             SCANLINE_DISTANCE: 6,
-            SCANLINE_SHARPNESS: 1.0,
             SCANLINE_BLUR: 1.5,
             SCANLINE_BLOOM: 1.0,
-            SCANLINE_STRENGTH: 1.0,
             SCANLINE_GAIN: 0.5,
             SCANLINE_LOSS: -0.5,
             SCANLINE_WEIGHT1: 0.20,
@@ -348,22 +344,6 @@ final class Phosbite: Shader {
                         key: "SCANLINE_DISTANCE",
                         get: { [unowned self] in Float(self.uniforms.SCANLINE_DISTANCE) },
                         set: { [unowned self] in self.uniforms.SCANLINE_DISTANCE = Int32($0) })),
-                    
-                    ShaderSetting(
-                        title: "Scanline Strength",
-                        range: 0.0...1.0, step: 0.01,
-                        value: Binding(
-                            key: "SCANLINE_STRENGTH",
-                            get: { [unowned self] in self.uniforms.SCANLINE_STRENGTH },
-                            set: { [unowned self] in self.uniforms.SCANLINE_STRENGTH = $0 })),
-                    
-                    ShaderSetting(
-                        title: "Scanline Sharpness",
-                        range: 0.0...1.0, step: 0.01,
-                        value: Binding(
-                            key: "SCANLINE_SHARPNESS",
-                            get: { [unowned self] in self.uniforms.SCANLINE_SHARPNESS },
-                            set: { [unowned self] in self.uniforms.SCANLINE_SHARPNESS = $0 })),
                     
                     ShaderSetting(
                         title: "Scanline Blur",

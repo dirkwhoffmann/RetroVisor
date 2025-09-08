@@ -57,10 +57,8 @@ namespace phosbite {
         // Scanlines
         uint  SCANLINES_ENABLE;
         uint  SCANLINE_DISTANCE;
-        float SCANLINE_SHARPNESS;
         float SCANLINE_BLUR;
         float SCANLINE_BLOOM;
-        float SCANLINE_STRENGTH;
         float SCANLINE_GAIN;
         float SCANLINE_LOSS;
         float SCANLINE_WEIGHT[8];
