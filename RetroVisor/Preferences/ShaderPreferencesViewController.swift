@@ -59,6 +59,8 @@ class ShaderPreferencesViewController: NSViewController {
         
         outlineView.reloadData()
 
+        expandAll()
+        /*
         for group in outlineView.groups {
             
             if group.enabled ?? true {
@@ -69,8 +71,27 @@ class ShaderPreferencesViewController: NSViewController {
                 outlineView.collapseItem(group)
             }
         }
+        */
     }
 
+    func expandAll() {
+     
+        for group in outlineView.groups {
+            outlineView.expandItem(group)
+        }
+    }
+    
+    func expandEnabled() {
+        
+        for group in outlineView.groups {
+            if group.enabled ?? true {
+                outlineView.expandItem(group)
+            } else {
+                outlineView.collapseItem(group)
+            }
+        }
+    }
+    
     func updateShaderPopup() {
         
         // Add all available shaders to the shader selector popup
@@ -117,6 +138,7 @@ class ShaderPreferencesViewController: NSViewController {
         ShaderLibrary.shared.selectShader(at: sender.selectedTag())
         updatePresetPopup()
         refresh()
+        expandAll()
     }
 
     @IBAction func presetAction(_ sender: NSPopUpButton) {

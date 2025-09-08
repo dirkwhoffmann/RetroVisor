@@ -947,7 +947,7 @@ Gw
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="flA-tZ-9cP">
-                                                                    <rect key="frame" x="41" y="28" width="529" height="16"/>
+                                                                    <rect key="frame" x="82" y="28" width="500" height="16"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Label" id="weY-LU-aQ1">
                                                                         <font key="font" metaFont="systemHeavy" size="13"/>
@@ -956,18 +956,18 @@ Gw
                                                                     </textFieldCell>
                                                                 </textField>
                                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b20-Zq-66q">
-                                                                    <rect key="frame" x="7" y="21.5" width="31.5" height="32"/>
+                                                                    <rect key="frame" x="7" y="14.5" width="31.5" height="32"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="only" alignment="center" inset="2" id="tnl-rG-Qsd">
                                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                         <font key="font" metaFont="system"/>
                                                                     </buttonCell>
                                                                     <connections>
-                                                                        <action selector="enableAction:" target="cJo-c0-E6g" id="NXF-ka-L9k"/>
+                                                                        <action selector="disclosureAction:" target="cJo-c0-E6g" id="wPg-zx-9PQ"/>
                                                                     </connections>
                                                                 </button>
                                                                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qAw-IE-lPo">
-                                                                    <rect key="frame" x="8" y="26" width="30" height="20"/>
+                                                                    <rect key="frame" x="42" y="19" width="30" height="20"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <buttonCell key="cell" type="check" title="Check" bezelStyle="regularSquare" imagePosition="only" controlSize="large" state="on" inset="2" id="yKh-fl-Q7K">
                                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -978,7 +978,7 @@ Gw
                                                                     </connections>
                                                                 </button>
                                                                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HN0-Xe-6Tw">
-                                                                    <rect key="frame" x="41" y="13" width="187" height="14"/>
+                                                                    <rect key="frame" x="82" y="13" width="187" height="14"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Lorem ipsum dolor" id="dMQ-PL-o40">
                                                                         <font key="font" metaFont="smallSystem"/>
@@ -986,11 +986,20 @@ Gw
                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
+                                                                <button hidden="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="t3G-aR-mr0">
+                                                                    <rect key="frame" x="82" y="19" width="30" height="20"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                    <buttonCell key="cell" type="check" title="Check" bezelStyle="regularSquare" imagePosition="only" controlSize="large" state="on" inset="2" id="Qpg-db-qgN">
+                                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                                        <font key="font" metaFont="system"/>
+                                                                    </buttonCell>
+                                                                </button>
                                                             </subviews>
                                                             <connections>
                                                                 <outlet property="controller" destination="lT8-2t-dOu" id="FId-1g-Hg0"/>
                                                                 <outlet property="disclosureButton" destination="b20-Zq-66q" id="2ye-7P-S7h"/>
                                                                 <outlet property="enableButton" destination="qAw-IE-lPo" id="DuR-bd-SjX"/>
+                                                                <outlet property="fakeButton" destination="t3G-aR-mr0" id="vSo-De-549"/>
                                                                 <outlet property="label" destination="flA-tZ-9cP" id="2jA-hN-VKN"/>
                                                                 <outlet property="subLabel" destination="HN0-Xe-6Tw" id="R0Y-kY-gl8"/>
                                                             </connections>

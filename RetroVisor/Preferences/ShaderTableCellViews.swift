@@ -25,6 +25,7 @@ class ShaderGroupView: ShaderTableCellView {
 
     @IBOutlet weak var disclosureButton: NSButton!
     @IBOutlet weak var enableButton: NSButton!
+    @IBOutlet weak var fakeButton: NSButton!
     @IBOutlet weak var label: NSTextField!
     @IBOutlet weak var subLabel: NSTextField!
 
@@ -32,6 +33,13 @@ class ShaderGroupView: ShaderTableCellView {
 
     func setup(with group: Group) {
 
+        func reposition(_ label: NSTextField, over button: NSButton) {
+
+            var frame = label.frame
+            frame.origin.x = button.frame.origin.x
+            label.frame = frame
+        }
+        
         self.group = group
         label.stringValue = shader.delegate?.title(setting: group) ?? group.title
 
@@ -40,15 +48,19 @@ class ShaderGroupView: ShaderTableCellView {
 
         if let enabled = group.enabled {
             
+            reposition(label, over: fakeButton)
+            reposition(subLabel, over: fakeButton)
+            
             enableButton.isHidden = false
-            disclosureButton.isHidden = true
             enableButton.state = enabled ? .on : .off
             subLabel.stringValue = "\(group.enableKey)"
         
         } else {
 
+            reposition(label, over: enableButton)
+            reposition(subLabel, over: enableButton)
+
             enableButton.isHidden = true
-            disclosureButton.isHidden = false
             subLabel.stringValue = "\(optString)"
         }
     }
@@ -67,16 +79,29 @@ class ShaderGroupView: ShaderTableCellView {
         super.draw(dirtyRect)
     }
 
-    @IBAction func enableAction(_ sender: NSButton) {
+    @IBAction func disclosureAction(_ sender: NSButton) {
 
-        group.enabled = sender.state == .on
-        
         if sender.state == .on {
             outlineView.expandItem(group)
         } else {
             outlineView.collapseItem(group)
         }
 
+        outlineView.reloadData()
+    }
+    
+    @IBAction func enableAction(_ sender: NSButton) {
+
+        group.enabled = sender.state == .on
+        
+        /*
+        if sender.state == .on {
+            outlineView.expandItem(group)
+        } else {
+            outlineView.collapseItem(group)
+        }
+        */
+        
         shader.delegate?.settingDidChange(setting: group)
         outlineView.reloadData()
     }
