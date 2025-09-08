@@ -37,6 +37,9 @@ namespace crteasy {
         float SHARPNESS_H;
         float SHARPNESS_V;
         uint  ENABLE_LANCZOS;
+        
+        float2 resolution;
+        float2 window;
     };
     
     constant constexpr float M_PI = 3.14159265358979323846264338327950288;
@@ -177,33 +180,7 @@ namespace crteasy {
         
         return float4(col * u.BRIGHT_BOOST, 1.0);
     }
-    
-    // Fragment shader variant
-    fragment float4 fragment_crt_easymode(VertexOut in [[stage_in]],
-                                          texture2d<float> tex [[texture(0)]],
-                                          constant Uniforms& uniforms [[buffer(0)]],
-                                          constant CrtUniforms& crtUniforms [[buffer(1)]],
-                                          sampler sam [[sampler(0)]]) {
         
-        float2 texture_size = uniforms.resolution;
-        float2 video_size =  uniforms.window;
-        float2 output_size = uniforms.window;
-        
-        // Normalize the texture coordinate
-        float2 texOrigin = float2(0,0); // uniforms.texRect.xy;
-        float2 texSize =  float2(1.0,1.0); //  uniforms.texRect.zw - uniforms.texRect.xy;
-        float2 normuv = (in.texCoord - texOrigin) / texSize;
-        
-        return crt_easymode(texture_size,
-                            video_size,
-                            output_size,
-                            normuv,
-                            in.texCoord,
-                            tex,
-                            sam,
-                            crtUniforms);
-    }
-    
     // Compute kernel variant
     kernel void crtEasy(texture2d<float, access::sample> inTexture     [[ texture(0) ]],
                         texture2d<float, access::write>   outTexture   [[ texture(1) ]],
@@ -215,9 +192,9 @@ namespace crteasy {
         // (Optional) bounds check if you over-dispatch:
         // if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) return;
         
-        float2 texture_size = uniforms.resolution;
-        float2 video_size   = uniforms.window;
-        float2 output_size  = uniforms.window;
+        float2 texture_size = crtUniforms.resolution;
+        float2 video_size   = crtUniforms.window;
+        float2 output_size  = crtUniforms.window;
         
         // 1) Compute-space -> normalized output UV at pixel center
         float2 outSize = float2(outTexture.get_width(), outTexture.get_height());

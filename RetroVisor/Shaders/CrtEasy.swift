@@ -31,6 +31,9 @@ final class CRTEasy: Shader {
         var SHARPNESS_H: Float
         var SHARPNESS_V: Float
         var ENABLE_LANCZOS: Int32
+        
+        var resolution: SIMD2<Float>
+        var window: SIMD2<Float>
 
         static let defaults = Uniforms(
 
@@ -51,7 +54,10 @@ final class CRTEasy: Shader {
             SCANLINE_STRENGTH: 1.0,
             SHARPNESS_H: 0.5,
             SHARPNESS_V: 1.0,
-            ENABLE_LANCZOS: 1
+            ENABLE_LANCZOS: 1,
+            
+            resolution: [0,0],
+            window: [0,0]
         )
     }
     
@@ -247,8 +253,8 @@ final class CRTEasy: Shader {
 
     func updateTextures(in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
 
-        let inpWidth = output.width // * uniforms.INPUT_TEX_SCALE
-        let inpHeight = output.height // * uniforms.INPUT_TEX_SCALE
+        let inpWidth = output.width
+        let inpHeight = output.height
 
         if src?.width != inpWidth || src?.height != inpHeight {
 
@@ -271,6 +277,10 @@ final class CRTEasy: Shader {
         // Crop and downscale the captured screen contents
         let scaler = ShaderLibrary.bilinear
         scaler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
+
+        // Setup uniforms
+        uniforms.resolution = app.windowController!.metalView!.uniforms.resolution
+        uniforms.window = app.windowController!.metalView!.uniforms.window
 
         // Apply the CRTEasy kernel
         kernel.apply(commandBuffer: commandBuffer,
