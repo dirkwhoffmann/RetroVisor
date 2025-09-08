@@ -71,7 +71,7 @@ final class ColorFilter: Shader {
     
     init() {
         
-        super.init(name: "Passthrough")
+        super.init(name: "Color Filter")
         
         delegate = self
         

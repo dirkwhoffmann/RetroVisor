@@ -42,11 +42,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
 
         // TODO: MOVE TO SHADER LIBRARY INIT
+        /*
         ShaderLibrary.shared.register(CRTEasy())
         ShaderLibrary.shared.register(Phosbite())
         ShaderLibrary.shared.register(ColorSplitter())
         ShaderLibrary.shared.selectShader(at: 2)
-
+        */
+        
         Task {
 
             if await Streamer.canRecord {

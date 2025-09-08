@@ -27,7 +27,18 @@ import MetalPerformanceShaders
 @MainActor
 final class ShaderLibrary {
 
-    static let shared = ShaderLibrary()
+    // static let shared = ShaderLibrary()
+    static let shared: ShaderLibrary = {
+          
+        let lib = ShaderLibrary()
+        lib.register(Phosbite())
+        lib.register(CRTEasy())
+        // lib.register(ColorFilter())
+        lib.register(ColorSplitter())
+        lib.selectShader(at: 0)
+        return lib
+    }()
+    
     static let lanczos = LanczosShader()
     static let bilinear = BilinearShader()
 
