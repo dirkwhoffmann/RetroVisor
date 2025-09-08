@@ -7,7 +7,6 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
-#include "ShaderTypes.metal"
 #include "MathToolbox.metal"
 #include "ColorToolbox.metal"
 
@@ -41,17 +40,6 @@ namespace colorfilter {
                           sampler                         sam       [[ sampler(0) ]],
                           uint2                           gid       [[ thread_position_in_grid ]])
     {
-        /*
-        // Get size of output texture
-        const Coord2 rect = float2(outTex.get_width(), outTex.get_height());
-
-        // Normalize gid to 0..1 in rect
-        Coord2 uv = (Coord2(gid) + 0.5) / rect;
-
-        // Read pixel
-        Color3 rgb = Color3(inTex.sample(sam, uv).rgb);
-        */
-        
         // Read pixel
         Color3 rgb = inTex.read(gid).rgb;
 
@@ -60,12 +48,10 @@ namespace colorfilter {
 
         // Convert RGB to YUV
         Color3 yuv = RGB2YUV(rgb);
+        Color Y = yuv.x;
+        Color U = yuv.y;
+        Color V = yuv.z;
         
-        // Adjust saturation, contrast, and brightness
-        Color Y = (yuv.x - 0.5) * (0.5 + u.CONTRAST) + 0.5 + (u.BRIGHTNESS - 0.5);
-        Color U = yuv.y * (u.SATURATION + 0.5);
-        Color V = yuv.z * (u.SATURATION + 0.5);
-
         // Transform color palette
         switch(u.PALETTE) {
 
@@ -103,6 +89,11 @@ namespace colorfilter {
                 
                 break;
         }
+
+        // Modulate saturation, contrast, and brightness
+        Y = (Y - 0.5) * (0.5 + u.CONTRAST) + 0.5 + (u.BRIGHTNESS - 0.5);
+        U = U * (u.SATURATION + 0.5);
+        V = V * (u.SATURATION + 0.5);
 
         // Convert YUV to RGB
         rgb = YUV2RGB(Color3(Y, U, V));

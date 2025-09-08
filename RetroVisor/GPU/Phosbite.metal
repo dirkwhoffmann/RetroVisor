@@ -8,7 +8,6 @@
 // -----------------------------------------------------------------------------
 
 #include <metal_stdlib>
-#include "ShaderTypes.metal"
 #include "ColorToolbox.metal"
 #include "MathToolbox.metal"
 

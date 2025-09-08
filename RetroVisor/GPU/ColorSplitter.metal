@@ -7,7 +7,6 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
-#include "ShaderTypes.metal"
 #include "MathToolbox.metal"
 #include "ColorToolbox.metal"
 

@@ -11,7 +11,7 @@ import MetalKit
 import MetalPerformanceShaders
 
 @MainActor
-final class PassthroughShader: Shader {
+final class ColorFilter: Shader {
     
     struct Uniforms {
         
@@ -213,7 +213,7 @@ final class PassthroughShader: Shader {
     }
 }
 
-extension PassthroughShader: ShaderDelegate {
+extension ColorFilter: ShaderDelegate {
     
     func isHidden(setting: ShaderSetting) -> Bool {
         
@@ -227,7 +227,7 @@ extension PassthroughShader: ShaderDelegate {
     }    
 }
 
-extension PassthroughShader {
+extension ColorFilter {
     
     class PaletteFilter: Kernel {
 

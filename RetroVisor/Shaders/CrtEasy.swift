@@ -9,7 +9,7 @@
 
 import MetalKit
 
-final class CRTEasyShader: Shader {
+final class CRTEasy: Shader {
 
     struct Uniforms {
 
@@ -282,7 +282,7 @@ final class CRTEasyShader: Shader {
     }
 }
 
-extension CRTEasyShader {
+extension CRTEasy {
     
     class CrtEasyKernel: Kernel {
 

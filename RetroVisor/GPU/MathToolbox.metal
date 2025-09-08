@@ -10,6 +10,10 @@
 #ifndef MATH_TOOLBOX_METAL
 #define MATH_TOOLBOX_METAL
 
+#include <metal_stdlib>
+
+using namespace metal;
+
 typedef float   Coord;
 typedef float2  Coord2;
 

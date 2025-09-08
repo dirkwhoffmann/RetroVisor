@@ -11,7 +11,7 @@ import MetalKit
 import MetalPerformanceShaders
 
 @MainActor
-final class ColorSplitShader: Shader {
+final class ColorSplitter: Shader {
 
     var kernel: Kernel!
 
@@ -166,7 +166,7 @@ final class ColorSplitShader: Shader {
     }
 }
 
-extension ColorSplitShader: ShaderDelegate {
+extension ColorSplitter: ShaderDelegate {
     
     func title(setting: ShaderSetting) -> String {
      
@@ -199,7 +199,7 @@ extension ColorSplitShader: ShaderDelegate {
     }
 }
 
-extension ColorSplitShader {
+extension ColorSplitter {
     
     class ColorSplitFilter: Kernel {
 
