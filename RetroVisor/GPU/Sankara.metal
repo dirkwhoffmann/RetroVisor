@@ -153,11 +153,11 @@ namespace sankara {
         Color c2 = ch2.read(gid).x - 0.5;
         
         // Adjust contrast and brightness (uniforms in [0..1])
-        y = ((y - 0.5) * (0.5 + u.CV_CONTRAST) + 0.5) * (u.CV_BRIGHTNESS + 0.5);
+        y = ((y - 0.5) * u.CV_CONTRAST + 0.5) + u.CV_BRIGHTNESS;
 
         // Adjust saturation and tint (uniforms in [0..1])
         float cosA = cos(u.CV_TINT), sinA = sin(u.CV_TINT);
-        float2 cc = float2(c1 * cosA - c2 * sinA, c1 * sinA + c2 * cosA) * (0.5 + u.CV_SATURATION);
+        float2 cc = float2(c1 * cosA - c2 * sinA, c1 * sinA + c2 * cosA) * u.CV_SATURATION;
         
         ycc.write(Color4(y, cc.x + 0.5, cc.y + 0.5, 1.0), gid);
     }

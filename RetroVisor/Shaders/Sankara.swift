@@ -85,9 +85,9 @@ final class Sankara: Shader {
             BLUR_FILTER: BlurFilterType.box.rawValue,
             
             CV_ENABLE: 0,
-            CV_CONTRAST: 0.5,
-            CV_BRIGHTNESS: 0.5,
-            CV_SATURATION: 0.5,
+            CV_CONTRAST: 1.0,
+            CV_BRIGHTNESS: 0.0,
+            CV_SATURATION: 1.0,
             CV_TINT: 0.0,
             CV_CHROMA_BOOST: 8.0,
             CV_CHROMA_BLUR: 24,
@@ -250,7 +250,7 @@ final class Sankara: Shader {
                   
                   [ ShaderSetting(
                     title: "Brightness",
-                    range: 0.0...1.0, step: 0.01,
+                    range: -0.5...0.5, step: 0.01,
                     value: Binding(
                         key: "CV_BRIGHTNESS",
                         get: { [unowned self] in self.uniforms.CV_BRIGHTNESS },
@@ -258,12 +258,20 @@ final class Sankara: Shader {
                     
                     ShaderSetting(
                         title: "Contrast",
-                        range: 0.0...1.0, step: 0.01,
+                        range: 0.5...1.5, step: 0.01,
                         value: Binding(
                             key: "CV_CONTRAST",
                             get: { [unowned self] in self.uniforms.CV_CONTRAST },
                             set: { [unowned self] in self.uniforms.CV_CONTRAST = $0 })),
-                    
+
+                    ShaderSetting(
+                        title: "Saturation",
+                        range: 0.5...1.5, step: 0.01,
+                        value: Binding(
+                            key: "CV_SATURATION",
+                            get: { [unowned self] in self.uniforms.CV_SATURATION },
+                            set: { [unowned self] in self.uniforms.CV_SATURATION = $0 })),
+
                     ShaderSetting(
                         title: "Tint",
                         range: -3.14...3.14, step: 0.01,
