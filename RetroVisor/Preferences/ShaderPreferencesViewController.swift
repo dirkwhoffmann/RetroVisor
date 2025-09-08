@@ -40,10 +40,13 @@ class ShaderPreferencesViewController: NSViewController {
 
     var shader: Shader { return ShaderLibrary.shared.currentShader }
 
+    var oldSettings: [String: [String: String]]!
+    
     override func viewDidLoad() {
 
-        // oldSettings = app.crtUniforms
-
+        oldSettings = ShaderLibrary.shared.currentShader.dictionary
+        print("\(oldSettings)")
+        
         outlineView.delegate = self
         outlineView.dataSource = self
         outlineView.indentationPerLevel = 0
@@ -104,7 +107,9 @@ class ShaderPreferencesViewController: NSViewController {
     
     @IBAction func cancelAction(_ sender: NSButton) {
 
-        // app.crtUniforms.self = oldSettings
+        ShaderLibrary.shared.currentShader.dictionary = oldSettings
+        print("\(ShaderLibrary.shared.currentShader.dictionary)")
+
         view.window?.close()
     }
 

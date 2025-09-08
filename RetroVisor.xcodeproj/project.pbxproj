@@ -33,6 +33,7 @@
 		506936542E4F2FE40037984F /* PassthroughShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936532E4F2FDB0037984F /* PassthroughShader.swift */; };
 		5069365C2E4F76280037984F /* Kernel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069365B2E4F76250037984F /* Kernel.swift */; };
 		507ADD392E6EA72200BB7E10 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507ADD382E6EA71C00BB7E10 /* Parser.swift */; };
+		507ADD3B2E6EE29000BB7E10 /* ShaderSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507ADD3A2E6EE28C00BB7E10 /* ShaderSetting.swift */; };
 		509E84C32E57584400384C75 /* ImageToolbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509E84C22E57584100384C75 /* ImageToolbox.swift */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
@@ -81,6 +82,7 @@
 		507ADD342E68770A00BB7E10 /* ColorToolbox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ColorToolbox.metal; sourceTree = "<group>"; };
 		507ADD362E68778900BB7E10 /* MathToolbox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MathToolbox.metal; sourceTree = "<group>"; };
 		507ADD382E6EA71C00BB7E10 /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
+		507ADD3A2E6EE28C00BB7E10 /* ShaderSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderSetting.swift; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		509E84C22E57584100384C75 /* ImageToolbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageToolbox.swift; sourceTree = "<group>"; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -162,6 +164,7 @@
 				504F53992E59BC5A00C5291F /* FilterLibrary.swift */,
 				506936512E4F0E540037984F /* ShaderLibrary.swift */,
 				5069364C2E4EFD2B0037984F /* Shader.swift */,
+				507ADD3A2E6EE28C00BB7E10 /* ShaderSetting.swift */,
 				506936532E4F2FDB0037984F /* PassthroughShader.swift */,
 				504F539F2E6173C300C5291F /* ColorSplitShader.swift */,
 				5069364F2E4EFEFB0037984F /* CrtEasyShader.swift */,
@@ -329,6 +332,7 @@
 				50292D902E4685E10084CFE3 /* MetalView.swift in Sources */,
 				5011EDEB2E6317DE00B0938A /* Phosbite.metal in Sources */,
 				503FCC292E48F2D200EF49DA /* ShaderPreferencesViewController.swift in Sources */,
+				507ADD3B2E6EE29000BB7E10 /* ShaderSetting.swift in Sources */,
 				5011EDED2E6317F000B0938A /* Phosbite.swift in Sources */,
 				504F539A2E59BC6600C5291F /* FilterLibrary.swift in Sources */,
 				50079E712E43813C005BC5FD /* Extensions.swift in Sources */,

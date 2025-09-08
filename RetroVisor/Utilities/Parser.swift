@@ -31,7 +31,13 @@ class Parser {
         }
     }
 
-    static func loadINI(contents: String) -> [String: [String: String]] {
+    static func load(url: URL) throws -> [String: [String: String]] {
+        
+        let contents = try String(contentsOf: url, encoding: .utf8)
+        return load(contents: contents)
+    }
+    
+    static func load(contents: String) -> [String: [String: String]] {
         
         var section = ""
         var result: [String: [String: String]] = [:]
@@ -78,7 +84,7 @@ class Parser {
         return result
     }
     
-    static func saveINI(_ dict: [String: [String: String]], to url: URL) throws {
+    static func save(url: URL, dict: [String: [String: String]]) throws {
         
         var lines: [String] = []
         

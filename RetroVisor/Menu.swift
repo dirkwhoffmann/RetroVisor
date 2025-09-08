@@ -158,7 +158,7 @@ extension AppDelegate: NSMenuItemValidation {
             
             if let url = panel.url {
                 do {
-                    try ShaderLibrary.shared.currentShader.loadSettings(url: url)
+                    try ShaderLibrary.shared.currentShader.dictionary = Parser.load(url: url)
                 } catch {
                     let alert = NSAlert()
                     alert.messageText = "Failed to load settings"

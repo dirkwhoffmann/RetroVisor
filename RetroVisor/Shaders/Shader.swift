@@ -11,166 +11,6 @@ import MetalKit
 import MetalPerformanceShaders
 
 @MainActor
-struct Binding {
-    
-    let key: String
-    let get: () -> Float
-    let set: (Float) -> Void
-    
-    init(key: String, get: @escaping () -> Float, set: @escaping (Float) -> Void) {
-        
-        self.key = key
-        self.get = get
-        self.set = set
-    }
-}
-
-@MainActor
-class ShaderSetting {
-
-    // Description of this setting
-    var title: String
-
-    // Parameters for numeric settings
-    let range: ClosedRange<Double>?
-    let step: Float
-
-    // Parameters for enum settings
-    let items: [(String,Int)]?
-
-    // Optional help string
-    let help: String?
-
-    // Binding for the enable key
-    private var enable: Binding?
-
-    // Binding for the value key
-    private var value: Binding?
-    
-    // Format string for numeric arguments
-    // var formatString: String { "%.3g" }
-
-    init(title: String = "",
-         range: ClosedRange<Double>? = nil,
-         step: Float = 0.01,
-         items: [(String,Int)]? = nil,
-         enable: Binding? = nil,
-         value: Binding? = nil,
-         help: String? = nil
-        ) {
-
-        self.title = title
-        self.enable = enable
-        self.value = value
-        self.range = range
-        self.step = step
-        self.items = items
-        self.help = help
-    }
- 
-    var enableKey: String { enable?.key ?? "" }
-    var valueKey: String { value?.key ?? "" }
-
-    var enabled: Bool? {
-        get { enable.map { $0.get() != 0 } }
-        set { newValue.map { enable?.set($0.floatValue) } }
-    }
-                    
-    var boolValue: Bool? {
-        get { value.map { $0.get() != 0 } }
-        set { newValue.map { value?.set($0.floatValue) } }
-    }
-
-    var int32Value: Int32? {
-        get { value.map { Int32($0.get()) } }
-        set { newValue.map { value?.set(Float($0)) } }
-    }
-
-    var intValue: Int? {
-        get { value.map { Int($0.get()) } }
-        set { newValue.map { value?.set(Float($0)) } }
-    }
-
-    var floatValue: Float? {
-        get { value.map { $0.get() } }
-        set { newValue.map { value?.set($0) } }
-    }
-}
-
-@MainActor
-class Group : ShaderSetting {
-
-    // The cell view associated with this group
-    var view: ShaderTableCellView?
-    
-    // The settings in this group
-    var children: [ShaderSetting]
-    
-    // var count: Int { children.filter { $0.hidden() == false }.count }
-    
-    init(title: String = "",
-         range: ClosedRange<Double>? = nil,
-         step: Float = 0.01,
-         items: [(String,Int)]? = nil,
-         enable: Binding? = nil,
-         value: Binding? = nil,
-         help: String? = nil,
-         hidden: @escaping () -> Bool = { false },
-         _ children: [ShaderSetting]) {
-        
-        self.children = children
-        super.init(title: title,
-                   range: range,
-                   step: step,
-                   items: items,
-                   enable: enable,
-                   value: value,
-                   help: help)
-    }
-    
-    func findSetting(key: String) -> ShaderSetting? {
-        
-        // Check this setting's bindings
-        if enableKey == key || valueKey == key { return self }
-        
-        // Recurse into children
-        for child in children {
-            if child.enableKey == key || child.valueKey == key { return child }
-        }
-        
-        return nil
-    }
-    
-    func getSettings() -> [String: String] {
-        
-        var result: [String: String] = [:]
-        
-        if enableKey != "" { result[enableKey] = (enabled ?? true) ? "1" : "0" }
-        if valueKey != "" { result[valueKey] = String(floatValue ?? 0) }
-
-        for child in children {
-            if child.enableKey != "" { result[child.enableKey] = (child.enabled ?? true) ? "1" : "0" }
-            if child.valueKey != "" { result[child.valueKey] = String(child.floatValue ?? 0) }
-        }
-        return result
-    }
-    
-    // DEPRECATED
-    func currentSettings() -> [String:Float] {
-        
-        var result : [String:Float] = [:]
-        if enableKey != "" { result[enableKey] = (enabled ?? true) ? 1 : 0 }
-        if valueKey != "" { result[valueKey] = floatValue }
-        
-        for child in children {
-            if child.enableKey != "" { result[child.enableKey] = (child.enabled ?? true) ? 1 : 0 }
-            if child.valueKey != "" { result[child.valueKey] = child.floatValue }
-        }
-        return result
-    }
-}
-
-@MainActor
 protocol ShaderDelegate {
     
     func title(setting: ShaderSetting) -> String
@@ -191,7 +31,7 @@ class Shader : Loggable {
     static var device: MTLDevice { MTLCreateSystemDefaultDevice()! }
 
     // Enables debug output to the console
-    let logging: Bool = false
+    let logging: Bool = true
 
     // Name of this shader
     var name: String = ""
@@ -234,61 +74,42 @@ extension Shader {
         return nil
     }
     
-    // Returns the current settings in form of a key value map
-    /*
-    @available(*, deprecated) func currentSettings() -> [String:Float] {
-        var result: [String: Float] = [:]
-        for group in settings {
-            for (key, value) in group.currentSettings() {
-                result[key] = value
-            }
-        }
-        return result
-    }
-    */
-    
-    func getSettings() -> [String: [String: String]] {
+    var dictionary: [String: [String: String]] {
         
-        var result: [String: [String: String]] = [:]
-        
-        for group in settings {
-            result[group.title] = group.getSettings()
-        }
-        return result
-    }
-    
-    func loadSettings(url: URL) throws {
-        
-        let contents = try String(contentsOf: url, encoding: .utf8)
-        try loadSettings(contents: contents)
-    }
-
-    func loadSettings(contents: String) throws {
-        
-        let dict = Parser.loadINI(contents: contents)
-                
-        for (section, keyValues) in dict {
+        get {
+            var result: [String: [String: String]] = [:]
             
-            for (key, value) in keyValues {
-                                
-                guard let setting = findSetting(key: key) else {
-                    
-                    print("WARNING: Setting \(key) not found")
-                    continue
+            for group in settings {
+                result[group.title] = group.dictionary
+            }
+            return result
+        }
+        set {
+            
+            for (_, keyValues) in newValue {
+                
+                for (key, value) in keyValues {
+                                    
+                    guard let setting = findSetting(key: key) else {
+                        
+                        log("Setting \(key) not found", .warning)
+                        continue
+                    }
+                    guard let value = Float(value) else {
+                        
+                        log("Failed to parse string \(value)", .warning)
+                        continue
+                    }
+                    if setting.enableKey == key { setting.enabled = value != 0 }
+                    if setting.valueKey == key { setting.floatValue = value }
                 }
-                guard let value = Float(value) else {
-                    
-                    print("WARNING: Failed to parse string \(value)")
-                    continue
-                }
-                setting.floatValue = value
             }
         }
     }
     
     func saveSettings(url: URL) throws {
                 
-        try Parser.saveINI(getSettings(), to: url)
+        try Parser.save(url: url, dict: dictionary)
     }
 }
 
