@@ -182,19 +182,18 @@ namespace crteasy {
     }
         
     // Compute kernel variant
-    kernel void crtEasy(texture2d<float, access::sample> inTexture     [[ texture(0) ]],
-                        texture2d<float, access::write>   outTexture   [[ texture(1) ]],
-                        constant Uniforms                 &uniforms    [[ buffer(0) ]],
-                        constant CrtUniforms              &crtUniforms [[ buffer(1) ]],
-                        sampler                           sam          [[ sampler(0) ]],
-                        uint2                             gid          [[ thread_position_in_grid ]])
+    kernel void crtEasy(texture2d<float, access::sample> inTexture   [[ texture(0) ]],
+                        texture2d<float, access::write>  outTexture  [[ texture(1) ]],
+                        constant CrtUniforms             &u          [[ buffer(0) ]],
+                        sampler                          sam         [[ sampler(0) ]],
+                        uint2                            gid         [[ thread_position_in_grid ]])
     {
         // (Optional) bounds check if you over-dispatch:
         // if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) return;
         
-        float2 texture_size = crtUniforms.resolution;
-        float2 video_size   = crtUniforms.window;
-        float2 output_size  = crtUniforms.window;
+        float2 texture_size = u.resolution;
+        float2 video_size   = u.window;
+        float2 output_size  = u.window;
         
         // 1) Compute-space -> normalized output UV at pixel center
         float2 outSize = float2(outTexture.get_width(), outTexture.get_height());
@@ -215,7 +214,7 @@ namespace crteasy {
                                      texCoord,     // same as fragment's in.texCoord
                                      inTexture,
                                      sam,
-                                     crtUniforms);
+                                     u);
         
         outTexture.write(result, gid);
     }

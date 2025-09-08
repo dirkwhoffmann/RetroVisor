@@ -285,10 +285,8 @@ final class CRTEasy: Shader {
         // Apply the CRTEasy kernel
         kernel.apply(commandBuffer: commandBuffer,
                      source: src, target: output,
-                     options: &app.windowController!.metalView!.uniforms,
-                     length: MemoryLayout<Uniforms>.stride,
-                     options2: &uniforms,
-                     length2: MemoryLayout<Uniforms>.stride)
+                     options: &uniforms,
+                     length: MemoryLayout<Uniforms>.stride)
     }
 }
 
