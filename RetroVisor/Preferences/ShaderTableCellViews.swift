@@ -14,7 +14,8 @@ class ShaderTableCellView: NSTableCellView {
     @IBOutlet weak var controller: ShaderPreferencesViewController!
 
     var shader: Shader { controller.shader }
-
+    var outlineView: MyOutlineView { controller.outlineView }
+    
     func updateIcon(expanded: Bool) {
         
     }
@@ -69,12 +70,15 @@ class ShaderGroupView: ShaderTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         group.enabled = sender.state == .on
-        shader.delegate?.settingDidChange(setting: group)
         
         if sender.state == .on {
-            controller.outlineView.expandItem(group)
+            outlineView.expandItem(group)
         } else {
-            controller.outlineView.collapseItem(group)
+            outlineView.collapseItem(group)
+        }
+
+        if shader.delegate?.settingDidChange(setting: group) == true {
+            outlineView.reloadData()
         }
     }
 }
@@ -183,7 +187,9 @@ class ShaderSettingView: ShaderTableCellView {
 
         shaderSetting.floatValue = rounded
         value = shaderSetting.floatValue
-        shader.delegate?.settingDidChange(setting: shaderSetting)
+        if shader.delegate?.settingDidChange(setting: shaderSetting) == true {
+            controller.outlineView.reloadData()
+        }
     }
 
     @IBAction func stepperAction(_ sender: NSControl) {
@@ -194,17 +200,19 @@ class ShaderSettingView: ShaderTableCellView {
     @IBAction func popupAction(_ sender: NSPopUpButton) {
 
         shaderSetting.intValue = sender.selectedTag()
-        shader.delegate?.settingDidChange(setting: shaderSetting)
-        update();
-        controller.outlineView.reloadData()
+        if shader.delegate?.settingDidChange(setting: shaderSetting) == true {
+            controller.outlineView.reloadData()
+        }
+        // update();
     }
 
     @IBAction func enableAction(_ sender: NSButton) {
 
         shaderSetting.enabled = sender.state == .on
-        shader.delegate?.settingDidChange(setting: shaderSetting)
-        update();
-        controller.outlineView.reloadData()
+        if shader.delegate?.settingDidChange(setting: shaderSetting) == true {
+            controller.outlineView.reloadData()
+        }
+        // update();
     }
 
     @IBAction func helpAction(_ sender: NSButton) {

@@ -807,6 +807,24 @@ final class Phosbite: Shader {
 
 extension Phosbite: ShaderDelegate {
     
+    func isHidden(setting: ShaderSetting) -> Bool {
+        
+        switch setting.valueKey {
+            
+        case "SCANLINE_WEIGHT1": return uniforms.SCANLINE_DISTANCE < 1
+        case "SCANLINE_WEIGHT2": return uniforms.SCANLINE_DISTANCE < 2
+        case "SCANLINE_WEIGHT3": return uniforms.SCANLINE_DISTANCE < 3
+        case "SCANLINE_WEIGHT4": return uniforms.SCANLINE_DISTANCE < 4
+        case "SCANLINE_WEIGHT5": return uniforms.SCANLINE_DISTANCE < 5
+        case "SCANLINE_WEIGHT6": return uniforms.SCANLINE_DISTANCE < 6
+        case "SCANLINE_WEIGHT7": return uniforms.SCANLINE_DISTANCE < 7
+        case "SCANLINE_WEIGHT8": return uniforms.SCANLINE_DISTANCE < 8
+
+        default:
+            return false
+        }
+    }
+    
     func settingDidChange(setting: ShaderSetting) {
         
         if setting.valueKey  == "OUTPUT_TEX_SCALE" || setting.valueKey .starts(with: "DOTMASK") {

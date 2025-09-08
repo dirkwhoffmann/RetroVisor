@@ -16,7 +16,7 @@ using namespace metal;
 
 namespace crteasy {
     
-    struct CrtUniforms {
+    struct Uniforms {
         
         float BRIGHT_BOOST;
         float DILATION;
@@ -44,8 +44,6 @@ namespace crteasy {
     constant constexpr float M_PI = 3.14159265358979323846264338327950288;
     
     inline float FIX(float c) { return max(fabs(c), 1e-5); }
-    // inline float2 FIX(float2 c) { return max(fabs(c), 1e-5); }
-    // inline float4 FIX(float4 c) { return max(fabs(c), 1e-5); }
     inline float4 dilate(float4 col, float DILATION) {
         float4 x = mix(float4(1.0), col, DILATION);
         return col * x;
@@ -101,7 +99,7 @@ namespace crteasy {
                                float2 coords,
                                texture2d<float> tex,
                                sampler sam,
-                               constant CrtUniforms& u) {
+                               constant Uniforms& u) {
         
         float2 dx = float2(1.0 / texture_size.x, 0.0);
         float2 dy = float2(0.0, 1.0 / texture_size.y);
@@ -183,7 +181,7 @@ namespace crteasy {
     // Compute kernel variant
     kernel void crtEasy(texture2d<float, access::sample> inTexture   [[ texture(0) ]],
                         texture2d<float, access::write>  outTexture  [[ texture(1) ]],
-                        constant CrtUniforms             &u          [[ buffer(0) ]],
+                        constant Uniforms                &u          [[ buffer(0) ]],
                         sampler                          sam         [[ sampler(0) ]],
                         uint2                            gid         [[ thread_position_in_grid ]])
     {
