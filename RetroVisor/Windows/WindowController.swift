@@ -173,19 +173,19 @@ extension WindowController: StreamerDelegate {
         }
     }
 
-    func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
+    nonisolated func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
 
         switch type {
 
         case .screen:
 
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
+            let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
+
             Task { @MainActor [weak self] in
-                
-                guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
-                
+                                
                 if let controller = self?.contentViewController as? ViewController {
                     
-                    let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
                     self?.recorder.timestamp = pts
                     controller.metalView.update(with: pixelBuffer)
                 }
@@ -193,7 +193,7 @@ extension WindowController: StreamerDelegate {
 
         case .audio:
 
-            DispatchQueue.main.async { [weak self] in
+            Task { @MainActor [weak self] in
 
                 self?.recorder.appendAudio(buffer: buffer)
             }

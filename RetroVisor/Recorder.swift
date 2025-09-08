@@ -10,6 +10,7 @@
 import AVFoundation
 import ScreenCaptureKit
 
+@MainActor
 protocol RecorderDelegate: AnyObject {
 
     func recorderDidStart()
@@ -120,7 +121,7 @@ class Recorder: Loggable {
         delegate?.recorderDidStart()
     }
 
-    func stopRecording(completion: @escaping () -> Void) {
+    func stopRecording(completion: @Sendable @escaping () -> Void) {
 
         if !isRecording { return }
 

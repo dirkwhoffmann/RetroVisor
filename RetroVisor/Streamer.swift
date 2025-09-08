@@ -7,11 +7,15 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
-import ScreenCaptureKit
+@preconcurrency import ScreenCaptureKit
 
 /* This class uses ScreenCaptureKit to record screen content and feed it into
  * the post-processor.
  */
+
+extension CVPixelBuffer: @unchecked @retroactive Sendable {}
+extension CMSampleBuffer: @unchecked @retroactive Sendable {}
+
 @MainActor
 protocol StreamerDelegate: AnyObject, SCStreamOutput {
 

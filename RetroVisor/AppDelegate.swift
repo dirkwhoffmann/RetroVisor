@@ -9,6 +9,7 @@
 
 import Cocoa
 
+@MainActor
 var app: AppDelegate { NSApp.delegate as! AppDelegate }
 
 @main @MainActor
