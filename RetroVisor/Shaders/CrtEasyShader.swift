@@ -9,54 +9,54 @@
 
 import MetalKit
 
-struct CrtUniforms {
-
-    var BRIGHT_BOOST: Float
-    var DILATION: Float
-    var GAMMA_INPUT: Float
-    var GAMMA_OUTPUT: Float
-    var MASK_SIZE: Float
-    var MASK_STAGGER: Float
-    var MASK_STRENGTH: Float
-    var MASK_DOT_WIDTH: Float
-    var MASK_DOT_HEIGHT: Float
-    var SCANLINE_BEAM_WIDTH_MAX: Float
-    var SCANLINE_BEAM_WIDTH_MIN: Float
-    var SCANLINE_BRIGHT_MAX: Float
-    var SCANLINE_BRIGHT_MIN: Float
-    var SCANLINE_CUTOFF: Float
-    var SCANLINE_STRENGTH: Float
-    var SHARPNESS_H: Float
-    var SHARPNESS_V: Float
-    var ENABLE_LANCZOS: Int32
-
-    static let defaults = CrtUniforms(
-
-        BRIGHT_BOOST: 1.2,
-        DILATION: 1.0,
-        GAMMA_INPUT: 2.0,
-        GAMMA_OUTPUT: 1.8,
-        MASK_SIZE: 1.0,
-        MASK_STAGGER: 0.0,
-        MASK_STRENGTH: 0.3,
-        MASK_DOT_WIDTH: 1.0,
-        MASK_DOT_HEIGHT: 1.0,
-        SCANLINE_BEAM_WIDTH_MAX: 1.5,
-        SCANLINE_BEAM_WIDTH_MIN: 1.5,
-        SCANLINE_BRIGHT_MAX: 0.65,
-        SCANLINE_BRIGHT_MIN: 0.35,
-        SCANLINE_CUTOFF: 1000.0,
-        SCANLINE_STRENGTH: 1.0,
-        SHARPNESS_H: 0.5,
-        SHARPNESS_V: 1.0,
-        ENABLE_LANCZOS: 1
-    )
-}
-
 final class CRTEasyShader: Shader {
 
+    struct Uniforms {
+
+        var BRIGHT_BOOST: Float
+        var DILATION: Float
+        var GAMMA_INPUT: Float
+        var GAMMA_OUTPUT: Float
+        var MASK_SIZE: Float
+        var MASK_STAGGER: Float
+        var MASK_STRENGTH: Float
+        var MASK_DOT_WIDTH: Float
+        var MASK_DOT_HEIGHT: Float
+        var SCANLINE_BEAM_WIDTH_MAX: Float
+        var SCANLINE_BEAM_WIDTH_MIN: Float
+        var SCANLINE_BRIGHT_MAX: Float
+        var SCANLINE_BRIGHT_MIN: Float
+        var SCANLINE_CUTOFF: Float
+        var SCANLINE_STRENGTH: Float
+        var SHARPNESS_H: Float
+        var SHARPNESS_V: Float
+        var ENABLE_LANCZOS: Int32
+
+        static let defaults = Uniforms(
+
+            BRIGHT_BOOST: 1.2,
+            DILATION: 1.0,
+            GAMMA_INPUT: 2.0,
+            GAMMA_OUTPUT: 1.8,
+            MASK_SIZE: 1.0,
+            MASK_STAGGER: 0.0,
+            MASK_STRENGTH: 0.3,
+            MASK_DOT_WIDTH: 1.0,
+            MASK_DOT_HEIGHT: 1.0,
+            SCANLINE_BEAM_WIDTH_MAX: 1.5,
+            SCANLINE_BEAM_WIDTH_MIN: 1.5,
+            SCANLINE_BRIGHT_MAX: 0.65,
+            SCANLINE_BRIGHT_MIN: 0.35,
+            SCANLINE_CUTOFF: 1000.0,
+            SCANLINE_STRENGTH: 1.0,
+            SHARPNESS_H: 0.5,
+            SHARPNESS_V: 1.0,
+            ENABLE_LANCZOS: 1
+        )
+    }
+    
     var kernel: Kernel!
-    var uniforms: CrtUniforms = .defaults
+    var uniforms: Uniforms = .defaults
 
     // Input texture passed to the CRTEasy kernel
     var src: MTLTexture!
@@ -236,7 +236,7 @@ final class CRTEasyShader: Shader {
 
     override func revertToPreset(nr: Int) {
         
-        uniforms = CrtUniforms.defaults
+        uniforms = Uniforms.defaults
     }
 
     override func activate() {
@@ -278,7 +278,7 @@ final class CRTEasyShader: Shader {
                      options: &app.windowController!.metalView!.uniforms,
                      length: MemoryLayout<Uniforms>.stride,
                      options2: &uniforms,
-                     length2: MemoryLayout<CrtUniforms>.stride)
+                     length2: MemoryLayout<Uniforms>.stride)
     }
 }
 

@@ -119,12 +119,6 @@ class ShaderPreferencesViewController: NSViewController {
         refresh()
     }
 
-    @IBAction func defaultsAction(_ sender: NSButton) {
-
-        // app.crtUniforms.self = CrtUniforms.defaults
-        refresh()
-    }
-
     @IBAction func presetAction(_ sender: NSPopUpButton) {
 
         print("\(sender.selectedTag())")
