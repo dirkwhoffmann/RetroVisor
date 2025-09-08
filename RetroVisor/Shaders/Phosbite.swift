@@ -618,6 +618,11 @@ final class Phosbite: Shader {
         ]
     }
     
+    override func revertToPreset(nr: Int) {
+        
+        uniforms = Uniforms.defaults
+    }
+    
     override func activate() {
         
         super.activate()

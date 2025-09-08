@@ -40,6 +40,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
 
+        // TODO: MOVE TO SHADER LIBRARY INIT
         ShaderLibrary.shared.register(CRTEasyShader())
         ShaderLibrary.shared.register(Phosbite())
         ShaderLibrary.shared.register(ColorSplitShader())

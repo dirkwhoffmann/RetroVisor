@@ -75,14 +75,14 @@ extension Float {
 
 extension CGRect {
 
-    static var unity = CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0)
+    static let unity = CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0)
 
     static var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }
 }
 
 extension NSSize {
     
-    static var unity = NSSize(width: 1.0, height: 1.0)
+    static let unity = NSSize(width: 1.0, height: 1.0)
 }
 
 extension NSFont {

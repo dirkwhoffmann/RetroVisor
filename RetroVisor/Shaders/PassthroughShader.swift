@@ -137,6 +137,11 @@ final class PassthroughShader: Shader {
         ]
     }
     
+    override func revertToPreset(nr: Int) {
+        
+        uniforms = Uniforms.defaults
+    }
+    
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
         
         let srcW = Int(Float(output.width) * uniforms.INPUT_TEX_SCALE)

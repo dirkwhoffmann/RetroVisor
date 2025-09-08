@@ -37,6 +37,7 @@ class ShaderPreferencesViewController: NSViewController {
 
     @IBOutlet weak var outlineView: MyOutlineView!
     @IBOutlet weak var shaderSelector: NSPopUpButton!
+    @IBOutlet weak var presetSelector: NSPopUpButton!
 
     var shader: Shader { return ShaderLibrary.shared.currentShader }
 
@@ -45,7 +46,6 @@ class ShaderPreferencesViewController: NSViewController {
     override func viewDidLoad() {
 
         oldSettings = ShaderLibrary.shared.currentShader.dictionary
-        print("\(oldSettings)")
         
         outlineView.delegate = self
         outlineView.dataSource = self
@@ -54,19 +54,9 @@ class ShaderPreferencesViewController: NSViewController {
         outlineView.gridColor = .separatorColor // .controlBackgroundColor // windowBackgroundColor
         outlineView.gridStyleMask = [.solidHorizontalGridLineMask]
 
-        // Add all available shaders to the shader selector popup
-        shaderSelector.removeAllItems()
-
-        for shader in ShaderLibrary.shared.shaders {
-
-            let item = NSMenuItem(title: shader.name,
-                                  action: nil,
-                                  keyEquivalent: "")
-            item.tag = shader.id ?? 0
-            shaderSelector.menu?.addItem(item)
-        }
-
-        shaderSelector.selectItem(withTag: shader.id ?? 0)
+        updateShaderPopup()
+        updatePresetPopup()
+        
         outlineView.reloadData()
 
         for group in outlineView.groups {
@@ -81,6 +71,39 @@ class ShaderPreferencesViewController: NSViewController {
         }
     }
 
+    func updateShaderPopup() {
+        
+        // Add all available shaders to the shader selector popup
+        shaderSelector.removeAllItems()
+        for shader in ShaderLibrary.shared.shaders {
+
+            let item = NSMenuItem(title: shader.name,
+                                  action: nil,
+                                  keyEquivalent: "")
+            item.tag = shader.id ?? 0
+            shaderSelector.menu?.addItem(item)
+        }
+        shaderSelector.selectItem(withTag: shader.id ?? 0)
+    }
+    
+    func updatePresetPopup() {
+     
+        presetSelector.removeAllItems()
+        
+        // let item = NSMenuItem(title: "Revert to...", action: nil, keyEquivalent: "")
+        presetSelector.menu?.addItem(withTitle: "Revert to...", action: nil, keyEquivalent: "")
+        presetSelector.menu?.addItem(NSMenuItem.separator())
+
+        for (index, title) in shader.presets.enumerated() {
+
+            let item = NSMenuItem(title: title,
+                                  action: nil,
+                                  keyEquivalent: "")
+            item.tag = index
+            presetSelector.menu?.addItem(item)
+        }
+    }
+    
     func refresh() {
 
         shaderSelector.selectItem(withTag: shader.id ?? 0)
@@ -92,12 +115,20 @@ class ShaderPreferencesViewController: NSViewController {
         print("shaderSelectAction \(sender.selectedTag())")
 
         ShaderLibrary.shared.selectShader(at: sender.selectedTag())
+        updatePresetPopup()
         refresh()
     }
 
     @IBAction func defaultsAction(_ sender: NSButton) {
 
         // app.crtUniforms.self = CrtUniforms.defaults
+        refresh()
+    }
+
+    @IBAction func presetAction(_ sender: NSPopUpButton) {
+
+        print("\(sender.selectedTag())")
+        ShaderLibrary.shared.currentShader.revertToPreset(nr: sender.selectedTag())
         refresh()
     }
 

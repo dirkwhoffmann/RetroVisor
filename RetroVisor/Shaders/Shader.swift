@@ -47,6 +47,12 @@ class Shader : Loggable {
         self.name = name
     }
     
+    // Returns the names of all available presets
+    var presets: [String] { return ["Default"] }
+
+    // Reverts the settings to the selected preset
+    func revertToPreset(nr: Int) { }
+    
     // Called once when the user selects this shader
     func activate() { log("Activating \(name)") }
 

@@ -234,6 +234,11 @@ final class CRTEasyShader: Shader {
         ]
     }
 
+    override func revertToPreset(nr: Int) {
+        
+        uniforms = CrtUniforms.defaults
+    }
+
     override func activate() {
 
         super.activate()
