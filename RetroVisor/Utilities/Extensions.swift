@@ -85,6 +85,18 @@ extension NSSize {
     static var unity = NSSize(width: 1.0, height: 1.0)
 }
 
+extension NSFont {
+ 
+    static func monospaced(ofSize fontSize: CGFloat, weight: Weight) -> NSFont {
+        
+        if #available(macOS 10.15, *) {
+            return NSFont.monospacedSystemFont(ofSize: fontSize, weight: weight)
+        } else {
+            return NSFont.systemFont(ofSize: fontSize)
+        }
+    }
+}
+
 extension NSScreen {
 
     static var scaleFactor: Int { Int(NSScreen.main?.backingScaleFactor ?? 2) }
@@ -146,13 +158,3 @@ extension Dictionary where Key == String {
         return format(self, level: 0)
     }
 }
-
-/*
-extension NSOutlineView {
-
-    func expandItem(_ item: Any?, state: Bool) {
-
-        if state { expandItem(item) } else { collapseItem(item) }
-    }
-}
-*/

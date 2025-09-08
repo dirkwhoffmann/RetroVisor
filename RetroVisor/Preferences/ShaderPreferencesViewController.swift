@@ -98,6 +98,10 @@ class ShaderPreferencesViewController: NSViewController {
         refresh()
     }
 
+    @IBAction func infoAction(_ sender: Any!) {
+        
+    }
+    
     @IBAction func cancelAction(_ sender: NSButton) {
 
         // app.crtUniforms.self = oldSettings

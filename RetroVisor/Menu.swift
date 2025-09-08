@@ -148,6 +148,44 @@ extension AppDelegate: NSMenuItemValidation {
         }
     }
 
+    @IBAction func loadSettingsAction(_ sender: NSMenuItem) {
+        
+        let panel = NSOpenPanel()
+        panel.title = "Load Settings"
+        panel.allowedContentTypes = [.plainText]
+        
+        if panel.runModal() == .OK {
+            
+            if let url = panel.url {
+                do {
+                    try ShaderLibrary.shared.currentShader.loadSettings(url: url)
+                } catch {
+                    let alert = NSAlert()
+                    alert.messageText = "Failed to load settings"
+                    alert.informativeText = error.localizedDescription
+                    alert.alertStyle = .warning
+                    alert.addButton(withTitle: "OK")
+                    alert.runModal()
+                }
+            }
+        }
+    }
+
+    @IBAction func saveSettingsAction(_ sender: NSMenuItem) {
+        
+        let panel = NSSavePanel()
+        panel.title = "Save Settings"
+        panel.allowedContentTypes = [.plainText]
+        panel.nameFieldStringValue = "settings.txt"
+        
+        if panel.runModal() == .OK {
+            if let url = panel.url {
+                let shader = ShaderLibrary.shared.currentShader
+                try? shader.saveSettings(url: url)
+            }
+        }
+    }
+
     @IBAction func resetZoom(_ sender: NSMenuItem) {
 
         if let metalView = windowController?.metalView {

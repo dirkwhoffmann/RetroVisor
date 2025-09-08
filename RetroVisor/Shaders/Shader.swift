@@ -48,7 +48,7 @@ class ShaderSetting {
     private var value: Binding?
     
     // Format string for numeric arguments
-    var formatString: String { "%.3g" }
+    // var formatString: String { "%.3g" }
 
     init(title: String = "",
          range: ClosedRange<Double>? = nil,
@@ -140,6 +140,34 @@ class Group : ShaderSetting {
         
         return nil
     }
+    
+    func getSettings() -> [String: String] {
+        
+        var result: [String: String] = [:]
+        
+        if enableKey != "" { result[enableKey] = (enabled ?? true) ? "1" : "0" }
+        if valueKey != "" { result[valueKey] = String(floatValue ?? 0) }
+
+        for child in children {
+            if child.enableKey != "" { result[child.enableKey] = (child.enabled ?? true) ? "1" : "0" }
+            if child.valueKey != "" { result[child.valueKey] = String(child.floatValue ?? 0) }
+        }
+        return result
+    }
+    
+    // DEPRECATED
+    func currentSettings() -> [String:Float] {
+        
+        var result : [String:Float] = [:]
+        if enableKey != "" { result[enableKey] = (enabled ?? true) ? 1 : 0 }
+        if valueKey != "" { result[valueKey] = floatValue }
+        
+        for child in children {
+            if child.enableKey != "" { result[child.enableKey] = (child.enabled ?? true) ? 1 : 0 }
+            if child.valueKey != "" { result[child.valueKey] = child.floatValue }
+        }
+        return result
+    }
 }
 
 @MainActor
@@ -179,12 +207,6 @@ class Shader : Loggable {
         self.name = name
     }
     
-    // Searches a setting by name
-    func findSetting(key: String) -> ShaderSetting? {
-        for group in settings { if let match = group.findSetting(key: key) { return match } }
-        return nil
-    }
-
     // Called once when the user selects this shader
     func activate() { log("Activating \(name)") }
 
@@ -198,6 +220,81 @@ class Shader : Loggable {
         fatalError("To be implemented by a subclass")
     }
 }
+
+//
+// Loading and saving options
+//
+
+extension Shader {
+    
+    // Searches a setting by name
+    func findSetting(key: String) -> ShaderSetting? {
+        
+        for group in settings { if let match = group.findSetting(key: key) { return match } }
+        return nil
+    }
+    
+    // Returns the current settings in form of a key value map
+    /*
+    @available(*, deprecated) func currentSettings() -> [String:Float] {
+        var result: [String: Float] = [:]
+        for group in settings {
+            for (key, value) in group.currentSettings() {
+                result[key] = value
+            }
+        }
+        return result
+    }
+    */
+    
+    func getSettings() -> [String: [String: String]] {
+        
+        var result: [String: [String: String]] = [:]
+        
+        for group in settings {
+            result[group.title] = group.getSettings()
+        }
+        return result
+    }
+    
+    func loadSettings(url: URL) throws {
+        
+        let contents = try String(contentsOf: url, encoding: .utf8)
+        try loadSettings(contents: contents)
+    }
+
+    func loadSettings(contents: String) throws {
+        
+        let dict = Parser.loadINI(contents: contents)
+                
+        for (section, keyValues) in dict {
+            
+            for (key, value) in keyValues {
+                                
+                guard let setting = findSetting(key: key) else {
+                    
+                    print("WARNING: Setting \(key) not found")
+                    continue
+                }
+                guard let value = Float(value) else {
+                    
+                    print("WARNING: Failed to parse string \(value)")
+                    continue
+                }
+                setting.floatValue = value
+            }
+        }
+    }
+    
+    func saveSettings(url: URL) throws {
+                
+        try Parser.saveINI(getSettings(), to: url)
+    }
+}
+
+//
+// Wrappers around MPSImageScale
+//
 
 @MainActor
 class ScaleShader<F: MPSImageScale> : Shader {

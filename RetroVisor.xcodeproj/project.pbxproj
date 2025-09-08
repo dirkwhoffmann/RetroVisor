@@ -32,6 +32,7 @@
 		506936522E4F0E590037984F /* ShaderLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936512E4F0E540037984F /* ShaderLibrary.swift */; };
 		506936542E4F2FE40037984F /* PassthroughShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506936532E4F2FDB0037984F /* PassthroughShader.swift */; };
 		5069365C2E4F76280037984F /* Kernel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5069365B2E4F76250037984F /* Kernel.swift */; };
+		507ADD392E6EA72200BB7E10 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507ADD382E6EA71C00BB7E10 /* Parser.swift */; };
 		509E84C32E57584400384C75 /* ImageToolbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509E84C22E57584100384C75 /* ImageToolbox.swift */; };
 		50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96442E3C80D6006BA8DF /* AppDelegate.swift */; };
 		50BA96512E3C80D6006BA8DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA96492E3C80D6006BA8DF /* ViewController.swift */; };
@@ -79,6 +80,7 @@
 		5069365B2E4F76250037984F /* Kernel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kernel.swift; sourceTree = "<group>"; };
 		507ADD342E68770A00BB7E10 /* ColorToolbox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ColorToolbox.metal; sourceTree = "<group>"; };
 		507ADD362E68778900BB7E10 /* MathToolbox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MathToolbox.metal; sourceTree = "<group>"; };
+		507ADD382E6EA71C00BB7E10 /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 		509C8DDE2E38F99E004BE11C /* RetroVisor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetroVisor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		509E84C22E57584100384C75 /* ImageToolbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageToolbox.swift; sourceTree = "<group>"; };
 		50BA96442E3C80D6006BA8DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 		50079E6F2E433206005BC5FD /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				507ADD382E6EA71C00BB7E10 /* Parser.swift */,
 				50DE5B872E4E065D002C07EC /* IconBar.swift */,
 				50DE5B852E4DA045002C07EC /* Overlay.swift */,
 				50DE5B832E4CDB02002C07EC /* Loggable.swift */,
@@ -313,6 +316,7 @@
 				50BA966D2E40C3CB006BA8DF /* ShaderTableCellViews.swift in Sources */,
 				50292D942E471A330084CFE3 /* PermissionWindowController.swift in Sources */,
 				503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */,
+				507ADD392E6EA72200BB7E10 /* Parser.swift in Sources */,
 				5069364D2E4EFD2D0037984F /* Shader.swift in Sources */,
 				503FCC352E4B85BD00EF49DA /* Settings.swift in Sources */,
 				509E84C32E57584400384C75 /* ImageToolbox.swift in Sources */,

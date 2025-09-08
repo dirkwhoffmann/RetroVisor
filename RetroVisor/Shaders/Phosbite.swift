@@ -393,7 +393,7 @@ final class Phosbite: Shader {
                         title: "Scanline Loss",
                         range: -1.0...0.0, step: 0.01,
                         value: Binding(
-                            key: "DOTMASK_LOSS",
+                            key: "SCANLINE_LOSS",
                             get: { [unowned self] in self.uniforms.SCANLINE_LOSS },
                             set: { [unowned self] in self.uniforms.SCANLINE_LOSS = $0 })),
                     

@@ -65,6 +65,18 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="File" id="bib-Uj-vzu">
                                     <items>
+                                        <menuItem title="Load Settings..." id="scf-aW-kfh">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="loadSettingsAction:" target="Ady-hI-5gd" id="Rah-j1-1hu"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Save Settings..." id="pj9-ce-G1J">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="saveSettingsAction:" target="Ady-hI-5gd" id="En5-3O-0aC"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Start Recording" keyEquivalent="r" id="eYt-ET-xw9">
                                             <connections>
                                                 <action selector="recorderAction:" target="Ady-hI-5gd" id="odY-9p-gES"/>
@@ -1137,6 +1149,17 @@ Gw
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rhb-3A-77l">
+                                <rect key="frame" x="234" y="13" width="46" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" image="text.alignleft" catalog="system" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="mwF-ZQ-ugv">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="infoAction:" target="lT8-2t-dOu" id="PGj-cU-vfh"/>
+                                </connections>
+                            </button>
                         </subviews>
                     </view>
                     <connections>
@@ -1552,5 +1575,6 @@ Gw
         <image name="lens" width="476" height="768"/>
         <image name="movieBg" width="678" height="895"/>
         <image name="stop" width="928" height="509"/>
+        <image name="text.alignleft" catalog="system" width="16" height="13"/>
     </resources>
 </document>
