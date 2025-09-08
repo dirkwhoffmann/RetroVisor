@@ -12,6 +12,7 @@ import ScreenCaptureKit
 /* This class uses ScreenCaptureKit to record screen content and feed it into
  * the post-processor.
  */
+@MainActor
 protocol StreamerDelegate: AnyObject, SCStreamOutput {
 
     func textureRectDidChange(rect: CGRect?)

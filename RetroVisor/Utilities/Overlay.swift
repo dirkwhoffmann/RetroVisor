@@ -13,6 +13,7 @@ import AppKit
  * clickable icon. It is used to display the large pause icon shown when the
  * capture stream ends or is terminated.
  */
+@MainActor
 final class Overlay {
 
     private weak var window: NSWindow?
@@ -31,11 +32,6 @@ final class Overlay {
 
         let image = NSImage(systemSymbolName: iconName, accessibilityDescription: nil)!
         self.init(window: window, image: image, clickHandler: clickHandler)
-    }
-
-    deinit {
-
-        removeOverlay()
     }
 
     private func showOverlay(image: NSImage) {

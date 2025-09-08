@@ -10,6 +10,7 @@
 import Cocoa
 import ScreenCaptureKit
 
+@MainActor
 class WindowController: NSWindowController, Loggable {
 
     var viewController: ViewController? { return self.contentViewController as? ViewController }
@@ -106,6 +107,7 @@ class WindowController: NSWindowController, Loggable {
     }
 }
 
+@MainActor
 extension WindowController: TrackingWindowDelegate {
 
     func windowDidStartResize(_ window: TrackingWindow) {
@@ -150,6 +152,7 @@ extension WindowController: TrackingWindowDelegate {
     }
 }
 
+@MainActor
 extension WindowController: StreamerDelegate {
 
     func textureRectDidChange(rect: CGRect?) {
@@ -176,12 +179,12 @@ extension WindowController: StreamerDelegate {
 
         case .screen:
 
-            guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
-
-            DispatchQueue.main.async { [weak self] in
-
+            Task { @MainActor [weak self] in
+                
+                guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
+                
                 if let controller = self?.contentViewController as? ViewController {
-
+                    
                     let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
                     self?.recorder.timestamp = pts
                     controller.metalView.update(with: pixelBuffer)
