@@ -8,9 +8,32 @@
 // -----------------------------------------------------------------------------
 
 #include <metal_stdlib>
-#include "ShaderTypes.metal"
 
 using namespace metal;
+
+struct VertexIn {
+
+    float4 position [[attribute(0)]];
+    float2 texCoord [[attribute(1)]];
+};
+
+struct VertexOut {
+
+    float4 position [[position]];
+    float2 texCoord;
+};
+
+struct Uniforms {
+
+    float time;
+    float2 shift;
+    float zoom;
+    float intensity;
+    float2 resolution;
+    float2 window;
+    float2 center;
+    float2 mouse;
+};
 
 //
 // Vertex shader

@@ -11,7 +11,6 @@
 // https://github.com/libretro/common-shaders/blob/master/crt/shaders/crt-easymode.cg
 
 #include <metal_stdlib>
-#include "ShaderTypes.metal"
 
 using namespace metal;
 
