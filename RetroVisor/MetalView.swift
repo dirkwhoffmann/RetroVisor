@@ -67,6 +67,12 @@ struct Uniforms {
     var debugXY: SIMD2<Float>
 }
 
+final class TextureBox: @unchecked Sendable {
+    
+    let texture: MTLTexture
+    init(_ texture: MTLTexture) { self.texture = texture }
+}
+
 class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     @IBOutlet weak var viewController: ViewController!
@@ -77,6 +83,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var windowController: WindowController? { return trackingWindow.windowController as? WindowController }
     var recorder: Recorder? { return windowController?.recorder }
 
+    let inFlightSemaphore = DispatchSemaphore(value: 3)
     var commandQueue: MTLCommandQueue!
     var pipelineState: MTLRenderPipelineState!
     var vertexBuffer: MTLBuffer!
@@ -223,32 +230,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         texRect = rect ?? .unity
     }
 
-    /*
-    func updateTextures(rect: NSRect) {
-
-        updateTextures(width: Int(rect.width), height: Int(rect.height))
-    }
-*/
-    // TODO: Udpate textures in draw
-    /*
-    func updateTextures(width: Int, height: Int) {
-
-        let width = NSScreen.scaleFactor * width
-        let height = NSScreen.scaleFactor * height
-
-        if dst?.width != width || dst?.height != height {
-
-            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
-                                                                      width: width,
-                                                                      height: height,
-                                                                      mipmapped: false)
-            descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-
-            dst = device!.makeTexture(descriptor: descriptor)
-        }
-    }
-    */
-    
     func update(with pixelBuffer: CVPixelBuffer) {
 
         // Convert the CVPixelBuffer to a Metal texture
@@ -311,14 +292,24 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     
     func draw(in view: MTKView) {
 
+        // Wait for a free slot before encoding a new frame
+        inFlightSemaphore.wait()
+        
         // Create or update all textures
         updateTextures()
 
         // Only proceed if all textures are set up
-        guard let src = self.src else { return }
-        guard let dwn = self.dwn else { return }
-        guard var dst = self.dst else { return }
+        guard let src = self.src,
+              let dwn = self.dwn,
+              var dst = self.dst,
+              let drawable = view.currentDrawable,
+              let commandBuffer = commandQueue.makeCommandBuffer()
+        else {
+            inFlightSemaphore.signal();
+            return
+        }
 
+        
         // Make sure the streamer uses the correct coordinates
         windowController?.streamer.updateRects()
 
@@ -338,10 +329,21 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         uniforms.window = [Float(trackingWindow.liveFrame.width), Float(trackingWindow.liveFrame.height)]
         uniforms.mouse = [Float(mouse.x), Float(1.0 - mouse.y)]
 
-        // Get the next drawable and create the command buffer
-        guard let drawable = view.currentDrawable else { return }
-        guard let commandBuffer = commandQueue.makeCommandBuffer() else { return }
+        commandBuffer.addCompletedHandler { @Sendable [weak inFlightSemaphore] commandBuffer in
+            inFlightSemaphore?.signal()
+        }
+        
+        /*
+        let textureBox = TextureBox(dst)
+        commandBuffer.addCompletedHandler { @Sendable [weak self] _ in
+            
+            Task { @MainActor in
+                self?.recorder?.appendVideo(texture: textureBox.texture)
+            }
+        }
+        */
 
+        
         //
         // Pass 1: Crop and downsample the input image
         //

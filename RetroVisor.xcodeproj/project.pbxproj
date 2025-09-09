@@ -515,7 +515,7 @@
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -545,7 +545,7 @@
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
