@@ -262,18 +262,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     func updateTextures() {
         
-        // Update the input texture if necessary
-        if let src = src {
-            
-            let dwnWidth = Int(Float(src.width) * uniforms.resampleXY.x)
-            let dwnHeight = Int(Float(src.height) * uniforms.resampleXY.y)
-            
-            if dwn?.width != dwnWidth || dwn?.height != dwnHeight {
-                
-                dwn = dst?.makeTexture(width: dwnWidth, height: dwnHeight)
-            }
-        }
-
         // Update the output texture if necessary
         if let dstSize = dstSize {
             
@@ -281,11 +269,23 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                 
                 let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
                                                                           width: dstSize.width,
-                                                                          height: dstSize.width,
+                                                                          height: dstSize.height,
                                                                           mipmapped: false)
                 descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
                 
                 dst = device!.makeTexture(descriptor: descriptor)
+            }
+        }
+        
+        // Update the downscaling texture if necessary
+        if let dst = dst {
+            
+            let dwnWidth = Int(Float(dst.width) * uniforms.resampleXY.x)
+            let dwnHeight = Int(Float(dst.height) * uniforms.resampleXY.y)
+            
+            if dwn?.width != dwnWidth || dwn?.height != dwnHeight {
+                
+                dwn = dst.makeTexture(width: dwnWidth, height: dwnHeight)
             }
         }
     }

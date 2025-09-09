@@ -24,14 +24,11 @@ class Recorder: Loggable {
     var delegate: RecorderDelegate?
 
     // Enables debug output to the console
-    let logging: Bool = false
+    let logging: Bool = true
 
     // Recorder settings
     var settings = RecorderSettings.Preset.systemDefault.settings
-
-    // The current recording state
-    var isRecording: Bool { countdown == 0 }
-
+    
     // The recorded screen cutout
     private(set) var recordingRect: NSRect?
 
@@ -39,7 +36,8 @@ class Recorder: Loggable {
     var timestamp: CMTime?
 
     // Frame counter to skip initial frames after recording starts
-    var countdown: Int?
+    // var countdown: Int?
+    var frame: Int?
 
     // AVWriter
     private var assetWriter: AVAssetWriter?
@@ -47,6 +45,11 @@ class Recorder: Loggable {
     private var audioInput: AVAssetWriterInput?
     private var pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
 
+    // The current recording state
+    // var isRecording: Bool { countdown == 0 }
+    var isRecording: Bool { assetWriter?.status == .writing }
+
+    /*
     func startRecording(width: Int, height: Int) {
 
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -54,7 +57,8 @@ class Recorder: Loggable {
 
         startRecording(to: file, width: width, height: height)
     }
-
+     */
+    
     func startRecording(to url: URL, width: Int, height: Int) {
 
         if isRecording { return }
@@ -117,7 +121,8 @@ class Recorder: Loggable {
             ]
         )
 
-        countdown = 8
+        // countdown = 8
+        frame = -8
         delegate?.recorderDidStart()
     }
 
@@ -125,13 +130,14 @@ class Recorder: Loggable {
 
         if !isRecording { return }
 
-        log("Stopping the recorder...")
+        log("Stopping the recorder after \(frame ?? 0) frames...")
 
         videoInput?.markAsFinished()
         assetWriter?.finishWriting { completion() }
 
         recordingRect = nil
-        countdown = nil
+        //countdown = nil
+        frame = nil
 
         delegate?.recorderDidStop()
     }
@@ -139,27 +145,45 @@ class Recorder: Loggable {
     // Appends a video frame
     func appendVideo(texture: MTLTexture) {
 
-        let status = assetWriter?.status
-        app.windowController?.effectWindow?.onAir = status == .writing
-
-        if (countdown ?? 0) > 0 { countdown! -= 1 }
-        if !isRecording { return }
-
         guard let timestamp = timestamp else { return }
         guard let assetWriter = assetWriter else { return }
 
+        // Update the recording icon
+        app.windowController?.effectWindow?.onAir = isRecording //  status == .writing
+
+
+        // let status = assetWriter?.status
+
+        // Exit if the recorder is idle
+        if frame == nil {
+            
+            if isRecording { stopRecording { } }
+            return
+        }
+
+        // Start the writer if this is the first frame to be recorded
+        if frame == 0 {
+            
+            print("Starting session")
+            assetWriter.startWriting()
+            assetWriter.startSession(atSourceTime: timestamp)
+        }
+        
+        print("Recording frame \(frame!)")
+        
+        // Advance the frame counter
+        frame! += 1
+        
+        // Only proceed if the recorder is in writing state
+        if !isRecording { return }
+
+        // Get the frame size
         let texW = CGFloat(texture.width)
         let texH = CGFloat(texture.height)
 
         // Stop recording if the texture size did change
         if recordingRect!.width != texW || recordingRect!.height != texH {
             stopRecording { }
-        }
-
-        // Start the writer if this is the first frame
-        if status != .writing {
-            assetWriter.startWriting()
-            assetWriter.startSession(atSourceTime: timestamp)
         }
 
         guard videoInput!.isReadyForMoreMediaData else { return }

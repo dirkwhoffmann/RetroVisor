@@ -130,7 +130,8 @@ extension AppDelegate: NSMenuItemValidation {
 
         if recorder.isRecording {
 
-            recorder.stopRecording { }
+            recorder.frame = nil
+            // recorder.stopRecording { }
 
         } else {
 
