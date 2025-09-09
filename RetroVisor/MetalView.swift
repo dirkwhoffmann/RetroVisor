@@ -59,7 +59,10 @@ struct Uniforms {
     var window: SIMD2<Float>
     var center: SIMD2<Float>
     var mouse: SIMD2<Float>
-    var debug: SIMD2<Float>
+    var resample: Int32
+    var resampleXY: SIMD2<Float>
+    var debug: Int32
+    var debugXY: SIMD2<Float>
 }
 
 class MetalView: MTKView, Loggable, MTKViewDelegate {
@@ -85,7 +88,10 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                  window: [0, 0],
                                  center: [0, 0],
                                  mouse: [0, 0],
-                                 debug: [0, 0])
+                                 resample: 0,
+                                 resampleXY: [1.0, 1.0],
+                                 debug: 1,
+                                 debugXY: [0.5, 0.5])
 
     var textureCache: CVMetalTextureCache!
 
@@ -265,9 +271,9 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     func updateTextures(commandBuffer: MTLCommandBuffer) {
         
-        // Size of the downscaled input texture
-        let inpWidth = Int(Float(inTexture!.width) * 1.0) //uniforms.INPUT_TEX_SCALE)
-        let inpHeight = Int(Float(outTexture!.height) * 1.0) // * uniforms.INPUT_TEX_SCALE)
+        // Determine the size of the downscaled input texture
+        let inpWidth = Int(Float(inTexture!.width) * uniforms.resampleXY.x)
+        let inpHeight = Int(Float(outTexture!.height) * uniforms.resampleXY.y)
                 
         if cropped?.width != inpWidth || cropped?.height != inpHeight {
             
@@ -309,15 +315,14 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Pass 1: Crop and downsample the input image
         //
         
-        resampler.type = ResampleFilterType.bilinear //  (rawValue: uniforms.RESAMPLE_FILTER)!
+        resampler.type = ResampleFilterType(rawValue: uniforms.resample)!
         resampler.apply(commandBuffer: commandBuffer, in: inTexture, out: cropped, rect: texRect)
  
         //
         // Stage 3: Apply the effect shader
         //
 
-        ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer,
-                                                 in: cropped, out: outTexture) // , rect: texRect)
+        ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer, in: cropped, out: outTexture)
 
         //
         // Stage 3: (Optional) in-texture blurring

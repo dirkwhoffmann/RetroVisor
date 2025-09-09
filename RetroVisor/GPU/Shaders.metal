@@ -35,7 +35,10 @@ struct Uniforms {
     float2 window;
     float2 center;
     float2 mouse;
-    float2 debug;
+    uint resample;
+    float2 resampleXY;
+    uint debug;
+    float2 debugXY;
 };
 
 //
@@ -57,12 +60,23 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
 /* The fragment shader used in the final render stage, where the computed
  * texture is drawn onto a fullscreen quad.
  *
- * Features:
+ * Responsibilities:
  *
  *  - Applies an optional zoom effect (magnification feature)
  *  - Applies an optional water-ripple effect (window animation effect)
+ *  - Mixes the effect texture with the original texture (in debug mode)
  *  - Draws the final texture onto a fullscreen quad
  */
+
+inline int debugPixelType(float2 uv, constant Uniforms &u) {
+    
+    float2 suv = sign(u.debugXY) * uv;
+    bool2 inside = suv < u.debugXY;
+
+//    bool2 inside = u.debugXY < 0 ? uv < u.debugXY : uv > u.debugXY;
+    
+    return inside.x && inside.y ? -1 : 1;
+}
 
 fragment float4 fragment_main(VertexOut in [[stage_in]],
                               texture2d<float> orig [[texture(0)]],
@@ -110,10 +124,10 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         return color;
     }
 
-    if (uv.x < 0.5) {
+    if (uniforms.debug == 0) {
         return tex.sample(sam, uv);
     } else {
-        return orig.sample(sam, uv);
+        return debugPixelType(uv, uniforms) == 1 ? tex.sample(sam, uv) :  orig.sample(sam, uv);
     }
 }
 
