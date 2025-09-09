@@ -29,20 +29,17 @@ namespace colorsplit {
         float Z_VALUE;
     };
 
-    kernel void splitter(texture2d<half, access::sample> inTex     [[ texture(0) ]],
-                         texture2d<half, access::write>  outTex    [[ texture(1) ]],
-                         constant Uniforms               &u        [[ buffer(0)  ]],
-                         sampler                         sam       [[ sampler(0) ]],
-                         uint2                           gid       [[ thread_position_in_grid ]])
+    kernel void splitter(texture2d<half, access::sample> src  [[ texture(0) ]],
+                         texture2d<half, access::write>  dst  [[ texture(1) ]],
+                         constant Uniforms               &u   [[ buffer(0)  ]],
+                         sampler                         sam  [[ sampler(0) ]],
+                         uint2                           gid  [[ thread_position_in_grid ]])
     {
-        // Get size of output texture
-        const Coord2 rect = float2(outTex.get_width(), outTex.get_height());
-
         // Normalize gid to [0..1]
-        Coord2 uv = (Coord2(gid) + 0.5) / rect;
+        Coord2 uv = (Coord2(gid) + 0.5) / float2(dst.get_width(), dst.get_height());;
 
         // Read pixel
-        Color3 xyz = Color3(inTex.sample(sam, uv).rgb);
+        Color3 xyz = Color3(src.sample(sam, uv).rgb);
 
         switch (u.COLOR_SPACE) {
                 
@@ -72,6 +69,6 @@ namespace colorsplit {
                 }
         }
         
-        outTex.write(Color4(xyz, 1.0), gid);
+        dst.write(Color4(xyz, 1.0), gid);
     }
 }

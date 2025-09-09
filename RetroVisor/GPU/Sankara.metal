@@ -22,8 +22,7 @@ namespace sankara {
         float GAMMA_INPUT;
         float GAMMA_OUTPUT;
         float BRIGHT_BOOST;
-        float INPUT_TEX_SCALE;
-        float OUTPUT_TEX_SCALE;
+        float TEX_SCALE;
         uint  RESAMPLE_FILTER;
         uint  BLUR_FILTER;
         
