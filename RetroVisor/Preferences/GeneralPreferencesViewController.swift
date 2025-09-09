@@ -45,6 +45,7 @@ class GeneralPreferencesViewController: NSViewController {
 
     // Texture Debugger
     @IBOutlet weak var debugButton: NSPopUpButton!
+    @IBOutlet weak var debugModeButton: NSPopUpButton!
     @IBOutlet weak var debugXSlider: NSSlider!
     @IBOutlet weak var debugYSlider: NSSlider!
 
@@ -81,6 +82,7 @@ class GeneralPreferencesViewController: NSViewController {
     func refresh() {
         
         guard let settings = streamer?.settings else { return }
+        guard let uniforms = metalView?.uniforms else { return }
         
         // Frame rate
         if !fpsButton.selectItem(withTag: settings.fpsMode.rawValue) {
@@ -98,6 +100,23 @@ class GeneralPreferencesViewController: NSViewController {
         
         // Capture mode
         captureModeButton.toolTip = settings.captureMode.help
+        
+        // Resampler
+        if !resampleButton.selectItem(withTag: Int(uniforms.resample)) {
+            fatalError()
+        }
+        resampleXSlider.floatValue = uniforms.resampleXY.x * 1000.0
+        resampleYSlider.floatValue = uniforms.resampleXY.y * 1000.0
+
+        // Debugger
+        if !debugButton.selectItem(withTag: Int(uniforms.debug)) {
+            fatalError()
+        }
+        if !debugModeButton.selectItem(withTag: Int(uniforms.debugMode)) {
+            fatalError()
+        }
+        resampleXSlider.floatValue = uniforms.debugXY.x * 1000.0
+        resampleYSlider.floatValue = uniforms.debugXY.y * 1000.0
     }
     
     @IBAction func fpsModeAction(_ sender: NSPopUpButton) {
@@ -157,8 +176,14 @@ class GeneralPreferencesViewController: NSViewController {
     
     @IBAction func debugAction(_ sender: NSPopUpButton) {
     
-        print("Debug mode: \(sender.selectedTag())")
+        print("Debug: \(sender.selectedTag())")
         metalView!.uniforms.debug = Int32(sender.selectedTag())
+    }
+
+    @IBAction func debugModeAction(_ sender: NSPopUpButton) {
+    
+        print("Debug mode: \(sender.selectedTag())")
+        metalView!.uniforms.debugMode = Int32(sender.selectedTag())
     }
 
     @IBAction func debugXAction(_ sender: NSSlider) {

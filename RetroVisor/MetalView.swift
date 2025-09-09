@@ -62,6 +62,8 @@ struct Uniforms {
     var resample: Int32
     var resampleXY: SIMD2<Float>
     var debug: Int32
+    var debugMode: Int32
+    var debugColor: SIMD3<Float>
     var debugXY: SIMD2<Float>
 }
 
@@ -91,6 +93,8 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                  resample: 0,
                                  resampleXY: [1.0, 1.0],
                                  debug: 1,
+                                 debugMode: 0,
+                                 debugColor: [1.0, 1.0, 1.0],
                                  debugXY: [0.5, 0.5])
 
     var textureCache: CVMetalTextureCache!
