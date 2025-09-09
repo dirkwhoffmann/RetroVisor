@@ -100,7 +100,7 @@ inline float4 sampleFragment(float2 uv,
         
         float2 w = debugWeight(uv, uniforms);
         bool inside = w.x < 0 && w.y < 0;
-        bool border = inside && (abs(w.x) < 0.002 || abs(w.y) < 0.002);
+        bool border = false; // inside && (abs(w.x) < 0.002 || abs(w.y) < 0.002);
         
         // Border pixels
         if (border) { return float4(uniforms.debugColor, 1.0); }

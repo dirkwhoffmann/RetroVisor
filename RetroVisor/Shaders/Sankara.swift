@@ -117,7 +117,7 @@ final class Sankara: Shader {
             DOTMASK_GAIN: 1.0,
             DOTMASK_LOSS: -0.5,
                         
-            DEBUG_ENABLE: 1,
+            DEBUG_ENABLE: 0,
             DEBUG_TEXTURE: 0,
             DEBUG_MIPMAP: 0.0
         )
@@ -562,8 +562,6 @@ final class Sankara: Shader {
     func updateTextures(commandBuffer: MTLCommandBuffer, in input: MTLTexture, out output: MTLTexture) {
         
         // Size of the downscaled input texture
-        // let inpWidth = Int(Float(output.width) * uniforms.INPUT_TEX_SCALE)
-        // let inpHeight = Int(Float(output.height) * uniforms.INPUT_TEX_SCALE)
         let inpWidth = input.width
         let inpHeight = input.height
 
@@ -585,8 +583,9 @@ final class Sankara: Shader {
         
         if crt?.width != crtWidth || crt?.height != crtHeight {
             
-            dom = output.makeTexture(width: crtWidth, height: crtHeight, mipmaps: 4)
             crt = output.makeTexture(width: crtWidth, height: crtHeight)
+            dom = output.makeTexture(width: crtWidth, height: crtHeight, mipmaps: 4)
+            dotMaskNeedsUpdate = true
         }
         
         if (uniforms.DEBUG_ENABLE != 0 && dbg?.width != crtWidth || dbg?.height != crtHeight) {
