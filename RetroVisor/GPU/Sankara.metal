@@ -22,8 +22,7 @@ namespace sankara {
         float GAMMA_INPUT;
         float GAMMA_OUTPUT;
         float BRIGHT_BOOST;
-        float INPUT_TEX_SCALE;
-        float OUTPUT_TEX_SCALE;
+        float TEX_SCALE;
         uint  RESAMPLE_FILTER;
         uint  BLUR_FILTER;
         
@@ -65,11 +64,7 @@ namespace sankara {
         
         // Debugging
         uint  DEBUG_ENABLE;
-        uint  DEBUG_TEXTURE1;
-        uint  DEBUG_TEXTURE2;
-        uint  DEBUG_LEFT;
-        uint  DEBUG_RIGHT;
-        float DEBUG_SLICE;
+        uint  DEBUG_TEXTURE;
         float DEBUG_MIPMAP;
     };
     
@@ -245,94 +240,42 @@ namespace sankara {
     // Debug kernel
     //
     
-    inline int debugPixelType(uint2 gid, uint2 size, constant Uniforms &u) {
-        
-        int cutoff = int(u.DEBUG_SLICE * size.x);
-        int coord = gid.x;
-        
-        return coord < cutoff ? -1 : coord > cutoff ? 1 : 0;
-    }
-     
-    inline Color3 sampleDebugTexture(int source,
-                                     Coord2 uv,
-                                     texture2d<half, access::sample> src [[ texture(0) ]],
-                                     texture2d<half, access::sample> fin [[ texture(1) ]],
-                                     texture2d<half, access::sample> ycc [[ texture(2) ]],
-                                     texture2d<half, access::sample> yc0 [[ texture(3) ]],
-                                     texture2d<half, access::sample> yc1 [[ texture(4) ]],
-                                     texture2d<half, access::sample> yc2 [[ texture(5) ]],
-                                     texture2d<half, access::sample> bl0 [[ texture(6) ]],
-                                     texture2d<half, access::sample> bl1 [[ texture(7) ]],
-                                     texture2d<half, access::sample> bl2 [[ texture(8) ]],
-                                     texture2d<half, access::sample> bri [[ texture(9) ]],
-                                     texture2d<half, access::sample> dom [[ texture(10)]],
-                                     constant Uniforms               &u  [[ buffer(0)  ]],
-                                     sampler                         sam [[ sampler(0) ]],
-                                     uint2                           gid [[ thread_position_in_grid ]])
-    {
-        switch (source) {
-
-            case 0:  return sampleRGB(src, sam, uv);
-            case 1:  return sampleRGB(fin, sam, uv);
-            case 2:  return YCC2RGB(sampleYCC(ycc, sam, uv, u.DEBUG_MIPMAP), u.PAL);
-            case 3:  return sampleYCC(yc0, sam, uv).xxx;
-            case 4:  return sampleYCC(yc1, sam, uv).xxx;
-            case 5:  return sampleYCC(yc2, sam, uv).xxx;
-            case 6:  return sampleYCC(bl0, sam, uv).xxx;
-            case 7:  return sampleYCC(bl1, sam, uv).xxx;
-            case 8:  return sampleYCC(bl2, sam, uv).xxx;
-            case 9:  return sampleYCC(bri, sam, uv).xxx;
-            case 10: return sampleRGB(dom, sam, uv, u.DEBUG_MIPMAP);
-                                
-            default:
-                return Color3(0.0, 0.0, 0.0);
-        }
-    }
-    
-    inline Color3 mixDebugPixel(Color3 color1, Color3 color2, int mode) {
-        
-        switch (mode) {
-                
-            case 0:  return color1;
-            case 1:  return color2;
-            default: return 0.5 + 0.5 * (color1 - color2);
-        }
-    }
-    
-    kernel void debug(texture2d<half, access::sample> src [[ texture(0) ]],
-                      texture2d<half, access::sample> fin [[ texture(1) ]],
-                      texture2d<half, access::sample> ycc [[ texture(2) ]],
-                      texture2d<half, access::sample> yc0 [[ texture(3) ]],
-                      texture2d<half, access::sample> yc1 [[ texture(4) ]],
-                      texture2d<half, access::sample> yc2 [[ texture(5) ]],
-                      texture2d<half, access::sample> bri [[ texture(6) ]],
-                      texture2d<half, access::sample> bl0 [[ texture(7) ]],
-                      texture2d<half, access::sample> bl1 [[ texture(8) ]],
-                      texture2d<half, access::sample> bl2 [[ texture(9) ]],
-                      texture2d<half, access::sample> dom [[ texture(10)]],
-                      texture2d<half, access::write>  out [[ texture(11)]],
+    kernel void debug(texture2d<half, access::sample> fin [[ texture(0) ]],
+                      texture2d<half, access::sample> ycc [[ texture(1) ]],
+                      texture2d<half, access::sample> yc0 [[ texture(2) ]],
+                      texture2d<half, access::sample> yc1 [[ texture(3) ]],
+                      texture2d<half, access::sample> yc2 [[ texture(4) ]],
+                      texture2d<half, access::sample> bri [[ texture(5) ]],
+                      texture2d<half, access::sample> bl0 [[ texture(6) ]],
+                      texture2d<half, access::sample> bl1 [[ texture(7) ]],
+                      texture2d<half, access::sample> bl2 [[ texture(8) ]],
+                      texture2d<half, access::sample> dom [[ texture(9) ]],
+                      texture2d<half, access::write>  dst [[ texture(10)]],
                       constant Uniforms               &u  [[ buffer(0)  ]],
                       sampler                         sam [[ sampler(0) ]],
                       uint2                           gid [[ thread_position_in_grid ]])
     {
         // Normalize gid to 0..1 in output texture
-        uint2 size = uint2(out.get_width(), out.get_height());
-        Coord2 uv = (Coord2(gid) + 0.5) / Coord2(size);
-                
-        // Sample the selected texures
-        Color3 color1 = sampleDebugTexture(u.DEBUG_TEXTURE1, uv,
-                                           src, fin, ycc, yc0, yc1, yc2, bri, bl0, bl1, bl2, dom,
-                                           u, sam, gid);
-        Color3 color2 = sampleDebugTexture(u.DEBUG_TEXTURE2, uv,
-                                           src, fin, ycc, yc0, yc1, yc2, bri, bl0, bl1, bl2, dom,
-                                           u, sam, gid);
+        Coord2 uv = (Coord2(gid) + 0.5) / float2(dst.get_width(), dst.get_height());
+              
+        Color3 col;
+        switch (u.DEBUG_TEXTURE) {
 
-        // Compute the pixel to display
-        switch (debugPixelType(gid, size, u)) {
-                
-            case -1: out.write(Color4(mixDebugPixel(color1, color2, u.DEBUG_LEFT), 1.0), gid); break;
-            case  1: out.write(Color4(mixDebugPixel(color1, color2, u.DEBUG_RIGHT), 1.0), gid); break;
-            default: out.write(Color4(1.0,1.0,1.0,1.0), gid);
+            case 0: col = sampleRGB(fin, sam, uv); break;
+            case 1: col = YCC2RGB(sampleYCC(ycc, sam, uv, u.DEBUG_MIPMAP), u.PAL); break;
+            case 2: col = sampleYCC(yc0, sam, uv).xxx; break;
+            case 3: col = sampleYCC(yc1, sam, uv).xxx; break;
+            case 4: col = sampleYCC(yc2, sam, uv).xxx; break;
+            case 5: col = sampleYCC(bl0, sam, uv).xxx; break;
+            case 6: col = sampleYCC(bl1, sam, uv).xxx; break;
+            case 7: col = sampleYCC(bl2, sam, uv).xxx; break;
+            case 8: col = sampleYCC(bri, sam, uv).xxx; break;
+            case 9: col = sampleRGB(dom, sam, uv, u.DEBUG_MIPMAP); break;
+                                
+            default:
+                col = Color3(0.0, 0.0, 0.0);
         }
+        
+       dst.write(Color4(col, 1.0), gid);
     }
 }

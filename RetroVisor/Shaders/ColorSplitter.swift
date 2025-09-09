@@ -156,8 +156,10 @@ final class ColorSplitter: Shader {
         updateTextures(in: input, out: output)
 
         // Rescale to the source texture size
-        resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
+        // resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
 
+        src = input
+        
         // Apply the color split filter
         kernel.apply(commandBuffer: commandBuffer,
                         textures: [src, output],

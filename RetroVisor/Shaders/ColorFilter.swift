@@ -15,15 +15,12 @@ final class ColorFilter: Shader {
     
     struct Uniforms {
         
-        var INPUT_TEX_SCALE: Float
-        var OUTPUT_TEX_SCALE: Float
-
         var PALETTE: Int32
         var BRIGHTNESS: Float
         var CONTRAST: Float
         var SATURATION: Float
 
-        var BLUR_ENABLE: Int32
+        var FILTER_ENABLE: Int32
         var BLUR_FILTER: Int32
         var BLUR_RADIUS_X: Float
         var BLUR_RADIUS_Y: Float
@@ -33,16 +30,13 @@ final class ColorFilter: Shader {
         var RESAMPLE_SCALE_Y: Float
         
         static let defaults = Uniforms(
-            
-            INPUT_TEX_SCALE: 0.5,
-            OUTPUT_TEX_SCALE: 2.0,
-            
+                        
             PALETTE: 0,
             BRIGHTNESS: 0.5,
             CONTRAST: 0.5,
             SATURATION: 0.5,
             
-            BLUR_ENABLE: 0,
+            FILTER_ENABLE: 0,
             BLUR_FILTER: BlurFilterType.box.rawValue,
             BLUR_RADIUS_X: 1.0,
             BLUR_RADIUS_Y: 1.0,
@@ -55,20 +49,15 @@ final class ColorFilter: Shader {
     
     var uniforms = Uniforms.defaults
     
-    // Filter
+    // Textures
+    var col: MTLTexture!    // Colorized texture
+    var blr: MTLTexture!    // Blurred texture
+
+    // Filters
     var resampler = ResampleFilter()
     var blurFilter = BlurFilter()
     var colorizer = PaletteFilter(sampler: ShaderLibrary.linear)
-    
-    // Downscaled input texture
-    var src: MTLTexture!
-
-    // Colorized texture
-    var col: MTLTexture!
-
-    // Blurred texture
-    var blur: MTLTexture!
-    
+        
     init() {
         
         super.init(name: "Color Filter")
@@ -78,16 +67,7 @@ final class ColorFilter: Shader {
         settings = [
             
             Group(title: "Textures", [
-                
-                ShaderSetting(
-                    title: "Input Downscaling Factor",
-                    range: 0.125...1.0,
-                    step: 0.125,
-                    value: Binding(
-                        key: "INPUT_TEX_SCALE",
-                        get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
-                        set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 })),
-                
+
                 ShaderSetting(
                     title: "Resampler",
                     items: [("BILINEAR", 0), ("LANCZOS", 1)],
@@ -100,9 +80,9 @@ final class ColorFilter: Shader {
             Group(title: "Filter",
                   
                   enable: Binding(
-                    key: "BLUR_ENABLE",
-                    get: { [unowned self] in Float(self.uniforms.BLUR_ENABLE) },
-                    set: { [unowned self] in self.uniforms.BLUR_ENABLE = Int32($0) }),
+                    key: "FILTER_ENABLE",
+                    get: { [unowned self] in Float(self.uniforms.FILTER_ENABLE) },
+                    set: { [unowned self] in self.uniforms.FILTER_ENABLE = Int32($0) }),
                   
                   [ ShaderSetting(
                     title: "Palette",
@@ -167,43 +147,37 @@ final class ColorFilter: Shader {
     
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
         
-        let srcW = Int(Float(output.width) * uniforms.INPUT_TEX_SCALE)
-        let srcH = Int(Float(output.height) * uniforms.INPUT_TEX_SCALE)
+        let srcW = output.width
+        let srcH = output.height
         
-        if src?.width != srcW || src?.height != srcH {
+        if col?.width != srcW || col?.height != srcH {
             
-            src = output.makeTexture(width: srcW, height: srcH)
             col = output.makeTexture(width: srcW, height: srcH)
-            blur = output.makeTexture(width: srcW, height: srcH)
+            blr = output.makeTexture(width: srcW, height: srcH)
         }
     }
     
     override func apply(commandBuffer: MTLCommandBuffer,
                         in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
         
-        // Create helper textures if needed
         updateTextures(in: input, out: output)
-        
-        // Rescale to the source texture size
-        resampler.type = ResampleFilterType(rawValue: uniforms.RESAMPLE_FILTER)!
-        resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
-        
+                
         // Apply the color split filter
         colorizer!.apply(commandBuffer: commandBuffer,
-                         textures: [src, col],
+                         textures: [input, col],
                          options: &uniforms,
                          length: MemoryLayout<Uniforms>.stride)
         
-        if uniforms.BLUR_ENABLE != 0 {
+        if uniforms.FILTER_ENABLE != 0 {
             
             // Blur the source texture
             blurFilter.blurType = BlurFilterType(rawValue: uniforms.BLUR_FILTER)!
             blurFilter.resampleXY = (uniforms.RESAMPLE_SCALE_X, uniforms.RESAMPLE_SCALE_Y)
             blurFilter.blurSize = (uniforms.BLUR_RADIUS_X, uniforms.BLUR_RADIUS_Y)
-            blurFilter.apply(commandBuffer: commandBuffer, in: col, out: blur)
+            blurFilter.apply(commandBuffer: commandBuffer, in: col, out: blr)
             
             // Rescale to the output texture size
-            resampler.apply(commandBuffer: commandBuffer, in: blur, out: output)
+            resampler.apply(commandBuffer: commandBuffer, in: blr, out: output)
             
         } else {
             
@@ -217,7 +191,7 @@ extension ColorFilter: ShaderDelegate {
     
     func isHidden(setting: ShaderSetting) -> Bool {
         
-        let FILTER_DISABLE = uniforms.BLUR_ENABLE == 0
+        let FILTER_DISABLE = uniforms.FILTER_ENABLE == 0
         let GAUSS = uniforms.BLUR_FILTER == BlurFilterType.gaussian.rawValue
         
         switch setting.valueKey {
@@ -227,7 +201,6 @@ extension ColorFilter: ShaderDelegate {
         case "CONTRAST":            return FILTER_DISABLE
         case "SATURATION:":         return FILTER_DISABLE
             
-        case "BLUR_ENABLE":         return FILTER_DISABLE
         case "BLUR_FILTER":         return FILTER_DISABLE
         case "BLUR_RADIUS_X":       return FILTER_DISABLE
         case "BLUR_RADIUS_Y":       return FILTER_DISABLE || GAUSS

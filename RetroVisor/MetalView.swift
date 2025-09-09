@@ -13,17 +13,23 @@ import MetalPerformanceShaders
 
 /* The current GPU pipeline consists of three stages:
  *
- * Stage 1: Main Processing
+ * Stage 1: Cropping and Downsampling
+ *
+ *          Crops and downsamples the input area. The result is a scaled down
+ *          version of the area beneath the effect window, which is then passed
+ *          to the effect shader.
+ *
+ * Stage 2: Main Processing
  *
  *          Applies the CRT effect shader to the input texture. This is the core
  *          rendering stage.
  *
- * Stage 2: Post-Processing (Blur Filter)
+ * Stage 3: Post-Processing (Optional)
  *
  *          Applies a Gaussian-like blur during window animations (i.e., move or
  *          resize) to produce a smoother visual experience.
  *
- * Stage 3: Rendering
+ * Stage 4: Rendering
  *
  *          Zooms the texture (if requested) and draws the final quad.
  *          Additonally, a water ripple effect during window drag and resize
@@ -53,6 +59,12 @@ struct Uniforms {
     var window: SIMD2<Float>
     var center: SIMD2<Float>
     var mouse: SIMD2<Float>
+    var resample: Int32
+    var resampleXY: SIMD2<Float>
+    var debug: Int32
+    var debugMode: Int32
+    var debugColor: SIMD3<Float>
+    var debugXY: SIMD2<Float>
 }
 
 class MetalView: MTKView, Loggable, MTKViewDelegate {
@@ -77,19 +89,27 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                  resolution: [0, 0],
                                  window: [0, 0],
                                  center: [0, 0],
-                                 mouse: [0, 0])
+                                 mouse: [0, 0],
+                                 resample: 0,
+                                 resampleXY: [1.0, 1.0],
+                                 debug: 0,
+                                 debugMode: 0,
+                                 debugColor: [0.5, 0.5, 0.5],
+                                 debugXY: [0.5, 1.0])
 
     var textureCache: CVMetalTextureCache!
-
-    // Input texture from the screen capturer
-    var inTexture: MTLTexture?
 
     // Area of the input texture covered by the effect window
     var texRect: CGRect = .unity
 
-    // Final output texture rendered in the effect window
-    var outTexture: MTLTexture?
-
+    // Textures
+    var inTexture: MTLTexture?      // Input texture from the screen capturer
+    var cropped: MTLTexture!        // The cropped and downsampled input texture
+    var outTexture: MTLTexture?     // Final output texture rendered in the effect window
+    
+    // Performance shaders
+    var resampler: ResampleFilter!
+    
     // Animation parameters
     var time: Float = 0.0
     var intensity = Animated<Float>(0.0)
@@ -131,6 +151,8 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         colorPixelFormat = .bgra8Unorm
         initMetal()
 
+        resampler = ResampleFilter()
+        
         // Enable the magnification gesture
         let magnifyRecognizer = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnify(_:)))
         addGestureRecognizer(magnifyRecognizer)
@@ -203,6 +225,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         updateTextures(width: Int(rect.width), height: Int(rect.height))
     }
 
+    // TODO: Udpate textures in draw 
     func updateTextures(width: Int, height: Int) {
 
         let width = NSScreen.scaleFactor * width
@@ -250,6 +273,18 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         }
     }
 
+    func updateTextures(commandBuffer: MTLCommandBuffer) {
+        
+        // Determine the size of the downscaled input texture
+        let inpWidth = Int(Float(inTexture!.width) * uniforms.resampleXY.x)
+        let inpHeight = Int(Float(outTexture!.height) * uniforms.resampleXY.y)
+                
+        if cropped?.width != inpWidth || cropped?.height != inpHeight {
+            
+            cropped = outTexture!.makeTexture(width: inpWidth, height: inpHeight)
+        }
+    }
+    
     func draw(in view: MTKView) {
 
         guard let inTexture = self.inTexture else { return }
@@ -277,15 +312,24 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         guard let drawable = view.currentDrawable else { return }
         guard let commandBuffer = commandQueue.makeCommandBuffer() else { return }
 
-        //
-        // Stage 1: Apply the effect shader
-        //
-
-        ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer,
-                                                 in: inTexture, out: outTexture, rect: texRect)
+        // Create or update all textures
+        updateTextures(commandBuffer: commandBuffer)
 
         //
-        // Stage 2: (Optional) in-texture blurring
+        // Pass 1: Crop and downsample the input image
+        //
+        
+        resampler.type = ResampleFilterType(rawValue: uniforms.resample)!
+        resampler.apply(commandBuffer: commandBuffer, in: inTexture, out: cropped, rect: texRect)
+ 
+        //
+        // Stage 3: Apply the effect shader
+        //
+
+        ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer, in: cropped, out: outTexture)
+
+        //
+        // Stage 3: (Optional) in-texture blurring
         //
 
         if animates {
@@ -297,7 +341,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         }
 
         //
-        // Stage 3: Render a full quad on the screen
+        // Stage 4: Render a full quad on the screen
         //
 
         guard let renderPass3 = view.currentRenderPassDescriptor else { return }
@@ -309,7 +353,8 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
             encoder.setRenderPipelineState(pipelineState)
             encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-            encoder.setFragmentTexture(outTexture, index: 0)
+            encoder.setFragmentTexture(cropped, index: 0)
+            encoder.setFragmentTexture(outTexture, index: 1)
             encoder.setFragmentSamplerState(sampler, index: 0)
             encoder.setFragmentBytes(&uniforms,
                                      length: MemoryLayout<Uniforms>.stride,

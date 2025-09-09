@@ -7,7 +7,10 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
-#include <metal_stdlib>
+// #include <metal_stdlib>
+
+#include "MathToolbox.metal"
+#include "ColorToolbox.metal"
 
 using namespace metal;
 
@@ -33,6 +36,12 @@ struct Uniforms {
     float2 window;
     float2 center;
     float2 mouse;
+    uint resample;
+    float2 resampleXY;
+    uint debug;
+    uint debugMode;
+    float3 debugColor;
+    float2 debugXY;
 };
 
 //
@@ -40,6 +49,7 @@ struct Uniforms {
 //
 
 vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
+    
     VertexOut out;
     out.position = in.position;
     out.texCoord = in.texCoord;
@@ -53,58 +63,120 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
 /* The fragment shader used in the final render stage, where the computed
  * texture is drawn onto a fullscreen quad.
  *
- * Features:
+ * Responsibilities:
  *
  *  - Applies an optional zoom effect (magnification feature)
  *  - Applies an optional water-ripple effect (window animation effect)
+ *  - Mixes the effect texture with the original texture (in debug mode)
  *  - Draws the final texture onto a fullscreen quad
  */
 
+inline float2 debugWeight(float2 uv, constant Uniforms &u) {
+    
+    constexpr float2 signs[4] = {
+        
+        float2( 1.0,  1.0), // Upper left
+        float2(-1.0,  1.0), // Upper right
+        float2( 1.0, -1.0), // Lower left
+        float2(-1.0, -1.0)  // Lower right
+    };
+    
+    float2 s = signs[(u.debug - 1) & 3];
+    float2 xy = select(u.debugXY, 1.0 - u.debugXY, s < 0);
+    return s * (uv - xy);
+}
+
+inline float4 sampleFragment(float2 uv,
+                             texture2d<float> orig,
+                             texture2d<float> tex,
+                             constant Uniforms& uniforms,
+                             sampler sam) {
+    
+    if (uniforms.debug == 0) {
+        
+        return tex.sample(sam, uv);
+        
+    } else {
+        
+        float2 w = debugWeight(uv, uniforms);
+        bool inside = w.x < 0 && w.y < 0;
+        bool border = false; // inside && (abs(w.x) < 0.002 || abs(w.y) < 0.002);
+        
+        // Border pixels
+        if (border) { return float4(uniforms.debugColor, 1.0); }
+        
+        // Pixels from the input texture
+        if (!inside) { return orig.sample(sam, uv); }
+        
+        // Pixels from the effect texture
+        if (uniforms.debugMode == 0) { return tex.sample(sam, uv); }
+        
+        // Diff modes
+        float4 source = orig.sample(sam, uv);
+        float4 effect = tex.sample(sam, uv);
+        // float4 diff = 0.5 * (effect - source);
+        float4 diff = abs(effect - source);
+        float3 offset = 0.0;
+        
+        switch (uniforms.debugMode) {
+                
+            case 1: return float4(diff.rgb + offset, 1.0);
+            case 2: return float4(diff.rrr + offset, 1.0);
+            case 3: return float4(diff.ggg + offset, 1.0);
+            case 4: return float4(diff.bbb + offset, 1.0);
+            default: return float4(float3(LUM(Color4(diff))), 1.0);
+        }
+    }
+}
+    
 fragment float4 fragment_main(VertexOut in [[stage_in]],
-                              texture2d<float> tex [[texture(0)]],
+                              texture2d<float> orig [[texture(0)]],
+                              texture2d<float> tex [[texture(1)]],
                               constant Uniforms& uniforms [[buffer(0)]],
                               sampler sam [[sampler(0)]]) {
 
-    // float2 shift = float2(0.5 - 0.5 / uniforms.zoom, 0.5 - 0.5 / uniforms.zoom);
+    // Scale and shift coordinate according to the given zoom and parameters
     float2 uv = in.texCoord / uniforms.zoom + uniforms.shift;
     float2 mouse = uniforms.mouse / uniforms.zoom + uniforms.shift;
-
+    
+    // Apply the water-ripple effect if enabled
     if (uniforms.intensity > 0.0) {
-
+        
         // Ripple parameters
-        float waveFreq        = 100.0; // 60
+        float waveFreq        = 100.0;
         float waveSpeed       = 10.0;
-        float baseAmp         = 0.025 * uniforms.intensity; // 0.005
+        float baseAmp         = 0.025 * uniforms.intensity;
         float brightnessDepth = 0.15 * uniforms.intensity;
         float frequencyDrop   = 0.75;
-
+        
         // Compute distance to the center
         float2 dir = uv - mouse;
         float dist = length(dir);
-
+        
         // Make wavelength increase with distance
         float variableFreq = waveFreq / (1.0 + dist * frequencyDrop);
-
+        
         // Lower the amplitude with distance
         float ampFalloff = exp(-dist * 0.5);
         float rippleAmp = baseAmp * ampFalloff;
-
+        
         // Simulate ripple and displacement
         float ripple = sin((dist * variableFreq) - (uniforms.time * waveSpeed));
         float offset = ripple * rippleAmp;
         float2 rippleUV = uv + (dist > 0.0001 ? normalize(dir) * offset : float2(0.0));
-
+        
         // Rectify the coordinates at the border
         rippleUV = clamp(rippleUV, float2(0.01), float2(0.99));
-
-        float4 color = tex.sample(sam, rippleUV);
+        
+        // float4 color = tex.sample(sam, rippleUV);
+        float4 color = sampleFragment(rippleUV, orig, tex, uniforms, sam);
         float brightness = 1.0 - brightnessDepth * (cos((dist * variableFreq) - (uniforms.time * waveSpeed)) * 0.5 + 0.5);
         color.rgb *= brightness;
-
+        
         return color;
     }
 
-    return tex.sample(sam, uv);
+    return sampleFragment(uv, orig, tex, uniforms, sam);
 }
 
 //

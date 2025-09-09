@@ -20,8 +20,7 @@ final class Sankara: Shader {
         var GAMMA_INPUT: Float
         var GAMMA_OUTPUT: Float
         var BRIGHT_BOOST: Float
-        var INPUT_TEX_SCALE: Float
-        var OUTPUT_TEX_SCALE: Float
+        var TEX_SCALE: Float
         var RESAMPLE_FILTER: Int32
         var BLUR_FILTER: Int32
         
@@ -66,11 +65,7 @@ final class Sankara: Shader {
         var DOTMASK_LOSS: Float
                 
         var DEBUG_ENABLE: Int32
-        var DEBUG_TEXTURE1: Int32
-        var DEBUG_TEXTURE2: Int32
-        var DEBUG_LEFT: Int32
-        var DEBUG_RIGHT: Int32
-        var DEBUG_SLICE: Float
+        var DEBUG_TEXTURE: Int32
         var DEBUG_MIPMAP: Float
         
         static let defaults = Uniforms(
@@ -79,8 +74,7 @@ final class Sankara: Shader {
             GAMMA_INPUT: 2.2,
             GAMMA_OUTPUT: 2.2,
             BRIGHT_BOOST: 1.0,
-            INPUT_TEX_SCALE: 1.0,
-            OUTPUT_TEX_SCALE: 2.0,
+            TEX_SCALE: 2.0,
             RESAMPLE_FILTER: ResampleFilterType.bilinear.rawValue,
             BLUR_FILTER: BlurFilterType.box.rawValue,
             
@@ -124,11 +118,7 @@ final class Sankara: Shader {
             DOTMASK_LOSS: -0.5,
                         
             DEBUG_ENABLE: 0,
-            DEBUG_TEXTURE1: 0,
-            DEBUG_TEXTURE2: 1,
-            DEBUG_LEFT: 0,
-            DEBUG_RIGHT: 1,
-            DEBUG_SLICE: 0.5,
+            DEBUG_TEXTURE: 0,
             DEBUG_MIPMAP: 0.0
         )
     }
@@ -136,7 +126,6 @@ final class Sankara: Shader {
     var uniforms: Uniforms = .defaults
         
     // Textures
-    var src: MTLTexture! // Downscaled input texture
     var yc0: MTLTexture! // Channel 0 (Luma)
     var yc1: MTLTexture! // Channel 1 (Chroma U/I)
     var yc2: MTLTexture! // Channel 2 (Chroma I/Q)
@@ -207,22 +196,14 @@ final class Sankara: Shader {
                         get: { [unowned self] in self.uniforms.BRIGHT_BOOST },
                         set: { [unowned self] in self.uniforms.BRIGHT_BOOST = $0 }),
                 ),
-                
+                                
                 ShaderSetting(
-                    title: "Input Downscaling",
-                    range: 0.125...1.0, step: 0.125,
-                    value: Binding(
-                        key: "INPUT_TEX_SCALE",
-                        get: { [unowned self] in self.uniforms.INPUT_TEX_SCALE },
-                        set: { [unowned self] in self.uniforms.INPUT_TEX_SCALE = $0 })),
-                
-                ShaderSetting(
-                    title: "Output Upscaling",
+                    title: "Internal Upscaling",
                     range: 1.0...2.0, step: 0.125,
                     value: Binding(
-                        key: "OUTPUT_TEX_SCALE",
-                        get: { [unowned self] in self.uniforms.OUTPUT_TEX_SCALE },
-                        set: { [unowned self] in self.uniforms.OUTPUT_TEX_SCALE = $0 })),
+                        key: "TEX_SCALE",
+                        get: { [unowned self] in self.uniforms.TEX_SCALE },
+                        set: { [unowned self] in self.uniforms.TEX_SCALE = $0 })),
                 
                 ShaderSetting(
                     title: "Resampler",
@@ -530,70 +511,21 @@ final class Sankara: Shader {
                     set: { [unowned self] in self.uniforms.DEBUG_ENABLE = Int32($0) }),
                   
                   [ ShaderSetting(
-                    title: "Texture 1",
-                    items: [ ("Source", 0),
-                             ("Final", 1),
-                             ("", 0),
-                             ("ycc", 2),
-                             ("ycc (Y)", 3),
-                             ("ycc (C1)", 4),
-                             ("ycc (C2)", 5),
-                             ("Bright Pass", 6),
-                             ("Bloom (Y)", 7),
-                             ("Bloom (C1)", 8),
-                             ("Bloom (C2)", 9),
-                             ("Dotmask", 10) ],
+                    title: "Texture",
+                    items: [ ("Final", 0),
+                             ("Ycc", 1),
+                             ("Ycc (Luma)", 2),
+                             ("Ycc (Chroma 1)", 3),
+                             ("Ycc (Chroma 2)", 4),
+                             ("Bright Pass", 5),
+                             ("Bloom (Luma)", 6),
+                             ("Bloom (Chroma 1)", 7),
+                             ("Bloom (Chroma 2)", 8),
+                             ("Dotmask", 9) ],
                     value: Binding(
-                        key: "DEBUG_TEXTURE1",
-                        get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE1) },
-                        set: { [unowned self] in self.uniforms.DEBUG_TEXTURE1 = Int32($0) })),
-                    
-                    ShaderSetting(
-                        title: "Texture 2",
-                        items: [ ("Source", 0),
-                                 ("Final", 1),
-                                 ("", 0),
-                                 ("ycc", 2),
-                                 ("ycc (Y)", 3),
-                                 ("ycc (C1)", 4),
-                                 ("ycc (C2)", 5),
-                                 ("Bright Pass", 6),
-                                 ("Bloom (Y)", 7),
-                                 ("Bloom (C1)", 8),
-                                 ("Bloom (C2)", 9),
-                                 ("Dotmask", 10) ],
-                        value: Binding(
-                            key: "DEBUG_TEXTURE2",
-                            get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE2) },
-                            set: { [unowned self] in self.uniforms.DEBUG_TEXTURE2 = Int32($0) })),
-                    
-                    ShaderSetting(
-                        title: "Left View",
-                        items: [ ("Texture 1", 0),
-                                 ("Texture 2", 1),
-                                 ("Diff", 2) ],
-                        value: Binding(
-                            key: "DEBUG_LEFT",
-                            get: { [unowned self] in Float(self.uniforms.DEBUG_LEFT) },
-                            set: { [unowned self] in self.uniforms.DEBUG_LEFT = Int32($0) })),
-                    
-                    ShaderSetting(
-                        title: "Right View",
-                        items: [ ("Texture 1", 0),
-                                 ("Texture 2", 1),
-                                 ("Diff", 2) ],
-                        value: Binding(
-                            key: "DEBUG_RIGHT",
-                            get: { [unowned self] in Float(self.uniforms.DEBUG_RIGHT) },
-                            set: { [unowned self] in self.uniforms.DEBUG_RIGHT = Int32($0) })),
-                    
-                    ShaderSetting(
-                        title: "Area Slider",
-                        range: 0.0...1.0, step: 0.01,
-                        value: Binding(
-                            key: "DEBUG_SLICE",
-                            get: { [unowned self] in self.uniforms.DEBUG_SLICE },
-                            set: { [unowned self] in self.uniforms.DEBUG_SLICE = $0 })),
+                        key: "DEBUG_TEXTURE",
+                        get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE) },
+                        set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) })),
                     
                     ShaderSetting(
                         title: "Mipmap level",
@@ -630,16 +562,15 @@ final class Sankara: Shader {
     func updateTextures(commandBuffer: MTLCommandBuffer, in input: MTLTexture, out output: MTLTexture) {
         
         // Size of the downscaled input texture
-        let inpWidth = Int(Float(output.width) * uniforms.INPUT_TEX_SCALE)
-        let inpHeight = Int(Float(output.height) * uniforms.INPUT_TEX_SCALE)
-        
+        let inpWidth = input.width
+        let inpHeight = input.height
+
         // Size of the upscaled internal texture
-        let crtWidth = Int(Float(output.width) * uniforms.OUTPUT_TEX_SCALE)
-        let crtHeight = Int(Float(output.height) * uniforms.OUTPUT_TEX_SCALE)
+        let crtWidth = Int(Float(output.width) * uniforms.TEX_SCALE)
+        let crtHeight = Int(Float(output.height) * uniforms.TEX_SCALE)
         
         if ycc?.width != inpWidth || ycc?.height != inpHeight {
             
-            src = output.makeTexture(width: inpWidth, height: inpHeight)
             ycc = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
             yc0 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
             yc1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
@@ -652,8 +583,9 @@ final class Sankara: Shader {
         
         if crt?.width != crtWidth || crt?.height != crtHeight {
             
-            dom = output.makeTexture(width: crtWidth, height: crtHeight, mipmaps: 4)
             crt = output.makeTexture(width: crtWidth, height: crtHeight)
+            dom = output.makeTexture(width: crtWidth, height: crtHeight, mipmaps: 4)
+            dotMaskNeedsUpdate = true
         }
         
         if (uniforms.DEBUG_ENABLE != 0 && dbg?.width != crtWidth || dbg?.height != crtHeight) {
@@ -698,19 +630,12 @@ final class Sankara: Shader {
     }
     
     override func apply(commandBuffer: MTLCommandBuffer,
-                        in input: MTLTexture, out output: MTLTexture, rect: CGRect) {
+                        in src: MTLTexture, out dst: MTLTexture, rect: CGRect) {
         
-        updateTextures(commandBuffer: commandBuffer, in: input, out: output)
-        
+        updateTextures(commandBuffer: commandBuffer, in: src, out: dst)
+                
         //
-        // Pass 1: Crop and downsample the input image
-        //
-        
-        resampler.type = ResampleFilterType(rawValue: uniforms.RESAMPLE_FILTER)!
-        resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
-        
-        //
-        // Pass 2: Convert the input image into YUV/YIQ space
+        // Pass 1: Convert the input image into YUV/YIQ space
         //
         
         splitKernel.apply(commandBuffer: commandBuffer,
@@ -719,7 +644,7 @@ final class Sankara: Shader {
                           length: MemoryLayout<Uniforms>.stride)
         
         //
-        // Pass 3: Emulate composite effects
+        // Pass 2: Emulate composite effects
         //
         
         if uniforms.CV_ENABLE == 1 {
@@ -757,7 +682,7 @@ final class Sankara: Shader {
         pyramid.encode(commandBuffer: commandBuffer, inPlaceTexture: &ycc)
         
         //
-        // Pass 4: Create the bloom texture
+        // Pass 3: Create the bloom texture
         //
         
         if uniforms.BLOOM_ENABLE == 1 {
@@ -768,7 +693,7 @@ final class Sankara: Shader {
         }
         
         //
-        // Pass 5: Emulate CRT effects
+        // Pass 4: Emulate CRT effects
         //
         
         crtKernel.apply(commandBuffer: commandBuffer,
@@ -777,18 +702,18 @@ final class Sankara: Shader {
                         length: MemoryLayout<Uniforms>.stride)
         
         //
-        // Pass 6: Mix in debug textures
+        // Pass 5: Run the texture debugger
         //
         
         if uniforms.DEBUG_ENABLE == 1 {
             
             debugKernel.apply(commandBuffer: commandBuffer,
-                              textures: [src, dbg, ycc, yc0, yc1, yc2, bl0, bl1, bl2, bri, dom, output],
+                              textures: [dbg, ycc, yc0, yc1, yc2, bl0, bl1, bl2, bri, dom, dst],
                               options: &uniforms,
                               length: MemoryLayout<Uniforms>.stride)
         } else {
             
-            resampler.apply(commandBuffer: commandBuffer, in: crt, out: output)
+            resampler.apply(commandBuffer: commandBuffer, in: crt, out: dst)
         }
     }
 }
@@ -823,7 +748,7 @@ extension Sankara: ShaderDelegate {
     
     func settingDidChange(setting: ShaderSetting) {
         
-        if setting.valueKey  == "OUTPUT_TEX_SCALE" || setting.valueKey .starts(with: "DOTMASK") {
+        if setting.valueKey  == "TEX_SCALE" || setting.valueKey .starts(with: "DOTMASK") {
             
             dotMaskNeedsUpdate = true
         }
