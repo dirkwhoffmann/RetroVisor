@@ -118,9 +118,15 @@ extension WindowController: TrackingWindowDelegate {
 
     func windowDidStopResize(_ window: TrackingWindow) {
 
+        let width = NSScreen.scaleFactor * Int(window.frame.width)
+        let height = NSScreen.scaleFactor * Int(window.frame.height)
+
         metalView!.intensity.target = 0.0
         metalView!.intensity.steps = 15
-        metalView!.updateTextures(rect: window.frame)
+        
+        metalView!.dstSize = MTLSize(width: width, height: height, depth: 1)
+
+        // metalView!.updateTextures(rect: window.frame)
 
         streamer.updateRects()
         streamer.relaunchIfNeeded()

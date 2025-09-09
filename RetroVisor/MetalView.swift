@@ -103,9 +103,12 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var texRect: CGRect = .unity
 
     // Textures
-    var inTexture: MTLTexture?      // Input texture from the screen capturer
-    var cropped: MTLTexture!        // The cropped and downsampled input texture
-    var outTexture: MTLTexture?     // Final output texture rendered in the effect window
+    var src: MTLTexture?    // Source texture from the screen capturer
+    var dwn: MTLTexture?    // Cropped and downsampled input texture
+    var dst: MTLTexture?    // Destination texture rendered in the effect window
+
+    // Proposed size of the destination texture (picked up in update textures)
+    var dstSize: MTLSize?
     
     // Performance shaders
     var resampler: ResampleFilter!
@@ -220,18 +223,20 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         texRect = rect ?? .unity
     }
 
+    /*
     func updateTextures(rect: NSRect) {
 
         updateTextures(width: Int(rect.width), height: Int(rect.height))
     }
-
-    // TODO: Udpate textures in draw 
+*/
+    // TODO: Udpate textures in draw
+    /*
     func updateTextures(width: Int, height: Int) {
 
         let width = NSScreen.scaleFactor * width
         let height = NSScreen.scaleFactor * height
 
-        if outTexture?.width != width || outTexture?.height != height {
+        if dst?.width != width || dst?.height != height {
 
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
                                                                       width: width,
@@ -239,10 +244,11 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                                                       mipmapped: false)
             descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
 
-            outTexture = device!.makeTexture(descriptor: descriptor)
+            dst = device!.makeTexture(descriptor: descriptor)
         }
     }
-
+    */
+    
     func update(with pixelBuffer: CVPixelBuffer) {
 
         // Convert the CVPixelBuffer to a Metal texture
@@ -262,34 +268,58 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         if result == kCVReturnSuccess && cvTextureOut != nil {
 
-            inTexture = CVMetalTextureGetTexture(cvTextureOut!)
+            src = CVMetalTextureGetTexture(cvTextureOut!)
 
             // Trigger the view to redraw
             setNeedsDisplay(bounds)
 
             // Pass the rendered texture to the recorder
             // TODO: DO THIS IN METAL VIEW ONCE THE TEXTURE HAS BEEN CREATED
-            if outTexture != nil { recorder?.appendVideo(texture: outTexture!) }
+            if dst != nil { recorder?.appendVideo(texture: dst!) }
         }
     }
 
-    func updateTextures(commandBuffer: MTLCommandBuffer) {
+    func updateTextures() {
         
-        // Determine the size of the downscaled input texture
-        let inpWidth = Int(Float(inTexture!.width) * uniforms.resampleXY.x)
-        let inpHeight = Int(Float(outTexture!.height) * uniforms.resampleXY.y)
-                
-        if cropped?.width != inpWidth || cropped?.height != inpHeight {
+        // Update the input texture if necessary
+        if let src = src {
             
-            cropped = outTexture!.makeTexture(width: inpWidth, height: inpHeight)
+            let dwnWidth = Int(Float(src.width) * uniforms.resampleXY.x)
+            let dwnHeight = Int(Float(src.height) * uniforms.resampleXY.y)
+            
+            if dwn?.width != dwnWidth || dwn?.height != dwnHeight {
+                
+                dwn = dst?.makeTexture(width: dwnWidth, height: dwnHeight)
+            }
+        }
+
+        // Update the output texture if necessary
+        if let dstSize = dstSize {
+            
+            if dst?.width != dstSize.width || dst?.height != dstSize.height {
+                
+                let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm,
+                                                                          width: dstSize.width,
+                                                                          height: dstSize.width,
+                                                                          mipmapped: false)
+                descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
+                
+                dst = device!.makeTexture(descriptor: descriptor)
+            }
         }
     }
     
     func draw(in view: MTKView) {
 
-        guard let inTexture = self.inTexture else { return }
-        guard var outTexture = self.outTexture else { return }
+        // Create or update all textures
+        updateTextures()
 
+        // Only proceed if all textures are set up
+        guard let src = self.src else { return }
+        guard let dwn = self.dwn else { return }
+        guard var dst = self.dst else { return }
+
+        // Make sure the streamer uses the correct coordinates
         windowController?.streamer.updateRects()
 
         // Advance the animation parameters
@@ -304,7 +334,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         uniforms.zoom = zoom
         uniforms.shift = shift
         uniforms.intensity = intensity.current
-        uniforms.resolution = [Float(inTexture.width), Float(inTexture.height)]
+        uniforms.resolution = [Float(src.width), Float(src.height)]
         uniforms.window = [Float(trackingWindow.liveFrame.width), Float(trackingWindow.liveFrame.height)]
         uniforms.mouse = [Float(mouse.x), Float(1.0 - mouse.y)]
 
@@ -312,21 +342,18 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         guard let drawable = view.currentDrawable else { return }
         guard let commandBuffer = commandQueue.makeCommandBuffer() else { return }
 
-        // Create or update all textures
-        updateTextures(commandBuffer: commandBuffer)
-
         //
         // Pass 1: Crop and downsample the input image
         //
         
         resampler.type = ResampleFilterType(rawValue: uniforms.resample)!
-        resampler.apply(commandBuffer: commandBuffer, in: inTexture, out: cropped, rect: texRect)
+        resampler.apply(commandBuffer: commandBuffer, in: src, out: dwn, rect: texRect)
  
         //
         // Stage 3: Apply the effect shader
         //
 
-        ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer, in: cropped, out: outTexture)
+        ShaderLibrary.shared.currentShader.apply(commandBuffer: commandBuffer, in: dwn, out: dst)
 
         //
         // Stage 3: (Optional) in-texture blurring
@@ -337,7 +364,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
             let radius = Int(9.0 * uniforms.intensity) | 1
             let blur = MPSImageBox(device: device!, kernelWidth: radius, kernelHeight: radius)
             blur.encode(commandBuffer: commandBuffer,
-                        inPlaceTexture: &outTexture, fallbackCopyAllocator: nil)
+                        inPlaceTexture: &dst, fallbackCopyAllocator: nil)
         }
 
         //
@@ -353,8 +380,8 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
             encoder.setRenderPipelineState(pipelineState)
             encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-            encoder.setFragmentTexture(cropped, index: 0)
-            encoder.setFragmentTexture(outTexture, index: 1)
+            encoder.setFragmentTexture(dwn, index: 0)
+            encoder.setFragmentTexture(dst, index: 1)
             encoder.setFragmentSamplerState(sampler, index: 0)
             encoder.setFragmentBytes(&uniforms,
                                      length: MemoryLayout<Uniforms>.stride,
