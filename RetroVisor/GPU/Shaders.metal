@@ -9,6 +9,8 @@
 
 #include <metal_stdlib>
 
+#include "MathToolbox.metal"
+
 using namespace metal;
 
 struct VertexIn {
@@ -33,6 +35,7 @@ struct Uniforms {
     float2 window;
     float2 center;
     float2 mouse;
+    float2 debug;
 };
 
 //
@@ -40,6 +43,7 @@ struct Uniforms {
 //
 
 vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
+    
     VertexOut out;
     out.position = in.position;
     out.texCoord = in.texCoord;
@@ -61,20 +65,22 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
  */
 
 fragment float4 fragment_main(VertexOut in [[stage_in]],
-                              texture2d<float> tex [[texture(0)]],
+                              texture2d<float> orig [[texture(0)]],
+                              texture2d<float> tex [[texture(1)]],
                               constant Uniforms& uniforms [[buffer(0)]],
                               sampler sam [[sampler(0)]]) {
 
-    // float2 shift = float2(0.5 - 0.5 / uniforms.zoom, 0.5 - 0.5 / uniforms.zoom);
+    // Scale and shift coordinate according to the given zoom and parameters
     float2 uv = in.texCoord / uniforms.zoom + uniforms.shift;
     float2 mouse = uniforms.mouse / uniforms.zoom + uniforms.shift;
 
+    // Apply the water-ripple effect if enabled
     if (uniforms.intensity > 0.0) {
 
         // Ripple parameters
-        float waveFreq        = 100.0; // 60
+        float waveFreq        = 100.0;
         float waveSpeed       = 10.0;
-        float baseAmp         = 0.025 * uniforms.intensity; // 0.005
+        float baseAmp         = 0.025 * uniforms.intensity;
         float brightnessDepth = 0.15 * uniforms.intensity;
         float frequencyDrop   = 0.75;
 
@@ -104,7 +110,11 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         return color;
     }
 
-    return tex.sample(sam, uv);
+    if (uv.x < 0.5) {
+        return tex.sample(sam, uv);
+    } else {
+        return orig.sample(sam, uv);
+    }
 }
 
 //

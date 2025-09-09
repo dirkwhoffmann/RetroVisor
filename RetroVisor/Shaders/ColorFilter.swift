@@ -167,8 +167,8 @@ final class ColorFilter: Shader {
     
     func updateTextures(in input: MTLTexture, out output: MTLTexture) {
         
-        let srcW = Int(Float(output.width) * uniforms.INPUT_TEX_SCALE)
-        let srcH = Int(Float(output.height) * uniforms.INPUT_TEX_SCALE)
+        let srcW = Int(Float(output.width)) //* uniforms.INPUT_TEX_SCALE)
+        let srcH = Int(Float(output.height)) //* uniforms.INPUT_TEX_SCALE)
         
         if src?.width != srcW || src?.height != srcH {
             
@@ -185,12 +185,14 @@ final class ColorFilter: Shader {
         updateTextures(in: input, out: output)
         
         // Rescale to the source texture size
+        /*
         resampler.type = ResampleFilterType(rawValue: uniforms.RESAMPLE_FILTER)!
         resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
+        */
         
         // Apply the color split filter
         colorizer!.apply(commandBuffer: commandBuffer,
-                         textures: [src, col],
+                         textures: [input, col],
                          options: &uniforms,
                          length: MemoryLayout<Uniforms>.stride)
         

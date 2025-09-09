@@ -275,9 +275,12 @@ final class CRTEasy: Shader {
         updateTextures(in: input, out: output, rect: rect)
 
         // Crop and downscale the captured screen contents
+        /*
         let scaler = ShaderLibrary.bilinear
         scaler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
-
+        */
+        src = input
+        
         // Setup uniforms
         uniforms.resolution = app.windowController!.metalView!.uniforms.resolution
         uniforms.window = app.windowController!.metalView!.uniforms.window

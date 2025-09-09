@@ -706,8 +706,11 @@ final class Sankara: Shader {
         // Pass 1: Crop and downsample the input image
         //
         
+        /*
         resampler.type = ResampleFilterType(rawValue: uniforms.RESAMPLE_FILTER)!
         resampler.apply(commandBuffer: commandBuffer, in: input, out: src, rect: rect)
+        */
+        src = input
         
         //
         // Pass 2: Convert the input image into YUV/YIQ space
