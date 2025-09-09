@@ -65,11 +65,7 @@ final class Sankara: Shader {
         var DOTMASK_LOSS: Float
                 
         var DEBUG_ENABLE: Int32
-        var DEBUG_TEXTURE1: Int32
-        var DEBUG_TEXTURE2: Int32
-        var DEBUG_LEFT: Int32
-        var DEBUG_RIGHT: Int32
-        var DEBUG_SLICE: Float
+        var DEBUG_TEXTURE: Int32
         var DEBUG_MIPMAP: Float
         
         static let defaults = Uniforms(
@@ -121,12 +117,8 @@ final class Sankara: Shader {
             DOTMASK_GAIN: 1.0,
             DOTMASK_LOSS: -0.5,
                         
-            DEBUG_ENABLE: 0,
-            DEBUG_TEXTURE1: 0,
-            DEBUG_TEXTURE2: 1,
-            DEBUG_LEFT: 0,
-            DEBUG_RIGHT: 1,
-            DEBUG_SLICE: 0.5,
+            DEBUG_ENABLE: 1,
+            DEBUG_TEXTURE: 0,
             DEBUG_MIPMAP: 0.0
         )
     }
@@ -519,70 +511,21 @@ final class Sankara: Shader {
                     set: { [unowned self] in self.uniforms.DEBUG_ENABLE = Int32($0) }),
                   
                   [ ShaderSetting(
-                    title: "Texture 1",
-                    items: [ ("Source", 0),
-                             ("Final", 1),
-                             ("", 0),
-                             ("ycc", 2),
-                             ("ycc (Y)", 3),
-                             ("ycc (C1)", 4),
-                             ("ycc (C2)", 5),
-                             ("Bright Pass", 6),
-                             ("Bloom (Y)", 7),
-                             ("Bloom (C1)", 8),
-                             ("Bloom (C2)", 9),
-                             ("Dotmask", 10) ],
+                    title: "Texture",
+                    items: [ ("Final", 0),
+                             ("Ycc", 1),
+                             ("Ycc (Luma)", 2),
+                             ("Ycc (Chroma 1)", 3),
+                             ("Ycc (Chroma 2)", 4),
+                             ("Bright Pass", 5),
+                             ("Bloom (Luma)", 6),
+                             ("Bloom (Chroma 1)", 7),
+                             ("Bloom (Chroma 2)", 8),
+                             ("Dotmask", 9) ],
                     value: Binding(
-                        key: "DEBUG_TEXTURE1",
-                        get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE1) },
-                        set: { [unowned self] in self.uniforms.DEBUG_TEXTURE1 = Int32($0) })),
-                    
-                    ShaderSetting(
-                        title: "Texture 2",
-                        items: [ ("Source", 0),
-                                 ("Final", 1),
-                                 ("", 0),
-                                 ("ycc", 2),
-                                 ("ycc (Y)", 3),
-                                 ("ycc (C1)", 4),
-                                 ("ycc (C2)", 5),
-                                 ("Bright Pass", 6),
-                                 ("Bloom (Y)", 7),
-                                 ("Bloom (C1)", 8),
-                                 ("Bloom (C2)", 9),
-                                 ("Dotmask", 10) ],
-                        value: Binding(
-                            key: "DEBUG_TEXTURE2",
-                            get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE2) },
-                            set: { [unowned self] in self.uniforms.DEBUG_TEXTURE2 = Int32($0) })),
-                    
-                    ShaderSetting(
-                        title: "Left View",
-                        items: [ ("Texture 1", 0),
-                                 ("Texture 2", 1),
-                                 ("Diff", 2) ],
-                        value: Binding(
-                            key: "DEBUG_LEFT",
-                            get: { [unowned self] in Float(self.uniforms.DEBUG_LEFT) },
-                            set: { [unowned self] in self.uniforms.DEBUG_LEFT = Int32($0) })),
-                    
-                    ShaderSetting(
-                        title: "Right View",
-                        items: [ ("Texture 1", 0),
-                                 ("Texture 2", 1),
-                                 ("Diff", 2) ],
-                        value: Binding(
-                            key: "DEBUG_RIGHT",
-                            get: { [unowned self] in Float(self.uniforms.DEBUG_RIGHT) },
-                            set: { [unowned self] in self.uniforms.DEBUG_RIGHT = Int32($0) })),
-                    
-                    ShaderSetting(
-                        title: "Area Slider",
-                        range: 0.0...1.0, step: 0.01,
-                        value: Binding(
-                            key: "DEBUG_SLICE",
-                            get: { [unowned self] in self.uniforms.DEBUG_SLICE },
-                            set: { [unowned self] in self.uniforms.DEBUG_SLICE = $0 })),
+                        key: "DEBUG_TEXTURE",
+                        get: { [unowned self] in Float(self.uniforms.DEBUG_TEXTURE) },
+                        set: { [unowned self] in self.uniforms.DEBUG_TEXTURE = Int32($0) })),
                     
                     ShaderSetting(
                         title: "Mipmap level",
@@ -766,7 +709,7 @@ final class Sankara: Shader {
         if uniforms.DEBUG_ENABLE == 1 {
             
             debugKernel.apply(commandBuffer: commandBuffer,
-                              textures: [src, dbg, ycc, yc0, yc1, yc2, bl0, bl1, bl2, bri, dom, dst],
+                              textures: [dbg, ycc, yc0, yc1, yc2, bl0, bl1, bl2, bri, dom, dst],
                               options: &uniforms,
                               length: MemoryLayout<Uniforms>.stride)
         } else {
