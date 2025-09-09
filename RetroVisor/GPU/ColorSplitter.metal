@@ -38,7 +38,7 @@ namespace colorsplit {
         // Get size of output texture
         const Coord2 rect = float2(outTex.get_width(), outTex.get_height());
 
-        // Normalize gid to 0..1 in rect
+        // Normalize gid to [0..1]
         Coord2 uv = (Coord2(gid) + 0.5) / rect;
 
         // Read pixel

@@ -16,9 +16,6 @@ namespace colorfilter {
 
     struct Uniforms {
 
-        float INPUT_TEX_SCALE;
-        float OUTPUT_TEX_SCALE;
-
         uint  PALETTE;
         float BRIGHTNESS;
         float CONTRAST;
@@ -34,14 +31,17 @@ namespace colorfilter {
         float RESAMPLE_SCALE_Y;
     };
     
-    kernel void colorizer(texture2d<half, access::sample> inTex     [[ texture(0) ]],
-                          texture2d<half, access::write>  outTex    [[ texture(1) ]],
-                          constant Uniforms               &u        [[ buffer(0)  ]],
-                          sampler                         sam       [[ sampler(0) ]],
-                          uint2                           gid       [[ thread_position_in_grid ]])
+    kernel void colorizer(texture2d<half, access::sample> src  [[ texture(0) ]],
+                          texture2d<half, access::write>  dst  [[ texture(1) ]],
+                          constant Uniforms               &u   [[ buffer(0)  ]],
+                          sampler                         sam  [[ sampler(0) ]],
+                          uint2                           gid  [[ thread_position_in_grid ]])
     {
+        // Normalize gid to [0..1]
+        Coord2 uv = (Coord2(gid) + 0.5) / float2(dst.get_width(), dst.get_height());
+
         // Read pixel
-        Color3 rgb = inTex.read(gid).rgb;
+        Color3 rgb = src.sample(sam, uv).rgb;
 
         // Apply gamma correction
         rgb = pow(rgb, 2.2);
@@ -101,6 +101,6 @@ namespace colorfilter {
         // Reverse Gamma correction
         rgb = pow(rgb, Color3(1.0 / 2.2));
 
-        outTex.write(Color4(rgb, 1.0), gid);
+        dst.write(Color4(rgb, 1.0), gid);
     }
 }
