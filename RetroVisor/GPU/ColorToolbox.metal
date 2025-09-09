@@ -18,6 +18,17 @@ typedef half    Color;
 typedef half3   Color3;
 typedef half4   Color4;
 
+/* Returns the luminance of a color */
+inline Color LUM(Color3 rgb) {
+    
+    return dot(rgb.rgb, Color3(0.299, 0.587, 0.114));
+}
+
+inline Color LUM(Color4 rgba) {
+    
+    return LUM(rgba.rgb);
+}
+
 /* The following macros convert between different color spaces.
  *
  *       RGB:  Red, Green, Blue

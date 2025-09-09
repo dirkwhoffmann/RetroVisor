@@ -876,6 +876,18 @@
                                             <menuItem title="Diff" tag="1" id="BDH-Ej-n47">
                                                 <modifierMask key="keyEquivalentModifierMask"/>
                                             </menuItem>
+                                            <menuItem title="Diff (Red)" tag="2" id="Ozh-wS-QUw">
+                                                <modifierMask key="keyEquivalentModifierMask"/>
+                                            </menuItem>
+                                            <menuItem title="Diff (Green)" tag="3" id="Aoa-Og-ord">
+                                                <modifierMask key="keyEquivalentModifierMask"/>
+                                            </menuItem>
+                                            <menuItem title="Diff (Blue)" tag="4" id="8po-8N-gvT">
+                                                <modifierMask key="keyEquivalentModifierMask"/>
+                                            </menuItem>
+                                            <menuItem title="Diff (Luminance)" tag="5" id="Pel-A0-kKI">
+                                                <modifierMask key="keyEquivalentModifierMask"/>
+                                            </menuItem>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>

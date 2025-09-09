@@ -95,7 +95,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
                                  debug: 1,
                                  debugMode: 0,
                                  debugColor: [1.0, 1.0, 1.0],
-                                 debugXY: [0.5, 0.5])
+                                 debugXY: [0.5, 1.0])
 
     var textureCache: CVMetalTextureCache!
 

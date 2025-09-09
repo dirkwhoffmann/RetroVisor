@@ -7,9 +7,10 @@
 // See https://www.gnu.org for license information
 // -----------------------------------------------------------------------------
 
-#include <metal_stdlib>
+// #include <metal_stdlib>
 
 #include "MathToolbox.metal"
+#include "ColorToolbox.metal"
 
 using namespace metal;
 
@@ -38,7 +39,7 @@ struct Uniforms {
     uint resample;
     float2 resampleXY;
     uint debug;
-    uint debugPos;
+    uint debugMode;
     float3 debugColor;
     float2 debugXY;
 };
@@ -90,21 +91,41 @@ inline float4 sampleFragment(float2 uv,
                              texture2d<float> tex,
                              constant Uniforms& uniforms,
                              sampler sam) {
-        
-    // Quick-exit if debug mode is disabled
-    if (uniforms.debug == 0) return tex.sample(sam, uv);
-        
-    float2 w = debugWeight(uv, uniforms);
     
-    bool inside = w.x < 0 && w.y < 0;
-    bool border = inside && (abs(w.x) < 0.002 || abs(w.y) < 0.002);
-    
-    if (border) {
-        return float4(uniforms.debugColor, 1.0);
-    } else if (inside) {
+    if (uniforms.debug == 0) {
+        
         return tex.sample(sam, uv);
+        
     } else {
-        return orig.sample(sam, uv);
+        
+        float2 w = debugWeight(uv, uniforms);
+        bool inside = w.x < 0 && w.y < 0;
+        bool border = inside && (abs(w.x) < 0.002 || abs(w.y) < 0.002);
+        
+        // Border pixels
+        if (border) { return float4(uniforms.debugColor, 1.0); }
+        
+        // Pixels from the input texture
+        if (!inside) { return orig.sample(sam, uv); }
+        
+        // Pixels from the effect texture
+        if (uniforms.debugMode == 0) { return tex.sample(sam, uv); }
+        
+        // Diff modes
+        float4 source = orig.sample(sam, uv);
+        float4 effect = tex.sample(sam, uv);
+        // float4 diff = 0.5 * (effect - source);
+        float4 diff = abs(effect - source);
+        float3 offset = 0.0;
+        
+        switch (uniforms.debugMode) {
+                
+            case 1: return float4(diff.rgb + offset, 1.0);
+            case 2: return float4(diff.rrr + offset, 1.0);
+            case 3: return float4(diff.ggg + offset, 1.0);
+            case 4: return float4(diff.bbb + offset, 1.0);
+            default: return float4(float3(LUM(Color4(diff))), 1.0);
+        }
     }
 }
     
@@ -117,8 +138,6 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     // Scale and shift coordinate according to the given zoom and parameters
     float2 uv = in.texCoord / uniforms.zoom + uniforms.shift;
     float2 mouse = uniforms.mouse / uniforms.zoom + uniforms.shift;
-
-    float4 result;
     
     // Apply the water-ripple effect if enabled
     if (uniforms.intensity > 0.0) {
