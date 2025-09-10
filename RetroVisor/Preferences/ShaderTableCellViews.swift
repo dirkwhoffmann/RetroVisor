@@ -235,6 +235,6 @@ class ShaderSettingView: ShaderTableCellView {
 
     @IBAction func helpAction(_ sender: NSButton) {
 
-        print("Not implemented yet")
+        // Not implemented yet
     }
 }

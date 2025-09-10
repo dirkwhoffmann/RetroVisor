@@ -60,18 +60,6 @@ class ShaderPreferencesViewController: NSViewController {
         outlineView.reloadData()
 
         expandAll()
-        /*
-        for group in outlineView.groups {
-            
-            if group.enabled ?? true {
-                // print("Expand \(group.title)")
-                outlineView.expandItem(group)
-            } else {
-                // print("Shrink \(group.title)")
-                outlineView.collapseItem(group)
-            }
-        }
-        */
     }
 
     func expandAll() {
@@ -133,8 +121,6 @@ class ShaderPreferencesViewController: NSViewController {
 
     @IBAction func shaderSelectAction(_ sender: NSPopUpButton) {
 
-        print("shaderSelectAction \(sender.selectedTag())")
-
         ShaderLibrary.shared.selectShader(at: sender.selectedTag())
         updatePresetPopup()
         refresh()
@@ -143,7 +129,6 @@ class ShaderPreferencesViewController: NSViewController {
 
     @IBAction func presetAction(_ sender: NSPopUpButton) {
 
-        print("\(sender.selectedTag())")
         ShaderLibrary.shared.currentShader.revertToPreset(nr: sender.selectedTag())
         refresh()
     }
@@ -155,8 +140,6 @@ class ShaderPreferencesViewController: NSViewController {
     @IBAction func cancelAction(_ sender: NSButton) {
 
         ShaderLibrary.shared.currentShader.dictionary = oldSettings
-        print("\(ShaderLibrary.shared.currentShader.dictionary)")
-
         view.window?.close()
     }
 

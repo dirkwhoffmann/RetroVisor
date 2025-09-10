@@ -78,7 +78,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     @IBOutlet weak var viewController: ViewController!
 
-    nonisolated static let logging: Bool = false
+    nonisolated static let logging: Bool = true
 
     var trackingWindow: TrackingWindow { window! as! TrackingWindow }
     var windowController: WindowController? { return trackingWindow.windowController as? WindowController }

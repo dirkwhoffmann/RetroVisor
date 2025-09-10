@@ -565,14 +565,9 @@ final class Sankara: Shader {
         let inpW = input.width
         let inpH = input.height
 
-        // print("inpWidth: \(inpWidth) \(inpHeight)")
-
         // Size of the upscaled internal texture
         let crtW = Int(Float(output.width) * uniforms.TEX_SCALE)
         let crtH = Int(Float(output.height) * uniforms.TEX_SCALE)
-
-        // print("output: \(output.width) \(output.width)")
-        // print("inpWidth: \(crtWidth) \(crtHeight)")
 
         if ycc?.width != inpW || ycc?.height != inpH {
 

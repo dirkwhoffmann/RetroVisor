@@ -9,11 +9,11 @@
 
 import Foundation
 
-enum LogLevel: String {
+enum LogLevel {
     
-    case info = "INFO"
-    case warning = "WARN"
-    case error = "ERROR"
+    case info
+    case warning
+    case error
 }
 
 protocol Loggable {
@@ -33,24 +33,26 @@ extension Loggable {
         return formatter.string(from: Date())
     }
     
+#if DEBUG
+    static func logInfo(_ message: String) { if Self.logging { print("[\(logtime)] \(message)") } }
+#else
+    static func logInfo(_ message: String) { }
+#endif
+    static func logWarning(_ message: String) { print("WARNING: \(message)") }
+    static func logError(_ message: String) { print("ERROR: \(message)") }
+    
     static func log(_ message: String, _ level: LogLevel = .info) {
         
         switch level {
             
-        case .info:
-            
-#if DEBUG
-            guard Self.logging else { return }
-            print("[\(logtime)] \(message)")
-#endif
-            
-        case .warning, .error:
-            
-            print("\(level.rawValue): \(message)")
+        case .info: logInfo(message)
+        case .warning: logWarning(message)
+        case .error: logError(message)
         }
     }
     
     func log(_ message: String, _ level: LogLevel  = .info) {
+        
         Self.log(message, level)
     }
 }

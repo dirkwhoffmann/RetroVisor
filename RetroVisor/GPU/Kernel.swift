@@ -15,7 +15,9 @@ import MetalKit
 //
 
 @MainActor
-class Kernel {
+class Kernel: Loggable {
+
+    nonisolated static let logging: Bool = true
 
     var kernel: MTLComputePipelineState!
     var sampler: MTLSamplerState?
@@ -28,7 +30,7 @@ class Kernel {
 
         // Lookup kernel function in library
         guard let function = ShaderLibrary.library.makeFunction(name: name) else {
-            print("Cannot find kernel function '\(name)' in library.")
+            log("Cannot find kernel function '\(name)' in library.", .error)
             return nil
         }
 
@@ -36,7 +38,7 @@ class Kernel {
         do {
             try kernel = ShaderLibrary.device.makeComputePipelineState(function: function)
         } catch {
-            print("Cannot create compute kernel '\(name)'.")
+            log("Cannot create compute kernel '\(name)'.", .error)
             let alert = NSAlert()
             alert.alertStyle = .informational
             alert.icon = NSImage(named: "metal")

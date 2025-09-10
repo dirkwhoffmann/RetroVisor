@@ -26,8 +26,10 @@ class TrackingSliderCell: NSSliderCell {
     }
 }
 
-class GeneralPreferencesViewController: NSViewController {
+class GeneralPreferencesViewController: NSViewController, Loggable {
     
+    nonisolated static let logging: Bool = false
+
     var streamer: Streamer? { app.streamer }
     var metalView: MetalView? { app.windowController?.metalView }
     
@@ -158,43 +160,43 @@ class GeneralPreferencesViewController: NSViewController {
     
     @IBAction func resampleAction(_ sender: NSPopUpButton) {
     
-        print("Resample mode: \(sender.selectedTag())")
+        log("Resample mode: \(sender.selectedTag())")
         metalView!.uniforms.resample = Int32(sender.selectedTag())
     }
 
     @IBAction func resampleXAction(_ sender: NSSlider) {
         
-        print("Down X: \(sender.floatValue)")
+        log("Down X: \(sender.floatValue)")
         metalView!.uniforms.resampleXY.x = sender.floatValue / 1000.0
     }
 
     @IBAction func resampleYAction(_ sender: NSSlider) {
         
-        print("Down Y: \(sender.floatValue)")
+        log("Down Y: \(sender.floatValue)")
         metalView!.uniforms.resampleXY.y = sender.floatValue / 1000.0
     }
     
     @IBAction func debugAction(_ sender: NSPopUpButton) {
     
-        print("Debug: \(sender.selectedTag())")
+        log("Debug: \(sender.selectedTag())")
         metalView!.uniforms.debug = Int32(sender.selectedTag())
     }
 
     @IBAction func debugModeAction(_ sender: NSPopUpButton) {
     
-        print("Debug mode: \(sender.selectedTag())")
+        log("Debug mode: \(sender.selectedTag())")
         metalView!.uniforms.debugMode = Int32(sender.selectedTag())
     }
 
     @IBAction func debugXAction(_ sender: NSSlider) {
         
-        print("X: \(sender.floatValue)")
+        log("X: \(sender.floatValue)")
         metalView!.uniforms.debugXY.x = sender.floatValue / 1000.0
     }
     
     @IBAction func debugYAction(_ sender: NSSlider) {
 
-        print("Y: \(sender.floatValue)")
+        log("Y: \(sender.floatValue)")
         metalView!.uniforms.debugXY.y = sender.floatValue / 1000.0
     }
 }

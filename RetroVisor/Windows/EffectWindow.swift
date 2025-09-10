@@ -20,14 +20,14 @@ class EffectWindow: TrackingWindow {
         didSet {
             if onAir != oldValue {
 
-                // print("onAir = \(onAir)")
+                log("onAir = \(onAir)")
 
                 let icons = [
                     BarIcon(
                         image: NSImage(named: "Recording")!,
                         height: 20
                     ) {
-                        print("Rec clicked")
+                        self.log("Rec clicked")
                     }
                 ]
 
