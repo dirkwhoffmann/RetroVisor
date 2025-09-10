@@ -595,8 +595,7 @@ final class Sankara: Shader {
         
         if (uniforms.DEBUG_ENABLE != 0 && dbg?.width != crtW || dbg?.height != crtH) {
 
-            dbg = Shader.makeTexture(width: crtW, height: crtH, pixelFormat: output.pixelFormat)
-            // dbg = output.makeTexture(width: crtWidth, height: crtHeight)
+            dbg = Shader.makeTexture("dbg", width: crtW, height: crtH, pixelFormat: output.pixelFormat)
         }
         
         if dotMaskNeedsUpdate {

@@ -10,20 +10,20 @@
 import Foundation
 
 enum LogLevel: String {
-
+    
     case info = "INFO"
     case warning = "WARN"
     case error = "ERROR"
 }
 
 protocol Loggable {
-
+    
     static var logging: Bool { get }
     func log(_ message: String, _ level: LogLevel)
 }
 
 extension Loggable {
-
+    
     private static var logtime: String {
         
         let formatter = DateFormatter()
@@ -32,18 +32,20 @@ extension Loggable {
         formatter.timeZone = TimeZone.current
         return formatter.string(from: Date())
     }
-
+    
     static func log(_ message: String, _ level: LogLevel = .info) {
-
+        
         switch level {
-
+            
         case .info:
-
+            
+#if DEBUG
             guard Self.logging else { return }
             print("[\(logtime)] \(message)")
-
+#endif
+            
         case .warning, .error:
-
+            
             print("\(level.rawValue): \(message)")
         }
     }

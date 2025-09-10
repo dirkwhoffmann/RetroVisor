@@ -477,27 +477,6 @@ public extension NSImage {
 
 extension MTLTexture {
     
-    /*
-    func makeTexture(width: Int, height: Int,
-                     mipmaps: Int = 0, pixelFormat: MTLPixelFormat? = nil) -> MTLTexture? {
-        
-        let format = pixelFormat ?? self.pixelFormat
-        
-        print("Creating \(width)x\(height) texture (format: \(format.rawValue) mipmaps: \(mipmaps))")
-        
-        let desc = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: format,
-            width: width,
-            height: height,
-            mipmapped: mipmaps > 0
-        )
-        desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-        if mipmaps > 0 { desc.mipmapLevelCount = mipmaps }
-        
-        return device.makeTexture(descriptor: desc)
-    }
-    */
-    
     func make(data: [[UInt32]]) -> MTLTexture? {
         
         let height = data.count, width = data[0].count, maskSize = width * height
