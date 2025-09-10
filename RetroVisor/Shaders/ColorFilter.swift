@@ -152,8 +152,9 @@ final class ColorFilter: Shader {
         
         if col?.width != srcW || col?.height != srcH {
             
-            col = output.makeTexture(width: srcW, height: srcH)
-            blr = output.makeTexture(width: srcW, height: srcH)
+            let format = output.pixelFormat
+            col = Shader.makeTexture("col", width: srcW, height: srcH, pixelFormat: format)
+            blr = Shader.makeTexture("blr", width: srcW, height: srcH, pixelFormat: format)
         }
     }
     

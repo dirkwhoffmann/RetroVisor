@@ -78,7 +78,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     @IBOutlet weak var viewController: ViewController!
 
-    let logging: Bool = false
+    nonisolated static let logging: Bool = false
 
     var trackingWindow: TrackingWindow { window! as! TrackingWindow }
     var windowController: WindowController? { return trackingWindow.windowController as? WindowController }
@@ -284,12 +284,12 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Update the downscaling texture if necessary
         if let dst = dst {
             
-            let dwnWidth = Int(Float(dst.width) * uniforms.resampleXY.x)
-            let dwnHeight = Int(Float(dst.height) * uniforms.resampleXY.y)
+            let dwnW = Int(Float(dst.width) * uniforms.resampleXY.x)
+            let dwnH = Int(Float(dst.height) * uniforms.resampleXY.y)
             
-            if dwn?.width != dwnWidth || dwn?.height != dwnHeight {
+            if dwn?.width != dwnW || dwn?.height != dwnH {
                 
-                dwn = dst.makeTexture(width: dwnWidth, height: dwnHeight)
+                dwn = Shader.makeTexture("dwn", width: dwnW, height: dwnH, pixelFormat: dst.pixelFormat)
             }
         }
     }

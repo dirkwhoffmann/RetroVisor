@@ -27,7 +27,7 @@ protocol RecorderDelegate: AnyObject {
 class Recorder: Loggable {
 
     // Enables debug output to the console
-    let logging: Bool = false
+    nonisolated static let logging: Bool = false
     
     // Event receiver
     var delegate: RecorderDelegate?

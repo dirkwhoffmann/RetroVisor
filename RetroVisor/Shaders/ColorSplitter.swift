@@ -145,7 +145,7 @@ final class ColorSplitter: Shader {
 
         if src?.width != srcW || src?.height != srcH {
 
-            src = output.makeTexture(width: srcW, height: srcH)
+            src = Shader.makeTexture("src", width: srcW, height: srcH, pixelFormat: output.pixelFormat)
         }
     }
 

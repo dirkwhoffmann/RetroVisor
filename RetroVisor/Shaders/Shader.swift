@@ -31,7 +31,7 @@ class Shader : Loggable {
     static var device: MTLDevice { MTLCreateSystemDefaultDevice()! }
 
     // Enables debug output to the console
-    let logging: Bool = true
+    nonisolated static let logging: Bool = true
 
     // Name of this shader
     var name: String = ""
@@ -64,6 +64,30 @@ class Shader : Loggable {
                in input: MTLTexture, out output: MTLTexture, rect: CGRect = .unity) {
         
         fatalError("To be implemented by a subclass")
+    }
+}
+
+//
+// Utilities
+//
+
+extension Shader {
+    
+    static func makeTexture(_ name: String = "unnamed", width: Int, height: Int,
+                            mipmaps: Int = 0, pixelFormat: MTLPixelFormat = .bgra8Unorm) -> MTLTexture? {
+        
+        log("Creating \(name) texture (\(width)x\(height), format: \(pixelFormat.rawValue) mipmaps: \(mipmaps))")
+        
+        let desc = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: pixelFormat,
+            width: width,
+            height: height,
+            mipmapped: mipmaps > 0
+        )
+        desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
+        if mipmaps > 0 { desc.mipmapLevelCount = mipmaps }
+        
+        return ShaderLibrary.device.makeTexture(descriptor: desc)
     }
 }
 

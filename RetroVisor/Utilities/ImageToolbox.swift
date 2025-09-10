@@ -477,6 +477,7 @@ public extension NSImage {
 
 extension MTLTexture {
     
+    /*
     func makeTexture(width: Int, height: Int,
                      mipmaps: Int = 0, pixelFormat: MTLPixelFormat? = nil) -> MTLTexture? {
         
@@ -495,6 +496,7 @@ extension MTLTexture {
         
         return device.makeTexture(descriptor: desc)
     }
+    */
     
     func make(data: [[UInt32]]) -> MTLTexture? {
         

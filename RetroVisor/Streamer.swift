@@ -31,7 +31,7 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
     var settings = StreamerSettings.Preset.systemDefault.settings
 
     // Enables debug output to the console
-    let logging: Bool = false
+    nonisolated static let logging: Bool = false
 
     // ScreenCaptureKit
     var stream: SCStream?

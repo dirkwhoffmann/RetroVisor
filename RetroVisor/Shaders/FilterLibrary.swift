@@ -96,8 +96,8 @@ class BlurFilter {
 
         if down?.width != W || down?.height != H {
 
-            down = output.makeTexture(width: W, height: H)
-            blur = output.makeTexture(width: W, height: H)
+            down = Shader.makeTexture("down", width: W, height: H, pixelFormat: output.pixelFormat)
+            blur = Shader.makeTexture("blur", width: W, height: H, pixelFormat: output.pixelFormat)
         }
     }
 

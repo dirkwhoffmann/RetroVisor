@@ -18,7 +18,7 @@ class WindowController: NSWindowController, Loggable {
     var metalView: MetalView? { return viewController?.metalView }
 
     // Enables debug output to the console
-    let logging: Bool = false
+    nonisolated static let logging: Bool = false
 
     // Icon bar containing the recorder icon
     var accessory: IconBarViewController?

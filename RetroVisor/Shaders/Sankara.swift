@@ -562,40 +562,41 @@ final class Sankara: Shader {
     func updateTextures(commandBuffer: MTLCommandBuffer, in input: MTLTexture, out output: MTLTexture) {
         
         // Size of the downscaled input texture
-        let inpWidth = input.width
-        let inpHeight = input.height
+        let inpW = input.width
+        let inpH = input.height
 
         // print("inpWidth: \(inpWidth) \(inpHeight)")
 
         // Size of the upscaled internal texture
-        let crtWidth = Int(Float(output.width) * uniforms.TEX_SCALE)
-        let crtHeight = Int(Float(output.height) * uniforms.TEX_SCALE)
+        let crtW = Int(Float(output.width) * uniforms.TEX_SCALE)
+        let crtH = Int(Float(output.height) * uniforms.TEX_SCALE)
 
         // print("output: \(output.width) \(output.width)")
         // print("inpWidth: \(crtWidth) \(crtHeight)")
 
-        if ycc?.width != inpWidth || ycc?.height != inpHeight {
-            
-            ycc = output.makeTexture(width: inpWidth, height: inpHeight, mipmaps: 4)
-            yc0 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
-            yc1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
-            yc2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
-            bri = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
-            bl0 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
-            bl1 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
-            bl2 = output.makeTexture(width: inpWidth, height: inpHeight, pixelFormat: .r8Unorm)
+        if ycc?.width != inpW || ycc?.height != inpH {
+
+            ycc = Shader.makeTexture("ycc", width: inpW, height: inpH, mipmaps: 4, pixelFormat: output.pixelFormat)
+            yc0 = Shader.makeTexture("yc0", width: inpW, height: inpH, pixelFormat: .r8Unorm)
+            yc1 = Shader.makeTexture("yc1", width: inpW, height: inpH, pixelFormat: .r8Unorm)
+            yc2 = Shader.makeTexture("yc2", width: inpW, height: inpH, pixelFormat: .r8Unorm)
+            bri = Shader.makeTexture("bri", width: inpW, height: inpH, pixelFormat: .r8Unorm)
+            bl0 = Shader.makeTexture("bl0", width: inpW, height: inpH, pixelFormat: .r8Unorm)
+            bl1 = Shader.makeTexture("bl1", width: inpW, height: inpH, pixelFormat: .r8Unorm)
+            bl2 = Shader.makeTexture("bl2", width: inpW, height: inpH, pixelFormat: .r8Unorm)
         }
         
-        if crt?.width != crtWidth || crt?.height != crtHeight {
-            
-            crt = output.makeTexture(width: crtWidth, height: crtHeight)
-            dom = output.makeTexture(width: crtWidth, height: crtHeight, mipmaps: 4)
+        if crt?.width != crtW || crt?.height != crtH {
+
+            crt = Shader.makeTexture("crt", width: crtW, height: crtH, pixelFormat: output.pixelFormat)
+            dom = Shader.makeTexture("dom", width: crtW, height: crtH, mipmaps: 4, pixelFormat: output.pixelFormat)
             dotMaskNeedsUpdate = true
         }
         
-        if (uniforms.DEBUG_ENABLE != 0 && dbg?.width != crtWidth || dbg?.height != crtHeight) {
-            
-            dbg = output.makeTexture(width: crtWidth, height: crtHeight)
+        if (uniforms.DEBUG_ENABLE != 0 && dbg?.width != crtW || dbg?.height != crtH) {
+
+            dbg = Shader.makeTexture(width: crtW, height: crtH, pixelFormat: output.pixelFormat)
+            // dbg = output.makeTexture(width: crtWidth, height: crtHeight)
         }
         
         if dotMaskNeedsUpdate {
