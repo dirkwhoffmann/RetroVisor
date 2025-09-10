@@ -14,6 +14,7 @@
 		50292D902E4685E10084CFE3 /* MetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50292D8F2E4685D80084CFE3 /* MetalView.swift */; };
 		50292D942E471A330084CFE3 /* PermissionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50292D932E471A2C0084CFE3 /* PermissionWindowController.swift */; };
 		50292D962E471AAA0084CFE3 /* PermissionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50292D952E471AA40084CFE3 /* PermissionViewController.swift */; };
+		503697572E71506600158314 /* AtomicQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503697562E71506200158314 /* AtomicQueue.swift */; };
 		503FCC1E2E48670300EF49DA /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC1D2E4866FE00EF49DA /* PreferencesWindowController.swift */; };
 		503FCC212E48688600EF49DA /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC202E48687D00EF49DA /* SidebarViewController.swift */; };
 		503FCC232E4868B900EF49DA /* PreferencesSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503FCC222E4868B200EF49DA /* PreferencesSplitViewController.swift */; };
@@ -62,6 +63,7 @@
 		50292D8F2E4685D80084CFE3 /* MetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalView.swift; sourceTree = "<group>"; };
 		50292D932E471A2C0084CFE3 /* PermissionWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionWindowController.swift; sourceTree = "<group>"; };
 		50292D952E471AA40084CFE3 /* PermissionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionViewController.swift; sourceTree = "<group>"; };
+		503697562E71506200158314 /* AtomicQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtomicQueue.swift; sourceTree = "<group>"; };
 		503FCC1D2E4866FE00EF49DA /* PreferencesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindowController.swift; sourceTree = "<group>"; };
 		503FCC202E48687D00EF49DA /* SidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewController.swift; sourceTree = "<group>"; };
 		503FCC222E4868B200EF49DA /* PreferencesSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSplitViewController.swift; sourceTree = "<group>"; };
@@ -120,6 +122,7 @@
 		50079E6F2E433206005BC5FD /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				503697562E71506200158314 /* AtomicQueue.swift */,
 				507ADD382E6EA71C00BB7E10 /* Parser.swift */,
 				50DE5B872E4E065D002C07EC /* IconBar.swift */,
 				50DE5B852E4DA045002C07EC /* Overlay.swift */,
@@ -310,6 +313,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				503697572E71506600158314 /* AtomicQueue.swift in Sources */,
 				503FCC332E4B016400EF49DA /* Shadowed.swift in Sources */,
 				50DE5B862E4DA04B002C07EC /* Overlay.swift in Sources */,
 				50BA964F2E3C80D6006BA8DF /* AppDelegate.swift in Sources */,
@@ -515,7 +519,7 @@
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -545,7 +549,7 @@
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};

@@ -10,6 +10,12 @@
 import AVFoundation
 import ScreenCaptureKit
 
+enum RecorderCommand {
+    
+    case start(url: URL, width: Int, height: Int, countdown: Int)
+    case stop
+}
+
 @MainActor
 protocol RecorderDelegate: AnyObject {
 
@@ -20,65 +26,169 @@ protocol RecorderDelegate: AnyObject {
 @MainActor
 class Recorder: Loggable {
 
+    // Enables debug output to the console
+    let logging: Bool = false
+    
     // Event receiver
     var delegate: RecorderDelegate?
 
-    // Enables debug output to the console
-    let logging: Bool = true
-
     // Recorder settings
     var settings = RecorderSettings.Preset.systemDefault.settings
-    
-    // The recorded screen cutout
-    private(set) var recordingRect: NSRect?
 
-    // Time stamp of the currently recorded frame
-    var timestamp: CMTime?
+    // Command queue for controlling the recorder
+    private let commands = AtomicQueue<RecorderCommand>()
+    
+    // The current recording state
+    private(set) var recording: Bool = false
+
+    // The current frame number
+    private(set) var frame: Int = 0
 
     // Frame counter to skip initial frames after recording starts
-    // var countdown: Int?
-    var frame: Int?
+    private var countdown: Int?
 
+    private var url: URL?
+    private var width: Int = 0
+    private var height: Int = 0
+    
     // AVWriter
     private var assetWriter: AVAssetWriter?
     private var videoInput: AVAssetWriterInput?
     private var audioInput: AVAssetWriterInput?
     private var pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
-
-    // The current recording state
-    // var isRecording: Bool { countdown == 0 }
-    var isRecording: Bool { assetWriter?.status == .writing }
-
-    /*
-    func startRecording(width: Int, height: Int) {
-
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let file = docs.appendingPathComponent("output.mov")
-
-        startRecording(to: file, width: width, height: height)
-    }
-     */
     
-    func startRecording(to url: URL, width: Int, height: Int) {
+    /* Inserts a command into the command queue
+     */
+    func enqueue(_ cmd: RecorderCommand) {
+            
+        commands.push(cmd)
+    }
+    
+    /* Appends a video frame and control the recorder state
+     */
+    func appendVideo(texture: MTLTexture?, timestamp: CMTime?) {
+        
+        // Update the recording icon
+        app.windowController?.effectWindow?.onAir = recording
 
-        if isRecording { return }
+        // We cannot record without a texture and a timestamp
+        guard let texture = texture else { return }
+        guard let timestamp = timestamp else { return }
 
-        log("Starting the recorder...")
+        // Process pending commands
+        for cmd in commands.popAll() {
+            
+            log("Frame \(frame): Processing command \(cmd)")
+            switch cmd {
+                
+            case .start(let url, let width, let height, let countdown):
+                
+                if recording {
+                    
+                    log("Frame \(frame): Cannot start a running recorder.", .warning)
+                    continue
+                }
+                
+                self.url = url
+                self.width = width
+                self.height = height
+                self.countdown = countdown
+                
+            case .stop:
+                
+                if !recording {
+                    
+                    log("Frame \(frame): Cannot stop a stopped recorder.", .warning)
+                    continue
+                }
+                
+                stopRecording { }
+            }
+        }
+        
+        // Handle countdown
+        if let remaining = countdown {
+            
+            if remaining > 0 {
+                countdown = remaining - 1
+            } else {
+                startRecording(to: url!, timestamp: timestamp)
+            }
+        }
 
-        recordingRect = NSRect(x: 0, y: 0, width: width, height: height)
+        // Exit if the recorder is in idle state
+        if !recording { return }
+        
+        // Stop recording if the texture size did change
+        if width != texture.width || height != texture.height {
+            
+            log("Frame \(frame): Rect has changed. Stopping the recorder...")
+            enqueue(.stop)
+            return
+        }
 
-        let fileManager = FileManager.default
+        // Advance the frame counter
+        frame += 1
+        if frame & 63 == 0 { log("Recording frame \(frame)") }
 
+        guard videoInput!.isReadyForMoreMediaData else {
+            
+            log("Frame \(frame): AVAssetWriter does not accept new input", .warning)
+            return
+        }
+        guard let pixelBufferPool = pixelBufferAdaptor?.pixelBufferPool else {
+            
+            log("Frame \(frame): AVAssetWriter provides no pixelBufferPool.", .warning)
+            return
+        }
+
+        var pixelBuffer: CVPixelBuffer?
+        CVPixelBufferPoolCreatePixelBuffer(nil, pixelBufferPool, &pixelBuffer)
+ 
+        guard let pixelBuffer = pixelBuffer else {
+            
+            log("Frame \(frame): AVAssetWriter provides no pixel buffer", .warning)
+            return
+        }
+
+        // Copy the Metal texture into the pixel buffer
+        CVPixelBufferLockBaseAddress(pixelBuffer, [])
+        let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
+        texture.getBytes(CVPixelBufferGetBaseAddress(pixelBuffer)!,
+                         bytesPerRow: bytesPerRow,
+                         from: MTLRegionMake2D(0, 0, texture.width, texture.height),
+                         mipmapLevel: 0)
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
+
+        // Append the pixel buffer to the video
+        pixelBufferAdaptor!.append(pixelBuffer, withPresentationTime: timestamp)
+    }
+
+    func appendAudio(buffer: CMSampleBuffer) {
+
+        if !recording { return }
+        
+        if audioInput?.isReadyForMoreMediaData == true {
+            audioInput!.append(buffer)
+        }
+    }
+    
+    private func startRecording(to url: URL, timestamp: CMTime) {
+
+        log("Frame \(frame): startRecording(\(url), \(timestamp))")
+        
+        assert(!recording)
+        
         // Remove the file if it already exists
-        if fileManager.fileExists(atPath: url.path) {
-            try? fileManager.removeItem(at: url)
+        if FileManager.default.fileExists(atPath: url.path) {
+            try? FileManager.default.removeItem(at: url)
         }
 
         do {
             assetWriter = try AVAssetWriter(outputURL: url,
                                             fileType: settings.videoType.avFileType)
         } catch {
-            log("Can't start recording: \(error)", .error)
+            log("Frame \(frame): Can't start recording: \(error)", .error)
             return
         }
 
@@ -121,95 +231,28 @@ class Recorder: Loggable {
             ]
         )
 
-        // countdown = 8
-        frame = -8
+        assetWriter?.startWriting()
+        assetWriter?.startSession(atSourceTime: timestamp)
+        
+        countdown = nil
+        recording = true
+        frame = 0
+
         delegate?.recorderDidStart()
     }
 
-    func stopRecording(completion: @Sendable @escaping () -> Void) {
+    private func stopRecording(completion: @Sendable @escaping () -> Void) {
 
-        if !isRecording { return }
-
-        log("Stopping the recorder after \(frame ?? 0) frames...")
+        log("Frame \(frame): stopRecording")
+        assert(recording)
 
         videoInput?.markAsFinished()
         assetWriter?.finishWriting { completion() }
 
-        recordingRect = nil
-        //countdown = nil
-        frame = nil
+        recording = false
+        frame = 0
 
         delegate?.recorderDidStop()
     }
-
-    // Appends a video frame
-    func appendVideo(texture: MTLTexture) {
-
-        guard let timestamp = timestamp else { return }
-        guard let assetWriter = assetWriter else { return }
-
-        // Update the recording icon
-        app.windowController?.effectWindow?.onAir = isRecording //  status == .writing
-
-
-        // let status = assetWriter?.status
-
-        // Exit if the recorder is idle
-        if frame == nil {
-            
-            if isRecording { stopRecording { } }
-            return
-        }
-
-        // Start the writer if this is the first frame to be recorded
-        if frame == 0 {
-            
-            print("Starting session")
-            assetWriter.startWriting()
-            assetWriter.startSession(atSourceTime: timestamp)
-        }
-        
-        print("Recording frame \(frame!)")
-        
-        // Advance the frame counter
-        frame! += 1
-        
-        // Only proceed if the recorder is in writing state
-        if !isRecording { return }
-
-        // Get the frame size
-        let texW = CGFloat(texture.width)
-        let texH = CGFloat(texture.height)
-
-        // Stop recording if the texture size did change
-        if recordingRect!.width != texW || recordingRect!.height != texH {
-            stopRecording { }
-        }
-
-        guard videoInput!.isReadyForMoreMediaData else { return }
-
-        var pixelBuffer: CVPixelBuffer?
-        CVPixelBufferPoolCreatePixelBuffer(nil, pixelBufferAdaptor!.pixelBufferPool!, &pixelBuffer)
-        guard let pixelBuffer = pixelBuffer else { return }
-
-        // Copy Metal texture into CVPixelBuffer
-        CVPixelBufferLockBaseAddress(pixelBuffer, [])
-        let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
-        texture.getBytes(CVPixelBufferGetBaseAddress(pixelBuffer)!,
-                         bytesPerRow: bytesPerRow,
-                         from: MTLRegionMake2D(0, 0, texture.width, texture.height),
-                         mipmapLevel: 0)
-        CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
-
-        pixelBufferAdaptor!.append(pixelBuffer, withPresentationTime: timestamp)
-    }
-
-    func appendAudio(buffer: CMSampleBuffer) {
-
-        if !isRecording { return }
-        // guard let time = currentTime else { return }
-        if audioInput?.isReadyForMoreMediaData == true {
-            audioInput!.append(buffer)
-        }
-    }
+    
 }

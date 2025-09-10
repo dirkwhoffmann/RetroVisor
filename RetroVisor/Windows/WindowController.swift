@@ -186,14 +186,14 @@ extension WindowController: StreamerDelegate {
         case .screen:
 
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
-            let pts = CMSampleBufferGetPresentationTimeStamp(buffer)
+            let timeStamp = CMSampleBufferGetPresentationTimeStamp(buffer)
 
             Task { @MainActor [weak self] in
                                 
                 if let controller = self?.contentViewController as? ViewController {
                     
-                    self?.recorder.timestamp = pts
-                    controller.metalView.update(with: pixelBuffer)
+                    //self?.recorder.timestamp = timeStamp
+                    controller.metalView.update(with: pixelBuffer, timeStamp: timeStamp)
                 }
             }
 

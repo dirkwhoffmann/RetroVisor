@@ -10,6 +10,7 @@
 import Cocoa
 import MetalKit
 import MetalPerformanceShaders
+import ScreenCaptureKit
 
 /* The current GPU pipeline consists of three stages:
  *
@@ -116,6 +117,9 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
     // Proposed size of the destination texture (picked up in update textures)
     var dstSize: MTLSize?
+    
+    // Timestamp associated with the src texture
+    var timestamp: CMTime?
     
     // Performance shaders
     var resampler: ResampleFilter!
@@ -230,7 +234,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         texRect = rect ?? .unity
     }
 
-    func update(with pixelBuffer: CVPixelBuffer) {
+    func update(with pixelBuffer: CVPixelBuffer, timeStamp: CMTime) {
 
         // Convert the CVPixelBuffer to a Metal texture
         let width = CVPixelBufferGetWidth(pixelBuffer)
@@ -250,13 +254,13 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         if result == kCVReturnSuccess && cvTextureOut != nil {
 
             src = CVMetalTextureGetTexture(cvTextureOut!)
-
+            self.timestamp = timeStamp
+            
             // Trigger the view to redraw
             setNeedsDisplay(bounds)
 
-            // Pass the rendered texture to the recorder
-            // TODO: DO THIS IN METAL VIEW ONCE THE TEXTURE HAS BEEN CREATED
-            if dst != nil { recorder?.appendVideo(texture: dst!) }
+            // Pass the latest rendered texture to the recorder
+            recorder?.appendVideo(texture: dst, timestamp: timeStamp)
         }
     }
 
@@ -309,7 +313,6 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
             return
         }
 
-        
         // Make sure the streamer uses the correct coordinates
         windowController?.streamer.updateRects()
 
@@ -329,21 +332,12 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         uniforms.window = [Float(trackingWindow.liveFrame.width), Float(trackingWindow.liveFrame.height)]
         uniforms.mouse = [Float(mouse.x), Float(1.0 - mouse.y)]
 
-        commandBuffer.addCompletedHandler { @Sendable [weak inFlightSemaphore] commandBuffer in
-            inFlightSemaphore?.signal()
-        }
-        
-        /*
-        let textureBox = TextureBox(dst)
-        commandBuffer.addCompletedHandler { @Sendable [weak self] _ in
+        // let textureBox = TextureBox(dst)
+        commandBuffer.addCompletedHandler { @Sendable [weak self] commandBuffer in
             
-            Task { @MainActor in
-                self?.recorder?.appendVideo(texture: textureBox.texture)
-            }
+            self?.inFlightSemaphore.signal()
         }
-        */
-
-        
+                
         //
         // Pass 1: Crop and downsample the input image
         //

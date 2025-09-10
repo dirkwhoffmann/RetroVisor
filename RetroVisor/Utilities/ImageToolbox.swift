@@ -480,10 +480,12 @@ extension MTLTexture {
     func makeTexture(width: Int, height: Int,
                      mipmaps: Int = 0, pixelFormat: MTLPixelFormat? = nil) -> MTLTexture? {
         
-        print("Creating new texture \(width)x\(height)")
+        let format = pixelFormat ?? self.pixelFormat
+        
+        print("Creating \(width)x\(height) texture (format: \(format.rawValue) mipmaps: \(mipmaps))")
         
         let desc = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: pixelFormat ?? self.pixelFormat,
+            pixelFormat: format,
             width: width,
             height: height,
             mipmapped: mipmaps > 0

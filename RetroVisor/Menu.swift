@@ -94,7 +94,7 @@ extension AppDelegate: NSMenuItemValidation {
 
         case #selector(AppDelegate.recorderAction(_:)):
 
-            if recorder.isRecording == true {
+            if recorder.recording {
                 menuItem.title = "Stop Recording"
             } else {
                 menuItem.title = "Start Recording"
@@ -128,10 +128,9 @@ extension AppDelegate: NSMenuItemValidation {
 
         guard let texture = windowController?.metalView?.dst else { return }
 
-        if recorder.isRecording {
+        if recorder.recording {
 
-            recorder.frame = nil
-            // recorder.stopRecording { }
+            recorder.enqueue(.stop)
 
         } else {
 
@@ -143,7 +142,11 @@ extension AppDelegate: NSMenuItemValidation {
 
             if panel.runModal() == .OK {
                 if let url = panel.url {
-                    self.recorder.startRecording(to: url, width: texture.width, height: texture.height)
+                    // self.recorder.startRecording(to: url, width: texture.width, height: texture.height)
+                    self.recorder.enqueue(.start(url: url,
+                                                 width: texture.width,
+                                                 height: texture.height,
+                                                 countdown: 8))
                 }
             }
         }

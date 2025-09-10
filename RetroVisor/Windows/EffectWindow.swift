@@ -20,7 +20,7 @@ class EffectWindow: TrackingWindow {
         didSet {
             if onAir != oldValue {
 
-                print("onAir = \(onAir)")
+                // print("onAir = \(onAir)")
 
                 let icons = [
                     BarIcon(

@@ -24,7 +24,7 @@ protocol Loggable {
 
 extension Loggable {
 
-    var timestamp: String { ISO8601DateFormatter().string(from: Date()) }
+    private var logtime: String { ISO8601DateFormatter().string(from: Date()) }
 
     func log(_ message: String, _ level: LogLevel = .info) {
 
@@ -33,7 +33,7 @@ extension Loggable {
         case .info:
 
             guard logging else { return }
-            print("[\(timestamp)] \(message)")
+            print("[\(logtime)] \(message)")
 
         case .warning, .error:
 
