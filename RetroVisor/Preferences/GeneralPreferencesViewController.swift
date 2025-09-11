@@ -28,7 +28,7 @@ class TrackingSliderCell: NSSliderCell {
 
 class GeneralPreferencesViewController: NSViewController, Loggable {
     
-    nonisolated static let logging: Bool = false
+    nonisolated static let logging: Bool = true
 
     var streamer: Streamer? { app.streamer }
     var metalView: MetalView? { app.windowController?.metalView }
@@ -43,7 +43,9 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
     // Resampler
     @IBOutlet weak var resampleButton: NSPopUpButton!
     @IBOutlet weak var resampleXSlider: NSSlider!
+    @IBOutlet weak var resampleXLabel: NSTextField!
     @IBOutlet weak var resampleYSlider: NSSlider!
+    @IBOutlet weak var resampleYLabel: NSTextField!
 
     // Texture Debugger
     @IBOutlet weak var debugButton: NSPopUpButton!
@@ -59,16 +61,11 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
         queueSlider.toolTip =
         "Defines how many video frames are buffered before processing. A longer queue improves stability and reduces the risk of drop-outs, but can increase latency. A shorter queue lowers latency but may cause glitches if the system cannot process data in time."
         
-        /*
-        captureModeButton.toolTip =
-        "Configures the recorder to capture the entire screen or only the portion under the effect window. Capturing the entire screen is more resource-intensive but allows for smooth, real-time updates during window drag and resize operations. Recommended for modern systems."
-        */
-        
+        // Fired texture-modifying sliders when the user stops operating
         if let cell = queueSlider.cell as? TrackingSliderCell {
             
             cell.onDragEnd = { [weak self] in
                 
-                // Fired when the user stops operating the slider
                 guard let self = self else { return }
                 if queueSlider.integerValue != streamer?.settings.queueDepth {
                     
@@ -77,7 +74,7 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
                 }
             }
         }
-        
+ 
         refresh()
     }
     
@@ -85,7 +82,7 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
         
         guard let settings = streamer?.settings else { return }
         guard let uniforms = metalView?.uniforms else { return }
-        
+
         // Frame rate
         if !fpsButton.selectItem(withTag: settings.fpsMode.rawValue) {
             fatalError()
@@ -107,8 +104,10 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
         if !resampleButton.selectItem(withTag: Int(uniforms.resample)) {
             fatalError()
         }
-        resampleXSlider.floatValue = uniforms.resampleXY.x * 1000.0
-        resampleYSlider.floatValue = uniforms.resampleXY.y * 1000.0
+        resampleXSlider.intValue = uniforms.resampleX
+        resampleXLabel.stringValue = "\(100 / uniforms.resampleX)%"
+        resampleYSlider.intValue = uniforms.resampleY
+        resampleYLabel.stringValue = "\(100 / uniforms.resampleY)%"
 
         // Debugger
         if !debugButton.selectItem(withTag: Int(uniforms.debug)) {
@@ -117,8 +116,8 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
         if !debugModeButton.selectItem(withTag: Int(uniforms.debugMode)) {
             fatalError()
         }
-        resampleXSlider.floatValue = uniforms.debugXY.x * 1000.0
-        resampleYSlider.floatValue = uniforms.debugXY.y * 1000.0
+        debugXSlider.floatValue = uniforms.debugXY.x * 1000.0
+        debugYSlider.floatValue = uniforms.debugXY.y * 1000.0
     }
     
     @IBAction func fpsModeAction(_ sender: NSPopUpButton) {
@@ -162,18 +161,21 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
     
         log("Resample mode: \(sender.selectedTag())")
         metalView!.uniforms.resample = Int32(sender.selectedTag())
+        refresh()
     }
 
     @IBAction func resampleXAction(_ sender: NSSlider) {
         
-        log("Down X: \(sender.floatValue)")
-        metalView!.uniforms.resampleXY.x = sender.floatValue / 1000.0
+        log("Down X: \(sender.intValue)")
+        metalView!.uniforms.resampleX = sender.intValue
+        refresh()
     }
 
     @IBAction func resampleYAction(_ sender: NSSlider) {
         
-        log("Down Y: \(sender.floatValue)")
-        metalView!.uniforms.resampleXY.y = sender.floatValue / 1000.0
+        log("Down Y: \(sender.intValue)")
+        metalView!.uniforms.resampleY = sender.intValue
+        refresh()
     }
     
     @IBAction func debugAction(_ sender: NSPopUpButton) {

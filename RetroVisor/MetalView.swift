@@ -61,11 +61,31 @@ struct Uniforms {
     var center: SIMD2<Float>
     var mouse: SIMD2<Float>
     var resample: Int32
-    var resampleXY: SIMD2<Float>
+    var resampleX: Int32
+    var resampleY: Int32
     var debug: Int32
     var debugMode: Int32
     var debugColor: SIMD3<Float>
     var debugXY: SIMD2<Float>
+    
+    static let defaults = Uniforms(
+        
+        time: 0.0,
+        shift: [0, 0],
+        zoom: 1.0,
+        intensity: 0.0,
+        resolution: [0, 0],
+        window: [0, 0],
+        center: [0, 0],
+        mouse: [0, 0],
+        resample: 0,
+        resampleX: 1,
+        resampleY: 1,
+        debug: 0,
+        debugMode: 0,
+        debugColor: [0.5, 0.5, 0.5],
+        debugXY: [0.5, 1.0]
+    )
 }
 
 final class TextureBox: @unchecked Sendable {
@@ -90,20 +110,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
     var vertexBuffer: MTLBuffer!
     var renderPass: MTLRenderPassDescriptor!
 
-    var uniforms = Uniforms.init(time: 0.0,
-                                 shift: [0, 0],
-                                 zoom: 1.0,
-                                 intensity: 0.0,
-                                 resolution: [0, 0],
-                                 window: [0, 0],
-                                 center: [0, 0],
-                                 mouse: [0, 0],
-                                 resample: 0,
-                                 resampleXY: [1.0, 1.0],
-                                 debug: 0,
-                                 debugMode: 0,
-                                 debugColor: [0.5, 0.5, 0.5],
-                                 debugXY: [0.5, 1.0])
+    var uniforms = Uniforms.defaults
 
     var textureCache: CVMetalTextureCache!
 
@@ -284,9 +291,11 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         // Update the downscaling texture if necessary
         if let dst = dst {
             
-            let dwnW = Int(Float(dst.width) * uniforms.resampleXY.x)
-            let dwnH = Int(Float(dst.height) * uniforms.resampleXY.y)
-            
+            // let dwnW = Int(Float(dst.width) / Float(uniforms.resampleX))
+            // let dwnH = Int(Float(dst.height) / Float(uniforms.resampleY))
+            let dwnW = dst.width / Int(uniforms.resampleX)
+            let dwnH = dst.height / Int(uniforms.resampleY)
+
             if dwn?.width != dwnW || dwn?.height != dwnH {
                 
                 dwn = Shader.makeTexture("dwn", width: dwnW, height: dwnH, pixelFormat: dst.pixelFormat)

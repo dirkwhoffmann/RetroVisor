@@ -793,6 +793,15 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="e5d-yf-q9O">
+                                <rect key="frame" x="322" y="229" width="58" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="100%" id="DHY-4D-igO">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="a8V-ZE-Im6">
                                 <rect key="frame" x="21" y="334" width="94" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -962,7 +971,7 @@
                             <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="c1T-2H-EVF">
                                 <rect key="frame" x="118" y="227" width="192" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" minValue="-1000" maxValue="1000" tickMarkPosition="above" numberOfTickMarks="3" sliderType="linear" id="1BR-gq-ur5" customClass="TrackingSliderCell" customModule="RetroVisor" customModuleProvider="target"/>
+                                <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" minValue="1" maxValue="4" doubleValue="1" tickMarkPosition="above" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="1BR-gq-ur5" customClass="TrackingSliderCell" customModule="RetroVisor" customModuleProvider="target"/>
                                 <connections>
                                     <action selector="resampleXAction:" target="bLc-tn-zPG" id="G3E-4a-b0w"/>
                                 </connections>
@@ -979,7 +988,7 @@
                             <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vCG-m8-3cn">
                                 <rect key="frame" x="118" y="199" width="192" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" minValue="-1000" maxValue="1000" tickMarkPosition="above" numberOfTickMarks="3" sliderType="linear" id="93G-Lp-rhY" customClass="TrackingSliderCell" customModule="RetroVisor" customModuleProvider="target"/>
+                                <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" minValue="1" maxValue="4" doubleValue="1" tickMarkPosition="above" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="93G-Lp-rhY" customClass="TrackingSliderCell" customModule="RetroVisor" customModuleProvider="target"/>
                                 <connections>
                                     <action selector="resampleYAction:" target="bLc-tn-zPG" id="do2-yZ-8bb"/>
                                 </connections>
@@ -1028,6 +1037,15 @@
                                     <action selector="debugAction:" target="bLc-tn-zPG" id="GCr-zE-y0w"/>
                                 </connections>
                             </popUpButton>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zWK-Hp-TUx">
+                                <rect key="frame" x="322" y="202" width="58" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="100%" id="Ne1-dx-D4k">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="ENG-5d-7AJ"/>
                         <viewLayoutGuide key="layoutMargins" id="9N2-ZV-ehK"/>
@@ -1043,7 +1061,9 @@
                         <outlet property="queueLabel" destination="jrZ-ij-izD" id="N8h-IY-SAf"/>
                         <outlet property="queueSlider" destination="25x-gG-MS1" id="Apx-Re-8nm"/>
                         <outlet property="resampleButton" destination="ocs-Ig-EOU" id="wJ4-Ty-tEJ"/>
+                        <outlet property="resampleXLabel" destination="e5d-yf-q9O" id="bCx-OB-POx"/>
                         <outlet property="resampleXSlider" destination="c1T-2H-EVF" id="3Tf-zf-sME"/>
+                        <outlet property="resampleYLabel" destination="zWK-Hp-TUx" id="6hb-2l-whv"/>
                         <outlet property="resampleYSlider" destination="vCG-m8-3cn" id="klT-C2-0ie"/>
                     </connections>
                 </viewController>

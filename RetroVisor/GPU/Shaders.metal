@@ -37,7 +37,8 @@ struct Uniforms {
     float2 center;
     float2 mouse;
     uint resample;
-    float2 resampleXY;
+    float resampleX;
+    float resampleY;
     uint debug;
     uint debugMode;
     float3 debugColor;

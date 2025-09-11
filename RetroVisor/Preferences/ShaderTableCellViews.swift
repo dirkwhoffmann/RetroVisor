@@ -93,15 +93,6 @@ class ShaderGroupView: ShaderTableCellView {
     @IBAction func enableAction(_ sender: NSButton) {
 
         group.enabled = sender.state == .on
-        
-        /*
-        if sender.state == .on {
-            outlineView.expandItem(group)
-        } else {
-            outlineView.collapseItem(group)
-        }
-        */
-        
         shader.delegate?.settingDidChange(setting: group)
         outlineView.reloadData()
     }
