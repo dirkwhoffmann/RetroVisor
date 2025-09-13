@@ -28,7 +28,7 @@ class TrackingSliderCell: NSSliderCell {
 
 class GeneralPreferencesViewController: NSViewController, Loggable {
     
-    nonisolated static let logging: Bool = true
+    nonisolated static let logging: Bool = false
 
     var streamer: Streamer? { app.streamer }
     var metalView: MetalView? { app.windowController?.metalView }
