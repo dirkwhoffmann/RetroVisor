@@ -86,7 +86,7 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
     // The source rectangle of the screen streamer
     var captureRect: CGRect?
 
-    // The displayed texture cutout
+    // The displayed texture cutout (in [0..1] coordinates)
     var textureRect: CGRect?
 
     // Indicates whether the current settings require a relaunch
@@ -109,7 +109,7 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
 
             case .start:
 
-                if state == .launching || state == .streaming {
+                if state == .launching {
 
                     log("Streamer: Cannot start a streamer in state \(state).")
                     continue
