@@ -94,9 +94,16 @@ class WindowController: NSWindowController, Loggable {
 
         Task { @MainActor [weak self] in
 
-            let layer = self?.window!.contentView!.layer!
-            layer?.borderWidth = 0
-            layer?.cornerRadius = 0
+            // Wait one runloop cycle after styleMask change
+            try? await Task.sleep(nanoseconds: 0)
+
+            if let contentView = self?.window!.contentView {
+
+                contentView.wantsLayer = true
+                let layer = self!.window!.contentView!.layer!
+                layer.borderWidth = 0
+                layer.cornerRadius = 0
+            }
         }
     }
 
@@ -110,13 +117,16 @@ class WindowController: NSWindowController, Loggable {
 
         Task { @MainActor [weak self] in
 
-            let layer = self?.window!.contentView!.layer!
-            layer?.borderColor = NSColor.systemBlue.cgColor
-            layer?.borderWidth = 2
-            if #available(macOS 26, *) {
-                layer?.cornerRadius = 16
-            } else {
-                layer?.cornerRadius = 12
+            // Wait one runloop cycle after styleMask change
+            try? await Task.sleep(nanoseconds: 0)
+
+            if let contentView = self?.window!.contentView {
+
+                contentView.wantsLayer = true
+                let layer = self!.window!.contentView!.layer!
+                layer.borderColor = NSColor.systemBlue.cgColor
+                layer.borderWidth = 2
+                layer.cornerRadius = NSWindow.cornerRadius
             }
         }
     }

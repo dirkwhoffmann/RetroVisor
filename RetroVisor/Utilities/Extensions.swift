@@ -104,6 +104,15 @@ extension NSScreen {
 
 extension NSWindow {
 
+    static var cornerRadius: CGFloat {
+
+        if #available(macOS 26, *) {
+            return 16
+        } else {
+            return 12
+        }
+    }
+
     func removeAccessory<T: NSTitlebarAccessoryViewController>(ofType type: T.Type) {
         
         if let index = titlebarAccessoryViewControllers.firstIndex(where: { $0 is T }) {

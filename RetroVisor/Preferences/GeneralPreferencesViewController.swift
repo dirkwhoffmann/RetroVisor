@@ -118,8 +118,12 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
         }
         debugXSlider.floatValue = uniforms.debugXY.x * 1000.0
         debugYSlider.floatValue = uniforms.debugXY.y * 1000.0
+
+        debugModeButton.isEnabled = uniforms.debug != 0
+        debugXSlider.isEnabled = uniforms.debug != 0
+        debugYSlider.isEnabled = uniforms.debug != 0
     }
-    
+
     @IBAction func fpsModeAction(_ sender: NSPopUpButton) {
         
         let mode = StreamerSettings.FpsMode(rawValue: sender.selectedTag())!
@@ -182,12 +186,14 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
     
         log("Debug: \(sender.selectedTag())")
         metalView!.uniforms.debug = Int32(sender.selectedTag())
+        refresh()
     }
 
     @IBAction func debugModeAction(_ sender: NSPopUpButton) {
     
         log("Debug mode: \(sender.selectedTag())")
         metalView!.uniforms.debugMode = Int32(sender.selectedTag())
+        refresh()
     }
 
     @IBAction func debugXAction(_ sender: NSSlider) {
