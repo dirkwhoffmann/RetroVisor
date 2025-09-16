@@ -48,6 +48,7 @@ class WindowController: NSWindowController, Loggable {
 
     override func windowDidLoad() {
 
+        print("windowDidLoad")
         super.windowDidLoad()
 
         let window = self.window as! EffectWindow
@@ -90,10 +91,13 @@ class WindowController: NSWindowController, Loggable {
 
         window.ignoresMouseEvents = true
         window.styleMask = [.titled, .nonactivatingPanel, .fullSizeContentView]
-        /*
-        window.contentView?.layer?.borderWidth = 0
-        window.contentView?.layer?.cornerRadius = 0
-        */
+
+        Task { @MainActor [weak self] in
+
+            let layer = self?.window!.contentView!.layer!
+            layer?.borderWidth = 0
+            layer?.cornerRadius = 0
+        }
     }
 
     func unfreeze() {
@@ -103,11 +107,18 @@ class WindowController: NSWindowController, Loggable {
         window.ignoresMouseEvents = false
         window.styleMask = [.titled, .closable, .resizable, .miniaturizable,
                             .nonactivatingPanel, .fullSizeContentView]
-        /*
-        window.contentView?.layer?.borderColor = NSColor.systemBlue.cgColor
-        window.contentView?.layer?.borderWidth = 2
-        window.contentView?.layer?.cornerRadius = 10
-        */
+
+        Task { @MainActor [weak self] in
+
+            let layer = self?.window!.contentView!.layer!
+            layer?.borderColor = NSColor.systemBlue.cgColor
+            layer?.borderWidth = 2
+            if #available(macOS 26, *) {
+                layer?.cornerRadius = 16
+            } else {
+                layer?.cornerRadius = 12
+            }
+        }
     }
 }
 
