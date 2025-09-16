@@ -69,7 +69,7 @@ class WindowController: NSWindowController, Loggable {
         recorder.delegate = self
 
         // Launch the streamer
-        Task { await streamer.launch() }
+        streamer.enqueue(.start)
     }
 
     func showPermissionAlert() {
@@ -90,8 +90,10 @@ class WindowController: NSWindowController, Loggable {
 
         window.ignoresMouseEvents = true
         window.styleMask = [.titled, .nonactivatingPanel, .fullSizeContentView]
+        /*
         window.contentView?.layer?.borderWidth = 0
         window.contentView?.layer?.cornerRadius = 0
+        */
     }
 
     func unfreeze() {
@@ -101,9 +103,11 @@ class WindowController: NSWindowController, Loggable {
         window.ignoresMouseEvents = false
         window.styleMask = [.titled, .closable, .resizable, .miniaturizable,
                             .nonactivatingPanel, .fullSizeContentView]
+        /*
         window.contentView?.layer?.borderColor = NSColor.systemBlue.cgColor
         window.contentView?.layer?.borderWidth = 2
         window.contentView?.layer?.cornerRadius = 10
+        */
     }
 }
 

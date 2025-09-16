@@ -166,7 +166,9 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
         super.init(coder: coder)
 
         delegate = self
-        enableSetNeedsDisplay = true
+        enableSetNeedsDisplay = false
+        isPaused = false
+
         framebufferOnly = false
         clearColor = MTLClearColorMake(0, 0, 0, 1)
         colorPixelFormat = .bgra8Unorm
@@ -264,7 +266,7 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
             self.timestamp = timeStamp
             
             // Trigger the view to redraw
-            setNeedsDisplay(bounds)
+            // setNeedsDisplay(bounds)
 
             // Pass the latest rendered texture to the recorder
             recorder?.appendVideo(texture: dst, timestamp: timeStamp)
@@ -307,7 +309,10 @@ class MetalView: MTKView, Loggable, MTKViewDelegate {
 
         // Wait for a free slot before encoding a new frame
         inFlightSemaphore.wait()
-        
+
+        // Experimental
+        windowController?.streamer.process()
+
         // Create or update all textures
         updateTextures()
 

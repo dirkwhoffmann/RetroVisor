@@ -89,15 +89,13 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
     // The displayed texture cutout
     var textureRect: CGRect?
 
-    // Indicates whether the streamer is active
-    // private(set) var isStreaming: Bool = false
-
     // Indicates whether the current settings require a relaunch
     private var needsRestart: Bool = false
 
     // Inserts a command into the command queue
     func enqueue(_ cmd: StreamerCommand) {
 
+        log("Streamer: enqueue(\(cmd))")
         commands.push(cmd)
     }
 
@@ -113,17 +111,20 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
 
                 if state == .launching || state == .streaming {
 
-                    log("Streamer: Cannot start a streamer in state \(state).", .warning)
+                    log("Streamer: Cannot start a streamer in state \(state).")
                     continue
                 }
 
-                // TODO
+                Task { @MainActor [weak self] in
+
+                    await self?.launch()
+                }
 
             case .stop:
 
                 if state != .streaming {
 
-                    log("Streamer: Cannot stop a streamer in state \(state).", .warning)
+                    log("Streamer: Cannot stop a streamer in state \(state).")
                     continue
                 }
 
@@ -276,7 +277,8 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
 
     func relaunch() {
 
-        Task { await launch() }
+        enqueue(.start)
+//        Task { await launch() }
     }
 
     func relaunchIfNeeded() {
