@@ -275,15 +275,17 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
         }
     }
 
+    /*
     func relaunch() {
 
         enqueue(.start)
 //        Task { await launch() }
     }
+     */
 
     func relaunchIfNeeded() {
 
-        if needsRestart { relaunch() }
+        if needsRestart { enqueue(.start) }
     }
 
     nonisolated func stream(_ stream: SCStream, didStopWithError error: Error) {

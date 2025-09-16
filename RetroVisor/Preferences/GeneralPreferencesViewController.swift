@@ -70,7 +70,7 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
                 if queueSlider.integerValue != streamer?.settings.queueDepth {
                     
                     streamer?.settings.queueDepth = queueSlider.integerValue
-                    streamer?.relaunch()
+                    streamer?.enqueue(.start)
                 }
             }
         }
@@ -130,7 +130,7 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
         if mode != streamer?.settings.fpsMode {
             
             streamer?.settings.fpsMode = mode
-            streamer?.relaunch()
+            streamer?.enqueue(.start)
         }
         refresh()
     }
@@ -140,7 +140,7 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
         if streamer?.settings.fps != sender.integerValue {
             
             streamer?.settings.fps = sender.integerValue
-            streamer?.relaunch()
+            streamer?.enqueue(.start)
         }
         refresh()
     }
@@ -156,7 +156,7 @@ class GeneralPreferencesViewController: NSViewController, Loggable {
         if mode != streamer?.settings.captureMode {
             
             streamer?.settings.captureMode = mode
-            streamer?.relaunch()
+            streamer?.enqueue(.start)
         }
         refresh()
     }

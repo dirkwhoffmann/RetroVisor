@@ -179,7 +179,7 @@ extension WindowController: TrackingWindowDelegate {
 
     func windowDidChangeScreen(_ window: TrackingWindow) {
 
-        streamer.relaunch()
+        streamer.enqueue(.start)
     }
 }
 
@@ -199,7 +199,7 @@ extension WindowController: StreamerDelegate {
 
         if let image = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: nil) {
             effectWindow?.showPauseOverlay(image: image) {
-                app.streamer.relaunch()
+                app.streamer.enqueue(.start)
             }
         }
     }
