@@ -16,6 +16,36 @@
 extension CVPixelBuffer: @unchecked @retroactive Sendable {}
 extension CMSampleBuffer: @unchecked @retroactive Sendable {}
 
+enum StreamerState: CustomStringConvertible {
+
+    case idle
+    case launching
+    case streaming
+
+    var description: String {
+
+        switch self {
+        case .idle:         return "Idle"
+        case .launching:    return "Launching"
+        case .streaming:    return "Streaming"
+        }
+    }
+}
+
+enum StreamerCommand: CustomStringConvertible {
+
+    case start
+    case stop
+
+    var description: String {
+
+        switch self {
+        case .start:        return "Start"
+        case .stop:         return "Stop"
+        }
+    }
+}
+
 @MainActor
 protocol StreamerDelegate: AnyObject, SCStreamOutput {
 
@@ -27,11 +57,17 @@ protocol StreamerDelegate: AnyObject, SCStreamOutput {
 @MainActor
 class Streamer: NSObject, Loggable, SCStreamDelegate {
 
-    // Recorder settings
-    var settings = StreamerSettings.Preset.systemDefault.settings
-
     // Enables debug output to the console
     nonisolated static let logging: Bool = false
+
+    // Streamer settings
+    var settings = StreamerSettings.Preset.systemDefault.settings
+
+    // The current streamer state
+    private var state: StreamerState = .idle
+    
+    // Command queue for controlling the recorder
+    private let commands = AtomicQueue<StreamerCommand>()
 
     // ScreenCaptureKit
     var stream: SCStream?
@@ -54,11 +90,48 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
     var textureRect: CGRect?
 
     // Indicates whether the streamer is active
-    private(set) var isStreaming: Bool = false
+    // private(set) var isStreaming: Bool = false
 
     // Indicates whether the current settings require a relaunch
     private var needsRestart: Bool = false
 
+    // Inserts a command into the command queue
+    func enqueue(_ cmd: StreamerCommand) {
+
+        commands.push(cmd)
+    }
+
+    // Processes the command queue
+    func process() {
+
+        for cmd in commands.popAll() {
+
+            log("Streamer: Processing command \(cmd)")
+            switch cmd {
+
+            case .start:
+
+                if state == .launching || state == .streaming {
+
+                    log("Streamer: Cannot start a streamer in state \(state).", .warning)
+                    continue
+                }
+
+                // TODO
+
+            case .stop:
+
+                if state != .streaming {
+
+                    log("Streamer: Cannot stop a streamer in state \(state).", .warning)
+                    continue
+                }
+
+                // TODO
+            }
+        }
+    }
+    
     func normalize(rect: CGRect) -> CGRect {
 
         guard let display = display else { return .zero }
@@ -127,6 +200,7 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
     func launch() async {
 
         log("Launching streamer...")
+        state = .launching
 
         do {
 
@@ -188,10 +262,10 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
             try stream!.addStreamOutput(delegate!, type: .audio, sampleHandlerQueue: audioQueue)
 
             try await stream!.startCapture()
+            state = .streaming
 
             needsRestart = false
 
-            isStreaming = true
             log("Lauch completed")
 
         } catch {
@@ -214,7 +288,7 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
 
         Task { @MainActor in
 
-            isStreaming = false
+            state = .idle
             delegate?.streamDidStop(error: error)
         }
     }
