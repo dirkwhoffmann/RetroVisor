@@ -53,6 +53,9 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
     // The displayed texture cutout
     var textureRect: CGRect?
 
+    // Indicates whether the streamer is active
+    private(set) var isStreaming: Bool = false
+
     // Indicates whether the current settings require a relaunch
     private var needsRestart: Bool = false
 
@@ -188,9 +191,11 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
 
             needsRestart = false
 
+            isStreaming = true
             log("Lauch completed")
 
         } catch {
+
             log("\(error)", .error)
         }
     }
@@ -207,6 +212,10 @@ class Streamer: NSObject, Loggable, SCStreamDelegate {
 
     nonisolated func stream(_ stream: SCStream, didStopWithError error: Error) {
 
-        Task { @MainActor in delegate?.streamDidStop(error: error) }
+        Task { @MainActor in
+
+            isStreaming = false
+            delegate?.streamDidStop(error: error)
+        }
     }
 }
