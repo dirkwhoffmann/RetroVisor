@@ -10,7 +10,8 @@
 import Foundation
 
 enum LogLevel {
-    
+
+    case debug
     case info
     case warning
     case error
@@ -34,17 +35,19 @@ extension Loggable {
     }
     
 #if DEBUG
-    static func logInfo(_ message: String) { if Self.logging { print("[\(logtime)] \(message)") } }
+    static func logDebug(_ message: String) { if Self.logging { print("[\(logtime)] \(message)") } }
 #else
-    static func logInfo(_ message: String) { }
+    static func logDebug(_ message: String) { }
 #endif
+    static func logInfo(_ message: String) { print("\(message)") }
     static func logWarning(_ message: String) { print("WARNING: \(message)") }
     static func logError(_ message: String) { print("ERROR: \(message)") }
     
-    static func log(_ message: String, _ level: LogLevel = .info) {
-        
+    static func log(_ message: String, _ level: LogLevel = .debug) {
+
         switch level {
             
+        case .debug: logDebug(message)
         case .info: logInfo(message)
         case .warning: logWarning(message)
         case .error: logError(message)

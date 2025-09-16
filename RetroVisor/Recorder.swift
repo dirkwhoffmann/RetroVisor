@@ -28,7 +28,7 @@ class Recorder: Loggable {
 
     // Enables debug output to the console
     nonisolated static let logging: Bool = false
-    
+
     // Event receiver
     var delegate: RecorderDelegate?
 
@@ -43,6 +43,9 @@ class Recorder: Loggable {
 
     // The current frame number
     private(set) var frame: Int = 0
+
+    // Counts the number of frame errors (dropped frame etc.)
+    private(set) var frameErrors: Int = 0
 
     // Frame counter to skip initial frames after recording starts
     private var countdown: Int?
@@ -123,7 +126,7 @@ class Recorder: Loggable {
         if width != texture.width || height != texture.height {
             
             log("Frame \(frame): Rect has changed. Stopping the recorder...")
-            enqueue(.stop)
+           enqueue(.stop)
             return
         }
 
@@ -134,11 +137,14 @@ class Recorder: Loggable {
         guard videoInput!.isReadyForMoreMediaData else {
             
             log("Frame \(frame): AVAssetWriter does not accept new input", .warning)
+            frameErrors += 1
             return
         }
+
         guard let pixelBufferPool = pixelBufferAdaptor?.pixelBufferPool else {
-            
+
             log("Frame \(frame): AVAssetWriter provides no pixelBufferPool.", .warning)
+            frameErrors += 1
             return
         }
 
@@ -148,6 +154,7 @@ class Recorder: Loggable {
         guard let pixelBuffer = pixelBuffer else {
             
             log("Frame \(frame): AVAssetWriter provides no pixel buffer", .warning)
+            frameErrors += 1
             return
         }
 
@@ -161,7 +168,11 @@ class Recorder: Loggable {
         CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 
         // Append the pixel buffer to the video
-        pixelBufferAdaptor!.append(pixelBuffer, withPresentationTime: timestamp)
+        if !pixelBufferAdaptor!.append(pixelBuffer, withPresentationTime: timestamp) {
+
+            log("Frame \(frame): Failed to record frame", .warning)
+            frameErrors += 1
+        }
     }
 
     func appendAudio(buffer: CMSampleBuffer) {
@@ -237,6 +248,7 @@ class Recorder: Loggable {
         countdown = nil
         recording = true
         frame = 0
+        frameErrors = 0
 
         delegate?.recorderDidStart()
     }
@@ -249,8 +261,10 @@ class Recorder: Loggable {
         videoInput?.markAsFinished()
         assetWriter?.finishWriting { completion() }
 
+        log("\(frame) frames recorded with \(frameErrors) frame errors.", .info)
         recording = false
         frame = 0
+        frameErrors = 0
 
         delegate?.recorderDidStop()
     }
