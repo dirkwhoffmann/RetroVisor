@@ -31,6 +31,12 @@ class MyOutlineView : NSOutlineView {
 
         return .zero
     }
+
+    override func validateProposedFirstResponder(_ responder: NSResponder, for event: NSEvent?) -> Bool {
+
+        if responder is NSSlider { return true }
+        return super.validateProposedFirstResponder(responder, for: event)
+    }
 }
 
 class ShaderPreferencesViewController: NSViewController {
